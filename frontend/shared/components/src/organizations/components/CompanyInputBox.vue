@@ -74,7 +74,7 @@ import CompanyNumberInput from '#inputs/CompanyNumberInput.vue';
 import Dropdown from '#inputs/Dropdown.vue';
 import EmailInput from '#inputs/EmailInput.vue';
 import VATNumberInput from '#inputs/VATNumberInput.vue';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { Company } from '@stamhoofd/structures';
 import { PeppolEndointId, PeppolScheme, PeppolSchemeHelper } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';

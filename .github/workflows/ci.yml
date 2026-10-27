@@ -96,6 +96,7 @@ jobs:
                         - 'pnpm-workspace.yaml'
                         - '.npmrc'
                         - 'shared/**'
+                        - 'packages/common/**'
                         - 'backend/**'
                       backend_shared:
                         - 'package.json'
@@ -103,6 +104,7 @@ jobs:
                         - 'pnpm-workspace.yaml'
                         - '.npmrc'
                         - 'shared/**'
+                        - 'packages/common/**'
                         - 'backend/shared/**'
                       frontend:
                         - 'package.json'
@@ -110,6 +112,7 @@ jobs:
                         - 'pnpm-workspace.yaml'
                         - '.npmrc'
                         - 'shared/**'
+                        - 'packages/common/**'
                         - 'frontend/**'
                       shared:
                         - 'package.json'
@@ -117,6 +120,7 @@ jobs:
                         - 'pnpm-workspace.yaml'
                         - '.npmrc'
                         - 'shared/**'
+                        - 'packages/common/**'
                         - '.development/stam.mjs'
                       playwright:
                         - 'package.json'
@@ -125,6 +129,7 @@ jobs:
                         - '.npmrc'
                         - 'tests/playwright/**'
                         - 'shared/**'
+                        - 'packages/common/**'
                         - 'frontend/**'
                         - 'backend/**'
                         - '.development/Corefile'
@@ -161,7 +166,7 @@ jobs:
                     case "$path" in
                       package.json|pnpm-lock.yaml|pnpm-workspace.yaml|.npmrc)
                         backend_apps=true; backend_shared=true; frontend=true; shared=true; playwright=true ;;
-                      shared/*)
+                      shared/*|packages/common/*)
                         backend_apps=true; backend_shared=true; frontend=true; shared=true; playwright=true ;;
                       backend/shared/*) backend_apps=true; backend_shared=true; playwright=true ;;
                       backend/*) backend_apps=true; playwright=true ;;
@@ -263,6 +268,9 @@ jobs:
                       shared/*/dist
                       shared/*/dist-types
                       shared/*/.cache/*.tsbuildinfo
+                      packages/common/*/dist
+                      packages/common/*/dist-types
+                      packages/common/*/.cache/*.tsbuildinfo
                       backend/shared/*/dist
                       backend/shared/*/dist-types
                       backend/shared/*/.cache/*.tsbuildinfo
@@ -377,7 +385,7 @@ jobs:
               with:
                   name: shared-dist
             - name: Run tests
-              run: pnpm exec turbo run test --filter='./shared/*' --filter=i18n-uuid --concurrency=2 --env-mode=loose -- --run --bail=1
+              run: pnpm exec turbo run test --filter='./shared/*' --filter='./packages/common/*' --filter=i18n-uuid --concurrency=2 --env-mode=loose -- --run --bail=1
 
     job_boot:
         name: "API boot and shutdown"

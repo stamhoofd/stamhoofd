@@ -65,7 +65,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
 import { PatchMap } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';

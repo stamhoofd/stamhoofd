@@ -6,7 +6,7 @@ import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegi
 
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Event, Group, Organization, OrganizationRegistrationPeriod, Platform, Registration, RegistrationInvitation, RegistrationPeriod } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';

@@ -4,7 +4,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Group, Organization, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
 import { RegistrationPeriodService } from '@stamhoofd/models/services/RegistrationPeriodService.js';
 import { SQL } from '@stamhoofd/sql';

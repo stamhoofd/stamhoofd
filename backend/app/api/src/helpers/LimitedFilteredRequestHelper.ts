@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { SQLSortDefinitions } from '@stamhoofd/sql';
 import { getSortFilter, LimitedFilteredRequest } from '@stamhoofd/structures';
 

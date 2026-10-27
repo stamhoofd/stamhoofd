@@ -1,4 +1,4 @@
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
 import type { EmailInterfaceRecipient } from '@stamhoofd/email';
 import { Email as EmailClass } from '@stamhoofd/email';
 import { Email, EmailRecipient, Organization, Platform } from '@stamhoofd/models';

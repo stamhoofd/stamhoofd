@@ -1,7 +1,7 @@
 import type { DecodedRequest, Request, Response } from '@simonbackx/simple-endpoints';
 import { Endpoint } from '@simonbackx/simple-endpoints';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 type Params = { id: string };
 type Query = undefined;

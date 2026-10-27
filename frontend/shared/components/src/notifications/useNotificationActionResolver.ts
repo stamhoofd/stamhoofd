@@ -1,6 +1,6 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { UrlHelper } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { useFetchOrganizationRegistrationPeriods } from '#hooks/networking/useFetchOrganizationRegistrationPeriods.ts';

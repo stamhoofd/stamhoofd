@@ -1,5 +1,5 @@
 import { ObjectData } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 import { Group } from './Group.js';
 import { GroupGenderType } from './GroupGenderType.js';

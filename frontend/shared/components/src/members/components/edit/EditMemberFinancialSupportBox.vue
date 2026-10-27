@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { BooleanStatus, FinancialSupportSettings } from '@stamhoofd/structures';
 import { computed, nextTick } from 'vue';

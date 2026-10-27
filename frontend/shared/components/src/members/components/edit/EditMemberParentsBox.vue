@@ -94,7 +94,7 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useAppContext } from '#context/appContext.ts';
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@common/errors';
 import { usePresent } from '@simonbackx/vue-app-navigation';
 import { NationalRegisterNumberOptOut } from '@stamhoofd/structures';
 import { computed, nextTick } from 'vue';

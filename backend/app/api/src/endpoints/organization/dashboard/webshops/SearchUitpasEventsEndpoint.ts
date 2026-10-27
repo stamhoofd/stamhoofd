@@ -5,7 +5,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import { Context } from '../../../../helpers/Context.js';
 import type { UitpasEventsResponse } from '@stamhoofd/structures';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 type Params = Record<string, never>;
 class Query extends AutoEncoder {

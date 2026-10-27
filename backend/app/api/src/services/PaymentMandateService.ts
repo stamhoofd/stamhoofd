@@ -4,7 +4,7 @@ import { Platform } from '@stamhoofd/models';
 import { PaymentMandateStatus } from '@stamhoofd/structures/PaymentMandate.js';
 import type { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { MollieService } from './MollieService.js';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Context } from '../helpers/Context.js';
 import { PaymentProvider } from '@stamhoofd/structures';
 

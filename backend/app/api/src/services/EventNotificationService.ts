@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { EventNotification, Member, MemberResponsibilityRecord, Organization, Platform, User } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import type { EmailTemplateType } from '@stamhoofd/structures';

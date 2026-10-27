@@ -4,7 +4,7 @@ import type { CountFilteredRequest, RegistrationPeriod as RegistrationPeriodStru
 import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
 
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { RegistrationPeriod } from '@stamhoofd/models';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';

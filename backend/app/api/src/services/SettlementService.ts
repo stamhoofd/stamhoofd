@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { Payment } from '@stamhoofd/models';
 import { BalanceItemPayment, Order, Platform } from '@stamhoofd/models';
 import { Payment as PaymentModel } from '@stamhoofd/models';

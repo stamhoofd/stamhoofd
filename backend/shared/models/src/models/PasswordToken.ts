@@ -5,7 +5,7 @@ import basex from 'base-x';
 import crypto from 'crypto';
 
 import { User } from './User.js';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const bs58 = basex(ALPHABET);
 

@@ -2,7 +2,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, DateDecoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Email } from '@stamhoofd/email';
 import { Organization, Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';

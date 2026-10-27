@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { Organization } from '@stamhoofd/models';
 import { Platform, Webshop } from '@stamhoofd/models';
 import type { MemberWithRegistrationsBlob, RecordAnswer, StamhoofdFilter } from '@stamhoofd/structures';

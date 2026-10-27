@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { Address, Group, Organization, OrganizationRegistrationPeriod, Platform} from '@stamhoofd/structures';
 import { RecordCategory, RecordType } from '@stamhoofd/structures';
 import { AddressColumnMatcher } from './AddressColumnMatcher';

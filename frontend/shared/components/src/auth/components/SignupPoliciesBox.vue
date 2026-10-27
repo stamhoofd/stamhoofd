@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { PlatformPolicy, RichText } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';

@@ -1,6 +1,6 @@
 import type { Data, Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 import { LegacyRecordType, OldRecordType } from './LegacyRecordType.js';
 

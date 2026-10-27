@@ -1,6 +1,6 @@
-import { Data, Encodeable, EncodeContext } from '@simonbackx/simple-encoding';
+import type { Data, Encodeable, EncodeContext } from '@simonbackx/simple-encoding';
 
-import { isSimpleError, SimpleError } from './SimpleError';
+import { isSimpleError, SimpleError } from './SimpleError.js';
 
 export function isSimpleErrors(e: unknown): e is SimpleErrors {
     return typeof e === 'object' && e !== null && 'errors' in e && Array.isArray(e.errors) && e.errors.length > 0 && isSimpleError(e.errors[0]);

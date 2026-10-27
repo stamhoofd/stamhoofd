@@ -317,7 +317,7 @@ import { BalanceItemPaymentDetailed, BalanceItemRelationType, Company, DetailedR
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import PromiseView from '#containers/PromiseView.vue';
 import { useInvoicesObjectFetcher } from '#fetchers/useInvoicesObjectFetcher.ts';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { ComponentWithProperties, NavigationController, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { Formatter } from '@stamhoofd/utility';

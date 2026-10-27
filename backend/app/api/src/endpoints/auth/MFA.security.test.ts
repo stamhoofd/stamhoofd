@@ -1,6 +1,6 @@
 import { Request } from '@simonbackx/simple-endpoints';
-import type { SimpleError } from '@simonbackx/simple-errors';
-import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
+import type { SimpleError } from '@common/errors';
+import { isSimpleError, isSimpleErrors } from '@common/errors';
 import type { Organization } from '@stamhoofd/models';
 import { EmailVerificationCode, MFARecoveryCode, MFATOTP, MFAToken, OrganizationFactory, PasswordToken, Token, User, UserFactory, WebauthnCredential } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

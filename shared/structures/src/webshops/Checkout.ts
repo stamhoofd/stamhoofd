@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { Formatter } from '@stamhoofd/utility';
 
 import { ValidatedAddress } from '../addresses/Address.js';

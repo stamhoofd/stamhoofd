@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors } from '@common/errors';
 import { Request } from '@simonbackx/simple-networking';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import PrefixInput from '@stamhoofd/components/inputs/PrefixInput.vue';

@@ -1,6 +1,6 @@
 import type { AutoEncoderPatchType, Data, Decoder, PatchableDecoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Colors, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 

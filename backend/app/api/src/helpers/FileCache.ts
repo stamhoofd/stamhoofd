@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Formatter } from '@stamhoofd/utility';
 import basex from 'base-x';
 import crypto from 'crypto';

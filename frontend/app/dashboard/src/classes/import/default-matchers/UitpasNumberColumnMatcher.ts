@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { UitpasNumberDetails } from '@stamhoofd/structures';
 import { DataValidator } from '@stamhoofd/utility';
 import type XLSX from 'xlsx';

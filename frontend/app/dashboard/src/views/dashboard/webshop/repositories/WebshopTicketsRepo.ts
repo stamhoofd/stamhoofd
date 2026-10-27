@@ -1,6 +1,6 @@
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, ObjectData } from '@simonbackx/simple-encoding';
-import { isSimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleErrors } from '@common/errors';
 import { Request } from '@simonbackx/simple-networking';
 import { EventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';

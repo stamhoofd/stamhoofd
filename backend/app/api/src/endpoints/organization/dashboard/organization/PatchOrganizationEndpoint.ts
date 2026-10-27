@@ -2,7 +2,7 @@ import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@
 import { cloneObject, isPatchableArray, isPatchMap, ObjectData, PatchableArray, PatchMap, patchObject } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@common/errors';
 import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, Webshop } from '@stamhoofd/models';
 import type { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import type { Company, ResourcePermissions } from '@stamhoofd/structures';

@@ -2,7 +2,7 @@ import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@
 import { isEmptyPatch, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { Group, Registration } from '@stamhoofd/models';
 import { Member, RateLimiter } from '@stamhoofd/models';
 import { DocumentService } from '../../../services/DocumentService.js';

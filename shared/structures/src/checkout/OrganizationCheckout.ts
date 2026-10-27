@@ -3,7 +3,7 @@ import { STPackageBundle, STPackageBundleHelper } from '../billing/STPackageBund
 import { Checkoutable } from './Checkoutable.js';
 import type { OrganizationPackagesStatus } from '../billing/OrganizationPackagesStatus.js';
 import type { STPackage } from '../billing/STPackage.js';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 /**
  * Checkout flow between organizations

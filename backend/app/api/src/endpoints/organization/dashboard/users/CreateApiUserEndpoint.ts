@@ -1,7 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Token, User } from '@stamhoofd/models';
 import { ApiUser, ApiUserWithToken, UserMeta, UserPermissions } from '@stamhoofd/structures';
 

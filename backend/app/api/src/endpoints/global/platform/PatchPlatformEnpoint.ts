@@ -7,7 +7,7 @@ import type { EventNotificationType, MemberResponsibility, PlatformPremiseType }
 import { Platform as PlatformStruct, PlatformConfig } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { isAbortedError, isCanceledError, QueueHandler } from '@stamhoofd/queues';
 import { Context } from '../../../helpers/Context.js';
 import { MembershipCharger } from '../../../helpers/MembershipCharger.js';

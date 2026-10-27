@@ -217,7 +217,7 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, GroupType, NamedObject, RichText } from '@stamhoofd/structures';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 import GroupTag from '@stamhoofd/components/auth/components/GroupTag.vue';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';

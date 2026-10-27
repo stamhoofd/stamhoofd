@@ -2,7 +2,7 @@ import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { DetailedPayableBalance, PaymentStatus } from '@stamhoofd/structures';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { BalanceItem, Organization, Payment } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';

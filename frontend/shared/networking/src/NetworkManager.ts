@@ -1,4 +1,4 @@
-import type { SimpleErrors } from '@simonbackx/simple-errors';
+import type { SimpleErrors } from '@common/errors';
 import type { Request, RequestMiddleware} from '@simonbackx/simple-networking';
 import { Server } from '@simonbackx/simple-networking';
 import { Toast } from '@stamhoofd/frontend-notifications/Toast';

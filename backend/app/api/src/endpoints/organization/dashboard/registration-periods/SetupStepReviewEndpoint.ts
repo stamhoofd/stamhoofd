@@ -5,7 +5,7 @@ import { SetupStepType } from '@stamhoofd/structures';
 
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { AutoEncoder, BooleanDecoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/models';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';

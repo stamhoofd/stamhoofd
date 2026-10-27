@@ -1,4 +1,4 @@
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import type { Member, MemberPlatformMembership } from '@stamhoofd/models';
 import { Organization } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';

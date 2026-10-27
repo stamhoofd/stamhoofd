@@ -12,7 +12,7 @@ import type { TableAction, TableActionSelection } from '#tables/classes/TableAct
 import { AsyncTableAction, InMemoryTableAction, MenuTableAction } from '#tables/classes/TableAction.ts';
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { ComponentWithProperties, NavigationController, usePresent } from '@simonbackx/vue-app-navigation';
 import { markReviewMoment } from '@stamhoofd/frontend-application/markReviewMoment';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';

@@ -10,7 +10,7 @@ import { Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 
 import { AutoEncoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { StyledText } from '@simonbackx/simple-logging';
 import { markAllSeedsFinished, startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { Platform } from '@stamhoofd/models';

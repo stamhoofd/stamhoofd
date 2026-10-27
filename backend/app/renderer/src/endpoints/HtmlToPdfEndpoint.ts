@@ -1,6 +1,6 @@
 import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { verifyInternalSignature } from '@stamhoofd/backend-env';
 import { QueueHandler } from '@stamhoofd/queues';
 import formidable from 'formidable';

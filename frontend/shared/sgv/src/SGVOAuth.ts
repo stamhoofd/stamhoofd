@@ -1,5 +1,5 @@
 import { AutoEncoder, encodeObject, field, IntegerDecoder, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { RequestResult } from '@simonbackx/simple-networking';
 import { Server } from '@simonbackx/simple-networking';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';

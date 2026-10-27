@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { QueryableModel, readDynamicSQLExpression, SQL } from '@stamhoofd/sql';
 import basex from 'base-x';
 import crypto from 'crypto';

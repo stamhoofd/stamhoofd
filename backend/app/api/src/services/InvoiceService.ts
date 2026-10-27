@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, Invoice, InvoicedBalanceItem, Organization, Payment } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';

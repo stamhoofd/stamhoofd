@@ -1,6 +1,6 @@
 import type { Decoder, ObjectData } from '@simonbackx/simple-encoding';
 import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, field, IntegerDecoder, NumberDecoder, RecordDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@common/errors';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 
 import type { Member, MemberWithRegistrationsBlob } from '@stamhoofd/structures';

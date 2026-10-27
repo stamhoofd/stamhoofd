@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Email, Member, MemberUser } from '@stamhoofd/models';
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createJoinedRelationFilter, createWildcardColumnFilter, SQL, SQLAge, SQLCast, SQLConcat, SQLIfNull, SQLJsonExtract, SQLScalar, SQLValueType } from '@stamhoofd/sql';

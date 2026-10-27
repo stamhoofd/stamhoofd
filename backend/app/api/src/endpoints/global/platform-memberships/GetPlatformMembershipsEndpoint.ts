@@ -1,7 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { BalanceItem, Member, MemberPlatformMembership, Organization } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';

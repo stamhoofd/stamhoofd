@@ -81,7 +81,7 @@ import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import STToolbar from '#navigation/STToolbar.vue';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { FreshAction } from './FreshAction';
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 

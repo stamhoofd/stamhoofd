@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { AuditLog, Document, EventNotification, MemberWithUsersRegistrationsAndGroups, Order, Ticket } from '@stamhoofd/models';
 import { BalanceItem, CachedBalance, EmailRecipient, Event, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Platform as PlatformModel, Registration, RegistrationInvitation, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
 import type { EmailRecipient as EmailRecipientStruct, PaymentGeneral } from '@stamhoofd/structures';

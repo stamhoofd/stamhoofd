@@ -1,7 +1,7 @@
 import { ArrayDecoder, AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { CpuService } from '@stamhoofd/logging/CpuService';
 import { MemoryService } from '@stamhoofd/logging/MemoryService';
 

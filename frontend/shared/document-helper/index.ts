@@ -1,4 +1,4 @@
-import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors } from '@common/errors';
 import { Request } from '@simonbackx/simple-networking';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';

@@ -1,6 +1,6 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 import { Context } from '../../../../helpers/Context.js';
 import { STPackageService } from '../../../../services/STPackageService.js';

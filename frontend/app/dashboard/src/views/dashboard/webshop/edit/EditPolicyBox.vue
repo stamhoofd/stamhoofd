@@ -35,7 +35,7 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import FileInput from '@stamhoofd/components/inputs/FileInput.vue';
 import Radio from '@stamhoofd/components/inputs/Radio.vue';
