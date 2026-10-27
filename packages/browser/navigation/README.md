@@ -14,8 +14,8 @@ Run `pnpm stam test navigation`, `pnpm stam check lint @browser/navigation`, and
 Vite retains the library's Vue/CSS bundle. `vue-tsc` prepares declarations in
 `dist-types` before consumer checks, using the existing strict bundler settings.
 The managed test selector runs both node tests and headless Chromium tests.
-Browser tests import the built entry and CSS, matching application consumers
-rather than the unbundled source module graph.
+Browser tests cover navigation animations; the entry regression also checks the
+built consumer bundle.
 
 [Example](https://simonbackx.com/files/vue-app-navigation/example.gif 'Example of navigation')
 
