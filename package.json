@@ -57,7 +57,7 @@
         "@zxcvbn-ts/language-nl-be": "0.3.0",
         "argon2": "0.45.1",
         "chart.js": "3.9.1",
-        "core-js": "3.50.0",
+        "core-js": "3.51.0",
         "ibantools": "4.5.4",
         "jose": "5.10.0",
         "jsvat-next": "3.0.4",
