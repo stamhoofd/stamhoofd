@@ -9,6 +9,7 @@ export { };
  * during app bootstrap; this declaration only provides their types.
  */
 declare global {
+    /** Literal replacement arguments remain objects at this API boundary; implementations traverse Maps of own entries. */
     const $t: (key: string, replace?: Record<string, string | { toString(): string }>) => string;
     const $getCountry: () => Country;
     const $getLanguage: () => Language;

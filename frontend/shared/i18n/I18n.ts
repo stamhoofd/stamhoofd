@@ -103,12 +103,13 @@ export class I18n {
         return this.messages?.get(key) ?? key;
     }
 
+    /** Accepts literal arguments for $t compatibility; only own entries enter the internal Map. */
     replace(text: string, replace?: Record<string, string | { toString(): string }>): string {
         if (!replace) {
             return text;
         }
-        for (const key in replace) {
-            const value = replace[key];
+        const replacements = new Map(Object.entries(replace));
+        for (const [key, value] of replacements) {
             text = text.replace(new RegExp('\\{' + Formatter.escapeRegex(key) + '\\}', 'g'), value.toString());
         }
         return text;
