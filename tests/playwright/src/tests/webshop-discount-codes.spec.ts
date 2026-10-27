@@ -135,6 +135,50 @@ test.describe('Webshop discount codes @webshop-discount-codes', () => {
         await context.close();
     });
 
+    test('keeps the new code open with an error when saving fails', async ({ browser }) => {
+        const organization = await createWebshopOrganization('DiscountCodesError');
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Discount codes error ${WorkerData.id}`,
+        });
+        await createDiscountCode(webshop, { code: 'FRIENDS', email: null });
+
+        const admin = await createAdmin(organization);
+        const context = await browser.newContext();
+        const page = await context.newPage();
+        await loginAs({ page, user: admin });
+        await openDiscountCodes(page, organization, webshop.meta.name);
+
+        const table = new TableHelper(page);
+        await table.waitForFirstRow();
+
+        await table.clickAction('Nieuw');
+        const newView = page.getByTestId('save-view').filter({ hasText: 'Kortingscode toevoegen' });
+        const codeInput = newView.getByPlaceholder('Bv. BLACK-FRIDAY');
+        await codeInput.fill('friends');
+        await newView.getByTestId('email-input').fill('friends@test.be');
+        await newView.getByRole('button', { name: 'Korting toevoegen' }).click();
+        const discountView = page.getByTestId('save-view').filter({ has: page.getByRole('heading', { name: 'Korting toevoegen', exact: true }) });
+        await discountView.getByTestId('save-button').click();
+        await newView.getByTestId('save-button').click();
+
+        // The server rejects the duplicate code: the view stays open with the entered data
+        await expect(newView).toContainText('Er bestaat al een kortingscode met de code FRIENDS');
+        await expect(codeInput).toHaveValue('FRIENDS');
+        await expect(newView.getByTestId('email-input')).toHaveValue('friends@test.be');
+
+        await codeInput.fill('friends-2');
+        await newView.getByTestId('save-button').click();
+        await expect(newView).not.toBeVisible();
+
+        await expect(table.getRow('FRIENDS-2')).toContainText('friends@test.be');
+        const created = await WebshopDiscountCode.where({ webshopId: webshop.id, code: 'FRIENDS-2' });
+        expect(created).toHaveLength(1);
+        expect(created[0].discounts).toHaveLength(1);
+
+        await context.close();
+    });
+
     test('imports codes from a CSV file and updates existing codes by email', async ({ browser }) => {
         const organization = await createWebshopOrganization('DiscountCodesImport');
         const { webshop } = await TestWebshops.create({

@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="isNew ? $t(`%u2`) : $t(`%u3`)" :disabled="!hasChanges && !isNew" @save="save">
+    <SaveView :title="isNew ? $t(`%u2`) : $t(`%u3`)" :loading="saving" :disabled="!hasChanges && !isNew" @save="save">
         <h1 v-if="isNew">
             {{ $t('%u2') }}
         </h1>
@@ -108,12 +108,13 @@ import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
+import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import type { PrivateWebshop } from '@stamhoofd/structures';
 import { Discount, PrivateDiscountCode } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import EmailInput from '@stamhoofd/components/inputs/EmailInput.vue';
 import { generateDiscountCode } from './discountCodeGenerator';
 
@@ -122,13 +123,14 @@ const props = defineProps<{
     isNew: boolean;
     webshop: PrivateWebshop;
     // If we can immediately save this product, then you can create a save handler and pass along the changes.
-    saveHandler: (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => void;
+    saveHandler: (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => Promise<void>;
 }>();
 
 const errors = useErrors();
 const organization = useOrganization();
 const present = usePresent();
 const pop = usePop();
+const saving = ref(false);
 
 /// For now only used to update locations and times of other products that are shared
 const { patch: patchDiscountCode, patched: patchedDiscountCode, addPatch, hasChanges } = usePatch(props.discountCode);
@@ -256,6 +258,9 @@ function validate() {
 }
 
 async function save() {
+    if (saving.value) {
+        return;
+    }
     cleanCode();
 
     const isValid = await errors.validator.validate();
@@ -272,12 +277,18 @@ async function save() {
         return;
     }
 
-    if (!isValid) {
-        return;
-    }
     const p: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
     p.addPatch(patchDiscountCode.value);
-    props.saveHandler(p);
+
+    saving.value = true;
+    try {
+        await props.saveHandler(p);
+    } catch (e) {
+        errors.errorBox = new ErrorBox(e);
+        return;
+    } finally {
+        saving.value = false;
+    }
     pop({ force: true })?.catch(console.error);
 }
 
@@ -293,7 +304,12 @@ async function deleteMe() {
 
     const p: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
     p.addDelete(props.discountCode.id);
-    props.saveHandler(p);
+    try {
+        await props.saveHandler(p);
+    } catch (e) {
+        Toast.fromError(e).show();
+        return;
+    }
     pop({ force: true })?.catch(console.error);
 }
 
