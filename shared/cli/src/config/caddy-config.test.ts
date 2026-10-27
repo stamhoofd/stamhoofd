@@ -258,6 +258,26 @@ describe('cspFrontendSubroutes', () => {
         expect((replace as { replacements: { search: string; replace: string }[] }).replacements[0])
             .toEqual({ search: 'STAMHOOFD_CSP_NONCE', replace: '{http.request.uuid}' });
 
+        // HTML is never revalidated or cached, so a cached body can never carry a stale nonce. Other
+        // document paths (Vite dev source modules) keep their conditional requests.
+        const cachingRoutes = (documentRoute!.handle.find(h => h.handler === 'subroute') as { routes: any[] }).routes;
+        expect(cachingRoutes).toContainEqual({
+            match: [{ header: { Accept: ['*text/html*'] } }],
+            handle: [{ handler: 'headers', request: { delete: ['If-None-Match', 'If-Modified-Since'] } }],
+            terminal: false,
+        });
+        expect(cachingRoutes).toContainEqual({
+            handle: [{
+                handler: 'headers',
+                response: {
+                    require: { headers: { 'Content-Type': ['text/html*'] } },
+                    set: { 'Cache-Control': ['no-store'] },
+                    delete: ['ETag', 'Last-Modified'],
+                },
+            }],
+            terminal: false,
+        });
+
         // Resources (matched by file extension) get the fully sandboxed CSP and are never rewritten.
         const resourceRoute = nonceRoutes.find(route => route.match?.[0].path !== undefined);
         expect(resourceRoute).toBeDefined();
