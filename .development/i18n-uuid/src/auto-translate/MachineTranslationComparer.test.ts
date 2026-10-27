@@ -45,12 +45,12 @@ it('keeps source text and missing translations while ignoring obsolete machine t
     new MachineTranslationComparer(provider).createComparisons();
 
     for (const [comparison] of provider.setComparison.mock.calls) {
-        expect(comparison).toEqual({
+        expect(comparison).toEqual(new Map(Object.entries({
             greeting: {
                 original: 'Hallo',
                 translations: Object.fromEntries(Object.values(TranslatorType).map(type => [type, 'Bonjour'])),
             },
             missing: { original: 'Dag', translations: {} },
-        });
+        })));
     }
 });

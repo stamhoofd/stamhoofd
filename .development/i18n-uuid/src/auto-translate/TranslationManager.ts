@@ -225,7 +225,7 @@ export class TranslationManager implements TranslationProvider {
         }
         const dir = globals.COMPARE_OUTPUT_DIR;
         const path = `${dir}/comparison-${namespace}-${locale}.json`;
-        fs.writeFileSync(path, JSON.stringify(comparison, null, 2));
+        fs.writeFileSync(path, JSON.stringify(Object.fromEntries(comparison), null, 2));
     }
 
     async buildTranslations() {

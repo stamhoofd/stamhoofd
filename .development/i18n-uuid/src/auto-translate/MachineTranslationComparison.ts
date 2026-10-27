@@ -5,4 +5,4 @@ export type MachineTranslationComparisonItem = {
     translations: Record<TranslatorType, string>;
 };
 
-export type MachineTranslationComparison = Record<string, MachineTranslationComparisonItem>;
+export type MachineTranslationComparison = Map<string, MachineTranslationComparisonItem>;

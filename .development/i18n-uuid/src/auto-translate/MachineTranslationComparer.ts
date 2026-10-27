@@ -22,7 +22,7 @@ export class MachineTranslationComparer {
         for (const otherLocale of otherLocales) {
             for (const namespace of this.translationManager.namespaces) {
                 const comparison: MachineTranslationComparison
-                    = Object.fromEntries(
+                    = new Map(
                         Array.from(
                             this.translationManager.readDist(
                                 defaultLocale,
@@ -46,7 +46,7 @@ export class MachineTranslationComparer {
                     );
 
                     for (const [uuid, translation] of translations) {
-                        const item = comparison[uuid];
+                        const item = comparison.get(uuid);
                         if (item) {
                             item.translations[translatorType] = translation;
                         }
