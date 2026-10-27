@@ -1,51 +1,51 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 
-export const discountCodeFilterCompilers: SQLFilterDefinitions = {
+export const discountCodeFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    id: createColumnFilter({
+    ['id', createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    organizationId: createColumnFilter({
+    })],
+    ['organizationId', createColumnFilter({
         expression: SQL.column('organizationId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    webshopId: createColumnFilter({
+    })],
+    ['webshopId', createColumnFilter({
         expression: SQL.column('webshopId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    code: createColumnFilter({
+    })],
+    ['code', createColumnFilter({
         expression: SQL.column('code'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    description: createColumnFilter({
+    })],
+    ['description', createColumnFilter({
         expression: SQL.column('description'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    email: createColumnFilter({
+    })],
+    ['email', createColumnFilter({
         expression: SQL.column('email'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    usageCount: createColumnFilter({
+    })],
+    ['usageCount', createColumnFilter({
         expression: SQL.column('usageCount'),
         type: SQLValueType.Number,
         nullable: false,
-    }),
-    createdAt: createColumnFilter({
+    })],
+    ['createdAt', createColumnFilter({
         expression: SQL.column('createdAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    updatedAt: createColumnFilter({
+    })],
+    ['updatedAt', createColumnFilter({
         expression: SQL.column('updatedAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-};
+    })],
+]);

@@ -1,51 +1,51 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 
-export const documentFilterCompilers: SQLFilterDefinitions = {
+export const documentFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    id: createColumnFilter({
+    ['id', createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    description: createColumnFilter({
+    })],
+    ['description', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('data'), '$.value.description'),
         type: SQLValueType.JSONString,
         nullable: false,
-    }),
-    organizationId: createColumnFilter({
+    })],
+    ['organizationId', createColumnFilter({
         expression: SQL.column('organizationId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    templateId: createColumnFilter({
+    })],
+    ['templateId', createColumnFilter({
         expression: SQL.column('templateId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    memberId: createColumnFilter({
+    })],
+    ['memberId', createColumnFilter({
         expression: SQL.column('memberId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    updatedAt: createColumnFilter({
+    })],
+    ['updatedAt', createColumnFilter({
         expression: SQL.column('updatedAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    createdAt: createColumnFilter({
+    })],
+    ['createdAt', createColumnFilter({
         expression: SQL.column('createdAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    number: createColumnFilter({
+    })],
+    ['number', createColumnFilter({
         expression: SQL.column('number'),
         type: SQLValueType.Number,
         nullable: true,
-    }),
-    status: createColumnFilter({
+    })],
+    ['status', createColumnFilter({
         expression: SQL.column('status'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-};
+    })],
+]);

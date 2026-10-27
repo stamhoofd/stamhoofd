@@ -7,49 +7,49 @@ import { EmailRelationFilterCompilers } from './shared/EmailRelationFilterCompil
 /**
  * Defines how to filter cached balance items in the database from StamhoofdFilter objects
  */
-export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
+export const receivableBalanceFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    id: createColumnFilter({
+    ['id', createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    organizationId: createColumnFilter({
+    })],
+    ['organizationId', createColumnFilter({
         expression: SQL.column('organizationId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    objectType: createColumnFilter({
+    })],
+    ['objectType', createColumnFilter({
         expression: SQL.column('objectType'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    amountOpen: createColumnFilter({
+    })],
+    ['amountOpen', createColumnFilter({
         expression: SQL.column('amountOpen'),
         type: SQLValueType.Number,
         nullable: false,
-    }),
-    amountPending: createColumnFilter({
+    })],
+    ['amountPending', createColumnFilter({
         expression: SQL.column('amountPending'),
         type: SQLValueType.Number,
         nullable: false,
-    }),
-    nextDueAt: createColumnFilter({
+    })],
+    ['nextDueAt', createColumnFilter({
         expression: SQL.column('nextDueAt'),
         type: SQLValueType.Datetime,
         nullable: true,
-    }),
-    lastReminderEmail: createColumnFilter({
+    })],
+    ['lastReminderEmail', createColumnFilter({
         expression: SQL.column('lastReminderEmail'),
         type: SQLValueType.Datetime,
         nullable: true,
-    }),
-    reminderEmailCount: createColumnFilter({
+    })],
+    ['reminderEmailCount', createColumnFilter({
         expression: SQL.column('reminderEmailCount'),
         type: SQLValueType.Number,
         nullable: false,
-    }),
-    reminderAmountIncreased: createColumnFilter({
+    })],
+    ['reminderAmountIncreased', createColumnFilter({
         expression: SQL.if(
             SQL.column('amountOpen'),
             '>',
@@ -57,8 +57,8 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
         ).then(1).else(0),
         type: SQLValueType.Boolean,
         nullable: false,
-    }),
-    organizations: createExistsFilter(
+    })],
+    ['organizations', createExistsFilter(
         SQL.select()
             .from(SQL.table('organizations'))
             .where(
@@ -72,8 +72,8 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
                 'organization'),
 
         organizationFilterCompilers,
-    ),
-    members: createExistsFilter(
+    )],
+    ['members', createExistsFilter(
         SQL.select()
             .from(SQL.table('members'))
             .where(
@@ -86,8 +86,8 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('cached_outstanding_balances', 'objectType'),
                 'member'),
         memberFilterCompilers(),
-    ),
-    users: createExistsFilter(
+    )],
+    ['users', createExistsFilter(
         SQL.select()
             .from(SQL.table('users'))
             .where(
@@ -100,9 +100,9 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('cached_outstanding_balances', 'objectType'),
                 ['user', 'userWithoutMembers'],
             ),
-        {
+        new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({
+            ['name', createColumnFilter({
                 expression: new SQLConcat(
                     SQL.column('firstName'),
                     new SQLScalar(' '),
@@ -110,15 +110,15 @@ export const receivableBalanceFilterCompilers: SQLFilterDefinitions = {
                 ),
                 type: SQLValueType.String,
                 nullable: false,
-            }),
-            email: createColumnFilter({
+            })],
+            ['email', createColumnFilter({
                 expression: SQL.column('email'),
                 type: SQLValueType.String,
                 nullable: false,
-            }),
-        },
-    ),
+            })],
+        ]),
+    )],
 
     // Allowed to filter by recent emails
     ...EmailRelationFilterCompilers,
-};
+]);

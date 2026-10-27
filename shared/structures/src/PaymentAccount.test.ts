@@ -29,16 +29,16 @@ describe('getPaymentAccount', () => {
      * Mirrors how the api compiles these filters to SQL (see sql-filters/payments.ts): the transfer
      * settings are read out of a JSON column, so a payment without any reads as null there.
      */
-    const paymentFilterCompilers: InMemoryFilterDefinitions = {
+    const paymentFilterCompilers: InMemoryFilterDefinitions = new Map([
         ...baseInMemoryFilterCompilers,
-        method: createValueCompiler(payment => payment.method),
-        provider: createValueCompiler(payment => payment.provider),
-        transferSettings: {
+        ['method', createValueCompiler(payment => payment.method)],
+        ['provider', createValueCompiler(payment => payment.provider)],
+        ['transferSettings', new Map([
             ...baseInMemoryFilterCompilers,
-            iban: createValueCompiler(payment => payment.transferSettings?.iban ?? null),
-            creditor: createValueCompiler(payment => payment.transferSettings?.creditor ?? null),
-        },
-    };
+            ['iban', createValueCompiler(payment => payment.transferSettings?.iban ?? null)],
+            ['creditor', createValueCompiler(payment => payment.transferSettings?.creditor ?? null)],
+        ])],
+    ]);
 
     function createValueCompiler(getValue: (payment: PaymentGeneral) => unknown) {
         return (filter: StamhoofdFilter) => {

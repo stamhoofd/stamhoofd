@@ -1,4 +1,4 @@
-import type { SQLFilterDefinitions } from '@stamhoofd/sql';
+import type { SQLFilterCompiler, SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 import { BalanceItemRelationType } from '@stamhoofd/structures';
 import { paymentSettlementFilterCompilers } from './payment-settlement.js';
@@ -14,45 +14,45 @@ import { paymentSettlementFilterCompilers } from './payment-settlement.js';
  * All expressions are qualified with the balance_items table so they keep working when balance_items
  * is joined into another query (e.g. via balance_item_payments).
  */
-export const balanceItemRelationFilterCompilers: SQLFilterDefinitions = {
-    registration: createExistsFilter(
+export const balanceItemRelationFilterCompilers: SQLFilterDefinitions = new Map<string, SQLFilterCompiler | SQLFilterDefinitions>([
+    ['registration', createExistsFilter(
         SQL.select()
             .from(SQL.table('registrations'))
             .where(
                 SQL.column('registrations', 'id'),
                 SQL.column('balance_items', 'registrationId'),
             ),
-        {
+        new Map([
             ...baseSQLFilterCompilers,
-            groupId: createColumnFilter({
+            ['groupId', createColumnFilter({
                 expression: SQL.column('registrations', 'groupId'),
                 type: SQLValueType.String,
                 nullable: false,
-            }),
-        },
-    ),
-    order: createExistsFilter(
+            })],
+        ]),
+    )],
+    ['order', createExistsFilter(
         SQL.select()
             .from(SQL.table('webshop_orders'))
             .where(
                 SQL.column('webshop_orders', 'id'),
                 SQL.column('balance_items', 'orderId'),
             ),
-        {
+        new Map([
             ...baseSQLFilterCompilers,
-            webshopId: createColumnFilter({
+            ['webshopId', createColumnFilter({
                 expression: SQL.column('webshop_orders', 'webshopId'),
                 type: SQLValueType.String,
                 nullable: false,
-            }),
-        },
-    ),
+            })],
+        ]),
+    )],
     // The membership type is only stored inside the relations JSON, so we read its id from there.
-    membershipType: createColumnFilter({
+    ['membershipType', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('balance_items', 'relations'), `$.value.${BalanceItemRelationType.MembershipType}.id`),
         type: SQLValueType.JSONString,
         nullable: true,
-    }),
+    })],
 
     /**
      * Filter on the id of any relation, e.g. { relations: { Group: { id: '...' } } }.
@@ -60,99 +60,97 @@ export const balanceItemRelationFilterCompilers: SQLFilterDefinitions = {
      * Used to narrow down to one category of a breakdown (see PaymentBreakdown), so every kind of
      * metadata a balance item carries is filterable without a dedicated compiler per relation.
      */
-    relations: {
+    ['relations', new Map([
         ...baseSQLFilterCompilers,
-        ...Object.fromEntries(
-            Object.values(BalanceItemRelationType).map(relationType => [
-                relationType,
-                {
-                    ...baseSQLFilterCompilers,
-                    id: createColumnFilter({
-                        expression: SQL.jsonExtract(SQL.column('balance_items', 'relations'), `$.value.${relationType}.id`),
-                        type: SQLValueType.JSONString,
-                        nullable: true,
-                    }),
-                },
+        ...Object.values(BalanceItemRelationType).map(relationType => [
+            relationType,
+            new Map([
+                ...baseSQLFilterCompilers,
+                ['id', createColumnFilter({
+                    expression: SQL.jsonExtract(SQL.column('balance_items', 'relations'), `$.value.${relationType}.id`),
+                    type: SQLValueType.JSONString,
+                    nullable: true,
+                })],
             ]),
-        ),
-    },
-};
+        ] as const),
+    ])],
+]);
 
 /**
  * Defines how to filter balance items in the database from StamhoofdFilter objects
  */
-export const balanceItemFilterCompilers: SQLFilterDefinitions = {
+export const balanceItemFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
     ...balanceItemRelationFilterCompilers,
-    id: createColumnFilter({
+    ['id', createColumnFilter({
         expression: SQL.column('balance_items', 'id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    organizationId: createColumnFilter({
+    })],
+    ['organizationId', createColumnFilter({
         expression: SQL.column('balance_items', 'organizationId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    payingOrganizationId: createColumnFilter({
+    })],
+    ['payingOrganizationId', createColumnFilter({
         expression: SQL.column('balance_items', 'payingOrganizationId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    orderId: createColumnFilter({
+    })],
+    ['orderId', createColumnFilter({
         expression: SQL.column('balance_items', 'orderId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    registrationId: createColumnFilter({
+    })],
+    ['registrationId', createColumnFilter({
         expression: SQL.column('balance_items', 'registrationId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    type: createColumnFilter({
+    })],
+    ['type', createColumnFilter({
         expression: SQL.column('balance_items', 'type'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    status: createColumnFilter({
+    })],
+    ['status', createColumnFilter({
         expression: SQL.column('balance_items', 'status'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    createdAt: createColumnFilter({
+    })],
+    ['createdAt', createColumnFilter({
         expression: SQL.column('balance_items', 'createdAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    updatedAt: createColumnFilter({
+    })],
+    ['updatedAt', createColumnFilter({
         expression: SQL.column('balance_items', 'updatedAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
+    })],
 
-    name: createColumnFilter({
+    ['name', createColumnFilter({
         expression: SQL.column('balance_items', 'name'),
         type: SQLValueType.String,
         nullable: false,
-    }),
+    })],
 
-    description: createColumnFilter({
+    ['description', createColumnFilter({
         expression: SQL.column('balance_items', 'description'),
         type: SQLValueType.String,
         nullable: true,
-    }),
+    })],
 
-    priceWithVAT: createColumnFilter({
+    ['priceWithVAT', createColumnFilter({
         expression: SQL.column('balance_items', 'priceTotal'),
         type: SQLValueType.Number,
         nullable: false,
-    }),
+    })],
 
-    priceOpen: createColumnFilter({
+    ['priceOpen', createColumnFilter({
         expression: SQL.column('balance_items', 'priceOpen'),
         type: SQLValueType.Number,
         nullable: false,
-    }),
+    })],
 
     /**
      * The payments that paid (a part of) this balance item, e.g.
@@ -161,7 +159,7 @@ export const balanceItemFilterCompilers: SQLFilterDefinitions = {
      * Used to narrow a breakdown down to the balance items that were part of one payout (see
      * PaymentSettlementGroup): a balance item doesn't know how it was paid, its payments do.
      */
-    payments: createExistsFilter(
+    ['payments', createExistsFilter(
         SQL.select()
             .from(SQL.table('balance_item_payments'))
             .join(
@@ -174,14 +172,14 @@ export const balanceItemFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('balance_item_payments', 'balanceItemId'),
                 SQL.column('balance_items', 'id'),
             ),
-        {
+        new Map([
             ...baseSQLFilterCompilers,
-            price: createColumnFilter({
+            ['price', createColumnFilter({
                 expression: SQL.column('balance_item_payments', 'price'),
                 type: SQLValueType.Number,
                 nullable: false,
-            }),
-            payment: paymentSettlementFilterCompilers,
-        },
-    ),
-};
+            })],
+            ['payment', paymentSettlementFilterCompilers],
+        ]),
+    )],
+]);

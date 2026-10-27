@@ -14,14 +14,14 @@ function userToFilterableAdmin(user: User, platform: PlatformStruct, organizatio
         permissions: user.permissions?.forOrganization(organization, platform, user.email),
     };
 }
-const filterableAdminFilterCompilers: InMemoryFilterDefinitions = {
+const filterableAdminFilterCompilers: InMemoryFilterDefinitions = new Map([
     ...baseInMemoryFilterCompilers,
-    permissions: createInMemoryFilterCompiler(['permissions'], {
+    ['permissions', createInMemoryFilterCompiler(['permissions'], new Map([
         ...baseInMemoryFilterCompilers,
-        level: createInMemoryFilterCompiler('level'),
-        accessRights: createInMemoryFilterCompiler('accessRights'),
-    }),
-};
+        ['level', createInMemoryFilterCompiler('level')],
+        ['accessRights', createInMemoryFilterCompiler('accessRights')],
+    ]))],
+]);
 
 Email.recipientLoaders.set(EmailRecipientFilterType.Organizations, {
     fetch: fetchRecipients,

@@ -6,10 +6,10 @@ import { test, testError, testMatch } from '../utils/index.js';
 
 describe('$in', () => {
     it('throws when not passing an array', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
-        };
+            ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+        ]);
 
         await testError({
             filter: {
@@ -23,10 +23,10 @@ describe('$in', () => {
     });
 
     it('throws when passing more than 1000 values to the filter', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
-        };
+            ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+        ]);
 
         await testError({
             filter: {
@@ -40,10 +40,10 @@ describe('$in', () => {
     });
 
     it('can filter on $in', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
-        };
+            ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+        ]);
 
         await test({
             filter: {
@@ -62,10 +62,10 @@ describe('$in', () => {
     });
 
     it('can filter on single $in', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
-        };
+            ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+        ]);
 
         await test({
             filter: {
@@ -82,10 +82,10 @@ describe('$in', () => {
     });
 
     it('can filter on empty $in', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
-        };
+            ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+        ]);
 
         await test({
             filter: {
@@ -102,10 +102,10 @@ describe('$in', () => {
     });
 
     it('can invert $in inside', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
-        };
+            ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+        ]);
 
         await test({
             filter: {
@@ -126,10 +126,10 @@ describe('$in', () => {
     });
 
     it('can invert $in outside', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
-        };
+            ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+        ]);
 
         await test({
             filter: {
@@ -150,10 +150,10 @@ describe('$in', () => {
     });
 
     it('splits up when using null', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
-        };
+            ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+        ]);
 
         await test({
             filter: {
@@ -172,10 +172,10 @@ describe('$in', () => {
     });
 
     it('works when only including null', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
-        };
+            ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+        ]);
 
         await test({
             filter: {
@@ -192,10 +192,10 @@ describe('$in', () => {
     });
 
     it('throws an error when trying to search in json objects', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            settings: createColumnFilter({ expression: SQL.column('settings'), type: SQLValueType.JSONObject, nullable: false }),
-        };
+            ['settings', createColumnFilter({ expression: SQL.column('settings'), type: SQLValueType.JSONObject, nullable: false })],
+        ]);
         await testError({
             filter: {
                 settings: {
@@ -214,13 +214,13 @@ describe('$in', () => {
                 nullable: true,
             },
         };
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            'settings.randomValues': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.randomValues'), type: SQLValueType.JSONArray, nullable: true },
-            ),
-            'settings.name': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: true },
-            ),
-        };
+            ['settings.randomValues', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.randomValues'), type: SQLValueType.JSONArray, nullable: true },
+            )],
+            ['settings.name', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: true },
+            )],
+        ]);
 
         it('Can check if a string is in a JSON string array, case insensitive', async () => {
             await testMatch({
@@ -620,10 +620,10 @@ describe('$in', () => {
                 nullable: true,
             },
         };
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            'settings.scalar': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.scalar'), type: SQLValueType.JSONScalar, nullable: true }),
-        };
+            ['settings.scalar', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.scalar'), type: SQLValueType.JSONScalar, nullable: true })],
+        ]);
 
         it('Can compare with number scalars', async () => {
             await testMatch({

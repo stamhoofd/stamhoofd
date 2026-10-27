@@ -10,34 +10,34 @@ import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@
  * All expressions are qualified with the payments table so they keep working in a subquery that joins
  * payments (see balance-items.ts).
  */
-export const paymentSettlementFilterCompilers: SQLFilterDefinitions = {
+export const paymentSettlementFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    method: createColumnFilter({
+    ['method', createColumnFilter({
         expression: SQL.column('payments', 'method'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    provider: createColumnFilter({
+    })],
+    ['provider', createColumnFilter({
         expression: SQL.column('payments', 'provider'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    status: createColumnFilter({
+    })],
+    ['status', createColumnFilter({
         expression: SQL.column('payments', 'status'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    settlement: {
+    })],
+    ['settlement', new Map([
         ...baseSQLFilterCompilers,
-        reference: createColumnFilter({
+        ['reference', createColumnFilter({
             expression: SQL.jsonExtract(SQL.column('payments', 'settlement'), '$.value.reference'),
             type: SQLValueType.JSONString,
             nullable: true,
-        }),
-        settledAt: createColumnFilter({
+        })],
+        ['settledAt', createColumnFilter({
             expression: SQL.jsonExtract(SQL.column('payments', 'settlement'), '$.value.settledAt'),
             type: SQLValueType.JSONDate,
             nullable: true,
-        }),
-    },
-};
+        })],
+    ])],
+]);

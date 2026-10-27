@@ -11,14 +11,14 @@ import { SQLTranslatedString } from './SQLTranslatedString.js';
 type TranslatedStringValue = string | { [key in Language]?: string };
 type Row = { settings: { name: TranslatedStringValue } };
 
-const filters: SQLFilterDefinitions = {
+const filters: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    'settings:name': createColumnFilter({
+    ['settings:name', createColumnFilter({
         expression: new SQLTranslatedString(SQL.column('settings'), '$.name'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-};
+    })],
+]);
 
 /**
  * Creates a table with a single nullable json `settings` column, inserts the rows and checks that every

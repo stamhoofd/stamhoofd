@@ -258,18 +258,19 @@ export class DocumentTemplatePrivate extends AutoEncoder implements ObjectWithRe
         }) as this;
     }
 
+    /** Evaluates conditions against the configured literal answer IDs, including dotted IDs. */
     doesMatchFilter(filter: StamhoofdFilter): boolean {
         try {
-            const recordAnswerFilters = {
+            const recordAnswerFilters = new Map([
                 ...baseInMemoryFilterCompilers,
-            };
+            ]);
             for (const a of this.settings.fieldAnswers.values()) {
-                recordAnswerFilters[a.settings.id] = createInMemoryFilterCompiler([a.settings.id, 'objectValue']);
+                recordAnswerFilters.set(a.settings.id, createInMemoryFilterCompiler([a.settings.id, 'objectValue']));
             }
-            const defs = {
+            const defs = new Map([
                 ...documentInMemoryFilterCompilers,
-                fieldAnswers: createInMemoryFilterCompiler('settings.fieldAnswers', recordAnswerFilters),
-            };
+                ['fieldAnswers', createInMemoryFilterCompiler('settings.fieldAnswers', recordAnswerFilters)],
+            ]);
 
             const compiledFilter = compileToInMemoryFilter(filter, defs);
             return compiledFilter(this);

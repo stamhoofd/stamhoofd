@@ -13,121 +13,121 @@ import { paymentSettlementFilterCompilers } from './payment-settlement.js';
  * All expressions are qualified with the payments table so they keep working when payments is joined
  * into another query instead of being selected from (see balance-item-payments-root.ts).
  */
-export const paymentFilterCompilers: SQLFilterDefinitions = {
+export const paymentFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
     // method, provider, status and settlement
     ...paymentSettlementFilterCompilers,
-    id: createColumnFilter({
+    ['id', createColumnFilter({
         expression: SQL.column(Payment.table, 'id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    type: createColumnFilter({
+    })],
+    ['type', createColumnFilter({
         expression: SQL.column(Payment.table, 'type'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    organizationId: createColumnFilter({
+    })],
+    ['organizationId', createColumnFilter({
         expression: SQL.column(Payment.table, 'organizationId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    payingOrganizationId: createColumnFilter({
+    })],
+    ['payingOrganizationId', createColumnFilter({
         expression: SQL.column(Payment.table, 'payingOrganizationId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    payingOrganization: createJoinedRelationFilter(
+    })],
+    ['payingOrganization', createJoinedRelationFilter(
         SQL.join('organizations').where(SQL.column('organizations', 'id'), SQL.column(Payment.table, 'payingOrganizationId')),
         organizationFilterCompilers,
-    ),
-    invoiceId: createColumnFilter({
+    )],
+    ['invoiceId', createColumnFilter({
         expression: SQL.column(Payment.table, 'invoiceId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    createdAt: createColumnFilter({
+    })],
+    ['createdAt', createColumnFilter({
         expression: SQL.column(Payment.table, 'createdAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    updatedAt: createColumnFilter({
+    })],
+    ['updatedAt', createColumnFilter({
         expression: SQL.column(Payment.table, 'updatedAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    paidAt: createColumnFilter({
+    })],
+    ['paidAt', createColumnFilter({
         expression: SQL.column(Payment.table, 'paidAt'),
         type: SQLValueType.Datetime,
         nullable: true,
-    }),
-    price: createColumnFilter({
+    })],
+    ['price', createColumnFilter({
         expression: SQL.column(Payment.table, 'price'),
         type: SQLValueType.Number,
         nullable: false,
-    }),
+    })],
 
-    stripeAccountId: createColumnFilter({
+    ['stripeAccountId', createColumnFilter({
         expression: SQL.column(Payment.table, 'stripeAccountId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
+    })],
 
     /**
      * What a payment rounded away, which belongs to the payment as a whole instead of to one of the
      * things it paid for (see PaymentBreakdownBuilder.addRounding).
      */
-    roundingAmount: createColumnFilter({
+    ['roundingAmount', createColumnFilter({
         expression: SQL.column(Payment.table, 'roundingAmount'),
         type: SQLValueType.Number,
         nullable: false,
-    }),
+    })],
 
     /**
      * The account a transfer was made to. Used to narrow a breakdown down to the money that arrived on
      * one account (see PaymentBreakdown).
      */
-    transferSettings: {
+    ['transferSettings', new Map([
         ...baseSQLFilterCompilers,
-        iban: createColumnFilter({
+        ['iban', createColumnFilter({
             expression: SQL.jsonExtract(SQL.column(Payment.table, 'transferSettings'), '$.value.iban'),
             type: SQLValueType.JSONString,
             nullable: true,
-        }),
-        creditor: createColumnFilter({
+        })],
+        ['creditor', createColumnFilter({
             expression: SQL.jsonExtract(SQL.column(Payment.table, 'transferSettings'), '$.value.creditor'),
             type: SQLValueType.JSONString,
             nullable: true,
-        }),
-    },
-    transferDescription: createColumnFilter({
+        })],
+    ])],
+    ['transferDescription', createColumnFilter({
         expression: SQL.column(Payment.table, 'transferDescription'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    hasInvoice: createColumnFilter({
+    })],
+    ['hasInvoice', createColumnFilter({
         expression: SQL.isNull(SQL.column(Payment.table, 'invoiceId')),
         type: SQLValueType.Boolean,
         nullable: false,
-    }),
-    customer: {
+    })],
+    ['customer', new Map([
         ...baseSQLFilterCompilers,
-        email: createColumnFilter({
+        ['email', createColumnFilter({
             expression: SQL.jsonExtract(SQL.column(Payment.table, 'customer'), '$.value.email'),
             type: SQLValueType.JSONString,
             nullable: true,
-        }),
-        firstName: createColumnFilter({
+        })],
+        ['firstName', createColumnFilter({
             expression: SQL.jsonExtract(SQL.column(Payment.table, 'customer'), '$.value.firstName'),
             type: SQLValueType.JSONString,
             nullable: true,
-        }),
-        lastName: createColumnFilter({
+        })],
+        ['lastName', createColumnFilter({
             expression: SQL.jsonExtract(SQL.column(Payment.table, 'customer'), '$.value.lastName'),
             type: SQLValueType.JSONString,
             nullable: true,
-        }),
-        name: createColumnFilter({
+        })],
+        ['name', createColumnFilter({
             expression: new SQLCast(
                 new SQLConcat(
                     new SQLJsonUnquote(SQL.jsonExtract(SQL.column(Payment.table, 'customer'), '$.value.firstName')),
@@ -138,32 +138,32 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
             ),
             type: SQLValueType.String,
             nullable: true,
-        }),
-        company: {
+        })],
+        ['company', new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({
+            ['name', createColumnFilter({
                 expression: SQL.jsonExtract(SQL.column(Payment.table, 'customer'), '$.value.company.name'),
                 type: SQLValueType.JSONString,
                 nullable: true,
-            }),
-            VATNumber: createColumnFilter({
+            })],
+            ['VATNumber', createColumnFilter({
                 expression: SQL.jsonExtract(SQL.column(Payment.table, 'customer'), '$.value.company.VATNumber'),
                 type: SQLValueType.JSONString,
                 nullable: true,
-            }),
-            companyNumber: createColumnFilter({
+            })],
+            ['companyNumber', createColumnFilter({
                 expression: SQL.jsonExtract(SQL.column(Payment.table, 'customer'), '$.value.company.companyNumber'),
                 type: SQLValueType.JSONString,
                 nullable: true,
-            }),
-            administrationEmail: createColumnFilter({
+            })],
+            ['administrationEmail', createColumnFilter({
                 expression: SQL.jsonExtract(SQL.column(Payment.table, 'customer'), '$.value.company.administrationEmail'),
                 type: SQLValueType.JSONString,
                 nullable: true,
-            }),
-        },
-    },
-    balanceItemPayments: createExistsFilter(
+            })],
+        ])],
+    ])],
+    ['balanceItemPayments', createExistsFilter(
         SQL.select()
             .from(
                 SQL.table('balance_item_payments'),
@@ -179,9 +179,9 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('payments', 'id'),
             ),
         balanceItemPaymentsCompilers,
-    ),
+    )],
     // The stored payouts this payment was part of (the m2m rows, not the legacy JSON blob above)
-    settlements: createExistsFilter(
+    ['settlements', createExistsFilter(
         SQL.select()
             .from(
                 SQL.table('payment_settlements'),
@@ -196,64 +196,64 @@ export const paymentFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('payment_settlements', 'paymentId'),
                 SQL.column('payments', 'id'),
             ),
-        {
+        new Map([
             ...baseSQLFilterCompilers,
-            amount: createColumnFilter({
+            ['amount', createColumnFilter({
                 expression: SQL.column('payment_settlements', 'amount'),
                 type: SQLValueType.Number,
                 nullable: false,
-            }),
-            externalId: createColumnFilter({
+            })],
+            ['externalId', createColumnFilter({
                 expression: SQL.column('payment_settlements', 'externalId'),
                 type: SQLValueType.String,
                 nullable: false,
-            }),
-            occurredAt: createColumnFilter({
+            })],
+            ['occurredAt', createColumnFilter({
                 expression: SQL.column('payment_settlements', 'occurredAt'),
                 type: SQLValueType.Datetime,
                 nullable: false,
-            }),
-            settlement: {
+            })],
+            ['settlement', new Map([
                 ...baseSQLFilterCompilers,
-                id: createColumnFilter({
+                ['id', createColumnFilter({
                     expression: SQL.column('settlements', 'id'),
                     type: SQLValueType.String,
                     nullable: false,
-                }),
-                provider: createColumnFilter({
+                })],
+                ['provider', createColumnFilter({
                     expression: SQL.column('settlements', 'provider'),
                     type: SQLValueType.String,
                     nullable: false,
-                }),
-                externalId: createColumnFilter({
+                })],
+                ['externalId', createColumnFilter({
                     expression: SQL.column('settlements', 'externalId'),
                     type: SQLValueType.String,
                     nullable: false,
-                }),
-                reference: createColumnFilter({
+                })],
+                ['reference', createColumnFilter({
                     expression: SQL.column('settlements', 'reference'),
                     type: SQLValueType.String,
                     nullable: false,
-                }),
-                settledAt: createColumnFilter({
+                })],
+                ['settledAt', createColumnFilter({
                     expression: SQL.column('settlements', 'settledAt'),
                     type: SQLValueType.Datetime,
                     nullable: false,
-                }),
-                amount: createColumnFilter({
+                })],
+                ['amount', createColumnFilter({
                     expression: SQL.column('settlements', 'amount'),
                     type: SQLValueType.Number,
                     nullable: false,
-                }),
-                stripeAccountId: createColumnFilter({
+                })],
+                ['stripeAccountId', createColumnFilter({
                     expression: SQL.column('settlements', 'stripeAccountId'),
                     type: SQLValueType.String,
                     nullable: true,
-                }),
-            },
-        },
-    ),
-};
+                })],
+            ])],
+        ]),
+    )],
+]);
 
 /**
  * What a search term typed in a list of payments selects, as a filter on the payments table.

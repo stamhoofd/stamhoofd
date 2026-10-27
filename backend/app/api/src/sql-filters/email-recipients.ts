@@ -1,39 +1,39 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLConcat, SQLScalar, SQLValueType } from '@stamhoofd/sql';
 
-export const emailRecipientsFilterCompilers: SQLFilterDefinitions = {
+export const emailRecipientsFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    id: createColumnFilter({
+    ['id', createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    memberId: createColumnFilter({
+    })],
+    ['memberId', createColumnFilter({
         expression: SQL.column('memberId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    userId: createColumnFilter({
+    })],
+    ['userId', createColumnFilter({
         expression: SQL.column('userId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    email: createColumnFilter({
+    })],
+    ['email', createColumnFilter({
         expression: SQL.column('email'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    firstName: createColumnFilter({
+    })],
+    ['firstName', createColumnFilter({
         expression: SQL.column('firstName'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    lastName: createColumnFilter({
+    })],
+    ['lastName', createColumnFilter({
         expression: SQL.column('lastName'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    name: createColumnFilter({
+    })],
+    ['name', createColumnFilter({
         expression: new SQLConcat(
             SQL.column('firstName'),
             new SQLScalar(' '),
@@ -41,45 +41,45 @@ export const emailRecipientsFilterCompilers: SQLFilterDefinitions = {
         ),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    organizationId: createColumnFilter({
+    })],
+    ['organizationId', createColumnFilter({
         expression: SQL.column('organizationId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    duplicateOfRecipientId: createColumnFilter({
+    })],
+    ['duplicateOfRecipientId', createColumnFilter({
         expression: SQL.column('duplicateOfRecipientId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    emailId: createColumnFilter({
+    })],
+    ['emailId', createColumnFilter({
         expression: SQL.column('emailId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    sentAt: createColumnFilter({
+    })],
+    ['sentAt', createColumnFilter({
         expression: SQL.column('sentAt'),
         type: SQLValueType.Datetime,
         nullable: true,
-    }),
-    failError: createColumnFilter({
+    })],
+    ['failError', createColumnFilter({
         expression: SQL.column('failError'),
         type: SQLValueType.JSONObject,
         nullable: true,
-    }),
-    spamComplaintError: createColumnFilter({
+    })],
+    ['spamComplaintError', createColumnFilter({
         expression: SQL.column('spamComplaintError'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    softBounceError: createColumnFilter({
+    })],
+    ['softBounceError', createColumnFilter({
         expression: SQL.column('softBounceError'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    hardBounceError: createColumnFilter({
+    })],
+    ['hardBounceError', createColumnFilter({
         expression: SQL.column('hardBounceError'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-};
+    })],
+]);

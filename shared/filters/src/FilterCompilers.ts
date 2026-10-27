@@ -21,11 +21,9 @@ function wrapPlainFilter(filter: StamhoofdFilter): Exclude<StamhoofdFilter, Stam
 export type FilterCompiler<Runner> = (filter: StamhoofdFilter, parentCompiler: FilterCompiler<Runner>, key: string) => Runner | undefined;
 export type RequiredFilterCompiler<Runner> = (filter: StamhoofdFilter, parentCompiler: FilterCompiler<Runner>) => Runner;
 
-export type FilterDefinitions<Runner> = {
-    [P in string]: FilterCompiler<Runner> | FilterDefinitions<Runner>;
-};
+/** Registry of exact filter keys and nested namespaces, without inherited keys. */
+export type FilterDefinitions<Runner> = Map<string, FilterCompiler<Runner> | FilterDefinitions<Runner>>;
 
-// Record<string, FilterCompiler<Runner> | FilterDefinitions<Runner>>;
 /**
  * @deprecated
  */
@@ -33,17 +31,22 @@ export type FilterCompilerSelector<Runner> = FilterCompiler<Runner>;
 
 export const filterDefinitionsToSelector = filterDefinitionsToCompiler;
 
+/**
+ * Exact registrations take precedence over dotted namespaces and the `*` fallback.
+ * The fallback only handles non-operator keys without a dot; a compiler returning
+ * undefined remains an exact match and does not trigger fallback resolution.
+ */
 export function filterDefinitionsToCompiler<Runner>(definitions: FilterDefinitions<Runner>): FilterCompiler<Runner> {
     return (filter: StamhoofdFilter, parentCompiler: FilterCompiler<Runner>, key: string) => {
-        let k = definitions[key] as FilterCompiler<Runner> | FilterDefinitions<Runner> | undefined;
+        let k = definitions.get(key);
 
-        if (!k) {
+        if (!definitions.has(key)) {
             const dotIndex = key.indexOf('.');
             if (dotIndex !== -1) {
                 // todo: first search for first match + adjust filter
                 const firstKey = key.substring(0, dotIndex);
-                const k = definitions[firstKey];
-                if (!k) {
+                const k = definitions.get(firstKey);
+                if (k === undefined) {
                     throw new SimpleError({
                         code: 'unknown_filter',
                         message: 'Unknown filter ' + key,
@@ -59,15 +62,15 @@ export function filterDefinitionsToCompiler<Runner>(definitions: FilterDefinitio
                 return subCompiler(filter, subCompiler, subKey);
             }
 
-            if (definitions['*'] && !key.startsWith('$')) {
-                k = definitions['*'];
+            if (definitions.has('*') && !key.startsWith('$')) {
+                k = definitions.get('*');
             }
         }
 
         if (typeof k === 'function') {
             return k(filter, parentCompiler, key);
         }
-        if (typeof k === 'object') {
+        if (k instanceof Map) {
             // Create a namespace compiler
             const subCompiler = filterDefinitionsToCompiler(k);
             return subCompiler(filter, subCompiler, '$and');

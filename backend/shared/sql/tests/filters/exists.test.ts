@@ -5,21 +5,21 @@ import { testSelect } from '../utils/index.js';
 
 describe('Exists relations', () => {
     it('Added when used', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-            organizations: createExistsFilter(
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            ['organizations', createExistsFilter(
                 SQL.select()
                     .from('organizations', 'o')
                     .where(
                         SQL.parentColumn('organizationId'),
                         SQL.column('id'),
                     ),
-                {
+                new Map([
                     ...baseSQLFilterCompilers,
-                    id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
-                }),
-        };
+                    ['id', createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false })],
+                ]))],
+        ]);
 
         await testSelect({
             filter: [
@@ -40,21 +40,21 @@ describe('Exists relations', () => {
     });
 
     it('Also added when always true', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-            organizations: createExistsFilter(
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            ['organizations', createExistsFilter(
                 SQL.select()
                     .from('organizations', 'o')
                     .where(
                         SQL.parentColumn('organizationId'),
                         SQL.column('id'),
                     ),
-                {
+                new Map([
                     ...baseSQLFilterCompilers,
-                    id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
-                }),
-        };
+                    ['id', createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false })],
+                ]))],
+        ]);
 
         await testSelect({
             filter: [
@@ -77,21 +77,21 @@ describe('Exists relations', () => {
     });
 
     it('Not added when always false', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-            organizations: createExistsFilter(
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            ['organizations', createExistsFilter(
                 SQL.select()
                     .from('organizations', 'o')
                     .where(
                         SQL.parentColumn('organizationId'),
                         SQL.column('id'),
                     ),
-                {
+                new Map([
                     ...baseSQLFilterCompilers,
-                    id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
-                }),
-        };
+                    ['id', createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false })],
+                ]))],
+        ]);
 
         await testSelect({
             filter: [

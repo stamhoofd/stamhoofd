@@ -291,29 +291,27 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
      * Mirrors how the api compiles these filters to SQL (see sql-filters/balance-items.ts): a relation
      * the item doesn't have reads as null there, so it matches `{ id: null }`.
      */
-    const balanceItemFilterCompilers: InMemoryFilterDefinitions = {
+    const balanceItemFilterCompilers: InMemoryFilterDefinitions = new Map([
         ...baseInMemoryFilterCompilers,
-        type: createInMemoryFilterCompiler('type'),
-        name: createInMemoryFilterCompiler('name'),
-        relations: {
+        ['type', createInMemoryFilterCompiler('type')],
+        ['name', createInMemoryFilterCompiler('name')],
+        ['relations', new Map([
             ...baseInMemoryFilterCompilers,
-            ...Object.fromEntries(
-                Object.values(BalanceItemRelationType).map(relationType => [
-                    relationType,
-                    {
-                        ...baseInMemoryFilterCompilers,
-                        id: (filter) => {
-                            // A plain value has to be wrapped, as compileToInMemoryFilter reads a bare null as 'no filter'
-                            const condition = filter !== null && typeof filter === 'object' ? filter : { $eq: filter };
-                            const runner = compileToInMemoryFilter(condition, baseInMemoryFilterCompilers);
+            ...Object.values(BalanceItemRelationType).map(relationType => [
+                relationType,
+                new Map([
+                    ...baseInMemoryFilterCompilers,
+                    ['id', (filter) => {
+                        // A plain value has to be wrapped, as compileToInMemoryFilter reads a bare null as 'no filter'
+                        const condition = filter !== null && typeof filter === 'object' ? filter : { $eq: filter };
+                        const runner = compileToInMemoryFilter(condition, baseInMemoryFilterCompilers);
 
-                            return (item: BalanceItem) => runner(item.relations.get(relationType)?.id ?? null);
-                        },
-                    },
+                        return (item: BalanceItem) => runner(item.relations.get(relationType)?.id ?? null);
+                    }],
                 ]),
-            ),
-        },
-    };
+            ] as const),
+        ])],
+    ]);
 
     function matches(filter: StamhoofdFilter, item: BalanceItem): boolean {
         return compileToInMemoryFilter(filter, balanceItemFilterCompilers)(item);

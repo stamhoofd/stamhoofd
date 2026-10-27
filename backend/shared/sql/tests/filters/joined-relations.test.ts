@@ -17,14 +17,14 @@ describe('Joined relations', () => {
         );
 
     it('Joins when used', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-            organization: createJoinedRelationFilter(organizationJoin, {
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            ['organization', createJoinedRelationFilter(organizationJoin, new Map([
                 ...baseSQLFilterCompilers,
-                id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
-            }),
-        };
+                ['id', createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false })],
+            ]))],
+        ]);
 
         await testSelect({
             filter: [
@@ -43,14 +43,14 @@ describe('Joined relations', () => {
     });
 
     it('Joins only once when used twice', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-            organization: createJoinedRelationFilter(organizationJoin, {
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            ['organization', createJoinedRelationFilter(organizationJoin, new Map([
                 ...baseSQLFilterCompilers,
-                id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
-            }),
-        };
+                ['id', createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false })],
+            ]))],
+        ]);
 
         await testSelect({
             filter: [
@@ -74,14 +74,14 @@ describe('Joined relations', () => {
     });
 
     it('Does not left join when always true', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-            organization: createJoinedRelationFilter(organizationJoin, {
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            ['organization', createJoinedRelationFilter(organizationJoin, new Map([
                 ...baseSQLFilterCompilers,
-                id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
-            }),
-        };
+                ['id', createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false })],
+            ]))],
+        ]);
 
         await testSelect({
             filter: [
@@ -98,14 +98,14 @@ describe('Joined relations', () => {
     });
 
     it('Does inner join when always true and relationAlwaysExist is false', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-            organization: createJoinedRelationFilter(organizationInnerJoin, {
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            ['organization', createJoinedRelationFilter(organizationInnerJoin, new Map([
                 ...baseSQLFilterCompilers,
-                id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
-            }, { doesRelationAlwaysExist: false }),
-        };
+                ['id', createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false })],
+            ]), { doesRelationAlwaysExist: false })],
+        ]);
 
         await testSelect({
             filter: [
@@ -126,14 +126,14 @@ describe('Joined relations', () => {
     });
 
     it('Does inner join when always true and relationAlwaysExist is true', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-            organization: createJoinedRelationFilter(organizationInnerJoin, {
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            ['organization', createJoinedRelationFilter(organizationInnerJoin, new Map([
                 ...baseSQLFilterCompilers,
-                id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
-            }, { doesRelationAlwaysExist: true }),
-        };
+                ['id', createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false })],
+            ]), { doesRelationAlwaysExist: true })],
+        ]);
 
         await testSelect({
             filter: [
@@ -154,14 +154,14 @@ describe('Joined relations', () => {
     });
 
     it('Does not join when unused', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-            organization: createJoinedRelationFilter(organizationJoin, {
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            ['organization', createJoinedRelationFilter(organizationJoin, new Map([
                 ...baseSQLFilterCompilers,
-                id: createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false }),
-            }),
-        };
+                ['id', createColumnFilter({ expression: SQL.column('id'), type: SQLValueType.String, nullable: false })],
+            ]))],
+        ]);
 
         await testSelect({
             filter: [

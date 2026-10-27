@@ -25,9 +25,9 @@ function test({ filter, filters, objects, doNotMatch }: { filter: StamhoofdFilte
 
 describe('InMemoryFilter', () => {
     it('Cannot filter on unknown columns', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseInMemoryFilterCompilers,
-        };
+        ]);
 
         testError({
             filter: { name: 'John Doe' },
@@ -37,11 +37,11 @@ describe('InMemoryFilter', () => {
     });
 
     it('Cannot stack column filters', () => {
-        const filters = {
+        const filters = new Map([
             ...baseInMemoryFilterCompilers,
-            name: createInMemoryFilterCompiler('name'),
-            age: createInMemoryFilterCompiler('age'),
-        };
+            ['name', createInMemoryFilterCompiler('name')],
+            ['age', createInMemoryFilterCompiler('age')],
+        ]);
 
         testError({
             filter: {
@@ -56,10 +56,10 @@ describe('InMemoryFilter', () => {
 
     describe('$eq', () => {
         it('Filtering strings is case insensitive', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                name: createInMemoryFilterCompiler('name'),
-            };
+                ['name', createInMemoryFilterCompiler('name')],
+            ]);
 
             test({
                 filter: { name: 'John Doe' },
@@ -80,10 +80,10 @@ describe('InMemoryFilter', () => {
         });
 
         it('Filtering strings ignores accents, like the utf8mb4_0900_ai_ci collation of MySQL', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                name: createInMemoryFilterCompiler('name'),
-            };
+                ['name', createInMemoryFilterCompiler('name')],
+            ]);
 
             test({
                 filter: { name: 'jose muller' },
@@ -106,10 +106,10 @@ describe('InMemoryFilter', () => {
         });
 
         it('Values of arrays only ignore casing, like JSON arrays in MySQL', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                codes: createInMemoryFilterCompiler('codes'),
-            };
+                ['codes', createInMemoryFilterCompiler('codes')],
+            ]);
 
             test({
                 filter: { codes: 'ÉTÉ' },
@@ -126,10 +126,10 @@ describe('InMemoryFilter', () => {
         });
 
         it('Filtering numbers', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                age: createInMemoryFilterCompiler('age'),
-            };
+                ['age', createInMemoryFilterCompiler('age')],
+            ]);
 
             test({
                 filter: { age: 12 },
@@ -148,10 +148,10 @@ describe('InMemoryFilter', () => {
 
     describe('$contains', () => {
         it('Filtering strings is case insensitive', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                name: createInMemoryFilterCompiler('name'),
-            };
+                ['name', createInMemoryFilterCompiler('name')],
+            ]);
 
             test({
                 filter: {
@@ -170,10 +170,10 @@ describe('InMemoryFilter', () => {
         });
 
         it('Filtering strings ignores accents and keeps spaces, like LIKE in MySQL', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                name: createInMemoryFilterCompiler('name'),
-            };
+                ['name', createInMemoryFilterCompiler('name')],
+            ]);
 
             test({
                 filter: { name: { $contains: 'muller' } },
@@ -194,10 +194,10 @@ describe('InMemoryFilter', () => {
         });
 
         it('Values of arrays only ignore casing, like JSON arrays in MySQL', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                codes: createInMemoryFilterCompiler('codes'),
-            };
+                ['codes', createInMemoryFilterCompiler('codes')],
+            ]);
 
             test({
                 filter: { codes: { $contains: 'TÉ' } },
@@ -208,10 +208,10 @@ describe('InMemoryFilter', () => {
         });
 
         it('Can use $and inside scope', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                name: createInMemoryFilterCompiler('name'),
-            };
+                ['name', createInMemoryFilterCompiler('name')],
+            ]);
 
             test({
                 filter: {
@@ -235,10 +235,10 @@ describe('InMemoryFilter', () => {
 
     describe('$or', () => {
         it('An empty $or is always false', () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                age: createInMemoryFilterCompiler('age'),
-            };
+                ['age', createInMemoryFilterCompiler('age')],
+            ]);
 
             test({
                 filter: {
@@ -259,11 +259,11 @@ describe('InMemoryFilter', () => {
         });
 
         it('If one child is true, the whole $or is true', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                name: createInMemoryFilterCompiler('name'),
-                age: createInMemoryFilterCompiler('age'),
-            };
+                ['name', createInMemoryFilterCompiler('name')],
+                ['age', createInMemoryFilterCompiler('age')],
+            ]);
 
             test({
                 filter: {
@@ -285,11 +285,11 @@ describe('InMemoryFilter', () => {
         });
 
         it('$or object children are $and together', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                name: createInMemoryFilterCompiler('name'),
-                age: createInMemoryFilterCompiler('age'),
-            };
+                ['name', createInMemoryFilterCompiler('name')],
+                ['age', createInMemoryFilterCompiler('age')],
+            ]);
 
             test({
                 filter: [
@@ -324,10 +324,10 @@ describe('InMemoryFilter', () => {
 
     describe('$and', () => {
         it('An empty $and is always true', () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                age: createInMemoryFilterCompiler('age'),
-            };
+                ['age', createInMemoryFilterCompiler('age')],
+            ]);
 
             test({
                 filter: {
@@ -350,13 +350,13 @@ describe('InMemoryFilter', () => {
     });
 
     describe('Wildcards', () => {
-        const filters: InMemoryFilterDefinitions = {
+        const filters: InMemoryFilterDefinitions = new Map([
             ...baseInMemoryFilterCompilers,
-            recordAnswers: createInMemoryFilterCompiler('details.recordAnswers', createInMemoryWildcardCompilerSelector({
+            ['recordAnswers', createInMemoryFilterCompiler('details.recordAnswers', createInMemoryWildcardCompilerSelector(new Map([
                 ...baseInMemoryFilterCompilers,
-                id: createInMemoryFilterCompiler('id'),
-            })),
-        };
+                ['id', createInMemoryFilterCompiler('id')],
+            ])))],
+        ]);
 
         it('Can filter on wildcards', async () => {
             test({
@@ -412,10 +412,10 @@ describe('InMemoryFilter', () => {
 
     describe('$lt', () => {
         it('Numbers and null', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                age: createInMemoryFilterCompiler('age'),
-            };
+                ['age', createInMemoryFilterCompiler('age')],
+            ]);
 
             test({
                 filter: { age: { $lt: 5 } },
@@ -433,10 +433,10 @@ describe('InMemoryFilter', () => {
         });
 
         it('Strings and null', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                name: createInMemoryFilterCompiler('name'),
-            };
+                ['name', createInMemoryFilterCompiler('name')],
+            ]);
 
             test({
                 filter: { name: { $lt: 'John Doe' } },
@@ -456,10 +456,10 @@ describe('InMemoryFilter', () => {
         });
 
         it('Date and null', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                birthDay: createInMemoryFilterCompiler('birthDay'),
-            };
+                ['birthDay', createInMemoryFilterCompiler('birthDay')],
+            ]);
 
             test({
                 filter: { birthDay: { $lt: new Date(1994, 5, 24) } },
@@ -480,10 +480,10 @@ describe('InMemoryFilter', () => {
 
     describe('$gt', () => {
         it('Numbers and null', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                age: createInMemoryFilterCompiler('age'),
-            };
+                ['age', createInMemoryFilterCompiler('age')],
+            ]);
 
             test({
                 filter: { age: { $gt: 5 } },
@@ -502,10 +502,10 @@ describe('InMemoryFilter', () => {
         });
 
         it('Strings and null', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                name: createInMemoryFilterCompiler('name'),
-            };
+                ['name', createInMemoryFilterCompiler('name')],
+            ]);
 
             test({
                 filter: { name: { $gt: 'John Doe' } },
@@ -525,10 +525,10 @@ describe('InMemoryFilter', () => {
         });
 
         it('Date and null', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseInMemoryFilterCompilers,
-                birthDay: createInMemoryFilterCompiler('birthDay'),
-            };
+                ['birthDay', createInMemoryFilterCompiler('birthDay')],
+            ]);
 
             test({
                 filter: { birthDay: { $gt: new Date(1994, 5, 24) } },

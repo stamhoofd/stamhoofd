@@ -10,19 +10,19 @@ export const groupJoin = SQL.join(Group.table).where(SQL.column(Group.table, 'id
 
 export const organizationJoin = SQL.join(Organization.table).where(SQL.column(Organization.table, 'id'), SQL.column(RegistrationInvitation.table, 'organizationId'));
 
-export const registrationInvitationFilterCompilers: SQLFilterDefinitions = {
+export const registrationInvitationFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    id: createColumnFilter({
+    ['id', createColumnFilter({
         expression: SQL.column(RegistrationInvitation.table, 'id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    organizationId: createColumnFilter({
+    })],
+    ['organizationId', createColumnFilter({
         expression: SQL.column(RegistrationInvitation.table, 'organizationId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    groupId: createColumnFilter({
+    })],
+    ['groupId', createColumnFilter({
         expression: SQL.column(RegistrationInvitation.table, 'groupId'),
         type: SQLValueType.String,
         nullable: false,
@@ -30,61 +30,61 @@ export const registrationInvitationFilterCompilers: SQLFilterDefinitions = {
         // async checkPermission(filter) {
         //     await checkGroupIdFilterAccess(filter, PermissionLevel.Read);
         // },
-    }),
-    memberId: createColumnFilter({
+    })],
+    ['memberId', createColumnFilter({
         expression: SQL.column(RegistrationInvitation.table, 'memberId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    createdAt: createColumnFilter({
+    })],
+    ['createdAt', createColumnFilter({
         expression: SQL.column(RegistrationInvitation.table, 'createdAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    member: createJoinedRelationFilter(
+    })],
+    ['member', createJoinedRelationFilter(
         memberJoin,
         memberFilterCompilers(),
-    ),
-    group: createJoinedRelationFilter(
+    )],
+    ['group', createJoinedRelationFilter(
         groupJoin,
-        {
+        new Map([
             ...baseSQLFilterCompilers,
-            id: createColumnFilter({
+            ['id', createColumnFilter({
                 expression: SQL.column('groupId'),
                 type: SQLValueType.String,
                 nullable: false,
-            }),
-            periodId: createColumnFilter({
+            })],
+            ['periodId', createColumnFilter({
                 expression: SQL.column('periodId'),
                 type: SQLValueType.String,
                 nullable: false,
-            }),
-            type: createColumnFilter({
+            })],
+            ['type', createColumnFilter({
                 expression: SQL.column('groups', 'type'),
                 type: SQLValueType.String,
                 nullable: false,
-            }),
-            name: createColumnFilter({
+            })],
+            ['name', createColumnFilter({
                 expression: new SQLTranslatedString(SQL.column('groups', 'settings'), '$.value.name'),
                 type: SQLValueType.String,
                 nullable: true,
-            }),
-            status: createColumnFilter({
+            })],
+            ['status', createColumnFilter({
                 expression: SQL.column('groups', 'status'),
                 type: SQLValueType.String,
                 nullable: false,
-            }),
-            defaultAgeGroupId: createColumnFilter({
+            })],
+            ['defaultAgeGroupId', createColumnFilter({
                 expression: SQL.column('groups', 'defaultAgeGroupId'),
                 type: SQLValueType.String,
                 nullable: true,
-            }),
+            })],
             // temporary keep filter for testing
-            deletedAt: createColumnFilter({
+            ['deletedAt', createColumnFilter({
                 expression: SQL.column('groups', 'deletedAt'),
                 type: SQLValueType.Datetime,
                 nullable: true,
-            }),
-        },
-    ),
-};
+            })],
+        ]),
+    )],
+]);

@@ -8,61 +8,61 @@ export const notificationJoin = SQL.join(Notification.table).where(SQL.column(No
 /**
  * Columns are table-qualified because the notifications query joins recipients with notifications.
  */
-export const notificationFilterCompilers: SQLFilterDefinitions = {
+export const notificationFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    id: createColumnFilter({
+    ['id', createColumnFilter({
         expression: SQL.column(NotificationRecipient.table, 'id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    notificationId: createColumnFilter({
+    })],
+    ['notificationId', createColumnFilter({
         expression: SQL.column(NotificationRecipient.table, 'notificationId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    readAt: createColumnFilter({
+    })],
+    ['readAt', createColumnFilter({
         expression: SQL.column(NotificationRecipient.table, 'readAt'),
         type: SQLValueType.Datetime,
         nullable: true,
-    }),
-    seenAt: createColumnFilter({
+    })],
+    ['seenAt', createColumnFilter({
         expression: SQL.column(NotificationRecipient.table, 'seenAt'),
         type: SQLValueType.Datetime,
         nullable: true,
-    }),
-    dismissedAt: createColumnFilter({
+    })],
+    ['dismissedAt', createColumnFilter({
         expression: SQL.column(NotificationRecipient.table, 'dismissedAt'),
         type: SQLValueType.Datetime,
         nullable: true,
-    }),
-    type: createColumnFilter({
+    })],
+    ['type', createColumnFilter({
         expression: SQL.column(Notification.table, 'type'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    organizationId: createColumnFilter({
+    })],
+    ['organizationId', createColumnFilter({
         expression: SQL.column(Notification.table, 'organizationId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    subjectType: createColumnFilter({
+    })],
+    ['subjectType', createColumnFilter({
         expression: SQL.column(Notification.table, 'subjectType'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    subjectId: createColumnFilter({
+    })],
+    ['subjectId', createColumnFilter({
         expression: SQL.column(Notification.table, 'subjectId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    groupKey: createColumnFilter({
+    })],
+    ['groupKey', createColumnFilter({
         expression: SQL.column(Notification.table, 'groupKey'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    createdAt: createColumnFilter({
+    })],
+    ['createdAt', createColumnFilter({
         expression: SQL.column(Notification.table, 'createdAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-};
+    })],
+]);

@@ -1,31 +1,31 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 
-export const auditLogFilterCompilers: SQLFilterDefinitions = {
+export const auditLogFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    id: createColumnFilter({
+    ['id', createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    organizationId: createColumnFilter({
+    })],
+    ['organizationId', createColumnFilter({
         expression: SQL.column('organizationId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    type: createColumnFilter({
+    })],
+    ['type', createColumnFilter({
         expression: SQL.column('type'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    objectId: createColumnFilter({
+    })],
+    ['objectId', createColumnFilter({
         expression: SQL.column('objectId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    createdAt: createColumnFilter({
+    })],
+    ['createdAt', createColumnFilter({
         expression: SQL.column('createdAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-};
+    })],
+]);

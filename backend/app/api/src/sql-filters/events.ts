@@ -1,143 +1,143 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 
-export const eventFilterCompilers: SQLFilterDefinitions = {
+export const eventFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    'id': createColumnFilter({
+    ['id', createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    'name': createColumnFilter({
+    })],
+    ['name', createColumnFilter({
         expression: SQL.column('name'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    'organizationId': createColumnFilter({
+    })],
+    ['organizationId', createColumnFilter({
         expression: SQL.column('organizationId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    'startDate': createColumnFilter({
+    })],
+    ['startDate', createColumnFilter({
         expression: SQL.column('startDate'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    'endDate': createColumnFilter({
+    })],
+    ['endDate', createColumnFilter({
         expression: SQL.column('endDate'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    'groupIds': createColumnFilter({
+    })],
+    ['groupIds', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('meta'), '$.value.groups[*].id'),
         type: SQLValueType.JSONArray,
         nullable: true,
-    }),
-    'groupId': createColumnFilter({
+    })],
+    ['groupId', createColumnFilter({
         expression: SQL.column('groupId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    'webshopId': createColumnFilter({
+    })],
+    ['webshopId', createColumnFilter({
         expression: SQL.column('webshopId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    'typeId': createColumnFilter({
+    })],
+    ['typeId', createColumnFilter({
         expression: SQL.column('typeId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    'defaultAgeGroupIds': createColumnFilter({
+    })],
+    ['defaultAgeGroupIds', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('meta'), '$.value.defaultAgeGroupIds'),
         type: SQLValueType.JSONArray,
         nullable: true,
-    }),
-    'organizationTagIds': createColumnFilter({
+    })],
+    ['organizationTagIds', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('meta'), '$.value.organizationTagIds'),
         type: SQLValueType.JSONArray,
         nullable: true,
-    }),
-    'minAge': createColumnFilter({
+    })],
+    ['minAge', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('meta'), '$.value.minAge'),
         type: SQLValueType.JSONNumber,
         nullable: true,
-    }),
-    'maxAge': createColumnFilter({
+    })],
+    ['maxAge', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('meta'), '$.value.maxAge'),
         type: SQLValueType.JSONNumber,
         nullable: true,
-    }),
-    'meta.visible': createColumnFilter({
+    })],
+    ['meta.visible', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('meta'), '$.value.visible'),
         type: SQLValueType.JSONBoolean,
         nullable: false,
-    }),
-    'group': createExistsFilter(
+    })],
+    ['group', createExistsFilter(
         SQL.select()
             .from(SQL.table('groups'))
             .where(
                 SQL.column('id'),
                 SQL.column('events', 'groupId'),
             ),
-        {
+        new Map([
             ...baseSQLFilterCompilers,
-            organizationId: createColumnFilter({
+            ['organizationId', createColumnFilter({
                 expression: SQL.column('organizationId'),
                 type: SQLValueType.String,
                 nullable: false,
-            }),
-            status: createColumnFilter({
+            })],
+            ['status', createColumnFilter({
                 expression: SQL.column('status'),
                 type: SQLValueType.String,
                 nullable: false,
-            }),
-            registrationStartDate: createColumnFilter({
+            })],
+            ['registrationStartDate', createColumnFilter({
                 expression: SQL.jsonExtract(SQL.column('settings'), '$.value.registrationStartDate'),
                 type: SQLValueType.JSONNumber,
                 nullable: true,
-            }),
-            registrationEndDate: createColumnFilter({
+            })],
+            ['registrationEndDate', createColumnFilter({
                 expression: SQL.jsonExtract(SQL.column('settings'), '$.value.registrationEndDate'),
                 type: SQLValueType.JSONNumber,
                 nullable: true,
-            }),
-            preRegistrationsDate: createColumnFilter({
+            })],
+            ['preRegistrationsDate', createColumnFilter({
                 expression: SQL.jsonExtract(SQL.column('settings'), '$.value.preRegistrationsDate'),
                 type: SQLValueType.JSONNumber,
                 nullable: true,
-            }),
-            periodId: createColumnFilter({
+            })],
+            ['periodId', createColumnFilter({
                 expression: SQL.column('periodId'),
                 type: SQLValueType.String,
                 nullable: false,
-            }),
-        },
-    ),
-    'webshop': createExistsFilter(
+            })],
+        ]),
+    )],
+    ['webshop', createExistsFilter(
         SQL.select()
             .from(SQL.table('webshops'))
             .where(
                 SQL.column('id'),
                 SQL.column('events', 'webshopId'),
             ),
-        {
+        new Map([
             ...baseSQLFilterCompilers,
-            status: createColumnFilter({
+            ['status', createColumnFilter({
                 expression: SQL.jsonExtract(SQL.column('meta'), '$.value.status'),
                 type: SQLValueType.JSONString,
                 nullable: false,
-            }),
-            availableUntil: createColumnFilter({
+            })],
+            ['availableUntil', createColumnFilter({
                 expression: SQL.jsonExtract(SQL.column('meta'), '$.value.availableUntil'),
                 type: SQLValueType.JSONNumber,
                 nullable: true,
-            }),
-            openAt: createColumnFilter({
+            })],
+            ['openAt', createColumnFilter({
                 expression: SQL.jsonExtract(SQL.column('meta'), '$.value.openAt'),
                 type: SQLValueType.JSONNumber,
                 nullable: true,
-            }),
-        },
-    ),
-};
+            })],
+        ]),
+    )],
+]);

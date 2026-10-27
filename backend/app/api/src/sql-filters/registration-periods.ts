@@ -1,26 +1,26 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 
-export const registrationPeriodFilterCompilers: SQLFilterDefinitions = {
+export const registrationPeriodFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    id: createColumnFilter({
+    ['id', createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    organizationId: createColumnFilter({
+    })],
+    ['organizationId', createColumnFilter({
         expression: SQL.column('organizationId'),
         type: SQLValueType.String,
         nullable: true,
-    }),
-    startDate: createColumnFilter({
+    })],
+    ['startDate', createColumnFilter({
         expression: SQL.column('startDate'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    endDate: createColumnFilter({
+    })],
+    ['endDate', createColumnFilter({
         expression: SQL.column('endDate'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-};
+    })],
+]);

@@ -5,10 +5,10 @@ import { test } from '../utils/index.js';
 
 describe('$or', () => {
     it('If one child is always true, the whole $or is always true', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
-        };
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true })],
+        ]);
 
         await test({
             filter: {
@@ -28,10 +28,10 @@ describe('$or', () => {
     });
 
     it('An empty $or is always false', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
-        };
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true })],
+        ]);
 
         await test({
             filter: {
@@ -46,10 +46,10 @@ describe('$or', () => {
     });
 
     it('If all children are always false, the whole $or is always false', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
-        };
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true })],
+        ]);
 
         await test({
             filter: {
@@ -73,10 +73,10 @@ describe('$or', () => {
     });
 
     it('Children that are always false are removed from the $or', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-        };
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+        ]);
 
         await test({
             filter: {
@@ -98,11 +98,11 @@ describe('$or', () => {
     });
 
     it('$or object children are $and together', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
-        };
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+        ]);
 
         await test({
             filter: [
@@ -133,10 +133,10 @@ describe('$or', () => {
     });
 
     it('empty $or branches are removed', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-        };
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+        ]);
 
         await test({
             filter: {
@@ -161,10 +161,10 @@ describe('$or', () => {
     });
 
     it('deep $or branches are cleaned up', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-        };
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+        ]);
 
         await test({
             filter: {

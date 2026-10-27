@@ -4,21 +4,21 @@ import { SQL } from '../../src/SQL.js';
 import { test, testError } from '../utils/index.js';
 
 describe('Dot syntax', () => {
-    const filters = {
+    const filters = new Map([
         ...baseSQLFilterCompilers,
-        name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
-        age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
-        settings: {
+        ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true })],
+        ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+        ['settings', new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: true }),
-            age: createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.age'), type: SQLValueType.JSONNumber, nullable: true }),
-            dog: {
+            ['name', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: true })],
+            ['age', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.age'), type: SQLValueType.JSONNumber, nullable: true })],
+            ['dog', new Map([
                 ...baseSQLFilterCompilers,
-                name: createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.dog.name'), type: SQLValueType.JSONString, nullable: true }),
-                age: createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.dog.age'), type: SQLValueType.JSONNumber, nullable: true }),
-            },
-        },
-    };
+                ['name', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.dog.name'), type: SQLValueType.JSONString, nullable: true })],
+                ['age', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.dog.age'), type: SQLValueType.JSONNumber, nullable: true })],
+            ])],
+        ])],
+    ]);
 
     it('Correctly finds the right filter when using object syntax', async () => {
         await test({

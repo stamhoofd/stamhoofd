@@ -1,26 +1,26 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 
-export const invoicedBalanceItemCompilers: SQLFilterDefinitions = {
+export const invoicedBalanceItemCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    id: createColumnFilter({
+    ['id', createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    balanceItemId: createColumnFilter({
+    })],
+    ['balanceItemId', createColumnFilter({
         expression: SQL.column('balanceItemId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    name: createColumnFilter({
+    })],
+    ['name', createColumnFilter({
         expression: SQL.column('name'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    description: createColumnFilter({
+    })],
+    ['description', createColumnFilter({
         expression: SQL.column('description'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-};
+    })],
+]);

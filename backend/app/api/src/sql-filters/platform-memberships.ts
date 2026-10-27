@@ -9,54 +9,54 @@ import { organizationFilterCompilers } from './organizations.js';
 const organizationJoin = SQL.join(SQL.table('organizations')).where(SQL.column('organizations', 'id'), SQL.column(MemberPlatformMembership.table, 'organizationId'));
 const memberJoin = SQL.join(SQL.table('members')).where(SQL.column('members', 'id'), SQL.column(MemberPlatformMembership.table, 'memberId'));
 
-export const platformMembershipFilterCompilers: SQLFilterDefinitions = {
+export const platformMembershipFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    id: createColumnFilter({
+    ['id', createColumnFilter({
         expression: SQL.column(MemberPlatformMembership.table, 'id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    membershipTypeId: createColumnFilter({
+    })],
+    ['membershipTypeId', createColumnFilter({
         expression: SQL.column(MemberPlatformMembership.table, 'membershipTypeId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    organizationId: createColumnFilter({
+    })],
+    ['organizationId', createColumnFilter({
         expression: SQL.column(MemberPlatformMembership.table, 'organizationId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    periodId: createColumnFilter({
+    })],
+    ['periodId', createColumnFilter({
         expression: SQL.column(MemberPlatformMembership.table, 'periodId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    startDate: createColumnFilter({
+    })],
+    ['startDate', createColumnFilter({
         expression: SQL.column(MemberPlatformMembership.table, 'startDate'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    endDate: createColumnFilter({
+    })],
+    ['endDate', createColumnFilter({
         expression: SQL.column(MemberPlatformMembership.table, 'endDate'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    trialUntil: createColumnFilter({
+    })],
+    ['trialUntil', createColumnFilter({
         expression: SQL.column(MemberPlatformMembership.table, 'trialUntil'),
         type: SQLValueType.Datetime,
         nullable: true,
-    }),
-    createdAt: createColumnFilter({
+    })],
+    ['createdAt', createColumnFilter({
         expression: SQL.column(MemberPlatformMembership.table, 'createdAt'),
         type: SQLValueType.Datetime,
         nullable: true,
-    }),
-    freeAmount: createColumnFilter({
+    })],
+    ['freeAmount', createColumnFilter({
         expression: SQL.column(MemberPlatformMembership.table, 'freeAmount'),
         type: SQLValueType.Number,
         nullable: false,
-    }),
-    price: createColumnFilter({
+    })],
+    ['price', createColumnFilter({
         expression: SQL.column(MemberPlatformMembership.table, 'price'),
         type: SQLValueType.Number,
         nullable: false,
@@ -70,13 +70,13 @@ export const platformMembershipFilterCompilers: SQLFilterDefinitions = {
                 });
             }
         },
-    }),
-    organization: createJoinedRelationFilter(
+    })],
+    ['organization', createJoinedRelationFilter(
         organizationJoin,
         organizationFilterCompilers,
-    ),
-    member: createJoinedRelationFilter(
+    )],
+    ['member', createJoinedRelationFilter(
         memberJoin,
         memberFilterCompilers(),
-    ),
-};
+    )],
+]);

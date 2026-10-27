@@ -145,22 +145,22 @@ function invertFilterCompiler(compiler: SQLRequiredFilterCompiler): SQLRequiredF
     };
 }
 
-export const baseSQLFilterCompilers: SQLFilterDefinitions = {
-    $and: $andSQLFilterCompiler,
-    $or: $orSQLFilterCompiler,
-    $not: $notSQLFilterCompiler,
-    $eq: $equalsSQLFilterCompiler,
-    $neq: invertFilterCompiler($equalsSQLFilterCompiler),
+export const baseSQLFilterCompilers: SQLFilterDefinitions = new Map([
+    ['$and', $andSQLFilterCompiler],
+    ['$or', $orSQLFilterCompiler],
+    ['$not', $notSQLFilterCompiler],
+    ['$eq', $equalsSQLFilterCompiler],
+    ['$neq', invertFilterCompiler($equalsSQLFilterCompiler)],
 
-    $lt: $lessThanSQLFilterCompiler,
-    $gt: $greaterThanSQLFilterCompiler,
-    $lte: invertFilterCompiler($greaterThanSQLFilterCompiler),
-    $gte: invertFilterCompiler($lessThanSQLFilterCompiler),
+    ['$lt', $lessThanSQLFilterCompiler],
+    ['$gt', $greaterThanSQLFilterCompiler],
+    ['$lte', invertFilterCompiler($greaterThanSQLFilterCompiler)],
+    ['$gte', invertFilterCompiler($lessThanSQLFilterCompiler)],
 
-    $in: $inSQLFilterCompiler,
+    ['$in', $inSQLFilterCompiler],
 
-    $contains: $containsSQLFilterCompiler,
-};
+    ['$contains', $containsSQLFilterCompiler],
+]);
 
 const compileSQLFilter = compileFilter<SQLFilterRunner>;
 

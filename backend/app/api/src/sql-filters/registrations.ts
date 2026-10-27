@@ -12,56 +12,56 @@ export const groupJoin = SQL.join(Group.table).where(SQL.column(Group.table, 'id
 
 export const organizationJoin = SQL.join(Organization.table).where(SQL.column(Organization.table, 'id'), SQL.column(Registration.table, 'organizationId'));
 
-export const registrationFilterCompilers: SQLFilterDefinitions = {
+export const registrationFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
     ...baseRegistrationFilterCompilers,
-    member: createJoinedRelationFilter(
+    ['member', createJoinedRelationFilter(
         memberJoin,
         memberFilterCompilers(),
-    ),
-    group: createJoinedRelationFilter(
+    )],
+    ['group', createJoinedRelationFilter(
         groupJoin,
-        {
+        new Map([
             ...baseSQLFilterCompilers,
-            id: createColumnFilter({
+            ['id', createColumnFilter({
                 expression: SQL.column('groupId'),
                 type: SQLValueType.String,
                 nullable: false,
-            }),
-            type: createColumnFilter({
+            })],
+            ['type', createColumnFilter({
                 expression: SQL.column('groups', 'type'),
                 type: SQLValueType.String,
                 nullable: false,
-            }),
-            name: createColumnFilter({
+            })],
+            ['name', createColumnFilter({
                 expression: new SQLTranslatedString(SQL.column('groups', 'settings'), '$.value.name'),
                 type: SQLValueType.String,
                 nullable: true,
-            }),
-            status: createColumnFilter({
+            })],
+            ['status', createColumnFilter({
                 expression: SQL.column('groups', 'status'),
                 type: SQLValueType.String,
                 nullable: false,
-            }),
-            defaultAgeGroupId: createColumnFilter({
+            })],
+            ['defaultAgeGroupId', createColumnFilter({
                 expression: SQL.column('groups', 'defaultAgeGroupId'),
                 type: SQLValueType.String,
                 nullable: true,
-            }),
-            deletedAt: createColumnFilter({
+            })],
+            ['deletedAt', createColumnFilter({
                 expression: SQL.column('groups', 'deletedAt'),
                 type: SQLValueType.Datetime,
                 nullable: true,
-            }),
-        },
-    ),
+            })],
+        ]),
+    )],
     /**
      * There is a bug in MySQL 8 that is fixed in 9.3
      * where EXISTS (select * from json_table(...)) does not work
      * To fix this, we do a double select with join inside the select
      * It is a bit slower, but it works for now.
      */
-    options: createExistsFilter(
+    ['options', createExistsFilter(
         SQL.select()
             .from(SQL.table('registrations', 'innerRegistrations'))
             .join(
@@ -88,33 +88,33 @@ export const registrationFilterCompilers: SQLFilterDefinitions = {
                 ),
             )
             .where(SQL.column('innerRegistrations', 'id'), SQL.column('registrations', 'id')),
-        {
+        new Map([
             ...baseSQLFilterCompilers,
-            amount: createColumnFilter({
+            ['amount', createColumnFilter({
                 expression: SQL.column('options', 'amount'),
                 type: SQLValueType.Number,
                 nullable: false,
-            }),
-            option: {
+            })],
+            ['option', new Map([
                 ...baseSQLFilterCompilers,
-                id: createColumnFilter({
+                ['id', createColumnFilter({
                     expression: SQL.column('options', 'optionId'),
                     type: SQLValueType.String,
                     nullable: false,
-                }),
-            },
-            optionMenu: {
+                })],
+            ])],
+            ['optionMenu', new Map([
                 ...baseSQLFilterCompilers,
-                id: createColumnFilter({
+                ['id', createColumnFilter({
                     expression: SQL.column('options', 'optionMenuId'),
                     type: SQLValueType.String,
                     nullable: false,
-                }),
-            },
-        },
-    ),
-    organization: createJoinedRelationFilter(
+                })],
+            ])],
+        ]),
+    )],
+    ['organization', createJoinedRelationFilter(
         organizationJoin,
         organizationFilterCompilers,
-    ),
-};
+    )],
+]);

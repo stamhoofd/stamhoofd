@@ -4,35 +4,35 @@ import { organizationFilterCompilers } from './organizations.js';
 
 export const organizationJoin = SQL.join('organizations').where(SQL.column('organizations', 'id'), SQL.column('webshops', 'organizationId'));
 
-export const webshopFilterCompilers: SQLFilterDefinitions = {
+export const webshopFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    id: createColumnFilter({
+    ['id', createColumnFilter({
         expression: SQL.column('webshops', 'id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    organizationId: createColumnFilter({
+    })],
+    ['organizationId', createColumnFilter({
         expression: SQL.column('webshops', 'organizationId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    name: createColumnFilter({
+    })],
+    ['name', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('webshops', 'meta'), '$.value.name'),
         type: SQLValueType.JSONString,
         nullable: false,
-    }),
-    status: createColumnFilter({
+    })],
+    ['status', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('webshops', 'meta'), '$.value.status'),
         type: SQLValueType.JSONString,
         nullable: false,
-    }),
-    organization: createJoinedRelationFilter(
+    })],
+    ['organization', createJoinedRelationFilter(
         organizationJoin,
         organizationFilterCompilers,
-    ),
-    createdAt: createColumnFilter({
+    )],
+    ['createdAt', createColumnFilter({
         expression: SQL.column('createdAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-};
+    })],
+]);

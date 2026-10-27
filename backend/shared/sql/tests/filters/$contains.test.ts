@@ -6,10 +6,10 @@ import { test, testMatch, testMultipleErrors } from '../utils/index.js';
 
 describe('$contains', () => {
     it('Throws when passing non-string values', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-        };
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+        ]);
 
         await testMultipleErrors({
             testFilters: [
@@ -55,10 +55,10 @@ describe('$contains', () => {
 
     describe('Searching in native string columns', () => {
         it('Removes caps in the query', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseSQLFilterCompilers,
-                name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-            };
+                ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            ]);
 
             await test({
                 filter: {
@@ -75,10 +75,10 @@ describe('$contains', () => {
         });
 
         it('Escapes percentage', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseSQLFilterCompilers,
-                name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-            };
+                ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            ]);
 
             await test({
                 filter: {
@@ -95,10 +95,10 @@ describe('$contains', () => {
         });
 
         it('Escapes underscore', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseSQLFilterCompilers,
-                name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-            };
+                ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            ]);
 
             await test({
                 filter: {
@@ -115,10 +115,10 @@ describe('$contains', () => {
         });
 
         it('Escapes backslash characters', async () => {
-            const filters = {
+            const filters = new Map([
                 ...baseSQLFilterCompilers,
-                name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false }),
-            };
+                ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: false })],
+            ]);
 
             await test({
                 filter: {
@@ -143,10 +143,10 @@ describe('$contains', () => {
                     nullable: true,
                 },
             };
-            const filters = {
+            const filters = new Map([
                 ...baseSQLFilterCompilers,
-                name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
-            };
+                ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true })],
+            ]);
 
             it('Can actually search for %', async () => {
                 await testMatch({
@@ -336,10 +336,10 @@ describe('$contains', () => {
                     nullable: true,
                 },
             };
-            const filters = {
+            const filters = new Map([
                 ...baseSQLFilterCompilers,
-                'settings.name': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: false }),
-            };
+                ['settings.name', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: false })],
+            ]);
 
             it('Can actually search for %', async () => {
                 await testMatch({
@@ -540,13 +540,13 @@ describe('$contains', () => {
                 },
             };
 
-            const filters = {
+            const filters = new Map([
                 ...baseSQLFilterCompilers,
-                settings: {
+                ['settings', new Map([
                     ...baseSQLFilterCompilers,
-                    names: createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.names'), type: SQLValueType.JSONArray, nullable: false }),
-                },
-            };
+                    ['names', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.names'), type: SQLValueType.JSONArray, nullable: false })],
+                ])],
+            ]);
 
             it('Can search in the array', async () => {
                 await testMatch({
@@ -677,10 +677,10 @@ describe('$contains', () => {
                     nullable: true,
                 },
             };
-            const filters = {
+            const filters = new Map([
                 ...baseSQLFilterCompilers,
-                'settings.names': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.parents[*].name'), type: SQLValueType.JSONArray, nullable: false }),
-            };
+                ['settings.names', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.parents[*].name'), type: SQLValueType.JSONArray, nullable: false })],
+            ]);
 
             it('Can search in the array', async () => {
                 await testMatch({
@@ -732,10 +732,10 @@ describe('$contains', () => {
                     nullable: true,
                 },
             };
-            const filters = {
+            const filters = new Map([
                 ...baseSQLFilterCompilers,
-                'settings.scalar': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.scalar'), type: SQLValueType.JSONScalar, nullable: true }),
-            };
+                ['settings.scalar', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.scalar'), type: SQLValueType.JSONScalar, nullable: true })],
+            ]);
 
             it('Can actually search strings for %', async () => {
                 await testMatch({

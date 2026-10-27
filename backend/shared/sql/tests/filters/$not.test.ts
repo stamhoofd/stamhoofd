@@ -5,10 +5,10 @@ import { test } from '../utils/index.js';
 
 describe('$not', () => {
     it('is not null via $neq', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
-        };
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true })],
+        ]);
 
         await test({
             filter: {
@@ -25,10 +25,10 @@ describe('$not', () => {
     });
 
     it('is not null via $not', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            name: createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true }),
-        };
+            ['name', createColumnFilter({ expression: SQL.column('name'), type: SQLValueType.String, nullable: true })],
+        ]);
 
         await test({
             filter: {

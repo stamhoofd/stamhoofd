@@ -13,36 +13,36 @@ import { paymentFilterCompilers } from './payments.js';
  * Lives in its own file because it reaches both parents, while balance-item-payments.ts is used inside
  * a subquery that only joins the balance items.
  */
-export const balanceItemPaymentRootFilterCompilers: SQLFilterDefinitions = {
+export const balanceItemPaymentRootFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
     // id, price and the balance item filters
     ...balanceItemPaymentsCompilers,
 
-    organizationId: createColumnFilter({
+    ['organizationId', createColumnFilter({
         expression: SQL.column('balance_item_payments', 'organizationId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
+    })],
 
-    paymentId: createColumnFilter({
+    ['paymentId', createColumnFilter({
         expression: SQL.column('balance_item_payments', 'paymentId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
+    })],
 
-    balanceItemId: createColumnFilter({
+    ['balanceItemId', createColumnFilter({
         expression: SQL.column('balance_item_payments', 'balanceItemId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
+    })],
 
-    createdAt: createColumnFilter({
+    ['createdAt', createColumnFilter({
         expression: SQL.column('balance_item_payments', 'createdAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
+    })],
 
     // The same compilers the payments use, which are qualified with the payments table so they keep
     // working here: this query joins it instead of selecting from it
-    payment: paymentFilterCompilers,
-};
+    ['payment', paymentFilterCompilers],
+]);

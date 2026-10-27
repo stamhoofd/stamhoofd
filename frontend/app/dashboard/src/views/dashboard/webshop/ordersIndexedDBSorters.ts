@@ -107,12 +107,10 @@ const filterableIndexKeys: OrderIndexKey[] = [
 /**
  * Compilers for filtering on the index values stored alongside each order (IndexBox.indexes), plus its id.
  */
-export const orderIndexesInMemoryFilterCompilers: InMemoryFilterDefinitions = {
+export const orderIndexesInMemoryFilterCompilers: InMemoryFilterDefinitions = new Map([
     ...baseInMemoryFilterCompilers,
-    ...Object.fromEntries(
-        filterableIndexKeys.map(key => [key, createInMemoryFilterCompiler(key)]),
-    ),
-};
+    ...filterableIndexKeys.map(key => [key, createInMemoryFilterCompiler(key)] as const),
+]);
 
 const logicalOperators = ['$and', '$or', '$not'];
 

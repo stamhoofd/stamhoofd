@@ -333,21 +333,21 @@ export function createInMemoryWildcardCompilerSelector(overrideFilterDefinitions
     };
 }
 
-export const baseInMemoryFilterCompilers: InMemoryFilterDefinitions = {
-    $and: $andInMemoryFilterCompiler,
-    $or: $orInMemoryFilterCompiler,
-    $not: $notInMemoryFilterCompiler,
-    $eq: $equalsInMemoryFilterCompiler,
-    $neq: invertFilterCompiler($equalsInMemoryFilterCompiler),
-    $lt: $lessThanInMemoryFilterCompiler,
-    $gt: $greaterThanInMemoryFilterCompiler,
-    $lte: invertFilterCompiler($greaterThanInMemoryFilterCompiler),
-    $gte: invertFilterCompiler($lessThanInMemoryFilterCompiler),
-    $in: $inInMemoryFilterCompiler,
-    $elemMatch: $elemMatchInMemoryFilterCompiler,
-    $contains: $containsInMemoryFilterCompiler,
-    $length: $lengthInMemoryFilterCompiler,
-};
+export const baseInMemoryFilterCompilers: InMemoryFilterDefinitions = new Map([
+    ['$and', $andInMemoryFilterCompiler],
+    ['$or', $orInMemoryFilterCompiler],
+    ['$not', $notInMemoryFilterCompiler],
+    ['$eq', $equalsInMemoryFilterCompiler],
+    ['$neq', invertFilterCompiler($equalsInMemoryFilterCompiler)],
+    ['$lt', $lessThanInMemoryFilterCompiler],
+    ['$gt', $greaterThanInMemoryFilterCompiler],
+    ['$lte', invertFilterCompiler($greaterThanInMemoryFilterCompiler)],
+    ['$gte', invertFilterCompiler($lessThanInMemoryFilterCompiler)],
+    ['$in', $inInMemoryFilterCompiler],
+    ['$elemMatch', $elemMatchInMemoryFilterCompiler],
+    ['$contains', $containsInMemoryFilterCompiler],
+    ['$length', $lengthInMemoryFilterCompiler],
+]);
 
 const compileInMemoryFilter = compileFilter<InMemoryFilterRunner>;
 

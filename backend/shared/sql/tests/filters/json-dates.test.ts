@@ -10,10 +10,10 @@ import { test, testError, testMatch } from '../utils/index.js';
  */
 describe('JSON dates', () => {
     it('compares a date with the stored unix timestamp in milliseconds', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            'settings.date': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.date'), type: SQLValueType.JSONDate, nullable: false }),
-        };
+            ['settings.date', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.date'), type: SQLValueType.JSONDate, nullable: false })],
+        ]);
 
         await test({
             filter: {
@@ -30,10 +30,10 @@ describe('JSON dates', () => {
     });
 
     it('cannot compare a date with a JSON string column', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            'settings.name': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: false }),
-        };
+            ['settings.name', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: false })],
+        ]);
 
         await testError({
             filter: {
@@ -47,10 +47,10 @@ describe('JSON dates', () => {
     });
 
     it('cannot compare a string with a JSON date column', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            'settings.date': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.date'), type: SQLValueType.JSONDate, nullable: false }),
-        };
+            ['settings.date', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.date'), type: SQLValueType.JSONDate, nullable: false })],
+        ]);
 
         await testError({
             filter: {
@@ -71,10 +71,10 @@ describe('JSON dates', () => {
             },
         };
 
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            'settings.date': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.date'), type: SQLValueType.JSONDate, nullable: true }),
-        };
+            ['settings.date', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.date'), type: SQLValueType.JSONDate, nullable: true })],
+        ]);
 
         // The stored date, and the day it falls on. These are built in UTC, because the timestamps end up
         // in the query parameters (and in the snapshots), which would otherwise depend on the local timezone.

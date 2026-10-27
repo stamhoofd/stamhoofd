@@ -6,10 +6,10 @@ import { test, testMatch } from '../utils/index.js';
 
 describe('$lte', () => {
     it('can filter on $lte', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
-        };
+            ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+        ]);
 
         await test({
             filter: {
@@ -26,10 +26,10 @@ describe('$lte', () => {
     });
 
     it('can invert $lte inside', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
-        };
+            ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+        ]);
 
         await test({
             filter: {
@@ -48,10 +48,10 @@ describe('$lte', () => {
     });
 
     it('can invert $lte outside', async () => {
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            age: createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false }),
-        };
+            ['age', createColumnFilter({ expression: SQL.column('age'), type: SQLValueType.Number, nullable: false })],
+        ]);
 
         await test({
             filter: {
@@ -84,22 +84,22 @@ describe('$lte', () => {
                 nullable: true,
             },
         };
-        const filters = {
+        const filters = new Map([
             ...baseSQLFilterCompilers,
-            'name': createColumnFilter(
+            ['name', createColumnFilter(
                 { expression: SQL.column('name'), type: SQLValueType.String, nullable: true },
-            ),
-            'age': createColumnFilter(
+            )],
+            ['age', createColumnFilter(
                 { expression: SQL.column('age'), type: SQLValueType.Number, nullable: true },
-            ),
-            'settings.name': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: true },
-            ),
-            'settings': createColumnFilter({ expression: SQL.column('settings'), type: SQLValueType.JSONObject, nullable: true }),
-            'settings.enabled': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.enabled'), type: SQLValueType.JSONBoolean, nullable: true },
-            ),
-            'settings.age': createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.age'), type: SQLValueType.JSONNumber, nullable: true },
-            ),
-        };
+            )],
+            ['settings.name', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.name'), type: SQLValueType.JSONString, nullable: true },
+            )],
+            ['settings', createColumnFilter({ expression: SQL.column('settings'), type: SQLValueType.JSONObject, nullable: true })],
+            ['settings.enabled', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.enabled'), type: SQLValueType.JSONBoolean, nullable: true },
+            )],
+            ['settings.age', createColumnFilter({ expression: SQL.jsonExtract(SQL.column('settings'), '$.age'), type: SQLValueType.JSONNumber, nullable: true },
+            )],
+        ]);
 
         it('Comparing string values is case insensitive', async () => {
             await testMatch({

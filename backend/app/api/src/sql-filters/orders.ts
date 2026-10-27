@@ -4,86 +4,86 @@ import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, createW
 import { PaymentStatus } from '@stamhoofd/structures';
 import { paymentFilterCompilers } from './payments.js';
 
-export const orderFilterCompilers: SQLFilterDefinitions = {
+export const orderFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
     // only backend (not useful to filter on these in the frontend)
-    organizationId: createColumnFilter({
+    ['organizationId', createColumnFilter({
         expression: SQL.column('organizationId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    updatedAt: createColumnFilter({
+    })],
+    ['updatedAt', createColumnFilter({
         expression: SQL.column('updatedAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
+    })],
 
     // frontend and backend
-    webshopId: createColumnFilter({
+    ['webshopId', createColumnFilter({
         expression: SQL.column('webshopId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    id: createColumnFilter({
+    })],
+    ['id', createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    timeSlotEndTime: createColumnFilter({
+    })],
+    ['timeSlotEndTime', createColumnFilter({
         // Stored as a number (minutes since midnight), so it must be typed as a JSON number to allow
         // numeric comparisons and to match the in-memory filter.
         expression: SQL.jsonExtract(SQL.column('data'), '$.value.timeSlot.endTime'),
         type: SQLValueType.JSONNumber,
         nullable: true,
-    }),
-    timeSlotStartTime: createColumnFilter({
+    })],
+    ['timeSlotStartTime', createColumnFilter({
         // Stored as a number (minutes since midnight), so it must be typed as a JSON number to allow
         // numeric comparisons and to match the in-memory filter.
         expression: SQL.jsonExtract(SQL.column('data'), '$.value.timeSlot.startTime'),
         type: SQLValueType.JSONNumber,
         nullable: true,
-    }),
-    createdAt: createColumnFilter({
+    })],
+    ['createdAt', createColumnFilter({
         expression: SQL.column('createdAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    number: createColumnFilter({
+    })],
+    ['number', createColumnFilter({
         expression: SQL.column('number'),
         type: SQLValueType.Number,
         nullable: true,
-    }),
-    status: createColumnFilter({
+    })],
+    ['status', createColumnFilter({
         expression: SQL.column('status'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    paymentMethod: createColumnFilter({
+    })],
+    ['paymentMethod', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('data'), '$.value.paymentMethod'),
         type: SQLValueType.JSONString,
         nullable: false,
-    }),
-    checkoutMethodId: createColumnFilter({
+    })],
+    ['checkoutMethodId', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('data'), '$.value.checkoutMethod.id'),
         type: SQLValueType.JSONString,
         nullable: true,
-    }),
-    checkoutMethod: createColumnFilter({
+    })],
+    ['checkoutMethod', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('data'), '$.value.checkoutMethod.type'),
         type: SQLValueType.JSONString,
         nullable: true,
-    }),
-    timeSlotDate: createColumnFilter({
+    })],
+    ['timeSlotDate', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('data'), '$.value.timeSlot.date'),
         type: SQLValueType.JSONString,
         nullable: true,
-    }),
-    validAt: createColumnFilter({
+    })],
+    ['validAt', createColumnFilter({
         expression: SQL.column('validAt'),
         type: SQLValueType.Datetime,
         nullable: true,
-    }),
-    name: createColumnFilter({
+    })],
+    ['name', createColumnFilter({
         expression: new SQLCast(
             new SQLConcat(
                 new SQLJsonUnquote(SQL.jsonExtract(SQL.column('data'), '$.value.customer.firstName')),
@@ -93,41 +93,41 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
             'CHAR'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    email: createColumnFilter({
+    })],
+    ['email', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('data'), '$.value.customer.email'),
         type: SQLValueType.JSONString,
         nullable: false,
-    }),
-    phone: createColumnFilter({
+    })],
+    ['phone', createColumnFilter({
         expression: SQL.jsonExtract(SQL.column('data'), '$.value.customer.phone'),
         type: SQLValueType.JSONString,
         nullable: false,
-    }),
-    totalPrice: createColumnFilter({
+    })],
+    ['totalPrice', createColumnFilter({
         expression: SQL.column('totalPrice'),
         type: SQLValueType.Number,
         nullable: false,
-    }),
-    amount: createColumnFilter({
+    })],
+    ['amount', createColumnFilter({
         expression: SQL.column('amount'),
         type: SQLValueType.Number,
         nullable: false,
-    }),
-    timeSlotTime: createColumnFilter({
+    })],
+    ['timeSlotTime', createColumnFilter({
         expression: SQL.column('timeSlotTime'),
         type: SQLValueType.Datetime,
         nullable: true,
-    }),
-    discountCodes: {
+    })],
+    ['discountCodes', new Map([
         ...baseSQLFilterCompilers,
-        code: createColumnFilter({
+        ['code', createColumnFilter({
             expression: SQL.jsonExtract(SQL.column('data'), '$.value.discountCodes[*].code'),
             type: SQLValueType.JSONArray,
             nullable: true,
-        }),
-    },
-    items: createExistsFilter(
+        })],
+    ])],
+    ['items', createExistsFilter(
         /**
          * There is a bug in MySQL 8 that is fixed in 9.3
          * where EXISTS (select * from json_table(...)) does not work
@@ -172,30 +172,30 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
             .where(SQL.column('innerOrders', 'id'), SQL.column('webshop_orders', 'id'))
             // Keep the parent JSON_TABLE correlated when its columns feed nested JSON_TABLE queries.
             .having(SQL.where(new SQLCount(), '>', new SQLScalar(0))),
-        {
+        new Map([
             ...baseSQLFilterCompilers,
-            amount: createColumnFilter({
+            ['amount', createColumnFilter({
                 expression: SQL.column('items', 'amount'),
                 type: SQLValueType.Number,
                 nullable: false,
-            }),
-            product: {
+            })],
+            ['product', new Map([
                 ...baseSQLFilterCompilers,
-                id: createColumnFilter({
+                ['id', createColumnFilter({
                     expression: SQL.column('items', 'productId'),
                     type: SQLValueType.String,
                     nullable: false,
-                }),
-            },
-            productPrice: {
+                })],
+            ])],
+            ['productPrice', new Map([
                 ...baseSQLFilterCompilers,
-                id: createColumnFilter({
+                ['id', createColumnFilter({
                     expression: SQL.column('items', 'productPriceId'),
                     type: SQLValueType.String,
                     nullable: false,
-                }),
-            },
-            options: createExistsFilter(
+                })],
+            ])],
+            ['options', createExistsFilter(
                 SQL.select()
                     .from(
                         SQL.jsonTable(
@@ -215,27 +215,27 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
                     )
                     // Aggregation prevents MySQL 8 from reordering JSON_TABLE before its parent item (bug #114897).
                     .having(SQL.where(new SQLCount(), '>', new SQLScalar(0))),
-                {
+                new Map([
                     ...baseSQLFilterCompilers,
-                    option: {
+                    ['option', new Map([
                         ...baseSQLFilterCompilers,
-                        id: createColumnFilter({
+                        ['id', createColumnFilter({
                             expression: SQL.column('options', 'optionId'),
                             type: SQLValueType.String,
                             nullable: false,
-                        }),
-                    },
-                    optionMenu: {
+                        })],
+                    ])],
+                    ['optionMenu', new Map([
                         ...baseSQLFilterCompilers,
-                        id: createColumnFilter({
+                        ['id', createColumnFilter({
                             expression: SQL.column('options', 'optionMenuId'),
                             type: SQLValueType.String,
                             nullable: false,
-                        }),
-                    },
-                },
-            ),
-            fieldAnswers: createExistsFilter(
+                        })],
+                    ])],
+                ]),
+            )],
+            ['fieldAnswers', createExistsFilter(
                 SQL.select()
                     .from(
                         SQL.jsonTable(
@@ -255,68 +255,68 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
                     )
                     // Aggregation prevents MySQL 8 from reordering JSON_TABLE before its parent item (bug #114897).
                     .having(SQL.where(new SQLCount(), '>', new SQLScalar(0))),
-                {
+                new Map([
                     ...baseSQLFilterCompilers,
-                    field: {
+                    ['field', new Map([
                         ...baseSQLFilterCompilers,
-                        id: createColumnFilter({
+                        ['id', createColumnFilter({
                             expression: SQL.column('fieldAnswers', 'fieldId'),
                             type: SQLValueType.String,
                             nullable: false,
-                        }),
-                    },
-                    answer: createColumnFilter({
+                        })],
+                    ])],
+                    ['answer', createColumnFilter({
                         expression: SQL.column('fieldAnswers', 'answer'),
                         type: SQLValueType.String,
                         nullable: false,
-                    }),
-                },
-            ),
-        },
-    ),
+                    })],
+                ]),
+            )],
+        ]),
+    )],
 
-    recordAnswers: createWildcardColumnFilter(
+    ['recordAnswers', createWildcardColumnFilter(
         (key: string) => ({
             expression: SQL.jsonExtract(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}`, true),
             type: SQLValueType.JSONObject,
             nullable: true,
         }),
-        (key: string) => ({
+        (key: string) => (new Map([
             ...baseSQLFilterCompilers,
-            selected: createColumnFilter({
+            ['selected', createColumnFilter({
                 expression: SQL.jsonExtract(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selected`, true),
                 type: SQLValueType.JSONBoolean,
                 nullable: true,
-            }),
-            selectedChoice: {
+            })],
+            ['selectedChoice', new Map([
                 ...baseSQLFilterCompilers,
-                id: createColumnFilter({
+                ['id', createColumnFilter({
                     expression: SQL.jsonExtract(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selectedChoice.id`, true),
                     type: SQLValueType.JSONString,
                     nullable: true,
-                }),
-            },
-            selectedChoices: {
+                })],
+            ])],
+            ['selectedChoices', new Map([
                 ...baseSQLFilterCompilers,
-                id: createColumnFilter({
+                ['id', createColumnFilter({
                     expression: SQL.jsonExtract(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.selectedChoices[*].id`, true),
                     type: SQLValueType.JSONArray,
                     nullable: true,
-                }),
-            },
-            value: createColumnFilter({
+                })],
+            ])],
+            ['value', createColumnFilter({
                 expression: SQL.jsonExtract(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.value`, true),
                 type: SQLValueType.JSONScalar, // Can be string, number or boolean
                 nullable: true,
-            }),
-            dateValue: createColumnFilter({
+            })],
+            ['dateValue', createColumnFilter({
                 expression: SQL.jsonExtract(SQL.column('data'), `$.value.recordAnswers.${SQLJsonExtract.escapePathComponent(key)}.dateValue`, true),
                 type: SQLValueType.JSONDate,
                 nullable: true,
-            }),
-        }),
-    ),
-    payments: createExistsFilter(
+            })],
+        ])),
+    )],
+    ['payments', createExistsFilter(
         // should equal payments on structure
         SQL.select()
             .from(
@@ -347,27 +347,27 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('payments', 'status'),
                 PaymentStatus.Failed,
             ),
-        {
+        new Map([
             ...baseSQLFilterCompilers,
-            paidAt: createColumnFilter({
+            ['paidAt', createColumnFilter({
                 expression: SQL.column(Payment.table, 'paidAt'),
                 type: SQLValueType.Datetime,
                 nullable: false,
-            }),
-            method: paymentFilterCompilers.method,
-            status: paymentFilterCompilers.status,
-            price: paymentFilterCompilers.price,
-            transferDescription: paymentFilterCompilers.transferDescription,
-        },
-    ),
+            })],
+            ['method', paymentFilterCompilers.get('method')!],
+            ['status', paymentFilterCompilers.get('status')!],
+            ['price', paymentFilterCompilers.get('price')!],
+            ['transferDescription', paymentFilterCompilers.get('transferDescription')!],
+        ]),
+    )],
     // not same as open balance (balance can be negative)
-    amountToPay: createColumnFilter({
+    ['amountToPay', createColumnFilter({
         expression: SQL.calculation(SQL.column('totalPrice')).subtract(getPricePaidSubQuery()),
         type: SQLValueType.Number,
         nullable: false,
-    }),
+    })],
     // Same as PrivateOrderWithTickets.ticketScanStatus: 'none' for an order without tickets
-    ticketScanStatus: createColumnFilter({
+    ['ticketScanStatus', createColumnFilter({
         expression: getTicketsSubQuery(
             new SQLIf(new SQLCount(SQL.column(Ticket.table, 'scannedAt')), 0)
                 .then(new SQLScalar('none'))
@@ -379,18 +379,18 @@ export const orderFilterCompilers: SQLFilterDefinitions = {
         ),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    ticketScannedAt: createColumnFilter({
+    })],
+    ['ticketScannedAt', createColumnFilter({
         expression: getTicketsSubQuery(new SQLMin(SQL.column(Ticket.table, 'scannedAt'))),
         type: SQLValueType.Datetime,
         nullable: true,
-    }),
-    ticketCount: createColumnFilter({
+    })],
+    ['ticketCount', createColumnFilter({
         expression: getTicketsSubQuery(new SQLCount()),
         type: SQLValueType.Number,
         nullable: false,
-    }),
-};
+    })],
+]);
 
 function getTicketsSubQuery(expression: SQLExpression): SQLExpression {
     return SQL.subQuery(SQL.select(expression)

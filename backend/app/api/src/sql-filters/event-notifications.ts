@@ -5,58 +5,58 @@ import { organizationFilterCompilers } from './organizations.js';
 
 export const organizationJoin = SQL.join('organizations').where(SQL.column('organizations', 'id'), SQL.column('event_notifications', 'organizationId'));
 
-export const eventNotificationsFilterCompilers: SQLFilterDefinitions = {
+export const eventNotificationsFilterCompilers: SQLFilterDefinitions = new Map([
     ...baseSQLFilterCompilers,
-    id: createColumnFilter({
+    ['id', createColumnFilter({
         expression: SQL.column('id'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    typeId: createColumnFilter({
+    })],
+    ['typeId', createColumnFilter({
         expression: SQL.column('typeId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    periodId: createColumnFilter({
+    })],
+    ['periodId', createColumnFilter({
         expression: SQL.column('periodId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    organizationId: createColumnFilter({
+    })],
+    ['organizationId', createColumnFilter({
         expression: SQL.column('organizationId'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    startDate: createColumnFilter({
+    })],
+    ['startDate', createColumnFilter({
         expression: SQL.column('startDate'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    endDate: createColumnFilter({
+    })],
+    ['endDate', createColumnFilter({
         expression: SQL.column('endDate'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    submittedAt: createColumnFilter({
+    })],
+    ['submittedAt', createColumnFilter({
         expression: SQL.column('submittedAt'),
         type: SQLValueType.Datetime,
         nullable: true,
-    }),
-    createdAt: createColumnFilter({
+    })],
+    ['createdAt', createColumnFilter({
         expression: SQL.column('createdAt'),
         type: SQLValueType.Datetime,
         nullable: false,
-    }),
-    status: createColumnFilter({
+    })],
+    ['status', createColumnFilter({
         expression: SQL.column('status'),
         type: SQLValueType.String,
         nullable: false,
-    }),
-    organization: createJoinedRelationFilter(
+    })],
+    ['organization', createJoinedRelationFilter(
         organizationJoin,
         organizationFilterCompilers,
-    ),
-    events: createExistsFilter(
+    )],
+    ['events', createExistsFilter(
         SQL.select()
             .from(
                 SQL.table('events'),
@@ -72,5 +72,5 @@ export const eventNotificationsFilterCompilers: SQLFilterDefinitions = {
                 SQL.column('event_notifications', 'id'),
             ),
         eventFilterCompilers,
-    ),
-};
+    )],
+]);

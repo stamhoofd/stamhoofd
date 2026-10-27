@@ -5,7 +5,7 @@ import { privateOrderFilterCompilers, privateOrderWithTicketsFilterCompilers } f
  * The keys that can only be answered once the tickets of an order are loaded: everything
  * privateOrderWithTicketsFilterCompilers adds on top of privateOrderFilterCompilers.
  */
-const ticketFilterKeys = Object.keys(privateOrderWithTicketsFilterCompilers).filter(key => !(key in privateOrderFilterCompilers));
+const ticketFilterKeys = [...privateOrderWithTicketsFilterCompilers.keys()].filter(key => !privateOrderFilterCompilers.has(key));
 
 /**
  * Whether the filter reads one of those keys, at any depth: also inside $and, $or, $not and arrays.

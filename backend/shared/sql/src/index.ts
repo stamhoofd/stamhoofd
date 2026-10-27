@@ -6,7 +6,7 @@ export * from './SQLJsonExpressions.js';
 export * from './SQLWhere.js';
 export * from './SQLSelect.js';
 export { createColumnFilter, createWildcardColumnFilter, createExistsFilter, createJoinedRelationFilter, compileToSQLFilter, baseSQLFilterCompilers } from './filters/SQLFilter.js';
-export { SQLValueType, type SQLFilterDefinitions } from './filters/SQLFilterTypes.js';
+export { SQLValueType, type SQLFilterCompiler, type SQLFilterDefinitions } from './filters/SQLFilterTypes.js';
 export * from './filters/SQLSorter.js';
 export * from './SQLOrderBy.js';
 export * from './SQLInsert.js';
