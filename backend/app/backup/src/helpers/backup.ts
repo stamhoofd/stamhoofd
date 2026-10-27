@@ -1,6 +1,6 @@
 import { DeleteObjectCommand, HeadObjectCommand, ListObjectsCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
 import { Upload } from '@aws-sdk/lib-storage';
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Formatter } from '@stamhoofd/utility';

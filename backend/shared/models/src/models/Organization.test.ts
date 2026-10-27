@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { EventFactory } from '../factories/EventFactory.js';
 import { OrganizationFactory } from '../factories/OrganizationFactory.js';
 import { Organization } from './Organization.js';

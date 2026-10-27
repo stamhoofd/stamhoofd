@@ -1,4 +1,4 @@
-import { Factory } from '@simonbackx/simple-database';
+import { Factory } from '@node/database';
 import type { RecordCategory } from '@stamhoofd/structures';
 import { EventNotificationType } from '@stamhoofd/structures';
 

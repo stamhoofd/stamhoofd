@@ -12,7 +12,7 @@
         "merge-reports": "playwright merge-reports --config merge.config.ts blob-report"
     },
     "dependencies": {
-        "@simonbackx/simple-database": "1.40.1",
+        "@node/database": "workspace:*",
         "@stamhoofd/backend": "workspace:*",
         "@stamhoofd/backend-i18n": "workspace:*",
         "@stamhoofd/cli": "workspace:*",

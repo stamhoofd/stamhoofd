@@ -1,4 +1,4 @@
-import { Migration } from '@simonbackx/simple-database';
+import { Migration } from '@node/database';
 import { Payment } from '@stamhoofd/models';
 import { QueryableModel, scalarToSQLExpression, SQL, SQLWhereLike } from '@stamhoofd/sql';
 import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';

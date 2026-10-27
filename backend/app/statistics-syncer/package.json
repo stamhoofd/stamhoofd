@@ -32,7 +32,7 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@simonbackx/simple-database": "1.40.1",
+        "@node/database": "workspace:*",
         "@common/encoding": "workspace:*",
         "@common/errors": "workspace:*",
         "@simonbackx/simple-logging": "1.0.1",

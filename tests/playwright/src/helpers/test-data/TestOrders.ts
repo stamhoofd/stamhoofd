@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import type { Order, Webshop } from '@stamhoofd/models';
 import { BalanceItem, OrderFactory, Ticket, TicketFactory } from '@stamhoofd/models';
 import { BalanceItemType } from '@stamhoofd/structures/BalanceItem.js';

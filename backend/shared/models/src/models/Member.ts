@@ -1,4 +1,4 @@
-import { column, ManyToManyRelation, ManyToOneRelation, OneToManyRelation } from '@simonbackx/simple-database';
+import { column, ManyToManyRelation, ManyToOneRelation, OneToManyRelation } from '@node/database';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { MemberDetails, PlatformMembershipMemberDetails, RegistrationWithTinyMember, TinyMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';

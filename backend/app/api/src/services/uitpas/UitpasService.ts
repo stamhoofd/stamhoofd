@@ -1,4 +1,4 @@
-import { Model } from '@simonbackx/simple-database';
+import { Model } from '@node/database';
 import { isSimpleError, SimpleError } from '@common/errors';
 import { Order, WebshopUitpasNumber } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';

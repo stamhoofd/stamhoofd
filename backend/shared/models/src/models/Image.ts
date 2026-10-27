@@ -1,5 +1,5 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules import
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { ArrayDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { QueryableModel } from '@stamhoofd/sql';

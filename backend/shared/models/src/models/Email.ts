@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import type { EmailRecipient as EmailRecipientStruct, EmailTemplateType, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
 import { EmailAttachment, EmailContent, EmailRecipientFilter, EmailRecipientsStatus, EmailStatus, Email as EmailStruct, LanguageHelper, LimitedFilteredRequest, SortItemDirection } from '@stamhoofd/structures';
 import type { Country } from '@stamhoofd/types/Country';

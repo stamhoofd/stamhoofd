@@ -9,7 +9,7 @@ import type { CountFilteredRequest, RegistrationWithMemberBlob, RegistrationsBlo
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponse, assertSort } from '@stamhoofd/structures';
 
-import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@node/database';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
 import { LimitedFilteredRequestHelper } from '../../../helpers/LimitedFilteredRequestHelper.js';

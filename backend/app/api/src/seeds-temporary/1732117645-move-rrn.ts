@@ -1,4 +1,4 @@
-import { Migration } from '@simonbackx/simple-database';
+import { Migration } from '@node/database';
 import { Member } from '@stamhoofd/models';
 import { MemberUserSyncer } from '../helpers/MemberUserSyncer.js';
 import { logger } from '@simonbackx/simple-logging';

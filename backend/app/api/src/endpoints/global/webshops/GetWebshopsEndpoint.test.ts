@@ -1,6 +1,6 @@
 import type { Endpoint } from '@node/endpoints';
 import { Request } from '@node/endpoints';
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import type { User } from '@stamhoofd/models';
 import { MemberFactory, OrganizationFactory, OrganizationTagFactory, RegistrationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import type { StamhoofdFilter } from '@stamhoofd/structures';

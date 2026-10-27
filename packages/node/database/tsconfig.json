@@ -1,13 +1,13 @@
 {
-    // File used by the editor.
-    "extends": "./tsconfig.base.json",
+    "extends": "../../../tsconfig.base.json",
     "compilerOptions": {
-        "outDir": "dist"
+        "target": "es2022",
+        "skipLibCheck": true
     },
-    "files": [], // intentionally empty
+    "files": [],
     "references": [
         {
-            "path": "./tsconfig.build.json"
+            "path": "./tsconfig.types.json"
         },
         {
             "path": "./tsconfig.test.json"

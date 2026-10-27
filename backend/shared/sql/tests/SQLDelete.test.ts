@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { SQL } from '../src/SQL.js';
 import { SQLAlias, SQLCount, SQLMin, SQLSelectAs } from '../src/SQLExpressions.js';
 import { SQLWhereOr } from '../src/SQLWhere.js';

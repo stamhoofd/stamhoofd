@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 import { SimpleError } from '@common/errors';
 import { Token, User, UserSession } from '@stamhoofd/models';
 import type { SessionDurations, SessionType } from '@stamhoofd/models/constants/sessions.js';

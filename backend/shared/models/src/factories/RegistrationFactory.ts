@@ -1,4 +1,4 @@
-import { Factory } from '@simonbackx/simple-database';
+import { Factory } from '@node/database';
 
 import type { GroupPrice } from '@stamhoofd/structures';
 import { BundleDiscount } from '@stamhoofd/structures';

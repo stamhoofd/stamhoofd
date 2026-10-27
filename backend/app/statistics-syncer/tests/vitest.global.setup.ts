@@ -14,7 +14,7 @@ const modelsPath = require.resolve('@stamhoofd/models');
 export async function setup() {
     TestUtils.globalSetup();
 
-    const { Database, Migration } = await import('@simonbackx/simple-database');
+    const { Database, Migration } = await import('@node/database');
     const { endStatisticsConnection } = await import('../src/database.js');
     const { runStatisticsMigrations } = await import('../src/schema.js');
 

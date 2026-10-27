@@ -1,4 +1,4 @@
-import { Migration } from '@simonbackx/simple-database';
+import { Migration } from '@node/database';
 import { Member, Organization } from '@stamhoofd/models';
 import type { Address, RecordAnswer, RecordCategory, RecordSettings } from '@stamhoofd/structures';
 import { Parent, ParentType, PropertyFilter, RecordAddressAnswer, RecordTextAnswer } from '@stamhoofd/structures';

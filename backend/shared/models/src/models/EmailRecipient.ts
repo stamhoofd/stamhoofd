@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { EmailRecipient as EmailRecipientStruct, Recipient, Replacement, TinyMember } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';

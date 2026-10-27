@@ -1,4 +1,4 @@
-import { column, Migration } from '@simonbackx/simple-database';
+import { column, Migration } from '@node/database';
 import { AutoEncoder, field } from '@common/encoding';
 import { Organization } from '@stamhoofd/models';
 import { QueryableModel, SQL } from '@stamhoofd/sql';

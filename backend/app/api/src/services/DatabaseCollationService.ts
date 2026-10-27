@@ -1,4 +1,4 @@
-import { Database } from '@simonbackx/simple-database';
+import { Database } from '@node/database';
 
 const EXPECTED_COLLATION = 'utf8mb4_0900_ai_ci';
 

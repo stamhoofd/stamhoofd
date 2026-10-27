@@ -8,7 +8,7 @@ import type { CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structure
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { LimitedFilteredRequest, PaginatedResponse, WebshopWithOrganization, assertSort, getSortFilter } from '@stamhoofd/structures';
 
-import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@node/database';
 import { Formatter } from '@stamhoofd/utility';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';

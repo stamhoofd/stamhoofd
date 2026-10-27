@@ -1,4 +1,4 @@
-import { column } from '@simonbackx/simple-database';
+import { column } from '@node/database';
 import { BalanceItemDetailed, BalanceItemPaymentDetailed, BaseOrganization, PaymentCustomer, PaymentGeneral, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, SettlementReference, TransferSettings } from '@stamhoofd/structures';
 import { PaymentSettlementDetailed } from '@stamhoofd/structures/settlements/PaymentSettlement.js';
 import { Settlement as SettlementStruct } from '@stamhoofd/structures/settlements/Settlement.js';

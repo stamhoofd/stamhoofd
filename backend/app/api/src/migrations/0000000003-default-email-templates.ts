@@ -1,4 +1,4 @@
-import { Database, Migration } from '@simonbackx/simple-database';
+import { Database, Migration } from '@node/database';
 import { EmailTemplate } from '@stamhoofd/models';
 import { promises as fs } from 'fs';
 

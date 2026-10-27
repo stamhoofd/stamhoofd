@@ -1,5 +1,5 @@
-import type { SQLResultNamespacedRow } from '@simonbackx/simple-database';
-import { Database } from '@simonbackx/simple-database';
+import type { SQLResultNamespacedRow } from '@node/database';
+import { Database } from '@node/database';
 import { Formatter } from '@stamhoofd/utility';
 import type { SQLExpression, SQLExpressionOptions, SQLNamedExpression, SQLQuery } from './SQLExpression.js';
 import { joinSQLQuery, normalizeSQLQuery } from './SQLExpression.js';

@@ -1,4 +1,4 @@
-import { Migration } from '@simonbackx/simple-database';
+import { Migration } from '@node/database';
 import { logger } from '@simonbackx/simple-logging';
 import { DocumentTemplate } from '@stamhoofd/models';
 import { SeedTools } from '../helpers/SeedTools.js';

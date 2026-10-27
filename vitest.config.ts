@@ -10,6 +10,7 @@ export default defineConfig({
             'packages/common/errors/vitest.config.js',
             'packages/common/encoding/vitest.config.js',
             'packages/common/networking/vitest.config.js',
+            'packages/node/database/vitest.config.js',
             'backend/shared/*/{vite,vitest}.config.{js,ts}',
             'backend/app/*/{vite,vitest}.config.{js,ts}',
         ],

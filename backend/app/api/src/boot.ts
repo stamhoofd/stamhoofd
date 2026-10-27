@@ -1,4 +1,4 @@
-import { Column, Database, Migration } from '@simonbackx/simple-database';
+import { Column, Database, Migration } from '@node/database';
 import { CORSPreflightEndpoint, Router, RouterServer } from '@node/endpoints';
 import { CORSMiddleware, LogMiddleware, VersionMiddleware } from '@stamhoofd/backend-middleware';
 import { checkReadOnly } from '@stamhoofd/crons';

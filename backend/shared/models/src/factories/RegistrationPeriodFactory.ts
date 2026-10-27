@@ -1,4 +1,4 @@
-import { Factory } from '@simonbackx/simple-database';
+import { Factory } from '@node/database';
 import { RegistrationPeriodSettings } from '@stamhoofd/structures';
 
 import type { Organization} from '../models/index.js';
