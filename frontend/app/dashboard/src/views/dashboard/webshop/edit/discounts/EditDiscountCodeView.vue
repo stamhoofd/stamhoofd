@@ -82,10 +82,12 @@
                 {{ $t('%S6') }}
             </h2>
 
-            <button class="button secundary danger" type="button" @click="deleteMe">
-                <span class="icon trash" />
-                <span>{{ $t('%CJ') }}</span>
-            </button>
+            <LoadingButton :loading="deleting">
+                <button class="button secundary danger" type="button" @click="deleteMe">
+                    <span class="icon trash" />
+                    <span>{{ $t('%CJ') }}</span>
+                </button>
+            </LoadingButton>
         </div>
     </SaveView>
 </template>
@@ -106,6 +108,7 @@ import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
+import LoadingButton from '@stamhoofd/components/navigation/LoadingButton.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
@@ -122,7 +125,7 @@ const props = defineProps<{
     discountCode: PrivateDiscountCode;
     isNew: boolean;
     webshop: PrivateWebshop;
-    // If we can immediately save this product, then you can create a save handler and pass along the changes.
+    // Saves the changes. Throw when saving fails, so the view stays open and shows the error.
     saveHandler: (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => Promise<void>;
 }>();
 
@@ -131,6 +134,7 @@ const organization = useOrganization();
 const present = usePresent();
 const pop = usePop();
 const saving = ref(false);
+const deleting = ref(false);
 
 /// For now only used to update locations and times of other products that are shared
 const { patch: patchDiscountCode, patched: patchedDiscountCode, addPatch, hasChanges } = usePatch(props.discountCode);
@@ -293,6 +297,9 @@ async function save() {
 }
 
 async function deleteMe() {
+    if (deleting.value) {
+        return;
+    }
     if (!await CenteredMessage.confirm({
         title: code.value ? $t('%Zn2', { name: code.value }) : $t('Deze kortingscode verwijderen?'),
         confirmText: $t('%CJ'),
@@ -304,11 +311,15 @@ async function deleteMe() {
 
     const p: PatchableArrayAutoEncoder<PrivateDiscountCode> = new PatchableArray();
     p.addDelete(props.discountCode.id);
+
+    deleting.value = true;
     try {
         await props.saveHandler(p);
     } catch (e) {
         Toast.fromError(e).show();
         return;
+    } finally {
+        deleting.value = false;
     }
     pop({ force: true })?.catch(console.error);
 }

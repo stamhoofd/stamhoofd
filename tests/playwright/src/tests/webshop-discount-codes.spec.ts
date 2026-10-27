@@ -176,6 +176,18 @@ test.describe('Webshop discount codes @webshop-discount-codes', () => {
         expect(created).toHaveLength(1);
         expect(created[0].discounts).toHaveLength(1);
 
+        // Renaming an existing code to a used code also keeps the view open
+        await table.getRow('FRIENDS-2').click();
+        const editView = page.getByTestId('save-view').filter({ hasText: 'Kortingscode bewerken' });
+        const editCodeInput = editView.getByPlaceholder('Bv. BLACK-FRIDAY');
+        await editCodeInput.fill('friends');
+        await editView.getByTestId('save-button').click();
+        await expect(editView).toContainText('Er bestaat al een kortingscode met de code FRIENDS');
+        await expect(editCodeInput).toHaveValue('FRIENDS');
+
+        const unchanged = await WebshopDiscountCode.getByID(created[0].id);
+        expect(unchanged?.code).toBe('FRIENDS-2');
+
         await context.close();
     });
 

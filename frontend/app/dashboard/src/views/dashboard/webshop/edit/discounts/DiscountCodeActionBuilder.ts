@@ -204,9 +204,7 @@ export class DiscountCodeActionBuilder {
                     isNew: true,
                     discountCode,
                     webshop: this.webshop,
-                    saveHandler: async (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => {
-                        await this.createDiscountCode(discountCode, patch);
-                    },
+                    saveHandler: (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => this.createDiscountCode(discountCode, patch),
                 }),
             ],
             modalDisplayStyle: 'popup',
@@ -232,9 +230,7 @@ export class DiscountCodeActionBuilder {
                     isNew: false,
                     discountCode,
                     webshop: this.webshop,
-                    saveHandler: async (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => {
-                        await this.patchDiscountCodes(patch);
-                    },
+                    saveHandler: (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => this.patchDiscountCodes(patch),
                 }),
             ],
             modalDisplayStyle: 'popup',
@@ -250,9 +246,7 @@ export class DiscountCodeActionBuilder {
                     isNew: true,
                     discountCode: cloned,
                     webshop: this.webshop,
-                    saveHandler: async (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => {
-                        await this.createDiscountCode(cloned, patch);
-                    },
+                    saveHandler: (patch: PatchableArrayAutoEncoder<PrivateDiscountCode>) => this.createDiscountCode(cloned, patch),
                 }),
             ],
             modalDisplayStyle: 'popup',
@@ -337,11 +331,7 @@ export class DiscountCodeActionBuilder {
         for (const discountCode of discountCodes) {
             arr.addDelete(discountCode.id);
         }
-        try {
-            await this.patchDiscountCodes(arr);
-        } catch (e) {
-            Toast.fromError(e).show();
-        }
+        await this.patchDiscountCodes(arr);
     }
 
     async exportToExcel(selection: TableActionSelection<PrivateDiscountCode>) {
