@@ -69,19 +69,19 @@ const title = $t('%1Wq');
 const viewModel = props.viewModel;
 const groups = computed(() => viewModel.membershipGroups);
 
-// Local edits of the single default price per group (in cents).
-const priceValues = reactive<Record<string, number>>({});
+// Local edits of the single default price per group ID (in cents); absent entries are unchanged.
+const priceValues = reactive(new Map<string, number>());
 
 function hasMultiplePrices(group: Group) {
     return group.settings.prices.length !== 1;
 }
 
 function getPrice(group: Group): number {
-    return priceValues[group.id] ?? group.settings.prices[0]?.price.price ?? 0;
+    return priceValues.get(group.id) ?? group.settings.prices[0]?.price.price ?? 0;
 }
 
 function setPrice(group: Group, value: number) {
-    priceValues[group.id] = value;
+    priceValues.set(group.id, value);
 }
 
 function openSettings(group: Group) {
@@ -108,7 +108,7 @@ async function goNext() {
                 continue;
             }
             const currentPrice = group.settings.prices[0];
-            const newValue = priceValues[group.id];
+            const newValue = priceValues.get(group.id);
             if (newValue === undefined || newValue === currentPrice.price.price) {
                 continue;
             }
