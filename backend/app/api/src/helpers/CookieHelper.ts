@@ -6,10 +6,11 @@ export type ObjectWithHeaders = {
     headers: http.IncomingHttpHeaders;
 };
 
-type DecodedRequestWithCookies = ObjectWithHeaders & { cookies?: Record<string, string | undefined> };
+type DecodedRequestWithCookies = ObjectWithHeaders & { cookies?: Map<string, string | undefined> };
 
 export class CookieHelper {
-    static getCookies(request: ObjectWithHeaders): Record<string, string | undefined> {
+    /** Caches parsed cookie names as literal keys; HTTP headers remain transport objects. */
+    static getCookies(request: ObjectWithHeaders): Map<string, string | undefined> {
         const r = request as DecodedRequestWithCookies;
         if (r.cookies) {
             return r.cookies;
@@ -17,18 +18,18 @@ export class CookieHelper {
 
         const header = r.headers.cookie;
         if (!header) {
-            r.cookies = {};
+            r.cookies = new Map();
             return r.cookies;
         }
 
         // Parse
-        r.cookies = cookie.parseCookie(header);
+        r.cookies = new Map(Object.entries(cookie.parseCookie(header)));
         return r.cookies;
     }
 
     static getCookie(request: ObjectWithHeaders, name: string): string | undefined {
         const cookies = this.getCookies(request);
-        return cookies[name];
+        return cookies.get(name);
     }
 
     static setCookie(response: Response<any>, name: string, value: string, options?: { httpOnly?: boolean; secure?: boolean; expires?: Date }) {
