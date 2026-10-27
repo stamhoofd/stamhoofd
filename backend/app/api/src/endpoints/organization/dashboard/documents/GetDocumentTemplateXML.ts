@@ -2,6 +2,7 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { DocumentTemplate } from '@stamhoofd/models';
+import { FiscalDocumentYearHelper } from '@stamhoofd/utility';
 
 import { Context } from '../../../../helpers/Context.js';
 import { DocumentRenderService } from '../../../../services/DocumentRenderService.js';
@@ -39,7 +40,15 @@ export class GetDocumentTemplateXMLEndpoint extends Endpoint<Params, Query, Body
 
         const template = await DocumentTemplate.getByID(request.params.id);
         if (!template || !await Context.auth.canAccessDocumentTemplate(template)) {
-            throw Context.auth.notFoundOrNoAccess($t(`%EK`));
+            throw Context.auth.notFoundOrNoAccess($t('%EK'));
+        }
+
+        if (template.privateSettings.templateDefinition.type === 'fiscal' && !new FiscalDocumentYearHelper().isXmlExportSupported(template.year)) {
+            throw new SimpleError({
+                code: 'xml_export_not_supported',
+                message: 'Fiscal documents from income year 2026 onwards can no longer be exported as XML',
+                human: $t('Vanaf inkomstenjaar 2026 aanvaardt Belcotax geen XML-bestanden meer. De nieuwe export wordt binnenkort beschikbaar in Stamhoofd.'),
+            });
         }
 
         // Update documents
