@@ -1,0 +1,25 @@
+{
+    "prettier.tabWidth": 4,
+    "prettier.packageManager": "yarn",
+    "editor.formatOnSave": true,
+    "javascript.format.enable": false,
+    "prettier.printWidth": 120,
+    "search.exclude": {
+        "**/dist": true,
+        "**/node_modules": true
+    },
+    "eslint.options": {
+        "extensions": [".js", ".ts"]
+    },
+    "vetur.validation.template": false,
+    "vetur.format.enable": false,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "editor.formatOnPaste": true,
+    "eslint.format.enable": true,
+
+    // Prettier acts fucked up in vue, typescript and javascript, so we let eslint format vue files
+    "eslint.validate": ["typescript", "javascript"],
+    "prettier.disableLanguages": ["typescript", "javascript"]
+}
