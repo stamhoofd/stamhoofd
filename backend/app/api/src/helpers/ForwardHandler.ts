@@ -113,7 +113,7 @@ export class ForwardHandler {
 
         let html: string | undefined = undefined;
 
-        if (parsed.html !== false) {
+        if (typeof parsed.html === 'string') {
             // Search for body
             const body = parsed.html.toLowerCase().indexOf('<body');
 
