@@ -39,14 +39,8 @@ export async function replaceKeysWithUuid(onProgress?: ProgressCallback) {
     await replaceKeysWithUuidInTranslations(translationsWithPath, onProgress);
 }
 
-type TranslationValue =
-    | string
-    | {
-        [key: string]: TranslationValue;
-    };
-
 async function replaceKeysWithUuidInTranslations(
-    translationsWithPath: Map<string, Record<string, string>>,
+    translationsWithPath: Map<string, Map<string, unknown>>,
     onProgress?: ProgressCallback,
 ) {
     const keysToSkip = ['replacements', 'extends', 'consistent-words'];
@@ -54,23 +48,19 @@ async function replaceKeysWithUuidInTranslations(
     const replacedKeys = new Map<string, string>();
 
     const flattenTranslationsAndReplaceKeys = (
-        result: Map<string, TranslationValue>,
-        translations: TranslationValue,
+        result: Map<string, unknown>,
+        translations: Iterable<[string, unknown]>,
         parentKeys = '',
     ): number => {
-        if (typeof translations === 'string') {
-            throw new Error(`Unexpected string: ${translations}`);
-        }
-
         let changes = 0;
 
-        for (const key in translations) {
+        for (const [key, value] of translations) {
             if (keysToSkip.includes(key)) continue;
             const fullKey = parentKeys ? `${parentKeys}.${key}` : key;
 
             const setOnResult = (uuidKey: string) => {
                 result.delete(key);
-                result.set(uuidKey, translations[key]);
+                result.set(uuidKey, value);
                 changes++;
             };
 
@@ -81,8 +71,6 @@ async function replaceKeysWithUuidInTranslations(
             }
             else if (isUuid(key) || isBase62(key)) continue;
 
-            const value = translations[key];
-
             if (typeof value === 'string') {
                 // For now inject a uuidv4 - we'll replace it with an auto incrementing ID when we loaded all translations into memory
                 const uuidKey = uuidv4();
@@ -91,7 +79,7 @@ async function replaceKeysWithUuidInTranslations(
                 continue;
             }
 
-            const deepChanges = flattenTranslationsAndReplaceKeys(result, value, fullKey);
+            const deepChanges = flattenTranslationsAndReplaceKeys(result, Object.entries(value as Record<string, unknown>), fullKey);
             result.delete(key);
             changes += deepChanges;
         }
@@ -100,11 +88,11 @@ async function replaceKeysWithUuidInTranslations(
     };
 
     for (const [filePath, translations] of translationsWithPath) {
-        const newTranslations = new Map(Object.entries(translations));
+        const newTranslations = new Map(translations);
         const changes = flattenTranslationsAndReplaceKeys(newTranslations, translations);
 
         if (changes > 0) {
-            writeTranslation(filePath, Object.fromEntries(newTranslations) as Record<string, string>);
+            writeTranslation(filePath, newTranslations);
         }
     }
 

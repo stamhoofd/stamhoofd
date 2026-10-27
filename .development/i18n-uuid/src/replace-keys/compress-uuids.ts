@@ -20,11 +20,11 @@ export async function compressUuids(onProgress?: ProgressCallback) {
     let largestBase62 = -1;
 
     for (const [filePath, translations] of translationsWithPath) {
-        for (const key in translations) {
+        for (const [key, value] of translations) {
             if (key === 'replacements' || key === 'extends' || key === 'consistent-words') {
                 continue;
             }
-            if (typeof translations[key] === 'string') {
+            if (typeof value === 'string') {
                 if (!usedKeys.has(key)) {
                     usedKeys.add(key);
                     if (isBase62(key)) {
@@ -49,15 +49,15 @@ export async function compressUuids(onProgress?: ProgressCallback) {
     for (const [filePath, translations] of translationsWithPath) {
         let updateRequired = false;
 
-        for (const key in translations) {
+        for (const [key, value] of [...translations]) {
             if (key === 'replacements' || key === 'extends' || key === 'consistent-words') {
                 continue;
             }
-            if (typeof translations[key] === 'string') {
+            if (typeof value === 'string') {
                 const replace = merge.get(key);
                 if (replace) {
-                    translations[replace] = translations[key];
-                    delete translations[key];
+                    translations.set(replace, value);
+                    translations.delete(key);
                     updateRequired = true;
                 }
             }

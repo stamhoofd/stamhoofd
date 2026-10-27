@@ -56,18 +56,18 @@ export async function addMissingKeys(onProgress?: ProgressCallback): Promise<num
         for (const [value, key] of new Map([
             ...replacedKeys,
         ]).entries()) {
-            translations[key] = value;
+            translations.set(key, value);
         }
 
         // Missing keys
         for (const [key, value] of new Map([
             ...missingUuidKeys,
         ]).entries()) {
-            if (translations[key]) {
+            if (translations.get(key)) {
                 // Already exists
                 continue;
             }
-            translations[key] = value;
+            translations.set(key, value);
         }
 
         // First write the translation files (no risk of losing data)
@@ -83,7 +83,7 @@ export async function addMissingKeys(onProgress?: ProgressCallback): Promise<num
 /**
  * Returns used keys ( $t(key) ), found anywhere in the source code, where the key is not present in the provided translations map, including the file where the keys are used.
  */
-async function getMissingKeys(translations: Record<string, string>, onProgress?: ProgressCallback): Promise<{
+async function getMissingKeys(translations: Map<string, unknown>, onProgress?: ProgressCallback): Promise<{
     missingKeys: Set<string>;
     filesWithMissingKeys: Set<string>;
 }> {
@@ -99,7 +99,7 @@ async function getMissingKeys(translations: Record<string, string>, onProgress?:
         let hasMissingKey = false;
 
         for (const key of findTranslationKeyUsages(fileContent)) {
-            if (!translations[key]) {
+            if (!translations.get(key)) {
                 missingKeys.add(key);
                 hasMissingKey = true;
             }

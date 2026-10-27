@@ -11,16 +11,20 @@ vi.mock('../shared/get-files-to-search.js', () => ({ getFilesToSearch: () => ['s
 vi.mock('./get-translations-with-path.js', () => ({ getTranslationsWithPath: vi.fn() }));
 vi.mock('./write-translations.js', () => ({ writeTranslation: vi.fn() }));
 
+function entries(values: Record<string, string>): Map<string, unknown> {
+    return new Map(Object.entries(values));
+}
+
 beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getTranslationsWithPath).mockReturnValue(new Map([['nl.json', { '%1': 'Save', '%2': 'Save' }]]));
+    vi.mocked(getTranslationsWithPath).mockReturnValue(new Map([['nl.json', entries({ '%1': 'Save', '%2': 'Save' })]]));
     vi.mocked(fs.readFileSync).mockReturnValue("$t('%1')");
 });
 
 it('scans source files once across all languages and reports overall cleanup completion', async () => {
     vi.mocked(getTranslationsWithPath).mockReturnValue(new Map([
-        ['nl.json', { '%1': 'Save', '%2': 'Remove' }],
-        ['fr.json', { '%1': 'Enregistrer', '%2': 'Supprimer' }],
+        ['nl.json', entries({ '%1': 'Save', '%2': 'Remove' })],
+        ['fr.json', entries({ '%1': 'Enregistrer', '%2': 'Supprimer' })],
     ]));
     const progress = vi.fn();
     expect(await unusedKeys(progress)).toBe(2);
@@ -30,7 +34,7 @@ it('scans source files once across all languages and reports overall cleanup com
     }));
     const overall = progress.mock.calls.map(([event]) => event.overallCompleted);
     expect(overall).toEqual([...overall].sort((a, b) => a - b));
-    expect(writeTranslation).toHaveBeenCalledWith('fr.json', { '%1': 'Enregistrer' });
+    expect(writeTranslation).toHaveBeenCalledWith('fr.json', entries({ '%1': 'Enregistrer' }));
 });
 
 it('preserves all supported literal key usages, including punctuation and multiline calls', async () => {
@@ -52,12 +56,12 @@ it('handles a large unused-key set across many source files', async () => {
 });
 
 it('keeps unchanged files and reserved metadata untouched', async () => {
-    vi.mocked(getTranslationsWithPath).mockReturnValue(new Map<string, Record<string, string>>([
-        ['nl.json', { '%1': 'Save', replacements: 'reserved', extends: 'reserved', 'consistent-words': 'reserved' }],
-        ['fr.json', { '%2': 'Supprimer' }],
+    vi.mocked(getTranslationsWithPath).mockReturnValue(new Map([
+        ['nl.json', entries({ '%1': 'Save', replacements: 'reserved', extends: 'reserved', 'consistent-words': 'reserved' })],
+        ['fr.json', entries({ '%2': 'Supprimer' })],
     ]));
     expect(await unusedKeys()).toBe(1);
-    expect(writeTranslation).toHaveBeenCalledExactlyOnceWith('fr.json', {});
+    expect(writeTranslation).toHaveBeenCalledExactlyOnceWith('fr.json', new Map());
 });
 
 it('does not change any translation files when the shared scan fails', async () => {
@@ -74,9 +78,9 @@ it('preserves conservative literal matching for quoted keys and overlapping sour
 afterEach(() => vi.restoreAllMocks());
 
 it('merges only identical language maps into the smallest numeric key regardless of insertion order', async () => {
-    vi.mocked(getTranslationsWithPath).mockReturnValue(new Map<string, Record<string, string>>([
-        ['nl.json', { '%10': 'Save', '%z': 'Save', '%2': 'Save', '%3': 'Save', '%4': 'Save', literal: 'Save' }],
-        ['fr.json', { '%10': 'Enregistrer', '%z': 'Enregistrer', '%2': 'Enregistrer', '%3': 'Different', literal: 'Enregistrer' }],
+    vi.mocked(getTranslationsWithPath).mockReturnValue(new Map([
+        ['nl.json', entries({ '%10': 'Save', '%z': 'Save', '%2': 'Save', '%3': 'Save', '%4': 'Save', literal: 'Save' })],
+        ['fr.json', entries({ '%10': 'Enregistrer', '%z': 'Enregistrer', '%2': 'Enregistrer', '%3': 'Different', literal: 'Enregistrer' })],
     ]));
     vi.mocked(fs.readFileSync).mockReturnValue("$t('%10') $t('%z') $t('%2') $t('%3') $t('%4') $t('literal')");
     expect(await mergeDuplicates()).toBe(2);
@@ -100,7 +104,7 @@ it('reports unused-key scan progress, yields to the CLI, and returns a removal s
     await scheduled;
     expect(removed).toBe(1);
     expect(progress).toHaveBeenCalledWith(expect.objectContaining({ phase: 'scan', completed: 1, total: 1 }));
-    expect(writeTranslation).toHaveBeenCalledWith('nl.json', { '%1': 'Save' });
+    expect(writeTranslation).toHaveBeenCalledWith('nl.json', entries({ '%1': 'Save' }));
 });
 
 it('returns a duplicate summary without printing manual command guidance', async () => {

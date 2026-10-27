@@ -9,11 +9,11 @@ export async function unusedKeys(onProgress?: ProgressCallback) {
     const translationsWithPath = getTranslationsWithPath();
     const keys = new Set<string>();
     for (const translations of translationsWithPath.values()) {
-        for (const key in translations) {
+        for (const [key, value] of translations) {
             if (key === 'replacements' || key === 'extends' || key === 'consistent-words') {
                 continue;
             }
-            if (typeof translations[key] === 'string') {
+            if (typeof value === 'string') {
                 keys.add(key);
             }
         }
@@ -27,8 +27,8 @@ export async function unusedKeys(onProgress?: ProgressCallback) {
     for (const [filePath, translations] of translationsWithPath) {
         let changed = false;
         for (const key of unusedKeys) {
-            if (typeof translations[key] === 'string') {
-                delete translations[key];
+            if (typeof translations.get(key) === 'string') {
+                translations.delete(key);
                 removed++;
                 changed = true;
             }

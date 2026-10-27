@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { decodeBase62, isBase62 } from './base62.js';
 
-export function writeMultipleTranslations(translationsWithPath: Map<string, Record<string, string>>) {
+export function writeMultipleTranslations(translationsWithPath: Map<string, Map<string, unknown>>) {
     for (const [filePath, translations] of translationsWithPath) {
         writeTranslation(filePath, translations);
     }
@@ -50,12 +50,9 @@ export function sortObjectKeysForEncoding(a: string, b: string) {
     return a.localeCompare(b);
 }
 
-export function writeTranslation(filePath: string, translations: Record<string, string>) {
+export function writeTranslation(filePath: string, translations: Map<string, unknown>) {
     // Sort keys
-    const keys = Object.keys(translations).sort(sortObjectKeysForEncoding);
-    const encodedObj = {};
-    for (const key of keys) {
-        encodedObj[key] = translations[key];
-    }
+    const keys = [...translations.keys()].sort(sortObjectKeysForEncoding);
+    const encodedObj = Object.fromEntries(keys.map(key => [key, translations.get(key)]));
     fs.writeFileSync(filePath, JSON.stringify(encodedObj, null, 2));
 }

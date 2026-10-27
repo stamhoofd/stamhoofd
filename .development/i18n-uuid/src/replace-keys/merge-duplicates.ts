@@ -28,18 +28,18 @@ export async function mergeDuplicates(onProgress?: ProgressCallback) {
     const translationsForKeys = new Map<string, Map<string, string>>();
 
     for (const [filePath, translations] of translationsWithPath) {
-        for (const key in translations) {
+        for (const [key, value] of translations) {
             if (key === 'replacements' || key === 'extends' || key === 'consistent-words') {
                 continue;
             }
-            if (typeof translations[key] === 'string') {
+            if (typeof value === 'string') {
                 const existingMap = translationsForKeys.get(key);
                 if (existingMap) {
-                    existingMap.set(filePath, translations[key]);
+                    existingMap.set(filePath, value);
                 }
                 else {
                     translationsForKeys.set(key, new Map([[
-                        filePath, translations[key],
+                        filePath, value,
                     ]]));
                 }
             }
