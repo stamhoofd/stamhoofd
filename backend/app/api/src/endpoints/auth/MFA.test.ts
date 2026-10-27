@@ -1,5 +1,5 @@
-import type { Endpoint } from '@simonbackx/simple-endpoints';
-import { Request } from '@simonbackx/simple-endpoints';
+import type { Endpoint } from '@node/endpoints';
+import { Request } from '@node/endpoints';
 import type { SimpleError } from '@common/errors';
 import { isSimpleError, isSimpleErrors } from '@common/errors';
 import { EmailMocker } from '@stamhoofd/email';

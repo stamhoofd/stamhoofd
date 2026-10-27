@@ -1,6 +1,6 @@
 import type { AutoEncoderPatchType } from '@common/encoding';
 import { PatchMap } from '@common/encoding';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
 import { Email, EmailRecipient, GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';

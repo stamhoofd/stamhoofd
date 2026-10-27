@@ -1,7 +1,7 @@
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { isEmptyPatch, PatchableArrayDecoder, StringDecoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import type { Group, Registration } from '@stamhoofd/models';
 import { Member, RateLimiter } from '@stamhoofd/models';

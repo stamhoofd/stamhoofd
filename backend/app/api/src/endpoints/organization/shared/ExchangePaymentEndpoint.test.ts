@@ -1,5 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { OrderFactory, OrganizationFactory, Payment, WebshopFactory } from '@stamhoofd/models';
 import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';

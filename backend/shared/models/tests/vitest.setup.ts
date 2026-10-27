@@ -1,5 +1,5 @@
 import { Column, Database } from '@simonbackx/simple-database';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import { Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';

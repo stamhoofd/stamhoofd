@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { SessionService } from '../../src/services/SessionService.js';

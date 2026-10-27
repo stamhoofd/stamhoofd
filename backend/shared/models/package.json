@@ -45,7 +45,7 @@
         "@bwip-js/node": "4.11.4",
         "@simonbackx/simple-database": "1.40.1",
         "@common/encoding": "workspace:*",
-        "@simonbackx/simple-endpoints": "1.23.0",
+        "@node/endpoints": "workspace:*",
         "@common/errors": "workspace:*",
         "argon2": "0.45.1",
         "base-x": "3.0.11",

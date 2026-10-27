@@ -1,6 +1,6 @@
 import type { Decoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import { StripeAccount } from '@stamhoofd/models';
 import type { PaymentGeneral } from '@stamhoofd/structures';
 import { StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';

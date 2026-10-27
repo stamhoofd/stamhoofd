@@ -2,7 +2,7 @@ import { PatchableArray } from '@common/encoding';
 import { PaymentStatus, PaymentGeneral } from '@stamhoofd/structures';
 import { PatchPaymentsEndpoint } from '../../src/endpoints/organization/dashboard/payments/PatchPaymentsEndpoint.js';
 import { testServer } from '../helpers/TestServer.js';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { initAdmin } from '../init/initAdmin.js';
 

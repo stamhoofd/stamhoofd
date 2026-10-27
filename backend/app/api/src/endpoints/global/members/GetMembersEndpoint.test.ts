@@ -1,5 +1,5 @@
-import type { Endpoint } from '@simonbackx/simple-endpoints';
-import { Request } from '@simonbackx/simple-endpoints';
+import type { Endpoint } from '@node/endpoints';
+import { Request } from '@node/endpoints';
 import type { Group, Member, MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod, Token, User } from '@stamhoofd/models';
 import { CachedBalance, EventFactory, GroupFactory, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecordFactory, OrganizationFactory, OrganizationTagFactory, Platform, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';

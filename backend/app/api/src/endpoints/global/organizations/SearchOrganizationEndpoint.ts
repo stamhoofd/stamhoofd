@@ -1,7 +1,7 @@
 import type { Decoder } from '@common/encoding';
 import { AutoEncoder, field, StringDecoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import { Organization } from '@stamhoofd/models';
 import type { SQLWhere } from '@stamhoofd/sql';
 import { scalarToSQLExpression, SQL, SQLMatch, SQLWhereLike } from '@stamhoofd/sql';

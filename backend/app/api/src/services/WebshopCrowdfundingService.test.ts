@@ -1,6 +1,6 @@
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Organization, StripeAccount, Token } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemFactory, BalanceItemPayment, Order, OrderFactory, OrganizationFactory, Payment, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import type { OrderResponse } from '@stamhoofd/structures';

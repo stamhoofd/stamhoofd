@@ -1,7 +1,7 @@
 import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
 import { isPatch } from '@common/encoding';
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { EmailVerificationCode, Member, PasswordToken, Platform, User } from '@stamhoofd/models';
 import type { UserWithMembers } from '@stamhoofd/structures';

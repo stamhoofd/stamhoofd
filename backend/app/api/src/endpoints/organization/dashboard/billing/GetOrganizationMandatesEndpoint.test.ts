@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
 import { OrganizationFactory, UserFactory } from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';

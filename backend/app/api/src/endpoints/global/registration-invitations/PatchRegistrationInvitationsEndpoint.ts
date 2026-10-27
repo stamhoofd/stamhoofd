@@ -1,7 +1,7 @@
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArrayDecoder, StringDecoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import type { RegistrationInvitation as RegistrationInvitationStruct } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { GroupType, RegistrationInvitationRequest } from '@stamhoofd/structures';

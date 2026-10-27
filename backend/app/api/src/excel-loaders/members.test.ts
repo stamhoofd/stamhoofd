@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { EmergencyContact, Group, GroupPrice, GroupSettings, MemberDetails, MembersBlob, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, Platform, PlatformFamily, Registration, RegistrationPeriod } from '@stamhoofd/structures';

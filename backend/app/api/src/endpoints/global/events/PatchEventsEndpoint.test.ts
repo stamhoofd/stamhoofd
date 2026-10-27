@@ -1,7 +1,7 @@
 import { Database } from '@simonbackx/simple-database';
 import { PatchableArray } from '@common/encoding';
-import type { Endpoint } from '@simonbackx/simple-endpoints';
-import { Request } from '@simonbackx/simple-endpoints';
+import type { Endpoint } from '@node/endpoints';
+import { Request } from '@node/endpoints';
 import type { User } from '@stamhoofd/models';
 import { Event as EventModel, EventFactory, Group as GroupModel, GroupFactory, Organization, OrganizationFactory, OrganizationRegistrationPeriodFactory, Platform, PlatformEventTypeFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';

@@ -1,4 +1,4 @@
-import type { Response, Request, RequestMiddleware, ResponseMiddleware } from '@simonbackx/simple-endpoints';
+import type { Response, Request, RequestMiddleware, ResponseMiddleware } from '@node/endpoints';
 import { isSimpleError, isSimpleErrors } from '@common/errors';
 import { logger, StyledText } from '@simonbackx/simple-logging';
 let requestCounter = 0;

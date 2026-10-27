@@ -37,6 +37,11 @@
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
             "cache": true
         },
+        "@node/endpoints#build": {
+            "dependsOn": ["^build", "build:types"],
+            "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
+            "cache": true
+        },
         "@stamhoofd/test-utils#build": {
             "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],

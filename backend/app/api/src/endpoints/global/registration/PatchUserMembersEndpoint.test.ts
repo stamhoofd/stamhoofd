@@ -1,8 +1,8 @@
 import { Database } from '@simonbackx/simple-database';
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray, PatchMap } from '@common/encoding';
-import type { Endpoint } from '@simonbackx/simple-endpoints';
-import { Request } from '@simonbackx/simple-endpoints';
+import type { Endpoint } from '@node/endpoints';
+import { Request } from '@node/endpoints';
 import { GroupFactory, Member, MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, RegistrationFactory, UserFactory } from '@stamhoofd/models';
 import type { PatchAnswers } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

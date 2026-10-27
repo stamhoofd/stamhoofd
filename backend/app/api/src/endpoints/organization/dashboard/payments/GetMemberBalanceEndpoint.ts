@@ -1,5 +1,5 @@
-import type { DecodedRequest, Request, Response } from '@simonbackx/simple-endpoints';
-import { Endpoint } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request, Response } from '@node/endpoints';
+import { Endpoint } from '@node/endpoints';
 
 import { SimpleError } from '@common/errors';
 

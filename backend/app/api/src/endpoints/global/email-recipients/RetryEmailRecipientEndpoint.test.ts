@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { Member, Organization, Token, User } from '@stamhoofd/models';
 import { Email, EmailRecipient, MemberFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';

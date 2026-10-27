@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { OrganizationFactory, Platform } from '@stamhoofd/models';
 import { v4 as uuidv4 } from 'uuid';
 

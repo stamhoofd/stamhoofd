@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Group, Member, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { Document, DocumentTemplateFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { IDRegisterCart, IDRegisterCheckout, IDRegisterItem, MemberDetails, MemberWithRegistrationsBlob, PaymentMethod } from '@stamhoofd/structures';

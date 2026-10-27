@@ -1,5 +1,5 @@
-import type { DecodedRequest } from '@simonbackx/simple-endpoints';
-import { Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest } from '@node/endpoints';
+import { Response } from '@node/endpoints';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { Organization, Platform, Token, User, Webshop } from '@stamhoofd/models';
 import type { LoginMethod, SessionMetaData, StartOpenIDFlowStruct } from '@stamhoofd/structures';

@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { BalanceItem, Organization, User } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, MemberFactory, OrganizationFactory, Payment, UserFactory } from '@stamhoofd/models';
 import { PaymentMethod, PaymentStatus } from '@stamhoofd/structures';

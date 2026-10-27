@@ -1,5 +1,5 @@
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import { BalanceItemPayment, Payment } from '@stamhoofd/models';
 import { BalanceItem, Member, Organization } from '@stamhoofd/models';
 import { DetailedPayableBalanceCollection, DetailedPayableBalance, PaymentStatus } from '@stamhoofd/structures';

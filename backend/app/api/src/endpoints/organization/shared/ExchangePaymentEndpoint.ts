@@ -1,7 +1,7 @@
 import type { Decoder } from '@common/encoding';
 import { AutoEncoder, BooleanDecoder, field } from '@common/encoding';
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { Order } from '@stamhoofd/models';
 import type { PaymentGeneral } from '@stamhoofd/structures';

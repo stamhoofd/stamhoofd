@@ -1,5 +1,5 @@
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import type { CountFilteredRequest, PrivateOrder, StamhoofdFilter } from '@stamhoofd/structures';
 import { assertSort, getOrderSearchFilter, getSortFilter, LimitedFilteredRequest, PaginatedResponse, PermissionsResourceKey } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

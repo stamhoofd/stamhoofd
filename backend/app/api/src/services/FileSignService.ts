@@ -2,7 +2,7 @@ import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'; // ES Modules i
 import {
     getSignedUrl,
 } from '@aws-sdk/s3-request-presigner';
-import type { DecodedRequest, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { File, supportedFileTypes } from '@stamhoofd/structures';
 import chalk from 'chalk';

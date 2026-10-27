@@ -8,7 +8,7 @@ import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { CountFilteredRequest, EmailStatus, LimitedFilteredRequest, OrganizationEmail, Permissions, PermissionsResourceKey, Replacement, ResourcePermissions } from '@stamhoofd/structures';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
 import { Email, EmailRecipient, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { SessionService } from '../../../services/SessionService.js';
 import { vi } from 'vitest';

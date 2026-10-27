@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Member, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { MemberFactory, MemberPlatformMembership, OrganizationFactory, Platform, RegistrationPeriodFactory } from '@stamhoofd/models';
 import { TestUtils } from '@stamhoofd/test-utils';

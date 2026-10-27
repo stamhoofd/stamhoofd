@@ -1,5 +1,5 @@
 import type { PutObjectCommand } from '@aws-sdk/client-s3';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { Image, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Permissions } from '@stamhoofd/structures';

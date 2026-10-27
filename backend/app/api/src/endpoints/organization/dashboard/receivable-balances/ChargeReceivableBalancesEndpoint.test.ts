@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Token } from '@stamhoofd/models';
 import { BalanceItemFactory, BlockedPaymentMandate, CachedBalance, Organization, OrganizationFactory, Payment } from '@stamhoofd/models';
 import { CountFilteredRequest, MollieOnboarding, MollieStatus, PaymentMethod, PaymentType } from '@stamhoofd/structures';

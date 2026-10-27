@@ -1,5 +1,5 @@
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import { Document, DocumentTemplate, Member } from '@stamhoofd/models';
 import type { Document as DocumentStruct } from '@stamhoofd/structures';
 import { DocumentStatus } from '@stamhoofd/structures';

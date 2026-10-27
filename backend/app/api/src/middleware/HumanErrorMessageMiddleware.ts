@@ -1,4 +1,4 @@
-import type { Request, RequestMiddleware } from '@simonbackx/simple-endpoints';
+import type { Request, RequestMiddleware } from '@node/endpoints';
 import type { SimpleError } from '@common/errors';
 import { isSimpleError, isSimpleErrors } from '@common/errors';
 

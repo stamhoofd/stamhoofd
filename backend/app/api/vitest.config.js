@@ -23,9 +23,9 @@ export default defineConfig({
         server: {
             deps: {
                 inline: [
-                    // @simonbackx/simple-endpoints and @simonbackx/simple-database do async imports inside the package
+                    // @node/endpoints and @simonbackx/simple-database do async imports inside the package
                     // we need to make sure Vitest also adds .ts support there
-                    '@simonbackx/simple-endpoints',
+                    '@node/endpoints',
                     '@simonbackx/simple-database',
                 ],
             },

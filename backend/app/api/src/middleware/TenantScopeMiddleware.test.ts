@@ -1,5 +1,5 @@
-import type { DecodedRequest } from '@simonbackx/simple-endpoints';
-import { Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest } from '@node/endpoints';
+import { Endpoint, Request, Response } from '@node/endpoints';
 import { ROOT_TENANT_ID } from '@stamhoofd/models';
 import { testServer } from '../../tests/helpers/TestServer.js';
 import { TenantContext } from '../helpers/TenantContext.js';

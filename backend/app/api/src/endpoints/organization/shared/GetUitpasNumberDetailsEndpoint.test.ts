@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 
 import { testServer } from '../../../../tests/helpers/TestServer.js';

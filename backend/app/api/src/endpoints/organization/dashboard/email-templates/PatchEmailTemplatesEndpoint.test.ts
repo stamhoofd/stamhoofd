@@ -1,6 +1,6 @@
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray, PatchMap } from '@common/encoding';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { EmailTemplate, GroupFactory, OrganizationFactory, Platform, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

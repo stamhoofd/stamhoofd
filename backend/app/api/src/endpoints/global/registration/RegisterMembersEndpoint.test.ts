@@ -1,5 +1,5 @@
 import { PatchMap } from '@common/encoding';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemFactory, EventFactory, Group, GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Registration, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';

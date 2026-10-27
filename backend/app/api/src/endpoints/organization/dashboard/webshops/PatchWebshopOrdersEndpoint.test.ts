@@ -1,6 +1,6 @@
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { Order, OrganizationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Cart, CartItem, Customer, OrderData, PaymentMethod, Permissions, PrivateOrder, Product, ProductPrice, WebshopMetaData } from '@stamhoofd/structures';

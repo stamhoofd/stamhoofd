@@ -1,4 +1,4 @@
-import { Router, RouterServer } from '@simonbackx/simple-endpoints';
+import { Router, RouterServer } from '@node/endpoints';
 import { LogMiddleware } from '@stamhoofd/backend-middleware';
 import { Country } from '@stamhoofd/types/Country';
 import { Geolocator } from './classes/Geolocator.js';

@@ -1,10 +1,10 @@
 import type {
     DecodedRequest,
-    Request } from '@simonbackx/simple-endpoints';
+    Request } from '@node/endpoints';
 import {
     Endpoint,
     Response,
-} from '@simonbackx/simple-endpoints';
+} from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { Version } from '@stamhoofd/structures';
 import type { FrontendSpecificEnvironment, SharedEnvironment } from '@stamhoofd/types/Environment';

@@ -1,5 +1,5 @@
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Organization, User, Webshop } from '@stamhoofd/models';
 import { OrderFactory, OrganizationFactory, Ticket, TicketFactory, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';

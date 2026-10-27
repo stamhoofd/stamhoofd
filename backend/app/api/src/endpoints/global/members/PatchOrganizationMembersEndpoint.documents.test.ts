@@ -1,7 +1,7 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import type { Endpoint } from '@simonbackx/simple-endpoints';
-import { Request } from '@simonbackx/simple-endpoints';
+import type { Endpoint } from '@node/endpoints';
+import { Request } from '@node/endpoints';
 import type { DocumentTemplate, Group, Member, Organization, Registration } from '@stamhoofd/models';
 import { BalanceItemFactory, Document, DocumentTemplateFactory, GroupFactory, MemberFactory, OrganizationFactory, Platform, RegistrationFactory, UserFactory } from '@stamhoofd/models';
 import { render } from '@stamhoofd/models/helpers/Handlebars.js';

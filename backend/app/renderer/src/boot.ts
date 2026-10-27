@@ -1,4 +1,4 @@
-import { CORSPreflightEndpoint, Router, RouterServer } from '@simonbackx/simple-endpoints';
+import { CORSPreflightEndpoint, Router, RouterServer } from '@node/endpoints';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { CORSMiddleware, LogMiddleware } from '@stamhoofd/backend-middleware';
 import { loadLogger } from '@stamhoofd/logging';

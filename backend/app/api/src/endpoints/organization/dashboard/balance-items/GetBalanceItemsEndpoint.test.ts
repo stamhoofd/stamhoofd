@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { BalanceItemFactory, GroupFactory, MemberFactory, OrderFactory, OrganizationFactory, RegistrationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import type { BalanceItem as BalanceItemStruct, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';

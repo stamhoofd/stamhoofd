@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { MemberFactory, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 
 import { MFATestHelper } from '../../../tests/helpers/MFATestHelper.js';

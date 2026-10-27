@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Group, Member, Organization, User } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationInvitation, RegistrationInvitationFactory, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import type { PaginatedResponse, RegistrationInvitation as RegistrationInvitationStruct, StamhoofdFilter } from '@stamhoofd/structures';

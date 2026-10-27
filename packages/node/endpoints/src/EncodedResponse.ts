@@ -1,4 +1,4 @@
-import { EncodeMedium } from '@simonbackx/simple-encoding';
+import { EncodeMedium } from '@common/encoding';
 import http from 'http';
 
 import { isReadableStream } from './isReadableStream.js';

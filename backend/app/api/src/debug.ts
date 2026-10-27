@@ -1,11 +1,11 @@
 import { Column } from '@simonbackx/simple-database';
-import type { ResponseMiddleware, RouterServer } from '@simonbackx/simple-endpoints';
-import { EncodedResponse, Router } from '@simonbackx/simple-endpoints';
+import type { ResponseMiddleware, RouterServer } from '@node/endpoints';
+import { EncodedResponse, Router } from '@node/endpoints';
 import { logger } from '@simonbackx/simple-logging';
 import { requestPrefix } from '@stamhoofd/backend-middleware';
 
 import { AutoEncoder } from '@common/encoding';
-import type { Request, Response } from '@simonbackx/simple-endpoints';
+import type { Request, Response } from '@node/endpoints';
 import { SQLLogger } from '@stamhoofd/sql';
 import { ContextInstance } from './helpers/Context.js';
 

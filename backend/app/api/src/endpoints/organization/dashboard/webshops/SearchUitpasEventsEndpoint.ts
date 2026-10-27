@@ -1,5 +1,5 @@
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import { UitpasService } from '../../../../services/uitpas/UitpasService.js';
 import type { Decoder } from '@common/encoding';
 import { AutoEncoder, field, StringDecoder } from '@common/encoding';

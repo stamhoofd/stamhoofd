@@ -1,5 +1,5 @@
 import { SimpleError } from '@common/errors';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { Platform } from '@stamhoofd/models';
 import { LoginMethod, LoginMethodConfig, LoginProviderType, OpenIDClientConfiguration, SessionClientType, StartOpenIDFlowStruct } from '@stamhoofd/structures';
 import { afterEach, describe, expect, it, vi } from 'vitest';

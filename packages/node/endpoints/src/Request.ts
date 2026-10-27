@@ -1,5 +1,5 @@
-import { EncodableObject, EncodeMedium, encodeObject } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { EncodableObject, EncodeMedium, encodeObject } from '@common/encoding';
+import { SimpleError } from '@common/errors';
 import http from 'http';
 import urlParser from 'url';
 

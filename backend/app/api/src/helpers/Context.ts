@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { isSimpleError, SimpleError } from '@common/errors';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { MFAToken, Organization, Platform, RateLimiter, Token, User } from '@stamhoofd/models';

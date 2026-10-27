@@ -1,6 +1,6 @@
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { OrganizationFactory, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Permissions, PrivateWebshop, Product, RecordCategory, RecordSettings, RecordType, TranslatedString, WebshopMetaData } from '@stamhoofd/structures';

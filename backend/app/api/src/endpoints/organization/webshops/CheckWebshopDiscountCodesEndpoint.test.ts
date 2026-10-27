@@ -1,5 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { OrganizationFactory, WebshopDiscountCode, WebshopFactory } from '@stamhoofd/models';
 import { Discount } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';

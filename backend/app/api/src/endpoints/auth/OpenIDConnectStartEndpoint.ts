@@ -1,6 +1,6 @@
 import type { Decoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint } from '@node/endpoints';
 import { StartOpenIDFlowStruct } from '@stamhoofd/structures';
 
 import { Context } from '../../helpers/Context.js';
