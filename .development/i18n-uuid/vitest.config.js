@@ -6,7 +6,8 @@ export default defineConfig({
         watch: false,
         globals: true,
         root: import.meta.dirname,
-        isolate: false,
+        // Module mocks must not leak between test files sharing a worker.
+        isolate: true,
         coverage: {
             provider: 'v8',
             include: ['src/**'],
