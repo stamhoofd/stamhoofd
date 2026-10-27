@@ -1230,8 +1230,8 @@ importers:
         specifier: 1.105.2
         version: 1.105.2
       vite-svg-2-webfont:
-        specifier: 8.4.0
-        version: 8.4.0(vite@8.3.4(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.2)(terser@5.51.2)(yaml@2.9.0))
+        specifier: 8.5.0
+        version: 8.5.0(vite@8.3.4(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.2)(terser@5.51.2)(yaml@2.9.0))
 
   frontend/app/admin:
     dependencies:
@@ -2591,8 +2591,8 @@ importers:
         specifier: 8.3.4
         version: 8.3.4(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.2)(terser@5.51.2)(yaml@2.9.0)
       vite-svg-2-webfont:
-        specifier: 8.4.0
-        version: 8.4.0(vite@8.3.4(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.2)(terser@5.51.2)(yaml@2.9.0))
+        specifier: 8.5.0
+        version: 8.5.0(vite@8.3.4(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.2)(terser@5.51.2)(yaml@2.9.0))
       vitest:
         specifier: 4.1.12
         version: 4.1.12(@opentelemetry/api@1.9.1)(@types/node@22.20.4)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@24.1.3(supports-color@5.5.0))(vite@8.3.4(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.2)(terser@5.51.2)(yaml@2.9.0))
@@ -3013,57 +3013,57 @@ packages:
   '@asamuzakjp/css-color@3.2.0':
     resolution: {integrity: sha512-K1A6z8tS3XsmCMM86xoWdn7Fkdn9m6RSVtocUrJYIwZnFVkng/PvkEoWtOWmP+Scc6saYWHWZYbndEEXxl24jw==}
 
-  '@atlowchemi/webfont-generator-darwin-arm64@0.9.0':
-    resolution: {integrity: sha512-Yde1o55iypovc2QDBnMqCYLJcQeyLi8vWT9amaP9pbQ9zRpRo4RZFe92WVvK+yVf7L8GMI8rWbV4RZ0UPPhsPA==}
+  '@atlowchemi/webfont-generator-darwin-arm64@0.10.0':
+    resolution: {integrity: sha512-W28R+myXwf9maG7Miwt5pmt9iabtzr9EBQwTe16R+Ivm/tnuNKiVDn8Wb4aGNc+IYxfNiEAak0KaumXgT60NHw==}
     cpu: [arm64]
     os: [darwin]
 
-  '@atlowchemi/webfont-generator-darwin-x64@0.9.0':
-    resolution: {integrity: sha512-SQ8Rz5YdL7VeeniaqMQVuA2lVYNgWvQILlO8bAk/fyGmv0QojDbfrvz8ykTvv/tIQgUPsGQwvzT046zjoVWxPw==}
+  '@atlowchemi/webfont-generator-darwin-x64@0.10.0':
+    resolution: {integrity: sha512-lwHT6mb99jDgyaNXWQ5/lQT3QS2EO/0m0E/p36QeENTq4r9dH9qPfWWFlLuwBIk7Kq+MuiZ5JpQMOBaGM9YydA==}
     cpu: [x64]
     os: [darwin]
 
-  '@atlowchemi/webfont-generator-linux-arm-gnueabihf@0.9.0':
-    resolution: {integrity: sha512-WXUp3SzWQE0O371s40soBLPrIeRvVgZK41d8BXv2go5sum7JOo0RnBJp6oyprHQuy1Qql8JHaTdKAoeVh9N55g==}
+  '@atlowchemi/webfont-generator-linux-arm-gnueabihf@0.10.0':
+    resolution: {integrity: sha512-L/snxeCpEuOVnhCMjK9r83+nObgC1vGr5yrjKerl6VyE2hxbo8Shs5ePZe4jKSOYfaIO0Yf0XHHzR2HqQ/fzgw==}
     cpu: [arm]
     os: [linux]
 
-  '@atlowchemi/webfont-generator-linux-arm64-gnu@0.9.0':
-    resolution: {integrity: sha512-X2xXCkMJe5zo3hwnDXGE9ji9qOrHL/WILhbOSAxXdoAuuEf5JTDIWyxjeNIOheTUk6fxTCnp81ZpCovJjtxEqg==}
+  '@atlowchemi/webfont-generator-linux-arm64-gnu@0.10.0':
+    resolution: {integrity: sha512-1Lw8iTGEn4D6UZ9DUp8Ah/DE5fEhLewFeKL6R+5iqgBUaqMfMs97AOEKb9Lpw1uV+XnQKxDoXxU9waulZb70TA==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@atlowchemi/webfont-generator-linux-arm64-musl@0.9.0':
-    resolution: {integrity: sha512-S+pMBBbkJswRbJ30I6mDeIqJ7qG0SPUP2FRcRByFuRWqswTlyJ+u7xAaU2yPSjRtOnglBq6XamNlQqeveJa7bw==}
+  '@atlowchemi/webfont-generator-linux-arm64-musl@0.10.0':
+    resolution: {integrity: sha512-3JIg/m8jztnYOAufJxPQja187Y/jq2oXgvyxluDJ3zlOZjs3O39wLJdKxAVeQU3fX4FocH8ziJEwhcOaptKE8w==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@atlowchemi/webfont-generator-linux-x64-gnu@0.9.0':
-    resolution: {integrity: sha512-yQLtoMqhdbhAA2ChPAog/01Zwencd4RuCC9tCReEiVuhLKzXUR/HekSD+V3JIy0tE7owH2tl2YU4PU6Dok3wEg==}
+  '@atlowchemi/webfont-generator-linux-x64-gnu@0.10.0':
+    resolution: {integrity: sha512-z4a44VgkfHa+QZwkFxkBZM1t9DHhxx3RtsVrAMpMon6tTg8x6950+sLRriNvPzMYZM6OhqdnMt59Sq2orrJGFw==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@atlowchemi/webfont-generator-linux-x64-musl@0.9.0':
-    resolution: {integrity: sha512-XYwoz03nQG9TTeZ0lGKYJtWAyiRF72rqvxKySvWukKoAhKt6saClTMKiSGAxYIFpUBEwlBR1IkRClxv0R31RYA==}
+  '@atlowchemi/webfont-generator-linux-x64-musl@0.10.0':
+    resolution: {integrity: sha512-9cwQCQh7VCBNbbGOV0aG51hbQsmtNaN3h1VTQsQ0ruzCDhj8fPnQrwRBtwo6097KR8f0UxER4sypK0iOGiu8Hw==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@atlowchemi/webfont-generator-win32-arm64-msvc@0.9.0':
-    resolution: {integrity: sha512-W4/LnHkzg94E3f8pofHLimGDgeHqvTAqVTDD7Pk71fED6idcMhPk+OtdwA5jBPk9EPNo/DEm13Fvr2kvfH6qdg==}
+  '@atlowchemi/webfont-generator-win32-arm64-msvc@0.10.0':
+    resolution: {integrity: sha512-wTtsVJp3ucc3SXPMI9iQmQfQenxY3lcDrKxiSRk9hSyHJF+67SgA0GNxNGzlKEH/oTpbZ7+ozMcMNo89NTPxng==}
     cpu: [arm64]
     os: [win32]
 
-  '@atlowchemi/webfont-generator-win32-x64-msvc@0.9.0':
-    resolution: {integrity: sha512-+sc6uOZjDsniHzMne1vGczSqkHecDFenEtWHKL/ZPY5w36kaa8nloQWt/TrAWRJe6q3u0rwuqnofPfGcIpp9NA==}
+  '@atlowchemi/webfont-generator-win32-x64-msvc@0.10.0':
+    resolution: {integrity: sha512-2+uC7VRfY04zKAXZEPES17G8f8retP0xWu0nVCwVdg9LdXOdaoMl2ZrYGoFBmVYsoZ8/YeCiH+YFz0zlFQML/Q==}
     cpu: [x64]
     os: [win32]
 
-  '@atlowchemi/webfont-generator@0.9.0':
-    resolution: {integrity: sha512-c8HFPgZTtZEWv3IGi+p5P5LO6Wl0R9XCH3pyzZSCe7V3bJWsJER76GQyP77g3jsw/wQbntF0Hh+i+IRZ/x0lfg==}
+  '@atlowchemi/webfont-generator@0.10.0':
+    resolution: {integrity: sha512-6S1wFQ3a6Uj/8gakAXSdEBVRhkh9IqtOTsCGWSRyefL39cSFLsrN1o0ZGV32kFkWybV51xgsJ16+3Q6Zvlhgtw==}
 
   '@aws-sdk/checksums@3.1001.4':
     resolution: {integrity: sha512-H8BiG/2DnfwydVxD1uDPLa1s1sfhRnVTbD2OwzfTr3WlJzgbIzICDXxBTlTMjbWNNCe4VS9X55fco+JI34L9kw==}
@@ -14111,8 +14111,8 @@ packages:
       vite: ^6.0.0 || ^7.0.0 || ^8.0.0-0
       vue: 3.5.44
 
-  vite-svg-2-webfont@8.4.0:
-    resolution: {integrity: sha512-MJkpHi8BKetqAVMTtn9y8MNYi2Og4nBSBF6VTBXDWqe6awdoIIMuXqy7pKhrXxyMfqyP9AWs5pHOWGjMdXrgiQ==}
+  vite-svg-2-webfont@8.5.0:
+    resolution: {integrity: sha512-4zKWH/zU2SuXgWPgJS7SCLAdJ2C6Oq8VwQBe1ezlgYPTsWydGojWxYMMYahIQKBQLYwo/04uA4c91IZewBCVHg==}
     engines: {node: ^22 || ^24 || >=26}
     peerDependencies:
       vite: ^6.0.0  || ^7.0.0 || ^8.0.0
@@ -14671,44 +14671,44 @@ snapshots:
       '@csstools/css-tokenizer': 3.0.4
       lru-cache: 10.4.3
 
-  '@atlowchemi/webfont-generator-darwin-arm64@0.9.0':
+  '@atlowchemi/webfont-generator-darwin-arm64@0.10.0':
     optional: true
 
-  '@atlowchemi/webfont-generator-darwin-x64@0.9.0':
+  '@atlowchemi/webfont-generator-darwin-x64@0.10.0':
     optional: true
 
-  '@atlowchemi/webfont-generator-linux-arm-gnueabihf@0.9.0':
+  '@atlowchemi/webfont-generator-linux-arm-gnueabihf@0.10.0':
     optional: true
 
-  '@atlowchemi/webfont-generator-linux-arm64-gnu@0.9.0':
+  '@atlowchemi/webfont-generator-linux-arm64-gnu@0.10.0':
     optional: true
 
-  '@atlowchemi/webfont-generator-linux-arm64-musl@0.9.0':
+  '@atlowchemi/webfont-generator-linux-arm64-musl@0.10.0':
     optional: true
 
-  '@atlowchemi/webfont-generator-linux-x64-gnu@0.9.0':
+  '@atlowchemi/webfont-generator-linux-x64-gnu@0.10.0':
     optional: true
 
-  '@atlowchemi/webfont-generator-linux-x64-musl@0.9.0':
+  '@atlowchemi/webfont-generator-linux-x64-musl@0.10.0':
     optional: true
 
-  '@atlowchemi/webfont-generator-win32-arm64-msvc@0.9.0':
+  '@atlowchemi/webfont-generator-win32-arm64-msvc@0.10.0':
     optional: true
 
-  '@atlowchemi/webfont-generator-win32-x64-msvc@0.9.0':
+  '@atlowchemi/webfont-generator-win32-x64-msvc@0.10.0':
     optional: true
 
-  '@atlowchemi/webfont-generator@0.9.0':
+  '@atlowchemi/webfont-generator@0.10.0':
     optionalDependencies:
-      '@atlowchemi/webfont-generator-darwin-arm64': 0.9.0
-      '@atlowchemi/webfont-generator-darwin-x64': 0.9.0
-      '@atlowchemi/webfont-generator-linux-arm-gnueabihf': 0.9.0
-      '@atlowchemi/webfont-generator-linux-arm64-gnu': 0.9.0
-      '@atlowchemi/webfont-generator-linux-arm64-musl': 0.9.0
-      '@atlowchemi/webfont-generator-linux-x64-gnu': 0.9.0
-      '@atlowchemi/webfont-generator-linux-x64-musl': 0.9.0
-      '@atlowchemi/webfont-generator-win32-arm64-msvc': 0.9.0
-      '@atlowchemi/webfont-generator-win32-x64-msvc': 0.9.0
+      '@atlowchemi/webfont-generator-darwin-arm64': 0.10.0
+      '@atlowchemi/webfont-generator-darwin-x64': 0.10.0
+      '@atlowchemi/webfont-generator-linux-arm-gnueabihf': 0.10.0
+      '@atlowchemi/webfont-generator-linux-arm64-gnu': 0.10.0
+      '@atlowchemi/webfont-generator-linux-arm64-musl': 0.10.0
+      '@atlowchemi/webfont-generator-linux-x64-gnu': 0.10.0
+      '@atlowchemi/webfont-generator-linux-x64-musl': 0.10.0
+      '@atlowchemi/webfont-generator-win32-arm64-msvc': 0.10.0
+      '@atlowchemi/webfont-generator-win32-x64-msvc': 0.10.0
 
   '@aws-sdk/checksums@3.1001.4':
     dependencies:
@@ -28639,9 +28639,9 @@ snapshots:
       vite: 8.3.4(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.2)(terser@5.51.2)(yaml@2.9.0)
       vue: 3.5.44(typescript@6.0.3)
 
-  vite-svg-2-webfont@8.4.0(vite@8.3.4(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.2)(terser@5.51.2)(yaml@2.9.0)):
+  vite-svg-2-webfont@8.5.0(vite@8.3.4(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.2)(terser@5.51.2)(yaml@2.9.0)):
     dependencies:
-      '@atlowchemi/webfont-generator': 0.9.0
+      '@atlowchemi/webfont-generator': 0.10.0
       vite: 8.3.4(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.2)(terser@5.51.2)(yaml@2.9.0)
 
   vite@8.3.4(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.2)(terser@5.51.2)(yaml@2.9.0):
