@@ -1,0 +1,24 @@
+{
+    // File used for test files.
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "outDir": "./dist/test",
+        "types": [
+            "node",
+            "vitest/globals"
+        ]
+    },
+    "references": [
+        // Give access to build
+        {
+            "path": "./tsconfig.esm.json"
+        }
+    ],
+    "include": [
+        "./src/**/*.spec.ts",
+        "./src/**/*.test.ts",
+        "./tests",
+    ]
+}
