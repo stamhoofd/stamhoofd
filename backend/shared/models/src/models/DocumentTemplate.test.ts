@@ -1,8 +1,35 @@
-import { DocumentStatus, NationalRegisterNumberOptOut, Parent } from '@stamhoofd/structures';
+import { DocumentStatus, GroupSettings, MemberDetails, NationalRegisterNumberOptOut, Parent, RecordCategory, RecordSettings, RecordType, TranslatedString } from '@stamhoofd/structures';
 import { DocumentTemplateFactory } from '../factories/DocumentTemplateFactory.js';
 import { getTaxDependentDebtors, splitPrice } from './DocumentTemplate.js';
+import { Group } from './Group.js';
+import { Member } from './Member.js';
+import { Registration } from './Registration.js';
 
 describe('Model.DocumentTemplate', () => {
+    it('clones linked default answers and retains built-in answers not listed in the template', async () => {
+        const group = new Group();
+        group.id = 'group';
+        group.organizationId = 'organization';
+        group.settings = GroupSettings.create({ name: TranslatedString.create('Camp') });
+        const member = new Member();
+        member.details = MemberDetails.create({ firstName: 'Jane', lastName: 'Doe' });
+        const registration = Object.assign(new Registration(), { member, group, groupId: group.id });
+        const template = await new DocumentTemplateFactory({ groups: [group] }).createWithoutSave();
+        const requiredUnknown = RecordSettings.create({ id: 'unknown', type: RecordType.Text, required: true });
+        template.privateSettings.templateDefinition.documentFieldCategories.push(RecordCategory.create({ records: [requiredUnknown] }));
+
+        const { fieldAnswers, missingData } = await template.buildAnswers(registration, { balance: { items: [], payments: [], balanceItemPayments: [] } });
+
+        expect(fieldAnswers.get('member.firstName')?.objectValue).toBe('Jane');
+        expect(fieldAnswers.get('renamedValue')?.objectValue).toBe('Jane');
+        expect(fieldAnswers.get('renamedValue')).not.toBe(fieldAnswers.get('member.firstName'));
+        expect(fieldAnswers.get('renamedValue')?.settings.id).toBe('renamedValue');
+        expect(fieldAnswers.get('member.firstName')?.settings.id).toBe('member.firstName');
+        expect(fieldAnswers.get('registration.priceOriginal')?.objectValue).toBe(0);
+        expect(fieldAnswers.get('unknown')?.isEmpty).toBe(true);
+        expect(missingData).toBe(true);
+    });
+
     it('PublishedAt should be set if status is published and publishedAt is null', async () => {
         const documentTemplate = await new DocumentTemplateFactory({
             status: DocumentStatus.Published,

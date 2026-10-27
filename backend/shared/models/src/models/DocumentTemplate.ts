@@ -263,7 +263,8 @@ export class DocumentTemplate extends QueryableModel {
     }
 
     /**
-     * Returns the default answers for a given registration. With a split, the prices are the share of that debtor.
+     * Returns answers keyed by template field ID for a registration. Built-in defaults are looked up by
+     * linked-field ID and cloned before applying template settings. With a split, prices are that debtor's share.
      */
     async buildAnswers(registration: RegistrationWithMember, options: { balance?: RegistrationBalance; debtors?: DocumentDebtor[]; split?: DocumentSplit } = {}): Promise<{ fieldAnswers: Map<string, RecordAnswer>; missingData: boolean }> {
         const fieldAnswers = new Map<string, RecordAnswer>();
@@ -291,70 +292,70 @@ export class DocumentTemplate extends QueryableModel {
         const paidAt = paidAtDates.length ? new Date(Math.min(...paidAtDates)) : null;
 
         // Some fields are supported by default in linked fields
-        const defaultData: Record<string, RecordAnswer> = {
-            'group.name': RecordTextAnswer.create({
+        const defaultData = new Map<string, RecordAnswer>([
+            ['group.name', RecordTextAnswer.create({
                 settings: RecordSettings.create({
                     id: 'group.name',
                     type: RecordType.Text,
                 }),
                 value: group?.settings?.name?.toString() ?? '',
-            }),
-            'group.type': RecordTextAnswer.create({
+            })],
+            ['group.type', RecordTextAnswer.create({
                 settings: RecordSettings.create({
                     id: 'group.type',
                     type: RecordType.Text,
                 }), // settings will be overwritten
                 value: group?.type ?? '',
-            }),
-            'registration.startDate': RecordDateAnswer.create({
+            })],
+            ['registration.startDate', RecordDateAnswer.create({
                 settings: RecordSettings.create({
                     id: 'registration.startDate',
                     type: RecordType.Date,
                 }), // settings will be overwritten
                 dateValue: period.startDate,
-            }),
-            'registration.endDate': RecordDateAnswer.create({
+            })],
+            ['registration.endDate', RecordDateAnswer.create({
                 settings: RecordSettings.create({
                     id: 'registration.endDate',
                     type: RecordType.Date,
                 }), // settings will be overwritten
                 dateValue: period.endDate,
-            }),
-            'registration.price':
+            })],
+            ['registration.price',
                 RecordPriceAnswer.create({
                     settings: RecordSettings.create({
                         id: 'registration.price',
                         type: RecordType.Price,
                     }), // settings will be overwritten
                     value: price,
-                }),
+                })],
             // This one is duplicated in case it got disabled (we need to use it to check if document is included), so it is never split
-            'registration.priceOriginal':
+            ['registration.priceOriginal',
                 RecordPriceAnswer.create({
                     settings: RecordSettings.create({
                         id: 'registration.priceOriginal',
                         type: RecordType.Price,
                     }), // settings will be overwritten
                     value: totalPrice,
-                }),
+                })],
             // This one is duplicated in case it got disabled (we need to use it to check if document is included), so it is never split
-            'registration.pricePaidOriginal':
+            ['registration.pricePaidOriginal',
                 RecordPriceAnswer.create({
                     settings: RecordSettings.create({
                         id: 'registration.pricePaidOriginal',
                         type: RecordType.Price,
                     }), // settings will be overwritten
                     value: totalPricePaid,
-                }),
-            'registration.pricePaid':
+                })],
+            ['registration.pricePaid',
                 RecordPriceAnswer.create({
                     settings: RecordSettings.create({
                         id: 'registration.pricePaid',
                         type: RecordType.Price,
                     }), // settings will be overwritten
                     value: pricePaid,
-                }),
-            'registration.paidAt':
+                })],
+            ['registration.paidAt',
                 RecordDateAnswer.create({
                     settings: RecordSettings.create({
                         id: 'registration.paidAt',
@@ -362,72 +363,72 @@ export class DocumentTemplate extends QueryableModel {
                         required: false,
                     }), // settings will be overwritten
                     dateValue: paidAt,
-                }),
-            'member.firstName': RecordTextAnswer.create({
+                })],
+            ['member.firstName', RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.firstName,
-            }),
-            'member.lastName': RecordTextAnswer.create({
+            })],
+            ['member.lastName', RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.lastName,
-            }),
-            'member.nationalRegisterNumber': RecordTextAnswer.create({
+            })],
+            ['member.nationalRegisterNumber', RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.nationalRegisterNumber === NationalRegisterNumberOptOut ? null : registration.member.details.nationalRegisterNumber,
-            }),
-            'member.address': RecordAddressAnswer.create({
+            })],
+            ['member.address', RecordAddressAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 address: registration.member.details.address ?? registration.member.details.getAllAddresses()[0] ?? null,
-            }),
-            'member.email': RecordTextAnswer.create({
+            })],
+            ['member.email', RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.getMemberEmails()[0] ?? registration.member.details.getParentEmails()[0],
-            }),
-            'member.birthDay': RecordDateAnswer.create({
+            })],
+            ['member.birthDay', RecordDateAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 dateValue: registration.member.details.birthDay,
-            }),
-            'parents[0].firstName': RecordTextAnswer.create({
+            })],
+            ['parents[0].firstName', RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.parents[0]?.firstName,
-            }),
-            'parents[0].lastName': RecordTextAnswer.create({
+            })],
+            ['parents[0].lastName', RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.parents[0]?.lastName,
-            }),
-            'parents[0].nationalRegisterNumber': RecordTextAnswer.create({
+            })],
+            ['parents[0].nationalRegisterNumber', RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.parents[0]?.nationalRegisterNumber === NationalRegisterNumberOptOut ? null : registration.member.details.parents[0]?.nationalRegisterNumber,
-            }),
-            'parents[0].address': RecordAddressAnswer.create({
+            })],
+            ['parents[0].address', RecordAddressAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 address: registration.member.details.parents[0]?.address ?? null,
-            }),
-            'parents[0].email': RecordTextAnswer.create({
+            })],
+            ['parents[0].email', RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.parents[0]?.email ?? null,
-            }),
-            'parents[1].firstName': RecordTextAnswer.create({
+            })],
+            ['parents[1].firstName', RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.parents[1]?.firstName,
-            }),
-            'parents[1].lastName': RecordTextAnswer.create({
+            })],
+            ['parents[1].lastName', RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.parents[1]?.lastName,
-            }),
-            'parents[1].nationalRegisterNumber': RecordTextAnswer.create({
+            })],
+            ['parents[1].nationalRegisterNumber', RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.parents[1]?.nationalRegisterNumber === NationalRegisterNumberOptOut ? null : registration.member.details.parents[1]?.nationalRegisterNumber,
-            }),
-            'parents[1].address': RecordAddressAnswer.create({
+            })],
+            ['parents[1].address', RecordAddressAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 address: registration.member.details.parents[1]?.address ?? null,
-            }),
-            'parents[1].email': RecordTextAnswer.create({
+            })],
+            ['parents[1].email', RecordTextAnswer.create({
                 settings: RecordSettings.create({}), // settings will be overwritten
                 value: registration.member.details.parents[1]?.email ?? null,
-            }),
-        };
+            })],
+        ]);
 
         const allRecords = this.privateSettings.templateDefinition.documentFieldCategories.flatMap(c => c.getAllRecords());
 
@@ -439,28 +440,26 @@ export class DocumentTemplate extends QueryableModel {
                 missingData = true;
             }
 
-            Object.assign(defaultData, {
-                'debtor.firstName': RecordTextAnswer.create({
-                    settings: RecordSettings.create({}), // settings will be overwritten
-                    value: debtor?.firstName ?? '',
-                }),
-                'debtor.lastName': RecordTextAnswer.create({
-                    settings: RecordSettings.create({}), // settings will be overwritten
-                    value: debtor?.lastName ?? '',
-                }),
-                'debtor.nationalRegisterNumber': RecordTextAnswer.create({
-                    settings: RecordSettings.create({}), // settings will be overwritten
-                    value: debtor?.nationalRegisterNumber === NationalRegisterNumberOptOut ? '' : debtor?.nationalRegisterNumber,
-                }),
-                'debtor.address': RecordAddressAnswer.create({
-                    settings: RecordSettings.create({}), // settings will be overwritten
-                    address: debtor?.address ?? null,
-                }),
-                'debtor.email': RecordTextAnswer.create({
-                    settings: RecordSettings.create({}), // settings will be overwritten
-                    value: debtor?.email ?? null,
-                }),
-            });
+            defaultData.set('debtor.firstName', RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: debtor?.firstName ?? '',
+            }));
+            defaultData.set('debtor.lastName', RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: debtor?.lastName ?? '',
+            }));
+            defaultData.set('debtor.nationalRegisterNumber', RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: debtor?.nationalRegisterNumber === NationalRegisterNumberOptOut ? '' : debtor?.nationalRegisterNumber,
+            }));
+            defaultData.set('debtor.address', RecordAddressAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                address: debtor?.address ?? null,
+            }));
+            defaultData.set('debtor.email', RecordTextAnswer.create({
+                settings: RecordSettings.create({}), // settings will be overwritten
+                value: debtor?.email ?? null,
+            }));
         }
 
         // Add data that is different for each member
@@ -505,10 +504,11 @@ export class DocumentTemplate extends QueryableModel {
                         }
 
                         // Check if supported by default
-                        if (defaultData[linkedToMemberAnswerSettingsId] && !defaultData[linkedToMemberAnswerSettingsId].isEmpty) {
-                            if (defaultData[linkedToMemberAnswerSettingsId] instanceof RecordAnswerDecoder.getClassForType(field.type)) {
+                        const defaultAnswer = defaultData.get(linkedToMemberAnswerSettingsId);
+                        if (defaultAnswer && !defaultAnswer.isEmpty) {
+                            if (defaultAnswer instanceof RecordAnswerDecoder.getClassForType(field.type)) {
                                 // We need to clone here, because the same default data can be used in multiple places
-                                const clone = defaultData[linkedToMemberAnswerSettingsId].clone();
+                                const clone = defaultAnswer.clone();
                                 clone.settings = field;
 
                                 found = true;
@@ -537,9 +537,9 @@ export class DocumentTemplate extends QueryableModel {
         }
 
         // Add other default data
-        for (const key in defaultData) {
-            if (defaultData[key] && defaultData[key].settings.id === key && !fieldAnswers.get(key)) {
-                fieldAnswers.set(key, defaultData[key]);
+        for (const [key, answer] of defaultData) {
+            if (answer.settings.id === key && !fieldAnswers.get(key)) {
+                fieldAnswers.set(key, answer);
             }
         }
 
