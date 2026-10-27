@@ -11,6 +11,8 @@
                 </template>
 
                 <template #right>
+                    <!-- Also on mobile, where the buttons slot moves to the toolbar at the bottom -->
+                    <slot name="navigation-buttons" />
                     <template v-if="!$isMobile && !$isPhone">
                         <slot name="buttons" />
                     </template>

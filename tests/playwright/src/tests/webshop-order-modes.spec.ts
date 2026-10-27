@@ -196,6 +196,27 @@ test.describe('Webshop order modes @webshop-order-modes', () => {
         expect(await Order.select().where('webshopId', webshop.id).fetch()).toHaveLength(0);
     });
 
+    test('Without room next to the settings, the preview opens from the navigation bar', async ({ page }) => {
+        // The width of a phone: the view moves its other buttons to the toolbar at the bottom
+        await page.setViewportSize({ width: 390, height: 844 });
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Preview smal ${WorkerData.id}`,
+            productCount: 2,
+            cartEnabled: true,
+        });
+
+        await openProductOffer(page, organization, webshop);
+        await page.getByTestId('order-mode-bulk').click();
+        await expect(page.locator('.webshop-preview-card')).toBeHidden();
+
+        // Not saved yet: the popup shows the changed settings
+        const previewButton = page.locator('.st-navigation-bar-container').getByTestId('webshop-preview-button');
+        await previewButton.click();
+        await expect(page.frameLocator('.webshop-full-preview-view iframe').getByTestId('bulk-product-row')).toHaveCount(2, { timeout: 20000 });
+    });
+
     test('A form keeps showing the settings it already used', async ({ page }) => {
         const organization = await createOrganization();
         const { webshop } = await TestWebshops.create({
@@ -278,6 +299,52 @@ test.describe('Webshop order modes @webshop-order-modes', () => {
         await preview.getByRole('button', { name: 'Terug' }).click();
         await expect(preview.getByTestId('product-box')).toHaveCount(2);
         await expect(preview.getByTestId('bulk-product-row')).toHaveCount(0);
+    });
+
+    test('The preview drops the extra pieces when switching to one at a time', async ({ page }) => {
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Preview single ${WorkerData.id}`,
+            orderMode: WebshopOrderMode.Bulk,
+        });
+
+        await openProductOffer(page, organization, webshop);
+        const preview = page.frameLocator('.webshop-preview-card iframe');
+        await expect(preview.getByTestId('bulk-product-row')).toHaveCount(1, { timeout: 20000 });
+
+        await preview.getByTestId('bulk-amount').fill('5');
+        await preview.getByTestId('bulk-amount').blur();
+        await expect(preview.getByTestId('bulk-amount')).toHaveValue('5');
+
+        await page.getByTestId('order-mode-single').click();
+        const form = preview.getByTestId('cart-item-view');
+        await expect(form).toBeVisible();
+        await expect(form).not.toContainText('Je hebt het maximaal aantal stuks bereikt');
+        await expect(form.getByTestId('save-button')).toBeVisible();
+    });
+
+    test('A saved cart with several pieces becomes one piece when the webshop orders one at a time', async ({ page }) => {
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Wissel ${WorkerData.id}`,
+            orderMode: WebshopOrderMode.Bulk,
+        });
+
+        await page.goto(WorkerData.urls.webshopUri(webshop.uri));
+        await page.getByTestId('bulk-amount').fill('5');
+        await page.getByTestId('bulk-amount').blur();
+        await expect(page.getByTestId('bulk-amount')).toHaveValue('5');
+
+        webshop.meta.orderMode = WebshopOrderMode.Single;
+        await webshop.save();
+
+        await page.reload();
+        const form = page.getByTestId('cart-item-view');
+        await expect(form).toBeVisible({ timeout: 15000 });
+        await expect(form).not.toContainText('Je hebt het maximaal aantal stuks bereikt');
+        await expect(form.getByTestId('save-button')).toBeVisible();
     });
 
     test('One at a time with several products: the visitor picks one, which opens as a step when it has choices', async ({ page }) => {

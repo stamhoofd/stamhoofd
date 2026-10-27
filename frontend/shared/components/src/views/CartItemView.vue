@@ -13,6 +13,9 @@
             <h1 v-if="!embedded">
                 {{ cartItem.product.name }}
             </h1>
+            <h2 v-else-if="showTitle" class="larger">
+                {{ cartItem.product.name }}
+            </h2>
 
             <ImageGallery :images="images" />
             <p v-if="cartItem.product.description" class="description" v-text="cartItem.product.description" />
@@ -153,15 +156,16 @@
                 </div>
             </template>
 
-            <div v-if="!cartEnabled && (pricedCheckout.priceBreakown.length > 1 || pricedCheckout.totalPrice > 0)" class="pricing-box max">
+            <div v-if="!cartEnabled && buttonPrice === null && (pricedCheckout.priceBreakown.length > 1 || pricedCheckout.totalPrice > 0)" class="pricing-box max">
                 <PriceBreakdownBox :price-breakdown="pricedCheckout.priceBreakown" />
             </div>
 
             <div v-if="canOrder && embedded" class="style-button-bar">
-                <LoadingButton :loading="loading">
-                    <button class="button primary" type="submit" data-testid="save-button">
+                <LoadingButton :loading="loading" class="max">
+                    <button class="button primary full" type="submit" data-testid="save-button">
                         <span v-if="saveButton.iconLeft" :class="'icon ' + saveButton.iconLeft" />
                         <span>{{ saveButton.text }}</span>
+                        <span v-if="buttonPrice" class="button-total">{{ formatPrice(buttonPrice) }}</span>
                         <span v-if="saveButton.iconRight" :class="'icon ' + saveButton.iconRight" />
                     </button>
                 </LoadingButton>
@@ -174,6 +178,7 @@
                     <button class="button primary" type="submit" data-testid="save-button">
                         <span v-if="saveButton.iconLeft" :class="'icon ' + saveButton.iconLeft" />
                         <span>{{ saveButton.text }}</span>
+                        <span v-if="buttonPrice" class="button-total">{{ formatPrice(buttonPrice) }}</span>
                         <span v-if="saveButton.iconRight" :class="'icon ' + saveButton.iconRight" />
                     </button>
                 </LoadingButton>
@@ -234,6 +239,10 @@ const props = withDefaults(defineProps<{
      */
     embedded?: boolean;
     /**
+     * Embedded only: still show the product name, e.g. when the form is in a column next to the content of the page
+     */
+    showTitle?: boolean;
+    /**
      * Live editing: every change is passed to this handler right away (e.g. to store the cart), so nothing is lost
      * when the page reloads and closing never asks to discard changes.
      * Pass the item that is in the cart as both `cartItem` and `oldItem`, so it is edited in place.
@@ -244,6 +253,7 @@ const props = withDefaults(defineProps<{
     oldItem: null,
     isPreview: false,
     embedded: false,
+    showTitle: false,
     liveSaveHandler: null,
 });
 
@@ -453,6 +463,19 @@ const saveButton = computed(() => {
     // Without a cart, saving the item starts the order
     return { iconLeft: null, text: getOrderButtonText(props.webshop, pricedCheckout.value.totalPrice), iconRight: 'arrow-right' };
 });
+const buttonPrice = computed(() => {
+    if (props.admin || willNeedSeats.value) {
+        return null;
+    }
+    if (cartEnabled.value) {
+        return pricedItem.value.getPriceWithDiscounts();
+    }
+    // The total is only shown separately when other costs (e.g. administration fees or delivery) need to be listed
+    if (pricedCheckout.value.priceBreakown.length > 1) {
+        return null;
+    }
+    return pricedCheckout.value.totalPrice;
+});
 const withSeats = computed(() => props.cartItem.product.seatingPlanId !== null);
 const suffixSingular = computed(() => {
     if (props.cartItem.product.type === ProductType.Ticket) {
@@ -647,10 +670,21 @@ defineExpose({
         padding-top: 15px;
     }
 
+    .button-total {
+        opacity: 0.7;
+        padding-left: 5px;
+    }
+
     // Embedded without a title: no line above the first part of the form (e.g. the prices) when nothing precedes it
     &.embedded > .container > .st-errors-default:first-child + hr,
     &.embedded > .container > .st-errors-default:first-child + .container > hr:first-child {
         display: none;
+    }
+
+    // Embedded right below the title, or without a title (the spacing above the form is set by the parent, like for a list of products)
+    &.embedded > .container > .st-errors-default:first-child + .info,
+    &.embedded > .container > h2:first-child + .st-errors-default + .info {
+        padding-top: 0;
     }
 }
 

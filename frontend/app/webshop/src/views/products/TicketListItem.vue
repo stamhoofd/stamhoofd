@@ -6,7 +6,7 @@
         </h3>
         <p v-if="isSingle && order" class="description" v-text="$t('%x3')+order.number" />
         <p v-if="isSingle && order" class="description" v-text="order.data.customer.name" />
-        <p v-if="cartItem.description" class="description" v-text="cartItem.description" />
+        <p v-if="description" class="description" v-text="description" />
 
         <p v-if="cartItem.product.location" class="description" v-text="cartItem.product.location.name" />
         <p v-if="cartItem.product.location && cartItem.product.location.address" class="description" v-text="cartItem.product.location.address" />
@@ -26,6 +26,7 @@ import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import type { Order, Organization, TicketPublic, Webshop} from '@stamhoofd/structures';
 import { WebshopTicketType } from '@stamhoofd/structures';
+import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 
 const props = withDefaults(defineProps<{
@@ -43,6 +44,18 @@ const present = usePresent();
 const cartItem = computed(() => props.ticket.items[0]);
 const name = computed(() => props.ticket.getTitle());
 const isSingle = computed(() => props.webshop.meta.ticketType === WebshopTicketType.SingleTicket);
+
+// The seats and UiTPAS numbers of the cart item belong to all its tickets, so a ticket for one unit only shows its own seat
+const description = computed(() => {
+    if (!props.ticket.isSingle) {
+        return cartItem.value.description;
+    }
+    const dateRange = cartItem.value.product.dateRange;
+    return [
+        dateRange ? Formatter.capitalizeFirstLetter(dateRange.toString()) : '',
+        cartItem.value.descriptionWithoutDate,
+    ].filter(d => !!d).join('\n');
+});
 
 function openTicket() {
     present({

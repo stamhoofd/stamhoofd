@@ -38,9 +38,8 @@
                 </div>
 
                 <template v-if="!showPreview">
-                    <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" />
-                    <!-- Without a title, the webshop name above already says what to order (e.g. 'Koop hier je tickets'), a second title 'Tickets' right below it is double -->
-                    <WebshopProducts v-else-if="canOrder" :webshop="webshop" :hide-list-title="!webshop.meta.title" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
+                    <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" :show-title="showOrderTitleBelowContent" />
+                    <WebshopProducts v-else-if="canOrder" :webshop="webshop" :hide-list-title="!showOrderTitleBelowContent" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
                     <WebshopCartButton v-if="showCartButton" :count="cartCount" @open="showCart().catch(console.error)" />
                     <WebshopPlatformFooter />
                 </template>
@@ -53,8 +52,9 @@
 
         <!-- Ordering happens next to the content (below it on small screens) -->
         <template v-if="showPreview" #preview>
-            <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" />
-            <WebshopProducts v-else :webshop="webshop" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
+            <!-- Below the content (not wide), the titles behave like in the stacked layout -->
+            <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" :show-title="previewWide || showOrderTitleBelowContent" />
+            <WebshopProducts v-else :webshop="webshop" :hide-list-title="!previewWide && !showOrderTitleBelowContent" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
             <WebshopCartButton v-if="showCartButton" :count="cartCount" @open="showCart().catch(console.error)" />
             <WebshopPlatformFooter />
         </template>
@@ -233,6 +233,7 @@ function getLiveCartItem(product: Product): CartItem {
         try {
             // Only refresh it against the webshop: a half filled in item is kept as is
             existing.validate(webshop.value, Cart.create({}), { refresh: true, admin: false, validateSeats: false, validateDetails: false });
+            saveLiveCartItem(existing);
             return existing;
         } catch (e) {
             console.error(e);
@@ -244,7 +245,8 @@ function getLiveCartItem(product: Product): CartItem {
 }
 
 function saveLiveCartItem(item: CartItem) {
-    if (!checkoutManager.cart.items.includes(item)) {
+    // Also drops the other items, e.g. the units of the bulk order mode when the order mode changed
+    if (checkoutManager.cart.items.length !== 1 || checkoutManager.cart.items[0] !== item) {
         checkoutManager.cart.clear();
         checkoutManager.cart.addItem(item, false);
     }
@@ -305,6 +307,13 @@ const products = computed(() => getVisibleProducts(webshop.value));
 
 // Check the text: a description that was cleared in the editor still has html like <p></p>
 const hasDescription = computed(() => webshop.value.meta.description.text.trim().length > 0);
+
+/**
+ * Below the content, the ordering part (a list or the form) only gets its own title when a description separates it
+ * from the title of the webshop. Without a title, the name of the webshop already says what to order (e.g. 'Koop hier je tickets').
+ * Next to the content, the ordering part always has a title.
+ */
+const showOrderTitleBelowContent = computed(() => !!webshop.value.meta.title && hasDescription.value);
 
 /**
  * Single mode with one product: the order form is shown on the page itself instead of an order button.
@@ -585,6 +594,13 @@ async function resumeStep(destination: string, animated = true) {
     .content > h1 {
         @extend %style-title-semihuge;
         padding-bottom: 10px;
+    }
+
+    // Right below the title (nothing else in the content): the extra space that separates the ordering part from a description is not needed
+    > main > .content:has(> h1:only-child) {
+        + .webshop-products, + .cart-item-view, + .preview-outlet > .preview-panel-preview {
+            padding-top: 10px;
+        }
     }
 }
 
