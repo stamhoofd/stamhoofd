@@ -1,4 +1,4 @@
-import type { Server } from '@simonbackx/simple-networking';
+import type { Server } from '@common/networking';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { BaseOrganization, Organization, Payment, TransferSettings } from '@stamhoofd/structures';

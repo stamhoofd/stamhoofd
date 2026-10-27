@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { markRaw, onBeforeUnmount, onDeactivated } from 'vue';
 

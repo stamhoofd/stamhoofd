@@ -4,7 +4,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { CountFilteredRequest } from '@stamhoofd/structures';
 import { ref, watch } from 'vue';

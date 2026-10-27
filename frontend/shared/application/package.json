@@ -16,7 +16,7 @@
     "dependencies": {
         "@common/encoding": "workspace:*",
         "@common/errors": "workspace:*",
-        "@simonbackx/simple-networking": "1.23.0",
+        "@common/networking": "workspace:*",
         "@simplewebauthn/browser": "13.3.0",
         "@stamhoofd/frontend-i18n": "workspace:*",
         "@stamhoofd/frontend-notifications": "workspace:*",

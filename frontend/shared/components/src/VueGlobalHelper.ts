@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { injectHooks, useCurrentComponent, useUrl } from '@simonbackx/vue-app-navigation';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { CountryHelper } from '@stamhoofd/structures';

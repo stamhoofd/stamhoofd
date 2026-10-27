@@ -1,6 +1,6 @@
-import { SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleErrors } from '@common/errors';
 
-import { Request } from './Request';
+import { Request } from './Request.js';
 
 /**
  * Extend requests without a built-in backoff or authentication policy.

@@ -1,6 +1,6 @@
 import { SimpleError } from '@common/errors';
-import type { Server } from '@simonbackx/simple-networking';
-import { Request } from '@simonbackx/simple-networking';
+import type { Server } from '@common/networking';
+import { Request } from '@common/networking';
 import { Token } from '@stamhoofd/structures';
 
 import { waitForNetworkOnline } from '@stamhoofd/networking/utility/waitForNetworkOnline';

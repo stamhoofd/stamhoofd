@@ -40,7 +40,7 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 
 [Patching inside views](frontend/patching.md)
 
-[Sending (authenticated) requests in the frontend](https://github.com/SimonBackx/simple-networking/blob/master/docs/requests.md)
+[Sending (authenticated) requests in the frontend](../packages/common/networking/docs/requests.md)
 
 [Storing data locally in the browser/app](frontend/local-storage.md)
 

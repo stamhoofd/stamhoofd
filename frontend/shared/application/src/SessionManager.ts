@@ -1,7 +1,7 @@
 import type { Decoder } from '@common/encoding';
 import { ArrayDecoder, AutoEncoder, field, ObjectData, StringDecoder, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import type { Platform } from '@stamhoofd/structures';
 import { Organization, User, Version } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';

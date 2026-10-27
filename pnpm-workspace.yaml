@@ -8,6 +8,7 @@ packages:
   # Register imported libraries individually until they are integrated.
   - 'packages/common/errors'
   - 'packages/common/encoding'
+  - 'packages/common/networking'
   - 'tests/*'
   - '.development/*'
   - 'docs'
@@ -91,6 +92,7 @@ allowBuilds:
   vue-demi@0.14.10: true
 
 overrides:
+  '@simonbackx/simple-networking': 'workspace:@common/networking@*'
   '@simonbackx/simple-encoding': 'workspace:@common/encoding@*'
   '@types/node': '22.20.4'
   axios: '1.20.0'

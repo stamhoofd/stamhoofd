@@ -139,7 +139,7 @@
 </template>
 
 <script setup lang="ts">
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { defineRoutes, useNavigate } from '@simonbackx/vue-app-navigation';
 import CompanyRow from '@stamhoofd/components/companies/CompanyRow.vue';
 import { useGlobalEventListener } from '@stamhoofd/components/hooks/useGlobalEventListener';

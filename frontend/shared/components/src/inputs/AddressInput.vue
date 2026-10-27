@@ -31,7 +31,7 @@
 <script lang="ts" setup>
 import type { Decoder } from '@common/encoding';
 import { isSimpleError, isSimpleErrors } from '@common/errors';
-import type { Server } from '@simonbackx/simple-networking';
+import type { Server } from '@common/networking';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Address, CountryHelper, ValidatedAddress } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';

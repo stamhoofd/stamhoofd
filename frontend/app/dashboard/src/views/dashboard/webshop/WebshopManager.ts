@@ -1,6 +1,6 @@
 import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
 import { EncodeMedium, ObjectData } from '@common/encoding';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { OrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { SortItem, StamhoofdFilter, WebshopPreview } from '@stamhoofd/structures';

@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Server } from '@simonbackx/simple-networking';
+import type { Server } from '@common/networking';
 import type { Payment } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import LoadingButton from '../navigation/LoadingButton.vue';

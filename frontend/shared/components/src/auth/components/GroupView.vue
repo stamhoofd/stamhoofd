@@ -197,7 +197,7 @@ import STListItem from '#layout/STListItem.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import { Toast } from '#overlays/Toast.ts';
 import ImageComponent from '#views/ImageComponent.vue';
-import { Request } from '@simonbackx/simple-networking';
+import { Request } from '@common/networking';
 import { useShow } from '@simonbackx/vue-app-navigation';
 import type { Group } from '@stamhoofd/structures';
 import { LimitedFilteredRequest, WaitingListType } from '@stamhoofd/structures';
