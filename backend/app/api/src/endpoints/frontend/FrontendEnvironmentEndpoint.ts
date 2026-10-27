@@ -5,7 +5,7 @@ import {
     Endpoint,
     Response,
 } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Version } from '@stamhoofd/structures';
 import type { FrontendSpecificEnvironment, SharedEnvironment } from '@stamhoofd/types/Environment';
 

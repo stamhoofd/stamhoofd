@@ -1,7 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@common/errors';
 import type { Organization as OrganizationStruct } from '@stamhoofd/structures';
 import { DNSRecord, DNSRecordType, OrganizationDomains } from '@stamhoofd/structures';
 import NodeRSA from 'node-rsa';

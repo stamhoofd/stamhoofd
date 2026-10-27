@@ -1,6 +1,6 @@
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@common/errors';
 import type { PlatformFamilyManager } from '@stamhoofd/components/members/PlatformFamilyManager.ts';
 import { startSilentRegister } from '@stamhoofd/components/members/checkout/startCheckout.ts';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';

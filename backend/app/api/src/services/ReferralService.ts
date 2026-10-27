@@ -1,5 +1,5 @@
 import type { Model } from '@simonbackx/simple-database';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { EmailInterfaceBase } from '@stamhoofd/email';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, Organization, Platform, RegisterCode, UsedRegisterCode } from '@stamhoofd/models';

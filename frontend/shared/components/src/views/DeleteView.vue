@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@common/errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { computed, ref } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';

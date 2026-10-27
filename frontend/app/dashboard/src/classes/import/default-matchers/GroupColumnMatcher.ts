@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { Group } from '@stamhoofd/structures';
 import { StringCompare } from '@stamhoofd/utility';
 import type XLSX from 'xlsx';

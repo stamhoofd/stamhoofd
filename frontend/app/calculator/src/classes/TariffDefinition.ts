@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { CalculationInput } from './CalculationInput';
 import type { CalculationLine, CalculationRemark} from './CalculationOutput';
 import { CalculationGroup, CalculationOutput, FixedPriceCalculationLine, VolumePercentageCalculationLine } from './CalculationOutput';

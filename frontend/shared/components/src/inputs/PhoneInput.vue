@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { countryCodes, CountryHelper } from '@stamhoofd/structures';
 import type { CountryCode } from '@stamhoofd/types/Country';

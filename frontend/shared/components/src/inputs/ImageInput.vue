@@ -15,7 +15,7 @@
 
 <script setup lang="ts">
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Request } from '@simonbackx/simple-networking';
 import { Image, ResolutionRequest, Version } from '@stamhoofd/structures';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';

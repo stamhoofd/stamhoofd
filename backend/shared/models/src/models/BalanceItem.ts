@@ -4,7 +4,7 @@ import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { Payment } from './Payment.js';
 

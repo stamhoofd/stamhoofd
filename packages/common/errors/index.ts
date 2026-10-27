@@ -1,3 +1,3 @@
 // General
-export * from './src/SimpleError';
-export * from './src/SimpleErrors';
+export * from './src/SimpleError.js';
+export * from './src/SimpleErrors.js';

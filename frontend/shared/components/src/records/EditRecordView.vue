@@ -236,7 +236,7 @@ import SaveView from '#navigation/SaveView.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { ObjectWithRecords, RecordCategory, TranslatedString } from '@stamhoofd/structures';

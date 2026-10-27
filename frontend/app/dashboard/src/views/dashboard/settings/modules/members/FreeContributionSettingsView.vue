@@ -49,7 +49,7 @@
 <script lang="ts" setup>
 import type { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
 import { patchContainsChanges } from '@simonbackx/simple-encoding';
-import { SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleErrors } from '@common/errors';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';

@@ -107,7 +107,7 @@
 
 <script setup lang="ts">
 import { useShowMemberLanguage } from '#members/hooks/useShowMemberLanguage.ts';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@common/errors';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { Gender, LanguageHelper } from '@stamhoofd/structures';

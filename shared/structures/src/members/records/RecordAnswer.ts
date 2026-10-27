@@ -1,6 +1,6 @@
 import type { Data, Decoder, EncodeContext } from '@simonbackx/simple-encoding';
 import { addPropertyField, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EncodeMedium, field, IntegerDecoder, MapDecoder, NullableDecoder, PatchMapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, SimpleError } from '@common/errors';
 import { DataValidator, Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 

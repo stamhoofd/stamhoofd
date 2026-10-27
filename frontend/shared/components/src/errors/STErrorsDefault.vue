@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import type { SimpleError } from '@simonbackx/simple-errors';
+import type { SimpleError } from '@common/errors';
 import { nextTick, ref, useTemplateRef, watch } from 'vue';
 
 import { ErrorBox } from './ErrorBox';

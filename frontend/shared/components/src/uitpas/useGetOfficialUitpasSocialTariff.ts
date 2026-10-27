@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Request } from '@simonbackx/simple-networking';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { UitpasPriceCheckRequest, UitpasPriceCheckResponse } from '@stamhoofd/structures';

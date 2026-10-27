@@ -215,7 +215,7 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { useEventViewLoaders } from '#events/eventViewLoaders.ts';

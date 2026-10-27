@@ -101,7 +101,7 @@
 <script lang="ts" setup>
 import type { AutoEncoderPatchType} from '@simonbackx/simple-encoding';
 import { VersionBox } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { ComponentWithProperties, usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';

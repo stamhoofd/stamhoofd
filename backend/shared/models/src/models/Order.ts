@@ -1,6 +1,6 @@
 import type { ManyToOneRelation } from '@simonbackx/simple-database';
 import { column } from '@simonbackx/simple-database';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { QueueHandler } from '@stamhoofd/queues';
 import { Language } from '@stamhoofd/types/Language';
 import { QueryableModel, SQL } from '@stamhoofd/sql';

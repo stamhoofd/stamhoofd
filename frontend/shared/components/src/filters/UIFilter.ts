@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import type { PropertyFilter, StamhoofdFilter, StamhoofdNotFilter, WrapperFilter } from '@stamhoofd/structures';
 import { isEmptyFilter, unwrapFilter, wrapFilter } from '@stamhoofd/structures';

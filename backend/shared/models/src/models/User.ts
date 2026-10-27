@@ -7,7 +7,7 @@ import argon2 from 'argon2';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { QueueHandler } from '@stamhoofd/queues';
 
 export class User extends QueryableModel {

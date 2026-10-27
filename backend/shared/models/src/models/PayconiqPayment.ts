@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { PayconiqAccount } from '@stamhoofd/structures';
 import { PaymentStatus, Version } from '@stamhoofd/structures';

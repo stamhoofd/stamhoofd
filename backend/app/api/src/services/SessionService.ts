@@ -1,5 +1,5 @@
 import { Database } from '@simonbackx/simple-database';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Token, User, UserSession } from '@stamhoofd/models';
 import type { SessionDurations, SessionType } from '@stamhoofd/models/constants/sessions.js';
 import { ACCESS_TOKEN_DURATION, SESSION_DURATIONS, SSO_HANDOFF_TOKEN_DURATION } from '@stamhoofd/models/constants/sessions.js';

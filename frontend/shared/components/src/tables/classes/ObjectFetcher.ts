@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { LimitedFilteredRequest, SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { CountFilteredRequest } from '@stamhoofd/structures';
 

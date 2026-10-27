@@ -28,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import Radio from '@stamhoofd/components/inputs/Radio.vue';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';

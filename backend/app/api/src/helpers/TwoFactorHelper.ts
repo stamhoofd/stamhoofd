@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { User, Token } from '@stamhoofd/models';
 import { MFARecoveryCode, MFATOTP, MFAToken, Organization, Platform, RateLimiter, WebauthnCredential } from '@stamhoofd/models';

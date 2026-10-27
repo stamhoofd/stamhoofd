@@ -1,5 +1,5 @@
 import { PutObjectCommand } from '@aws-sdk/client-s3';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { Invoice } from '@stamhoofd/models';
 import { Image, InvoicedBalanceItem, Organization, Payment } from '@stamhoofd/models';
 import { File, getPeppolCategoryCode, getVATExcemptInvoiceNote, InvoicedBalanceItem as InvoicedBalanceItemStruct, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';

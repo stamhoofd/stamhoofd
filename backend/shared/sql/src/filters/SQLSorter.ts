@@ -1,5 +1,5 @@
 import type { PlainObject } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { SortList } from '@stamhoofd/filters/SortList';
 import type { SortDefinition } from '@stamhoofd/filters/Sorters';
 import type { SQLExpression } from '../SQLExpression.js';

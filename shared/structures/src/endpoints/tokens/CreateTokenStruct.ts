@@ -1,5 +1,5 @@
 import type { Data } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 import { ChallengeGrantStruct } from './ChallengeGrantStruct.js';
 import { MFAGrantStruct } from './MFAGrantStruct.js';

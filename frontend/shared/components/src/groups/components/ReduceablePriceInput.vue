@@ -29,7 +29,7 @@ import { useValidation } from '#errors/useValidation.ts';
 import type { Validator } from '#errors/Validator.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { Group, Organization, ReduceablePrice } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';

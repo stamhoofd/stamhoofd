@@ -1,5 +1,5 @@
-import type { SimpleErrors } from '@simonbackx/simple-errors';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import type { SimpleErrors } from '@common/errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { ComponentWithProperties, ReactiveUrl } from '@simonbackx/vue-app-navigation';
 import type { NavigationActions } from '@stamhoofd/components/types/NavigationActions.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';

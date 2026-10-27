@@ -1,6 +1,6 @@
 import type { AutoEncoderPatchType, Decoder} from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Event, Platform } from '@stamhoofd/structures';
 import { BaseOrganization, EventNotification, EventNotificationType } from '@stamhoofd/structures';

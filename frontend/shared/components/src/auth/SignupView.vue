@@ -49,7 +49,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';
 import { ref } from 'vue';
 

@@ -76,7 +76,7 @@
 
 <script setup lang="ts">
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@common/errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import EditUserPermissionsBox from '#admins/components/EditUserPermissionsBox.vue';

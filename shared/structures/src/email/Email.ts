@@ -1,5 +1,5 @@
 import { AnyDecoder, ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleErrors } from '@common/errors';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 import { EmailAttachment, Recipient, replaceEmailHtml, replaceEmailText, Replacement } from '../endpoints/EmailRequest.js';

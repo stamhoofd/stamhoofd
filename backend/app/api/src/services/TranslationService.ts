@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { TipTapDocument, TranslatableValue } from '@stamhoofd/structures/endpoints/TranslateRequest.js';
 import { isTipTapDocument } from '@stamhoofd/structures/endpoints/TranslateRequest.js';
 import { Language } from '@stamhoofd/types/Language';

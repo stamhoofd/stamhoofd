@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import AddressInput from '@stamhoofd/components/inputs/AddressInput.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';

@@ -1,7 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
-import type { SimpleErrors } from '@simonbackx/simple-errors';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import type { SimpleErrors } from '@common/errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import type { RequestMiddleware } from '@simonbackx/simple-networking';
 import { Request } from '@simonbackx/simple-networking';
 import { Toast } from '@stamhoofd/frontend-notifications/Toast';

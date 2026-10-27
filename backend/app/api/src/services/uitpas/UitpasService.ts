@@ -1,5 +1,5 @@
 import { Model } from '@simonbackx/simple-database';
-import { isSimpleError, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, SimpleError } from '@common/errors';
 import { Order, WebshopUitpasNumber } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { Cart, Product, ProductPrice, UitpasClientCredentialsStatus, UitpasOrganizersResponse } from '@stamhoofd/structures';

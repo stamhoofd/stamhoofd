@@ -1,5 +1,5 @@
 import { Migration } from '@simonbackx/simple-database';
-import { isSimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError } from '@common/errors';
 import { logger } from '@simonbackx/simple-logging';
 import { Member } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';

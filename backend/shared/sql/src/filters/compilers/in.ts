@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { assertFilterCompareValue } from '@stamhoofd/filters/FilterCompilers';
 import { scalarToSQLExpression, SQLArray, SQLLower } from '../../SQLExpressions.js';

@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Gender, getGenderName } from '@stamhoofd/structures';
 import type XLSX from 'xlsx';
 import type { ColumnMatcher } from '../ColumnMatcher';

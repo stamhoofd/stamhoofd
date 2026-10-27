@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Request } from '@simonbackx/simple-networking';
 import type { ObjectFetcher } from '@stamhoofd/components/tables/classes/ObjectFetcher.ts';
 import type { CountFilteredRequest, PrivateOrderWithTickets, SortItem, SortList, StamhoofdFilter } from '@stamhoofd/structures';

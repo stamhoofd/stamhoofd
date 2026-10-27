@@ -6,7 +6,7 @@ import { EmailTemplate, Platform } from '@stamhoofd/models';
 import { EmailTemplate as EmailTemplateStruct, EmailTemplateType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { StringArrayDecoder } from '../../../../decoders/StringArrayDecoder.js';
 import { StringNullableDecoder } from '../../../../decoders/StringNullableDecoder.js';
 import { Context } from '../../../../helpers/Context.js';

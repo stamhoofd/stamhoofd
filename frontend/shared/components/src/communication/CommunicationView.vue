@@ -60,7 +60,7 @@ import { Toast } from '#overlays/Toast.ts';
 import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
 import { ComponentWithProperties, defineRoute, NavigationController, useNavigate } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { EmailPreview, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';

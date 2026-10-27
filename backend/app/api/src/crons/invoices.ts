@@ -1,4 +1,4 @@
-import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors } from '@common/errors';
 import { registerTenantCron } from './helpers/registerTenantCron.js';
 import type { Invoice } from '@stamhoofd/models';
 import { Organization, Payment } from '@stamhoofd/models';

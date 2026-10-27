@@ -78,7 +78,7 @@ import { PayBalanceMode } from '../OrganizationCheckoutViewModel';
 import { Formatter } from '@stamhoofd/utility';
 import { ComponentWithProperties, NavigationController } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 
 const props = defineProps<{

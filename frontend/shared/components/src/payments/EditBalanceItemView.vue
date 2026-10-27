@@ -192,7 +192,7 @@ import { Toast } from '#overlays/Toast.ts';
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { BalanceItemRelation, Invoice } from '@stamhoofd/structures';

@@ -1,5 +1,5 @@
 import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleErrors } from '@common/errors';
 import { v4 as uuidv4 } from 'uuid';
 
 export enum DNSRecordType {

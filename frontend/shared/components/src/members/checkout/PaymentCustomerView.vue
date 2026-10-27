@@ -71,7 +71,7 @@ import CompanyInputBox from '#organizations/components/CompanyInputBox.vue';
 import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { Checkoutable, RegisterCheckout } from '@stamhoofd/structures';

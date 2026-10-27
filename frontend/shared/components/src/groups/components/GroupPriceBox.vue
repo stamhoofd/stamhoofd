@@ -129,7 +129,7 @@ import DateSelection from '#inputs/DateSelection.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import TimeInput from '#inputs/TimeInput.vue';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { ComponentWithProperties, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { BundleDiscount, Group, GroupPriceDiscount, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';

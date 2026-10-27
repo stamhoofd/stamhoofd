@@ -1,4 +1,4 @@
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { handleUitpasResponse } from './handleUitpasResponse.js';
 
 export type GetPassResponse = {

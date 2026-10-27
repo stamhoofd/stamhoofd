@@ -3,7 +3,7 @@ import {
     getSignedUrl,
 } from '@aws-sdk/s3-request-presigner';
 import type { DecodedRequest, Request, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { File, supportedFileTypes } from '@stamhoofd/structures';
 import chalk from 'chalk';
 import * as jose from 'jose';

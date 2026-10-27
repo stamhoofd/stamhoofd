@@ -1,6 +1,6 @@
 import type { Request, RequestMiddleware } from '@simonbackx/simple-endpoints';
-import type { SimpleError } from '@simonbackx/simple-errors';
-import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
+import type { SimpleError } from '@common/errors';
+import { isSimpleError, isSimpleErrors } from '@common/errors';
 
 /**
  * Human messages for error codes thrown by packages that cannot use $t themselves (e.g. @stamhoofd/filters).

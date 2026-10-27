@@ -4,7 +4,7 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import jwt from 'jsonwebtoken';
 
 import { Context } from '../../../../helpers/Context.js';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 type Params = Record<string, never>;
 type Query = undefined;

@@ -4,7 +4,7 @@ import type { CountFilteredRequest, EmailWithRecipients, StamhoofdFilter } from 
 import { assertSort, EmailStatus, getSortFilter, LimitedFilteredRequest, mergeFilters, PaginatedResponse } from '@stamhoofd/structures';
 
 import type { Decoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import { Email, Member } from '@stamhoofd/models';
 import type { Language } from '@stamhoofd/types/Language';

@@ -1,6 +1,6 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Organization, RegisterCode } from '@stamhoofd/models';
 import { RegisterCode as RegisterCodeStruct } from '@stamhoofd/structures';
 type Params = { code: string };

@@ -1,5 +1,5 @@
 import { column } from '@simonbackx/simple-database';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { QueryableModel, SQL, SQLWhereSign } from '@stamhoofd/sql';
 import { RegistrationPeriodBase, RegistrationPeriodSettings, RegistrationPeriod as RegistrationPeriodStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';

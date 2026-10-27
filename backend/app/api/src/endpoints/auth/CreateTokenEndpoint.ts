@@ -1,6 +1,6 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { EmailVerificationCode, MFATOTP, MFAToken, PasswordToken, Platform, Token, User, WebauthnCredential } from '@stamhoofd/models';
 import type { ChallengeGrantStruct, MFAGrantStruct, PasswordGrantStruct, PasswordTokenGrantStruct, RefreshTokenGrantStruct, RequestChallengeGrantStruct } from '@stamhoofd/structures';
 import { CreateTokenStruct, LoginMethod, MFAMethodType, SessionLoginMethod, SignupResponse, Token as TokenStruct } from '@stamhoofd/structures';

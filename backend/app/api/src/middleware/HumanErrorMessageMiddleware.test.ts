@@ -1,6 +1,6 @@
 import type { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { Endpoint, Request, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@common/errors';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';

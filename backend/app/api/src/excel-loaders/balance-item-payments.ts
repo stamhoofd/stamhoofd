@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { BalanceItemPayment, Payment } from '@stamhoofd/models';
 import { applySQLSorter, compileToSQLFilter, SQL } from '@stamhoofd/sql';
 import type { IPaginatedResponse, LimitedFilteredRequest } from '@stamhoofd/structures';

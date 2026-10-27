@@ -39,7 +39,7 @@ import { ErrorBox } from '#errors/ErrorBox.ts';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import STNavigationBar from '#navigation/STNavigationBar.vue';
 import STToolbar from '#navigation/STToolbar.vue';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { useCanDismiss, useDismiss } from '@simonbackx/vue-app-navigation';
 import type { Cart, CartItem, ReservedSeat, Webshop } from '@stamhoofd/structures';
 import { CartReservedSeat } from '@stamhoofd/structures';

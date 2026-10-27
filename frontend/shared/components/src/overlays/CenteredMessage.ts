@@ -1,4 +1,4 @@
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
 import { reactive } from 'vue';
 
 export type CenteredMessageListener = (centeredMessage: CenteredMessage) => unknown;

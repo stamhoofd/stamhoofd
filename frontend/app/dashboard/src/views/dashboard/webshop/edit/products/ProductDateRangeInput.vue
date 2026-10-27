@@ -16,7 +16,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';

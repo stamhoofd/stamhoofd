@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type {
     RequestInitializer,
     RequestMiddleware,
@@ -43,7 +43,7 @@ import {
 
 import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors } from '@common/errors';
 import { Sorter } from '@stamhoofd/utility';
 
 export { SGVOldMemberAction } from './SGVOldMemberAction.ts';

@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ResolutionRequest } from '../../files/ResolutionRequest.js';

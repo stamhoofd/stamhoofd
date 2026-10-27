@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { StamhoofdCompareValue, StamhoofdFilter, StamhoofdMagicFilter, StamhoofdMagicRelationFilter } from './StamhoofdFilter.js';
 
 function wrapPlainFilter(filter: StamhoofdFilter): Exclude<StamhoofdFilter, StamhoofdCompareValue> {

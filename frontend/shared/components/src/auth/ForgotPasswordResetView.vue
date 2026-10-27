@@ -49,7 +49,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@common/errors';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import EmailInput from '#inputs/EmailInput.vue';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';

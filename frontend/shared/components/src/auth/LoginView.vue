@@ -71,7 +71,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { defineRoute, onCheckRoutes, UrlHelper, useNavigate } from '@simonbackx/vue-app-navigation';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { LoginHelper } from '@stamhoofd/frontend-application/LoginHelper';

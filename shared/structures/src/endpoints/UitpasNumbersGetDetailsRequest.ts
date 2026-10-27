@@ -1,6 +1,6 @@
 import type { Data, Encodeable, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 export class UitpasNumbersGetDetailsRequest implements Encodeable {
     uitpasNumbers: string[];

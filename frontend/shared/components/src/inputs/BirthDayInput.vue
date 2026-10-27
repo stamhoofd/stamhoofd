@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Formatter } from '@stamhoofd/utility';
 
 import { ref, watch } from 'vue';

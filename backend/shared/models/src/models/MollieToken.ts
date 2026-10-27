@@ -1,7 +1,7 @@
 import { column } from '@simonbackx/simple-database';
 import type { PlainObject } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import { MollieRequiredScopes } from '@stamhoofd/structures/MollieScopes.js';
 import type { IncomingMessage } from 'http';

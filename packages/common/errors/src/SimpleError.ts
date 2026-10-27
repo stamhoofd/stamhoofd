@@ -1,4 +1,4 @@
-import { Data, Encodeable, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
+import type { Data, Encodeable, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 // Error that is caused by a client and should be reported to the client

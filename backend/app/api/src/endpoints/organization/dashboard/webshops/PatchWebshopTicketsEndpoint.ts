@@ -2,7 +2,7 @@ import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@common/errors';
 import { Ticket, Token, Webshop } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { TicketPrivate } from '@stamhoofd/structures';

@@ -100,6 +100,7 @@ describe('shared build orchestration', () => {
     it('runs the coverage inventory through Vitest coverage without Nx environment', async () => {
         expect(coverageTestPackages.map(pkg => pkg.name)).toEqual([
             'i18n-uuid',
+            'errors',
             'metabase',
             'filters',
             'structures',
@@ -199,7 +200,9 @@ describe('shared build orchestration', () => {
         expect(watch).toContain(`--exec 'pnpm run build:shared && touch ${readyFile} || exit 0'`);
         expect(watch).toContain('--signal SIGTERM');
         expect(watch).toContain('--watch shared --watch backend/shared');
+        expect(watch).toContain('--watch packages/common/errors');
         expect(watch).toContain('--watch turbo.jsonc');
         expect(watch).toContain("--ignore './shared/*/dist/' --ignore './backend/shared/*/dist/'");
+        expect(watch).toContain("--ignore './packages/common/*/dist/' --ignore './packages/common/*/dist-types/'");
     });
 });

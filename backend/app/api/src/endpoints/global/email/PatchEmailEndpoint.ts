@@ -7,7 +7,7 @@ import { EmailRecipientsStatus, EmailStatus, Email as EmailStruct, validateEmail
 
 import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
 import { patchObject } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Context } from '../../../helpers/Context.js';
 import { EmailPreviewService } from '../../../services/EmailPreviewService.js';
 import { EmailSendService } from '../../../services/EmailSendService.js';

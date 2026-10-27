@@ -1,7 +1,7 @@
 import { Database } from '@simonbackx/simple-database';
 import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, field, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { City, PostalCode, Street } from '@stamhoofd/models';
 import type { Address } from '@stamhoofd/structures';
 import { ValidatedAddress } from '@stamhoofd/structures';

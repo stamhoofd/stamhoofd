@@ -1,7 +1,7 @@
 import type { Endpoint } from '@simonbackx/simple-endpoints';
 import { Request } from '@simonbackx/simple-endpoints';
-import type { SimpleError } from '@simonbackx/simple-errors';
-import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
+import type { SimpleError } from '@common/errors';
+import { isSimpleError, isSimpleErrors } from '@common/errors';
 import { EmailMocker } from '@stamhoofd/email';
 import type { Organization } from '@stamhoofd/models';
 import { AuditLog, EmailTemplateFactory, EmailVerificationCode, MFARecoveryCode, MFATOTP, MFAToken, PasswordToken, Platform, Token, User, UserFactory, OrganizationFactory, UserSession, WebauthnChallenge, WebauthnCredential } from '@stamhoofd/models';

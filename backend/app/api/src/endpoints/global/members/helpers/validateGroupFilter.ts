@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { StamhoofdFilter, WrapperFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { FilterWrapperMarker, unwrapFilterRecursively } from '@stamhoofd/structures';

@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Address, CountryHelper } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';

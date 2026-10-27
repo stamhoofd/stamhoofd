@@ -1,6 +1,6 @@
 import { AutoEncoder, BooleanDecoder, EnumDecoder, field, IntegerDecoder, StringDecoder, URLDecoder } from '@simonbackx/simple-encoding';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Formatter } from '@stamhoofd/utility';
 import type { BalanceItem } from '../../BalanceItem.js';
 import type { Group } from '../../Group.js';

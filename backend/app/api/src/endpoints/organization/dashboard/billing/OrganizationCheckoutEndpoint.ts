@@ -1,7 +1,7 @@
 import type { Decoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
 import { BalanceItemStatus, BalanceItemType, CheckoutResponse, OrganizationCheckout, OrganizationPackagesStatus, STPackageStruct } from '@stamhoofd/structures';
 import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';

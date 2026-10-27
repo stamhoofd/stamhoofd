@@ -3,7 +3,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, fi
 import { Formatter } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { BundleDiscountGroupPriceSettings } from './BundleDiscountGroupPriceSettings.js';
 import { Group } from './Group.js';
 import { GroupGenderType } from './GroupGenderType.js';

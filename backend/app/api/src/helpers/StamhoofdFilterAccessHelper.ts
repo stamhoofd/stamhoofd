@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/structures';
 import { FilterWrapperMarker, getMagicRelationValue, isMagicFilter, isMagicRelationFilter, unwrapFilter } from '@stamhoofd/structures';
 

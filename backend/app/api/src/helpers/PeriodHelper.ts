@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { RegistrationPeriod } from '@stamhoofd/models';
 import { Group, Member, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';

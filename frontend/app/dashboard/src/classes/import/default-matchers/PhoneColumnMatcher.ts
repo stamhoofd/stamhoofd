@@ -1,4 +1,4 @@
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { countryCodes } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';

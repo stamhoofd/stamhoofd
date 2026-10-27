@@ -2,7 +2,7 @@ import type { Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { NotificationChannel, NotificationChannelHelper } from '@stamhoofd/structures/notifications/NotificationChannel.js';
 import { NotificationPreference } from '@stamhoofd/structures/notifications/NotificationPreference.js';
 import { NotificationType, NotificationTypeHelper } from '@stamhoofd/structures/notifications/NotificationType.js';

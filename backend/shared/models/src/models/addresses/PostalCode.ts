@@ -1,6 +1,6 @@
 import { column, Database } from '@simonbackx/simple-database';
 import type { ManyToOneRelation } from '@simonbackx/simple-database';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter, StringCompare } from '@stamhoofd/utility';

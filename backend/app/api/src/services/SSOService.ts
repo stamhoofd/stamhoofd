@@ -1,6 +1,6 @@
 import type { DecodedRequest } from '@simonbackx/simple-endpoints';
 import { Response } from '@simonbackx/simple-endpoints';
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { Organization, Platform, Token, User, Webshop } from '@stamhoofd/models';
 import type { LoginMethod, SessionMetaData, StartOpenIDFlowStruct } from '@stamhoofd/structures';
 import { getAppHost, LoginProviderType, OpenIDClientConfiguration, SessionClientType, SessionLoginMethod, Token as TokenStruct } from '@stamhoofd/structures';

@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox';
 import STErrorsDefault from '@stamhoofd/components/errors/STErrorsDefault.vue';

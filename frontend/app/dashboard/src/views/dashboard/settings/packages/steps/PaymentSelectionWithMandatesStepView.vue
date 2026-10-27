@@ -146,7 +146,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast';
 import LoadingViewTransition from '@stamhoofd/components/containers/LoadingViewTransition.vue';

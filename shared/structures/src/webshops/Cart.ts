@@ -1,5 +1,5 @@
 import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
-import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError, SimpleErrors } from '@common/errors';
 
 import { ProductType } from './Product.js';
 import type { Webshop } from './Webshop.js';

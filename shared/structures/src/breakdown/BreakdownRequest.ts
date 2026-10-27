@@ -1,6 +1,6 @@
 import type { Data, Decoder, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
 import { ArrayDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { CountFilteredRequest, StamhoofdFilterJSONDecoder } from '../filters/FilteredRequest.js';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { BreakdownPathItem } from '../PaymentBreakdown.js';

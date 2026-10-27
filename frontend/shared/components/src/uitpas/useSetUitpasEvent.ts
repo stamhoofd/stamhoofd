@@ -1,6 +1,6 @@
 import { Product, ProductPrice, UitpasEventResponse } from '@stamhoofd/structures';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
 import type { Ref } from 'vue';
 import { nextTick } from 'vue';

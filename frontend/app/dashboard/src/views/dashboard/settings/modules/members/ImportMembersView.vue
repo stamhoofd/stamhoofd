@@ -102,7 +102,7 @@
 </template>
 
 <script lang="ts" setup>
-import { isSimpleError, isSimpleErrors } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors } from '@common/errors';
 import type { PushOptions, ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useShow } from '@simonbackx/vue-app-navigation';

@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { I18n } from '@stamhoofd/backend-i18n';
 import type { Organization, StripeAccount } from '@stamhoofd/models';
 import { Payment, StripeCheckoutSession, StripePaymentIntent } from '@stamhoofd/models';

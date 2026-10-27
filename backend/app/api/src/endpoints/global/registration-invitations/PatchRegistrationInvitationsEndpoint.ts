@@ -6,7 +6,7 @@ import type { RegistrationInvitation as RegistrationInvitationStruct } from '@st
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { GroupType, RegistrationInvitationRequest } from '@stamhoofd/structures';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Group, Member, RegistrationInvitation } from '@stamhoofd/models';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';

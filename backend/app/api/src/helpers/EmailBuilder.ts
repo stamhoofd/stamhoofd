@@ -5,7 +5,7 @@ import { BalanceItem as BalanceItemStruct, getAppHost, getUsedReplacementFiles, 
 import type { Language } from '@stamhoofd/types/Language';
 import { Formatter } from '@stamhoofd/utility';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { I18n } from '@stamhoofd/backend-i18n/I18n';
 import type { Group, Organization, Webshop } from '@stamhoofd/models';
 import { CachedBalance, EmailRecipient, EmailTemplate, Member, Platform, User } from '@stamhoofd/models';

@@ -123,7 +123,7 @@ import { SecurityCodeSendMethod, SendMemberSecurityCodeRequest, SendMemberSecuri
 import type { ComponentOptions, Ref } from 'vue';
 import { computed, onActivated, ref } from 'vue';
 
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { Formatter } from '@stamhoofd/utility';
 import { useAppContext } from '#context/appContext.ts';

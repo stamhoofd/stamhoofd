@@ -1,6 +1,6 @@
 import type { Data, Decoder } from '@simonbackx/simple-encoding';
 import { ArrayDecoder, AutoEncoder, EnumDecoder, field, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Language } from '@stamhoofd/types/Language';
 
 /**

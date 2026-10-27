@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Platform, ROOT_TENANT_ID } from '@stamhoofd/models';
 import type { PlatformPrivateConfig, Platform as PlatformStruct } from '@stamhoofd/structures';
 import { AsyncLocalStorage } from 'async_hooks';

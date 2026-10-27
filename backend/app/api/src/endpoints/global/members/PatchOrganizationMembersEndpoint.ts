@@ -3,7 +3,7 @@ import type { AutoEncoderPatchType, ConvertArrayToPatchableArray, Decoder, Patch
 import { isEmptyPatch, isPatchableArray, PatchableArray, PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import type { MemberWithUsersRegistrationsAndGroups, Registration } from '@stamhoofd/models';
 import { AuditLog, BalanceItem, Group, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, Organization, Platform, RateLimiter, RegistrationPeriod, User } from '@stamhoofd/models';
 import { DocumentService } from '../../../services/DocumentService.js';

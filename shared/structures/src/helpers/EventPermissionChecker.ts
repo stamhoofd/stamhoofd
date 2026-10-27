@@ -1,4 +1,4 @@
-import { isSimpleError, isSimpleErrors, SimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError, isSimpleErrors, SimpleError } from '@common/errors';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import type { NamedObject } from '../Event.js';
 import type { LoadedPermissions } from '../LoadedPermissions.js';

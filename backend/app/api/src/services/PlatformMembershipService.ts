@@ -1,5 +1,5 @@
 import { Model } from '@simonbackx/simple-database';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { logger } from '@simonbackx/simple-logging';
 import { BalanceItem, Group, Member, MemberPlatformMembership, Organization, Platform, Registration, RegistrationPeriod } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';

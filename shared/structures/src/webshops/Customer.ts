@@ -1,5 +1,5 @@
 import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Formatter } from '@stamhoofd/utility';
 import { Address } from '../addresses/Address.js';
 import { Gender } from '../members/Gender.js';

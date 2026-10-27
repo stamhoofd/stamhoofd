@@ -2,7 +2,7 @@ import { column } from '@simonbackx/simple-database';
 import { DocumentData, DocumentStatus, Document as DocumentStruct } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { Registration } from './Registration.js';
 

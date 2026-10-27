@@ -1,5 +1,5 @@
 import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
-import { isSimpleError } from '@simonbackx/simple-errors';
+import { isSimpleError } from '@common/errors';
 
 /**
  * One error of the last sync attempt of a settlement, stored on the settlement so failing payouts

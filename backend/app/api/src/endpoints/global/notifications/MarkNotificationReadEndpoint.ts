@@ -1,6 +1,6 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Notification } from '@stamhoofd/models/models/Notification.js';
 import { NotificationRecipient } from '@stamhoofd/models/models/NotificationRecipient.js';
 import type { UserNotification } from '@stamhoofd/structures/notifications/UserNotification.js';

@@ -128,7 +128,7 @@ import { usePlatformFamilyManager } from '#members/PlatformFamilyManager.ts';
 import { Toast } from '#overlays/Toast.ts';
 import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
 import { PatchableArray } from '@simonbackx/simple-encoding';
-import { SimpleError, SimpleErrors } from '@simonbackx/simple-errors';
+import { SimpleError, SimpleErrors } from '@common/errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import type { PlatformMember, PlatformMembershipType, RegistrationPeriod } from '@stamhoofd/structures';
 import { MemberPlatformMembership, MemberWithRegistrationsBlob, PlatformMembershipTypeBehaviour } from '@stamhoofd/structures';

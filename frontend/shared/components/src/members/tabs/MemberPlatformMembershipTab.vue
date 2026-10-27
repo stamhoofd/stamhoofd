@@ -127,7 +127,7 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import { CenteredMessage } from '../../overlays/CenteredMessage';
 import { Toast } from '../../overlays/Toast';
 import { usePlatformFamilyManager } from '../PlatformFamilyManager';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 const props = defineProps<{
     member: PlatformMember;

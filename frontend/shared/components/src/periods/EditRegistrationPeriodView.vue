@@ -51,7 +51,7 @@ import DateSelection from '#inputs/DateSelection.vue';
 import SaveView from '#navigation/SaveView.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import type { RegistrationPeriod } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

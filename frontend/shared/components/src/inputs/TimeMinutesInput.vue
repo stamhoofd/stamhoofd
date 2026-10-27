@@ -6,7 +6,7 @@
 </template>
 
 <script lang="ts" setup>
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';

@@ -1,6 +1,6 @@
 import type { Data, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
 import { DateDecoder } from '@simonbackx/simple-encoding';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 import type { StamhoofdCompareValue, StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilterTypes';
 

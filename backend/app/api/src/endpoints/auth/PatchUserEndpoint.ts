@@ -2,7 +2,7 @@ import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding'
 import { isPatch } from '@simonbackx/simple-encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { EmailVerificationCode, Member, PasswordToken, Platform, User } from '@stamhoofd/models';
 import type { UserWithMembers } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
