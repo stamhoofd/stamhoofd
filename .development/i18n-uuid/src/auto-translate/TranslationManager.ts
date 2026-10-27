@@ -115,19 +115,19 @@ export class TranslationManager implements TranslationProvider {
         );
     }
 
-    readSourceBaseReplacements(namespace: string): Record<string, string> {
+    readSourceBaseReplacements(namespace: string): Map<string, string> {
         return (
             TranslationManager.readReplacementsAllowNull(
                 TranslationManager.getSourcePath('base', namespace),
-            ) ?? {}
+            ) ?? new Map()
         );
     }
 
-    readSourceReplacements(locale: string, namespace: string): Record<string, string> {
+    readSourceReplacements(locale: string, namespace: string): Map<string, string> {
         return (
             TranslationManager.readReplacementsAllowNull(
                 TranslationManager.getSourcePath(locale, namespace),
-            ) ?? {}
+            ) ?? new Map()
         );
     }
 
@@ -402,7 +402,7 @@ export class TranslationManager implements TranslationProvider {
         );
     }
 
-    static readReplacementsAllowNull(filePath: string): Record<string, string> | null {
+    static readReplacementsAllowNull(filePath: string): Map<string, string> | null {
         const parsedTranslations = TranslationManager.readCompleteSource(filePath);
         if (parsedTranslations === null) {
             return null;
@@ -416,7 +416,7 @@ export class TranslationManager implements TranslationProvider {
             }
         }
 
-        return replacements;
+        return new Map(Object.entries(replacements));
     }
 
     static readTranslationsAllowNull(filePath: string): Translations | null {

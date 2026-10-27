@@ -26,7 +26,7 @@ export class AutoTranslator {
     private readonly translator: ITranslator;
     private originalTextsBeforeReplacements: Translations | null = null;
     private defaultTexts: Translations | null = null;
-    private defaultReplacements: Record<string, string> | null = null;
+    private defaultReplacements: Map<string, string> | null = null;
 
     constructor(
         private readonly type: TranslatorType,
@@ -151,12 +151,12 @@ export class AutoTranslator {
         return this.defaultTexts;
     }
 
-    private getDefaultReplacements(): Record<string, string> {
+    private getDefaultReplacements(): Map<string, string> {
         if (this.defaultReplacements !== null) {
             return this.defaultReplacements;
         }
 
-        this.defaultReplacements = {
+        this.defaultReplacements = new Map([
             ...this.manager.readSourceBaseReplacements(
                 globals.DEFAULT_NAMESPACE,
             ),
@@ -168,7 +168,7 @@ export class AutoTranslator {
                 globals.DEFAULT_LOCALE,
                 globals.DEFAULT_NAMESPACE,
             ),
-        };
+        ]);
 
         return this.defaultReplacements;
     }
@@ -204,14 +204,14 @@ export class AutoTranslator {
                 globals.DEFAULT_NAMESPACE,
             );
 
-            const replacements = {
+            const replacements = new Map([
                 ...this.getDefaultReplacements(),
                 ...this.manager.readSourceBaseReplacements(args.namespace),
                 ...this.manager.readSourceReplacements(
                     globals.DEFAULT_LOCALE,
                     args.namespace,
                 ),
-            };
+            ]);
 
             for (const [uuid, missingTranslation] of Object.entries(
                 missingTranslations,
@@ -227,7 +227,7 @@ export class AutoTranslator {
 
                 let originalAfterReplacements = originalTextBeforeReplacements;
 
-                for (const [key, value] of Object.entries(replacements)) {
+                for (const [key, value] of replacements) {
                     originalAfterReplacements
                         = originalAfterReplacements.replaceAll(
                             new RegExp(`${key}+(?![^{]*})`, 'g'),
