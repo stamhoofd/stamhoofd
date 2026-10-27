@@ -3,8 +3,8 @@ import { setup, test } from '../test-fixtures/platform.js';
 setup();
 
 // other imports
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import { expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { Platform } from '@stamhoofd/models';
@@ -26,7 +26,7 @@ import { WorkerData } from '../helpers/index.js';
  * two-condition `$and` to a single bare condition (the `$and` wrapper being dropped), the stale
  * `$and` key survived the merge and the filter ended up as a mix of the old and the new state.
  *
- * This was fixed in `@simonbackx/simple-encoding` (deepSet now syncs the key set of plain-object
+ * This was fixed in `@common/encoding` (deepSet now syncs the key set of plain-object
  * dictionaries); these tests guard against a regression.
  */
 test.describe('[Regression] Platform cache filter merge @platform-filter-merge', () => {

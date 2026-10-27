@@ -1,4 +1,4 @@
-import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
 import type { Replacement } from '../endpoints/EmailRequest.js';
 import { Recipient } from '../endpoints/EmailRequest.js';
 import { EmailRecipient } from './Email.js';

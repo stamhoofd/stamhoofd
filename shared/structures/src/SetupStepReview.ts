@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, StringDecoder, field } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, StringDecoder, field } from '@common/encoding';
 
 export class SetupStepReview extends AutoEncoder {
     @field({ decoder: DateDecoder })

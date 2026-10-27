@@ -56,7 +56,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { useEditPopup } from '@stamhoofd/components/hooks/useEditPopup.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';

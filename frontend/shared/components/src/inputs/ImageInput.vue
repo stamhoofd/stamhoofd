@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { Request } from '@simonbackx/simple-networking';
 import { Image, ResolutionRequest, Version } from '@stamhoofd/structures';

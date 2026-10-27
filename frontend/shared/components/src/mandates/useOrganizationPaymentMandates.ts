@@ -1,8 +1,8 @@
 import { ErrorBox } from '#errors/ErrorBox';
 import { useContext } from '#hooks/useContext.ts';
 import { Toast } from '#overlays/Toast';
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
+import { ArrayDecoder, deepSetArray, PatchableArray } from '@common/encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { PaymentMandate } from '@stamhoofd/structures/PaymentMandate.js';
 import { reactive, ref } from 'vue';

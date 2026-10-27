@@ -3,7 +3,7 @@ import { EmailRecipient as EmailRecipientStruct, Recipient, Replacement, TinyMem
 import type { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder } from '@common/encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { SimpleErrors } from '@common/errors';
 import { Formatter } from '@stamhoofd/utility';

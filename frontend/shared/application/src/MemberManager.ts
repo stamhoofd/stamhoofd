@@ -1,5 +1,5 @@
-import type { Decoder} from '@simonbackx/simple-encoding';
-import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder} from '@common/encoding';
+import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import { Storage } from '@stamhoofd/frontend-storage/Storage';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { BalanceItem, Platform, RegisterCheckout} from '@stamhoofd/structures';

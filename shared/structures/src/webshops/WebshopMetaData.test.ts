@@ -1,4 +1,4 @@
-import { ObjectData } from '@simonbackx/simple-encoding';
+import { ObjectData } from '@common/encoding';
 import { describe, expect, it } from 'vitest';
 
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';

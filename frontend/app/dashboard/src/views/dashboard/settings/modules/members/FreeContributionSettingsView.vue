@@ -47,8 +47,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoder, AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { patchContainsChanges } from '@simonbackx/simple-encoding';
+import type { AutoEncoder, AutoEncoderPatchType } from '@common/encoding';
+import { patchContainsChanges } from '@common/encoding';
 import { SimpleErrors } from '@common/errors';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';

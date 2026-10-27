@@ -1,5 +1,5 @@
-import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, deepSetArray, PatchableArray } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import { ArrayDecoder, deepSetArray, PatchableArray } from '@common/encoding';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { GlobalEventBus } from '@stamhoofd/frontend-application/EventBus.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';

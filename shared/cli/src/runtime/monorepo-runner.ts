@@ -51,6 +51,7 @@ export type UnitTestPackage = {
 // query `Database` from @simonbackx/simple-database).
 export const unitTestPackages: UnitTestPackage[] = [
     { name: 'errors', path: 'packages/common/errors', needsDatabase: false },
+    { name: 'encoding', path: 'packages/common/encoding', needsDatabase: false },
     { name: 'cli', path: 'shared/cli', needsDatabase: false },
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
     { name: 'metabase', path: 'shared/metabase', needsDatabase: false },
@@ -82,7 +83,7 @@ export const unitTestPackages: UnitTestPackage[] = [
 ];
 export const coverageTestPackages: UnitTestPackage[] = [
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
-    ...unitTestPackages.filter(pkg => ['errors', 'metabase', 'filters', 'structures', 'object-differ', 'utility', 'queues', 'models', 'vies', 'sql', 'renderer', 'redirecter', 'statistics-syncer', 'api'].includes(pkg.name)),
+    ...unitTestPackages.filter(pkg => ['errors', 'encoding', 'metabase', 'filters', 'structures', 'object-differ', 'utility', 'queues', 'models', 'vies', 'sql', 'renderer', 'redirecter', 'statistics-syncer', 'api'].includes(pkg.name)),
 ];
 const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.pid}.ready`;
 
@@ -308,7 +309,7 @@ export async function cleanBuild(context: CliContext, options: { dryRun?: boolea
 }
 
 export function sharedBuildWatchCommand(): string {
-    return `mkdir -p .development/cli/generated && rm -f ${sharedBuildReadyFile} && pnpm exec nodemon --quiet --signal SIGTERM --watch shared --watch backend/shared --watch packages/common/errors --watch backend/stamhoofd.d.ts --watch turbo.jsonc --watch tsconfig.base.json --watch tsconfig.test.json --watch tsconfig.runtime.json --watch tsconfig.types.json --watch jest-extended.d.ts --ignore './shared/*/dist/' --ignore './backend/shared/*/dist/' --ignore './shared/*/dist-types/' --ignore './backend/shared/*/dist-types/' --ignore './packages/common/*/dist/' --ignore './packages/common/*/dist-types/' --ext .ts,.json,.jsonc,.sql,.mjs,.js --exec 'pnpm run build:shared && touch ${sharedBuildReadyFile} || exit 0'`;
+    return `mkdir -p .development/cli/generated && rm -f ${sharedBuildReadyFile} && pnpm exec nodemon --quiet --signal SIGTERM --watch shared --watch backend/shared --watch packages/common/errors --watch packages/common/encoding --watch backend/stamhoofd.d.ts --watch turbo.jsonc --watch tsconfig.base.json --watch tsconfig.test.json --watch tsconfig.runtime.json --watch tsconfig.types.json --watch jest-extended.d.ts --ignore './shared/*/dist/' --ignore './backend/shared/*/dist/' --ignore './shared/*/dist-types/' --ignore './backend/shared/*/dist-types/' --ignore './packages/common/*/dist/' --ignore './packages/common/*/dist-types/' --ext .ts,.json,.jsonc,.sql,.mjs,.js --exec 'pnpm run build:shared && touch ${sharedBuildReadyFile} || exit 0'`;
 }
 
 export function sharedBuildReadyCommand(): string {

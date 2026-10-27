@@ -117,8 +117,8 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { encodeObject, PatchableArray, PatchMap } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@common/encoding';
+import { encodeObject, PatchableArray, PatchMap } from '@common/encoding';
 import { ComponentWithProperties, usePop, usePresent, useShow } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import { markReviewMoment } from '@stamhoofd/frontend-application/markReviewMoment';

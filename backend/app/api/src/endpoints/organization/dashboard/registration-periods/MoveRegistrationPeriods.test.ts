@@ -7,8 +7,8 @@ import { Group, GroupCategory, GroupCategorySettings, GroupType, OrganizationReg
 import { PatchOrganizationRegistrationPeriodsEndpoint } from './PatchOrganizationRegistrationPeriodsEndpoint.js';
 import { SessionService } from '../../../../services/SessionService.js';
 
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArray } from '@common/encoding';
 
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';

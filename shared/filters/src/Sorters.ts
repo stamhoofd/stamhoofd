@@ -1,4 +1,4 @@
-import type { PlainObject } from '@simonbackx/simple-encoding';
+import type { PlainObject } from '@common/encoding';
 import type { SortList } from './SortList.js';
 import { SortItemDirection } from './SortList.js';
 

@@ -1,5 +1,5 @@
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArray } from '@common/encoding';
 import { Database } from '@simonbackx/simple-database';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User, Webshop } from '@stamhoofd/models';

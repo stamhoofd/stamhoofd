@@ -1,5 +1,5 @@
 import { column, ManyToManyRelation } from '@simonbackx/simple-database';
-import { EnumDecoder } from '@simonbackx/simple-encoding';
+import { EnumDecoder } from '@common/encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { RecordAnswer } from '@stamhoofd/structures';
 import { EventNotificationStatus, RecordAnswerMapDecoder } from '@stamhoofd/structures';

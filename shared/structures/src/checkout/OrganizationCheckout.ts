@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
 import { STPackageBundle, STPackageBundleHelper } from '../billing/STPackageBundle.js';
 import { Checkoutable } from './Checkoutable.js';
 import type { OrganizationPackagesStatus } from '../billing/OrganizationPackagesStatus.js';

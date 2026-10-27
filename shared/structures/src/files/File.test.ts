@@ -1,4 +1,4 @@
-import { ObjectData } from '@simonbackx/simple-encoding';
+import { ObjectData } from '@common/encoding';
 
 import { Version } from '../Version.js';
 import { File, FileTypes, supportedFileTypes, supportedImageTypes } from './File.js';

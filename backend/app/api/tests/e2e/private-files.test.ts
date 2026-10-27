@@ -1,8 +1,8 @@
 import { File, MemberDetails, MemberWithRegistrationsBlob, RecordCategory, RecordFileAnswer, RecordSettings, RecordType, TranslatedString, Version } from '@stamhoofd/structures';
 import { SessionService } from '../../src/services/SessionService.js';
 
-import type { PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { encodeObject, EncodeMedium, PatchableArray } from '@simonbackx/simple-encoding';
+import type { PatchableArrayAutoEncoder } from '@common/encoding';
+import { encodeObject, EncodeMedium, PatchableArray } from '@common/encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import { Member, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';

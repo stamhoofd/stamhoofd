@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Organization, User, Webshop } from '@stamhoofd/models';
 import { OrderFactory, OrganizationFactory, Ticket, TicketFactory, UserFactory, WebshopFactory } from '@stamhoofd/models';

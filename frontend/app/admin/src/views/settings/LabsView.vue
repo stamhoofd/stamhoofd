@@ -134,7 +134,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { ConvertArrayToPatchableArray } from '@simonbackx/simple-encoding';
+import type { ConvertArrayToPatchableArray } from '@common/encoding';
 import { usePop, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 

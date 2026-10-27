@@ -21,13 +21,13 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 
 > One of the most important concepts in our code base. Start here.
 
-[Encoding & decoding (structures)](https://github.com/SimonBackx/simple-encoding/blob/master/README.md#encoding--decoding-structures)
+[Encoding & decoding (structures)](../packages/common/encoding/README.md#encoding--decoding-structures)
 
-[Writing AutoEncoder classes](https://github.com/SimonBackx/simple-encoding/blob/master/docs/autoencoder.md)
+[Writing AutoEncoder classes](../packages/common/encoding/docs/autoencoder.md)
 
-[Patching data](https://github.com/SimonBackx/simple-encoding/blob/master/docs/patching.md)
+[Patching data](../packages/common/encoding/docs/patching.md)
 
-[Versioning data](https://github.com/SimonBackx/simple-encoding/blob/master/docs/versioning.md)
+[Versioning data](../packages/common/encoding/docs/versioning.md)
 
 ## Frontend guides
 

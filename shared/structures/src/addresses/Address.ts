@@ -1,4 +1,4 @@
-import { AutoEncoder, field, ObjectData, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, ObjectData, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter, StringCompare } from '@stamhoofd/utility';

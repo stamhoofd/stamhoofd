@@ -70,8 +70,8 @@
 import type { Address, Image, PatchAnswers, RecordChoice, RecordSettings } from '@stamhoofd/structures';
 import { FileType, RecordAddressAnswer, RecordAnswer, RecordAnswerDecoder, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordDateAnswer, RecordFileAnswer, RecordImageAnswer, RecordIntegerAnswer, RecordMultipleChoiceAnswer, RecordPriceAnswer, RecordTextAnswer, RecordType, supportedFileTypes } from '@stamhoofd/structures';
 
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { PatchMap } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
+import { PatchMap } from '@common/encoding';
 import { computed, onMounted } from 'vue';
 import { ErrorBox } from '../errors/ErrorBox';
 import STErrorsDefault from '../errors/STErrorsDefault.vue';

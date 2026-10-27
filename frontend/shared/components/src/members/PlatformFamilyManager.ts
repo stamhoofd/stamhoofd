@@ -1,5 +1,5 @@
-import type { Decoder, PatchableArrayAutoEncoder} from '@simonbackx/simple-encoding';
-import { PatchableArray, patchContainsChanges } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder} from '@common/encoding';
+import { PatchableArray, patchContainsChanges } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import type { RequestResult } from '@simonbackx/simple-networking';
 import { Request } from '@simonbackx/simple-networking';

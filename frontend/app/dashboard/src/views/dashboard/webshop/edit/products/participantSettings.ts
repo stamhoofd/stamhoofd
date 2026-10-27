@@ -1,4 +1,4 @@
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { GroupUIFilterBuilder } from '@stamhoofd/components/filters/GroupUIFilter.ts';
 import { RecordEditorSettings, RecordEditorType } from '@stamhoofd/components/records/RecordEditorSettings.ts';
 import type { Product } from '@stamhoofd/structures';

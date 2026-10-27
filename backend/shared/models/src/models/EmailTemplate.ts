@@ -1,6 +1,6 @@
 import { column } from '@simonbackx/simple-database';
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { AnyDecoder, EnumDecoder, MapDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { AnyDecoder, EnumDecoder, MapDecoder } from '@common/encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { EmailTemplateType } from '@stamhoofd/structures';
 import { EmailContent, EmailTemplate as EmailTemplateStruct } from '@stamhoofd/structures';

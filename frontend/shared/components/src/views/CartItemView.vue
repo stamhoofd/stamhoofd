@@ -192,7 +192,7 @@ import { CartStockHelper, Customer, ProductPrice, ProductType, UitpasNumberAndPr
 import { Formatter } from '@stamhoofd/utility';
 
 import { useContext } from '#hooks/useContext.ts';
-import { patchObject } from '@simonbackx/simple-encoding';
+import { patchObject } from '@common/encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';

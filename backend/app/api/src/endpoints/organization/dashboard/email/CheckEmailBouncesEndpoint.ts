@@ -1,4 +1,4 @@
-import { ArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, StringDecoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { SimpleError } from '@common/errors';

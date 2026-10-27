@@ -1,4 +1,4 @@
-import type { PlainObject } from '@simonbackx/simple-encoding';
+import type { PlainObject } from '@common/encoding';
 import { Sorter } from '@stamhoofd/utility';
 
 import type { MemberSummary } from '../admin/MemberSummary.js';

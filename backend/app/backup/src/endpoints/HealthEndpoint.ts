@@ -1,7 +1,7 @@
 import type { DecodedRequest, Request} from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { BackupHealth, getHealth } from '../helpers/backup.js';
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { checkReplicaStatus } from '../helpers/replica-status.js';
 

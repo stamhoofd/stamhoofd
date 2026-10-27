@@ -164,7 +164,7 @@ import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import ImageComponent from '#views/ImageComponent.vue';
 import PriceBreakdownBox from '#views/PriceBreakdownBox.vue';
-import { patchObject } from '@simonbackx/simple-encoding';
+import { patchObject } from '@common/encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import type { GroupOption, GroupOptionMenu, GroupPrice, PatchAnswers, PriceBreakdown, RegisterItem } from '@stamhoofd/structures';
 import { GroupType, RegisterItemOption } from '@stamhoofd/structures';

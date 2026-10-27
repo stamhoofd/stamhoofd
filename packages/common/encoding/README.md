@@ -6,17 +6,13 @@ Encoding and decoding can get customized, and that's the whole point of this lib
 
 ## Installation
 
-### Yarn
+This is a private workspace. Declare `"@common/encoding": "workspace:*"` in
+consuming packages. Run `pnpm stam test encoding` and
+`pnpm stam check typecheck @common/encoding` from the repository root.
 
-```
-yarn add @simonbackx/simple-encoding
-```
-
-### NPM
-
-```
-npm install @simonbackx/simple-encoding
-```
+The workspace override redirects remaining registry consumers to this same
+implementation. Consumers whose registry dependencies hide this build edge
+declare encoding as a build-time dependency until those libraries are integrated.
 
 ## Documentation
 
@@ -34,7 +30,7 @@ Structures are data objects that can be encoded (converted to plain objects) and
 
 In Stamhoofd all structures are currently stored in the `shared/structures` folder. They are used by the backend and frontend. This facilitates seamless communication over the network and ensures secure data storage in both the database and browser.
 
-The encoding and decoding behavior is mostly implemented in the `@simonbackx/simple-encoding` package.
+The encoding and decoding behavior is mostly implemented in the `@common/encoding` package.
 
 ---
 
@@ -45,7 +41,7 @@ The encoding and decoding behavior is mostly implemented in the `@simonbackx/sim
 The easiest way to create encodable and decodable structures is by extending the AutoEncoder class. Here's a basic example:
 
 ```typescript
-import { AutoEncoder, StringDecoder, NumberDecoder, field } from '@simonbackx/simple-encoding';
+import { AutoEncoder, StringDecoder, NumberDecoder, field } from '@common/encoding';
 
 class MyClass extends AutoEncoder {
     @field({ decoder: NumberDecoder })

@@ -1,4 +1,4 @@
-import { field } from '@simonbackx/simple-encoding';
+import { field } from '@common/encoding';
 
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItem, BalanceItemPayment } from './BalanceItem.js';

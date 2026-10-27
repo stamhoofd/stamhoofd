@@ -1,4 +1,4 @@
-import type { Data, Encodeable, EncodeContext } from '@simonbackx/simple-encoding';
+import type { Data, Encodeable, EncodeContext } from '@common/encoding';
 
 /**
  * OAuth2 token data with absolute expiration dates in memory and snake_case wire keys.

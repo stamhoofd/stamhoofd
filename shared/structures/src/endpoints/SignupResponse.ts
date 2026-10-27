@@ -1,4 +1,4 @@
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 
 export class SignupResponse extends AutoEncoder {
     /**

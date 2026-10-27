@@ -10,7 +10,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/ContextMenu';
 import EditRecordCategoryRecordsBox from '@stamhoofd/components/records/components/EditRecordCategoryRecordsBox.vue';

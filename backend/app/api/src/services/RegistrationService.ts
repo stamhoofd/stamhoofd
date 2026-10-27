@@ -1,5 +1,5 @@
 import { ManyToOneRelation } from '@simonbackx/simple-database';
-import { encodeObject } from '@simonbackx/simple-encoding';
+import { encodeObject } from '@common/encoding';
 import { BalanceItem, Document, Group, Member, Organization, Platform, Registration, RegistrationInvitation } from '@stamhoofd/models';
 import { DocumentService } from './DocumentService.js';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';

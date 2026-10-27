@@ -17,9 +17,9 @@ Documentation and code is located in the backend folder.
 
 ## Shared
 
-Imported libraries live under `packages/`. The integrated `@common/errors`
-workspace is documented in [`packages/common/errors/README.md`](packages/common/errors/README.md).
-Other imported libraries are not yet registered as workspaces.
+Reusable libraries live under `packages/`, grouped by runtime (`common`, `node`,
+and `browser`). Their private workspace names mirror these locations, such as
+`@common/errors` and `@common/encoding`. Each library owns its README and guides.
 
 We have some packages that are shared between the frontend and backend. The most important one is `structures`. This package contains all the data structures (communication in the API, stored in the backend, in an encrytped blob or in localstorage) and how they should be encoded and decoded. The data structures are versioned: when an old client communicates with an updated backend, everything will work as usual. If you need to add some new data, you'll probably need to make some changes in this package. Read the documantation about encoding, decoding, structures, patching, and versioning [here](https://github.com/SimonBackx/simple-encoding/blob/master/README.md#encoding--decoding-structures).
 

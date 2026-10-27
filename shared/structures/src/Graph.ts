@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, field, NumberDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, field, NumberDecoder, StringDecoder } from '@common/encoding';
 
 export class GraphData extends AutoEncoder {
     @field({ decoder: StringDecoder })

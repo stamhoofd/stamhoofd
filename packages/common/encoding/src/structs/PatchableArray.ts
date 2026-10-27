@@ -1,4 +1,4 @@
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 
 import { Cloneable, cloneObject } from '../classes/Cloneable.js';
 import { Data } from '../classes/Data.js';

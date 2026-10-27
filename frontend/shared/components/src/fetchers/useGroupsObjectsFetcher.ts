@@ -1,7 +1,7 @@
 import { useContext } from '#hooks/useContext.ts';
 import type { ObjectFetcher } from '#tables/classes/ObjectFetcher.ts';
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { ArrayDecoder } from '@common/encoding';
 import type { CountFilteredRequest, SortList } from '@stamhoofd/structures';
 import { assertSort, CountResponse, Group, LimitedFilteredRequest, PaginatedResponseDecoder } from '@stamhoofd/structures';
 

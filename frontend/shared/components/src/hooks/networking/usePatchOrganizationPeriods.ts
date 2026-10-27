@@ -1,5 +1,5 @@
-import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import { ArrayDecoder } from '@common/encoding';
 import { useContext } from '../useContext';
 import { useOrganization } from '../useOrganization';
 import { OrganizationRegistrationPeriod } from '@stamhoofd/structures';

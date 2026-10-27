@@ -76,7 +76,7 @@
 <script setup lang="ts">
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { NavigationActions } from '#types/NavigationActions.ts';
-import { PatchMap } from '@simonbackx/simple-encoding';
+import { PatchMap } from '@common/encoding';
 import { usePresent } from '@simonbackx/vue-app-navigation';
 
 import { propertyFilterToString } from '#filters/UIFilter.ts';

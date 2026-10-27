@@ -1,4 +1,4 @@
-import { AutoEncoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, IntegerDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { BalanceItem } from '../../BalanceItem.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../../upgradePriceFrom2To4DecimalPlaces.js';

@@ -1,5 +1,5 @@
-import type { AutoEncoder, NonScalarIdentifiable, PatchableArrayAutoEncoder, AutoEncoderPatchType} from '@simonbackx/simple-encoding';
-import { PatchableArray } from '@simonbackx/simple-encoding'
+import type { AutoEncoder, NonScalarIdentifiable, PatchableArrayAutoEncoder, AutoEncoderPatchType} from '@common/encoding';
+import { PatchableArray } from '@common/encoding'
 
 /** Forward each operation as a fresh array patch to a parent callback; `addPatch` requires a truthy id. */
 export function usePatchableArray<T extends AutoEncoder & NonScalarIdentifiable<string|number>>(patchArray: (array: PatchableArrayAutoEncoder<T>) => void) {

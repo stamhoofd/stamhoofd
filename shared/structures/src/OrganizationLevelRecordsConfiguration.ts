@@ -1,5 +1,5 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, AutoEncoder, field } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { ArrayDecoder, AutoEncoder, field } from '@common/encoding';
 import { RecordCategory } from './members/records/RecordCategory.js';
 import type { ObjectWithRecords } from './members/ObjectWithRecords.js';
 

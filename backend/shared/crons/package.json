@@ -20,6 +20,7 @@
         "mysql2": "3.24.6"
     },
     "devDependencies": {
+        "@common/encoding": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*"
     },

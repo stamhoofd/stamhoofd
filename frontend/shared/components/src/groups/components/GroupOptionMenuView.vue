@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { usePop } from '@simonbackx/vue-app-navigation';
 import type { Group, GroupOptionMenu } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';

@@ -4,7 +4,7 @@ import type { RecordAnswer } from '@stamhoofd/structures';
 import { AppliedRegistrationDiscount, GroupPrice, RecordAnswerMapDecoder, RegisterItemOption, Registration as RegistrationStructure, StockReservation } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ArrayDecoder, MapDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, MapDecoder, StringDecoder } from '@common/encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { Group } from './Group.js';
 

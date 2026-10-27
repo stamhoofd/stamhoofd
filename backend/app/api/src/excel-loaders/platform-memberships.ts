@@ -1,4 +1,4 @@
-import { field, StringDecoder } from '@simonbackx/simple-encoding';
+import { field, StringDecoder } from '@common/encoding';
 import type { XlsxTransformerSheet } from '@stamhoofd/excel-writer';
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { RegistrationPeriod } from '@stamhoofd/models';

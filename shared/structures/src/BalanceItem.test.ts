@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { ObjectData } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
+import { ObjectData } from '@common/encoding';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { BalanceItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BalanceItemWithPayments, NAME_TITLED_BALANCE_ITEM_TYPES, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, GroupedBalanceItems, VATExcemptReason } from './BalanceItem.js';
 import type { InMemoryFilterDefinitions } from './filters/InMemoryFilter.js';

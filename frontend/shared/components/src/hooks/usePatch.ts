@@ -1,5 +1,5 @@
-import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchType } from '@simonbackx/simple-encoding';
-import { patchContainsChanges } from '@simonbackx/simple-encoding';
+import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods, PatchType } from '@common/encoding';
+import { patchContainsChanges } from '@common/encoding';
 import { Version } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, ref, unref } from 'vue';

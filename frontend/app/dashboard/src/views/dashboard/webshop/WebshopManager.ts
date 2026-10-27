@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { EncodeMedium, ObjectData } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
+import { EncodeMedium, ObjectData } from '@common/encoding';
 import { Request } from '@simonbackx/simple-networking';
 import { OrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';

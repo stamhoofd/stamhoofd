@@ -1,5 +1,5 @@
-import type { Data, Encodeable, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
-import { cloneObject } from '@simonbackx/simple-encoding';
+import type { Data, Encodeable, EncodeContext, PlainObject } from '@common/encoding';
+import { cloneObject } from '@common/encoding';
 
 import { AuditLogReplacement } from '../AuditLogReplacement.js';
 import { isEmptyFilter, mergeFilters } from '@stamhoofd/filters/StamhoofdFilter';

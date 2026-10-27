@@ -1,7 +1,7 @@
 import type { BundleInfo } from '@capgo/capacitor-updater';
 import { CapacitorUpdater } from '@capgo/capacitor-updater';
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 import { Server } from '@simonbackx/simple-networking';
 import { ComponentWithProperties } from '@simonbackx/vue-app-navigation';
 import { MobileRootEventBus } from '@stamhoofd/components/overlays/ModalStackEventBus.ts';

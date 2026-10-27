@@ -1,5 +1,5 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 import { UrlHelper } from '@simonbackx/vue-app-navigation';
 import { useContext } from '#hooks/useContext.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';

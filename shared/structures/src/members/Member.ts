@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 
 import { MemberDetails } from './MemberDetails.js';

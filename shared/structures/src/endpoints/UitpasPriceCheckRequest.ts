@@ -1,4 +1,4 @@
-import { AutoEncoder, StringDecoder, field, IntegerDecoder, ArrayDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, StringDecoder, field, IntegerDecoder, ArrayDecoder } from '@common/encoding';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 
 export class UitpasPriceCheckRequest extends AutoEncoder {

@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { patchContainsChanges } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, PartialWithoutMethods } from '@common/encoding';
+import { patchContainsChanges } from '@common/encoding';
 import type { EmergencyContact, Group, Organization, Parent, Platform, PlatformMember, RecordAnswer } from '@stamhoofd/structures';
 import { MemberDetails, PlatformFamily, Version } from '@stamhoofd/structures';
 import { ImportRegistrationResult } from './ImportRegistrationResult';

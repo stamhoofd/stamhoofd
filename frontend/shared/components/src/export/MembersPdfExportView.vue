@@ -23,8 +23,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder} from '@simonbackx/simple-encoding';
-import { ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder} from '@common/encoding';
+import { ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import { ErrorBox } from '#errors/ErrorBox.ts';
 import ScrollableSegmentedControl from '#inputs/ScrollableSegmentedControl.vue';
 import { useAuth } from '#hooks/useAuth.ts';

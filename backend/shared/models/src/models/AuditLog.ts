@@ -1,6 +1,6 @@
 import { column } from '@simonbackx/simple-database';
-import type { Decoder} from '@simonbackx/simple-encoding';
-import { ArrayDecoder, MapDecoder, StringDecoder, StringOrNumberDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder} from '@common/encoding';
+import { ArrayDecoder, MapDecoder, StringDecoder, StringOrNumberDecoder } from '@common/encoding';
 import { QueryableModel } from '@stamhoofd/sql';
 import { AuditLogPatchItem, AuditLogReplacement, AuditLogSource, AuditLogType, getAuditLogTypeReplacements } from '@stamhoofd/structures';
 import { v7 as uuidv7 } from 'uuid';

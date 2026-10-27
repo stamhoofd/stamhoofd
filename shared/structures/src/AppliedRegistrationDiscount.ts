@@ -1,4 +1,4 @@
-import { AutoEncoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field, IntegerDecoder } from '@common/encoding';
 import { TranslatedString } from './TranslatedString.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 

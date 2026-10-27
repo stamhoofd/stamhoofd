@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { Formatter } from '@stamhoofd/utility';
 import { Address } from '../addresses/Address.js';

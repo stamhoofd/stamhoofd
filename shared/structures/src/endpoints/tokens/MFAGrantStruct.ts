@@ -1,4 +1,4 @@
-import type { Data } from '@simonbackx/simple-encoding';
+import type { Data } from '@common/encoding';
 
 import { MFAMethodType, WebauthnAuthenticationCredential } from '../../MFA.js';
 

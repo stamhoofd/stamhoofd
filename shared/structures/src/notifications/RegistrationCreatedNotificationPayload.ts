@@ -1,5 +1,5 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { AutoEncoder, field, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { AutoEncoder, field, ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding';
 import { NamedObject } from '../Event.js';
 import { Version } from '../Version.js';
 

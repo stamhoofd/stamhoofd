@@ -95,8 +95,8 @@
 </template>
 
 <script lang="ts" setup>
-import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods } from '@simonbackx/simple-encoding';
-import { patchContainsChanges } from '@simonbackx/simple-encoding';
+import type { AutoEncoder, AutoEncoderPatchType, PartialWithoutMethods } from '@common/encoding';
+import { patchContainsChanges } from '@common/encoding';
 import { SimpleErrors } from '@common/errors';
 import { ComponentWithProperties, NavigationController, useDismiss, usePresent } from '@simonbackx/vue-app-navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';

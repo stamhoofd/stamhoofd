@@ -1,4 +1,4 @@
-import { PatchMap } from '@simonbackx/simple-encoding';
+import { PatchMap } from '@common/encoding';
 import { Request } from '@simonbackx/simple-endpoints';
 import type { Group, Organization, RegistrationPeriod, User } from '@stamhoofd/models';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';

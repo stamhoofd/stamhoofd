@@ -1,5 +1,5 @@
-import type { Decoder} from '@simonbackx/simple-encoding';
-import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@simonbackx/simple-encoding'
+import type { Decoder} from '@common/encoding';
+import { ArrayDecoder, ObjectData, VersionBox, VersionBoxDecoder } from '@common/encoding'
 import { Checkout, DiscountCode, Version } from '@stamhoofd/structures'
 
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';

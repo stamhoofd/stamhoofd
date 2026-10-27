@@ -4,7 +4,7 @@ import { Encodeable } from './Encodeable.js';
 import { EncodeContext } from './EncodeContext.js';
 import { NonScalarIdentifiable } from './Identifiable.js';
 import { Cloneable, cloneObject } from './Cloneable.js';
-import { SimpleError } from '@simonbackx/simple-errors';
+import { SimpleError } from '@common/errors';
 import { isAutoEncoder } from '../helpers/isAutoEncoder.js';
 
 /** An object that can apply a patch of type P. AutoEncoder supplies this behavior automatically. */

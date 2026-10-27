@@ -1,4 +1,4 @@
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import type { Server } from '@simonbackx/simple-networking';
 import { useDismiss } from '@simonbackx/vue-app-navigation';
 import { Payment, PaymentStatus } from '@stamhoofd/structures';

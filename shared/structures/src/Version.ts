@@ -11,7 +11,7 @@ declare global {
     const NextVersion: { /* optional: true; */ version: number };
 }
 
-import { AutoEncoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder } from '@common/encoding';
 AutoEncoder.skipDefaultValuesVersion = 10000; // todo
 
 /**

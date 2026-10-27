@@ -172,8 +172,8 @@ import PaymentCustomerSelectionBox from '#payments/components/PaymentCustomerSel
 import type { Company, PaymentCustomer } from '@stamhoofd/structures';
 import { Invoice, InvoiceTypeHelper } from '@stamhoofd/structures';
 
-import type { Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, PatchableArray } from '@simonbackx/simple-encoding';
+import type { Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import { ArrayDecoder, PatchableArray } from '@common/encoding';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import { computed, ref } from 'vue';
 import InvoiceItemsBox from './InvoiceItemsBox.vue';

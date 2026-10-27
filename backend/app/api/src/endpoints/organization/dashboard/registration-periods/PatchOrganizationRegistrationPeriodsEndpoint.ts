@@ -4,8 +4,8 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { GroupPrivateSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, ResourcePermissions, Version } from '@stamhoofd/structures';
 
-import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@simonbackx/simple-encoding';
-import { PatchableArrayDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
+import { PatchableArrayDecoder, StringDecoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { Event, Group, Organization, OrganizationRegistrationPeriod, Platform, Registration, RegistrationInvitation, RegistrationPeriod } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';

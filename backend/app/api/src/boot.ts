@@ -9,7 +9,7 @@ import { MemoryService } from '@stamhoofd/logging/MemoryService';
 import { Version } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 
-import { AutoEncoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { StyledText } from '@simonbackx/simple-logging';
 import { markAllSeedsFinished, startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';

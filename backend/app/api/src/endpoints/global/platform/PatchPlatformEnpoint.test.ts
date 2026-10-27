@@ -6,7 +6,7 @@ import { MemberResponsibility, MemberResponsibilityRecordBase, PermissionRoleFor
 import { v4 as uuidv4 } from 'uuid';
 import { SessionService } from '../../../services/SessionService.js';
 
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { testServer } from '../../../../tests/helpers/TestServer.js';

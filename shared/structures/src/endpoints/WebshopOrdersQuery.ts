@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, EnumDecoder, field, IntegerDecoder } from '@common/encoding';
 
 export enum SortDirection {
     Ascending = 'Ascending',

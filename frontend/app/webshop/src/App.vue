@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { isSimpleError, isSimpleErrors } from '@common/errors';
 import type { PushOptions } from '@simonbackx/vue-app-navigation';
 import { ComponentWithProperties, HistoryManager, ModalStackComponent, NavigationController, useManualPresent } from '@simonbackx/vue-app-navigation';

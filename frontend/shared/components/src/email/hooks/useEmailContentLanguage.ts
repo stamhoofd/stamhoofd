@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType } from '@simonbackx/simple-encoding';
-import { encodeObject, PatchMap } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType } from '@common/encoding';
+import { encodeObject, PatchMap } from '@common/encoding';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { EmailContent, LanguageHelper } from '@stamhoofd/structures';
 import { isTipTapDocument, TranslateRequest } from '@stamhoofd/structures/endpoints/TranslateRequest.js';

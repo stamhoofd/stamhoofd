@@ -1,4 +1,4 @@
-import type { Decoder } from "@simonbackx/simple-encoding";
+import type { Decoder } from "@common/encoding";
 import { SessionContext } from "@stamhoofd/frontend-session/SessionContext";
 import { NetworkManager } from "@stamhoofd/networking/NetworkManager";
 import { Organization } from "@stamhoofd/structures";

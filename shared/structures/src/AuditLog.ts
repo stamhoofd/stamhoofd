@@ -1,4 +1,4 @@
-import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder, StringOrNumberDecoder } from '@simonbackx/simple-encoding';
+import { ArrayDecoder, AutoEncoder, DateDecoder, EnumDecoder, field, MapDecoder, StringDecoder, StringOrNumberDecoder } from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 import type { RenderContext } from './AuditLogRenderer.js';
 import { renderTemplate } from './AuditLogRenderer.js';

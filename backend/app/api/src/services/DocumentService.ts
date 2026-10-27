@@ -1,5 +1,5 @@
 import { Model } from '@simonbackx/simple-database';
-import type { PlainObject } from '@simonbackx/simple-encoding';
+import type { PlainObject } from '@common/encoding';
 import type { MemberWithRegistrations, RegistrationWithMember } from '@stamhoofd/models/models/Member.js';
 import { DocumentTemplate } from '@stamhoofd/models/models/DocumentTemplate.js';
 import { Group } from '@stamhoofd/models/models/Group.js';

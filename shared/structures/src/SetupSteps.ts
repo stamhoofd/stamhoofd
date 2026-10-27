@@ -1,4 +1,4 @@
-import { AutoEncoder, DateDecoder, EnumDecoder, MapDecoder, NumberDecoder, field } from '@simonbackx/simple-encoding';
+import { AutoEncoder, DateDecoder, EnumDecoder, MapDecoder, NumberDecoder, field } from '@common/encoding';
 import { Formatter } from '@stamhoofd/utility';
 import { SetupStepReview } from './SetupStepReview.js';
 import { SetupStepType } from './SetupStepType.js';

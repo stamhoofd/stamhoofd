@@ -1,5 +1,5 @@
 import { column, Migration } from '@simonbackx/simple-database';
-import { AutoEncoder, field } from '@simonbackx/simple-encoding';
+import { AutoEncoder, field } from '@common/encoding';
 import { Organization } from '@stamhoofd/models';
 import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { DataPermissionsSettings, FinancialSupportSettings, Version } from '@stamhoofd/structures';

@@ -1,8 +1,8 @@
 import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
 import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { UitpasService } from '../../../../services/uitpas/UitpasService.js';
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { AutoEncoder, field, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { AutoEncoder, field, StringDecoder } from '@common/encoding';
 import { Context } from '../../../../helpers/Context.js';
 import type { UitpasEventsResponse } from '@stamhoofd/structures';
 import { SimpleError } from '@common/errors';

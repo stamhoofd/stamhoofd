@@ -4,7 +4,7 @@ import type { CountFilteredRequest, EmailRecipient as EmailRecipientStruct, Stam
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { assertSort, getSortFilter, LimitedFilteredRequest, PaginatedResponse } from '@stamhoofd/structures';
 
-import type { Decoder } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { EmailRecipient } from '@stamhoofd/models';
 import type { SQLFilterDefinitions, SQLSortDefinitions } from '@stamhoofd/sql';

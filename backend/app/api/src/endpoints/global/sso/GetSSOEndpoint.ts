@@ -3,8 +3,8 @@ import { Endpoint, Response } from '@simonbackx/simple-endpoints';
 import { LoginProviderType, OpenIDClientConfiguration } from '@stamhoofd/structures';
 
 import { Context } from '../../../helpers/Context.js';
-import type { Decoder } from '@simonbackx/simple-encoding';
-import { AutoEncoder, EnumDecoder, field } from '@simonbackx/simple-encoding';
+import type { Decoder } from '@common/encoding';
+import { AutoEncoder, EnumDecoder, field } from '@common/encoding';
 import { SSOService } from '../../../services/SSOService.js';
 
 type Params = Record<string, never>;

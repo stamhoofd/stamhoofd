@@ -1,5 +1,5 @@
-import type { AutoEncoderPatchType, Decoder } from '@simonbackx/simple-encoding';
-import { ArrayDecoder, ObjectData } from '@simonbackx/simple-encoding';
+import type { AutoEncoderPatchType, Decoder } from '@common/encoding';
+import { ArrayDecoder, ObjectData } from '@common/encoding';
 import { isSimpleErrors } from '@common/errors';
 import { Request } from '@simonbackx/simple-networking';
 import { EventBus } from '@stamhoofd/frontend-application/EventBus.ts';

@@ -1,5 +1,5 @@
-import type { Data, Decoder, Encodeable, EncodeContext, PlainObject } from '@simonbackx/simple-encoding';
-import { AutoEncoder, field, IntegerDecoder, StringDecoder } from '@simonbackx/simple-encoding';
+import type { Data, Decoder, Encodeable, EncodeContext, PlainObject } from '@common/encoding';
+import { AutoEncoder, field, IntegerDecoder, StringDecoder } from '@common/encoding';
 
 import type { SortList } from '@stamhoofd/filters/SortList';
 import { encodeSortList, SortListDecoder } from '@stamhoofd/filters/SortList';
