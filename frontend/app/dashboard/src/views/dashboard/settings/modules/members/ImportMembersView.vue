@@ -283,19 +283,23 @@ const hasMembers = computed(() => {
 });
 
 const matcherCategories = computed(() => {
-    const arr: Record<string, { name: string; matchers: ColumnMatcher[] }> = {};
+    // Group case-insensitively while retaining the first matcher's category label.
+    const arr = new Map<string, { name: string; matchers: ColumnMatcher[] }>();
     for (const matcher of allMatchers.value) {
         const cat = matcher.category.toLowerCase();
-        if (arr[cat]) {
-            arr[cat].matchers.push(matcher);
+        const category = arr.get(cat);
+        if (category) {
+            category.matchers.push(matcher);
         } else {
-            arr[cat] = {
+            arr.set(cat, {
                 name: matcher.category,
                 matchers: [matcher],
-            };
+            });
         }
     }
-    return Object.values(arr);
+    // Custom category names can be numeric; retain their former object-key ordering.
+    const index = (key: string) => String(Number(key) >>> 0) === key && Number(key) < 2 ** 32 - 1 ? Number(key) : Infinity;
+    return [...arr].sort(([a], [b]) => index(a) - index(b)).map(([, category]) => category);
 });
 
 const includesBirthDay = computed(() => columns.value.some(c => c.matcher instanceof BirthDayColumnMatcher));
