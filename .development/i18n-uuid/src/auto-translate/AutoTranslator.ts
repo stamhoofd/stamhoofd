@@ -190,8 +190,7 @@ export class AutoTranslator {
         // get missing translations
         const missingTranslations = await this.findMissingTranslations(args);
         let simpleTranslations: Translations = {};
-        const translationsWithVariants: Record<string, TranslationWithVariant>
-            = {};
+        const translationsWithVariants = new Map<string, TranslationWithVariant>();
 
         if (args.namespace !== globals.DEFAULT_NAMESPACE) {
             const originalTextsBeforeReplacements
@@ -255,11 +254,11 @@ export class AutoTranslator {
                         );
                     }
 
-                    translationsWithVariants[uuid] = {
+                    translationsWithVariants.set(uuid, {
                         original,
                         translation: translationOfOriginal,
                         variant: missingTranslation,
-                    };
+                    });
                 }
                 else {
                     simpleTranslations[uuid] = missingTranslation;
@@ -298,7 +297,7 @@ export class AutoTranslator {
         }
 
         // translate translations with variant
-        if (Object.keys(translationsWithVariants).length !== 0) {
+        if (translationsWithVariants.size !== 0) {
             await this.translator.translateAllVariants(
                 translationsWithVariants,
                 {
@@ -312,7 +311,7 @@ export class AutoTranslator {
                                     uuid,
                                     {
                                         original:
-                                            translationsWithVariants[uuid]
+                                            translationsWithVariants.get(uuid)!
                                                 .variant,
                                         translation: value,
                                     },

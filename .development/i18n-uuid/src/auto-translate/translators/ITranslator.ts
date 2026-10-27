@@ -11,7 +11,7 @@ export interface ITranslator {
     ): Promise<Translations>;
 
     translateAllVariants(
-        translationsWithVariant: Record<string, TranslationWithVariant>,
+        translationsWithVariant: Map<string, TranslationWithVariant>,
         args: { originalLocal: string; targetLocal: string; namespace: string; afterBatchTranslated?: AfterBatchTranslatedCallback },
     ): Promise<Translations>;
 }

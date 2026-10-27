@@ -175,12 +175,12 @@ Above is an array with an original text in ${originalLocal}, the translation of 
         return text;
     }
 
-    private splitInBatches<T>(items: Record<string, T>): Batch<T>[] {
+    private splitInBatches<T>(items: Iterable<[string, T]>): Batch<T>[] {
         const batches: Batch<T>[] = [];
 
         let currentIndex = 0;
 
-        for (const [uuid, value] of Object.entries(items)) {
+        for (const [uuid, value] of items) {
             const item = { value, uuid };
             const batchIfNewItem = (batches[currentIndex] ?? []).concat([item]);
 
@@ -286,7 +286,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
         }: {
             originalLocal: string;
             targetLocal: string;
-            translations: Record<string, T>;
+            translations: Map<string, T>;
             consistentWords: Map<string, string> | null;
             namespace: string;
             translateBatch: (
@@ -333,7 +333,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
                             const validatedBatch: Batch<string>
                                 = translatedBatch.filter(({ uuid, value }) => {
                                     const original = getUntranslatedValue(
-                                        translations[uuid],
+                                        translations.get(uuid)!,
                                     );
                                     return this.validateTranslation(
                                         original,
@@ -348,7 +348,7 @@ Above is an array with an original text in ${originalLocal}, the translation of 
                                         ({ uuid, value }) =>
                                             value
                                             === getUntranslatedValue(
-                                                translations[uuid],
+                                                translations.get(uuid)!,
                                             ),
                                     )
                                 ) {
@@ -419,7 +419,7 @@ ${error}`;
             throw new Error(message);
         }
 
-        const batches = this.splitInBatches(translations);
+        const batches = this.splitInBatches(Object.entries(translations));
 
         const consistentWords = this.manager.getConsistentWords(
             targetLocal,
@@ -433,7 +433,7 @@ ${error}`;
         const result = await this.translateBatches(batches, {
             originalLocal: args.originalLocal,
             targetLocal,
-            translations,
+            translations: new Map(Object.entries(translations)),
             consistentWords,
             namespace: args.namespace,
             translateBatch: (batch, args) => this.translateSimpleBatch(batch, args),
@@ -446,7 +446,7 @@ ${error}`;
     }
 
     async translateAllVariants(
-        translationsWithVariant: Record<string, TranslationWithVariant>,
+        translationsWithVariant: Map<string, TranslationWithVariant>,
         args: {
             originalLocal: string;
             targetLocal: string;
