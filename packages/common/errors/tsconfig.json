@@ -1,5 +1,9 @@
 {
     "extends": "../../../tsconfig.base.json",
+    "compilerOptions": {
+        // Preserve the standalone package's assignment-style error properties.
+        "useDefineForClassFields": false
+    },
     "files": [],
     "references": [{ "path": "./tsconfig.types.json" }, { "path": "./tsconfig.test.json" }]
 }
