@@ -136,6 +136,7 @@ export class PaymentGeneral extends PrivatePayment {
         return str + '</tbody></table>';
     }
 
+    /** Groups equal payment descriptions and prefixes repeated descriptions with their count. */
     getShortDescription() {
         let shortDescriptions = this.balanceItemPayments.filter(p => p.price !== 0).map(p => p.balanceItem.paymentShortDescription!).filter(p => p !== null);
 
@@ -145,16 +146,19 @@ export class PaymentGeneral extends PrivatePayment {
         }
 
         // Count the number of times each description occurs and add prefix if more than 1
-        const counts: { [key: string]: number } = {};
+        const counts = new Map<string, number>();
         for (const shortDescription of shortDescriptions) {
-            counts[shortDescription] = (counts[shortDescription] || 0) + 1;
+            counts.set(shortDescription, (counts.get(shortDescription) ?? 0) + 1);
         }
 
         // Add prefix if more than 1
         const arr: string[] = [];
-        for (const shortDescription of Object.keys(counts)) {
-            if (counts[shortDescription] > 1) {
-                arr.push(counts[shortDescription] + ' x ' + shortDescription);
+        // Keep the former object's ordering for descriptions that are array-index strings.
+        const index = (key: string) => String(Number(key) >>> 0) === key && Number(key) < 2 ** 32 - 1 ? Number(key) : Infinity;
+        const sortedCounts = [...counts].sort(([a], [b]) => index(a) - index(b));
+        for (const [shortDescription, count] of sortedCounts) {
+            if (count > 1) {
+                arr.push(count + ' x ' + shortDescription);
             } else {
                 arr.push(shortDescription);
             }
