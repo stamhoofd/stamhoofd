@@ -22,8 +22,8 @@ function contact(data: Partial<MailchimpContact> & { email: string }): Mailchimp
     };
 }
 
-function existing(data: Partial<MailchimpExistingContact> & { email: string }): [string, MailchimpExistingContact] {
-    return [data.email, { status: 'subscribed', tags: [], mergeFields: {}, ...data }];
+function existing(data: Omit<Partial<MailchimpExistingContact>, 'mergeFields'> & { email: string; mergeFields?: Record<string, unknown> }): [string, MailchimpExistingContact] {
+    return [data.email, { status: 'subscribed', tags: [], ...data, mergeFields: new Map(Object.entries(data.mergeFields ?? {})) }];
 }
 
 const mergeFields = { firstName: 'FNAME', lastName: 'LNAME', members: 'SH_LEDEN', groups: 'SH_GROEPEN', organizations: null };

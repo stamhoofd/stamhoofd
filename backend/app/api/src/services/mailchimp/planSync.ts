@@ -12,7 +12,8 @@ export type MailchimpExistingContact = {
     email: string;
     status: string;
     tags: string[];
-    mergeFields: Record<string, unknown>;
+    /** Literal audience tags, normalized from Mailchimp JSON by MailchimpClient. */
+    mergeFields: Map<string, unknown>;
 };
 
 export type MailchimpEmailStatus = {
@@ -136,7 +137,7 @@ function buildMergeFields(contact: MailchimpContact, existing: MailchimpExisting
         if (!tag || !value) {
             return;
         }
-        if (options.kind === 'orders' && existing && existing.mergeFields[tag]) {
+        if (options.kind === 'orders' && existing && existing.mergeFields.get(tag)) {
             return;
         }
         fields[tag] = truncate(value);
@@ -148,13 +149,13 @@ function buildMergeFields(contact: MailchimpContact, existing: MailchimpExisting
         // A selection only contains part of the linked members, so keep the existing values
         const keepExisting = !options.full;
         if (tags.members) {
-            fields[tags.members] = joinList(contact.memberFirstNames, existing?.mergeFields[tags.members], keepExisting);
+            fields[tags.members] = joinList(contact.memberFirstNames, existing?.mergeFields.get(tags.members), keepExisting);
         }
         if (tags.groups) {
-            fields[tags.groups] = joinList(contact.groups, existing?.mergeFields[tags.groups], keepExisting);
+            fields[tags.groups] = joinList(contact.groups, existing?.mergeFields.get(tags.groups), keepExisting);
         }
         if (tags.organizations) {
-            fields[tags.organizations] = joinList(contact.organizations, existing?.mergeFields[tags.organizations], keepExisting);
+            fields[tags.organizations] = joinList(contact.organizations, existing?.mergeFields.get(tags.organizations), keepExisting);
         }
     }
     return fields;
@@ -233,7 +234,7 @@ export function planSync(
             tags: buildTagChanges(contact, existing, options),
         };
 
-        if (existing && !upsert.unsubscribe && upsert.tags.length === 0 && Object.entries(upsert.mergeFields).every(([tag, value]) => existing.mergeFields[tag] === value)) {
+        if (existing && !upsert.unsubscribe && upsert.tags.length === 0 && Object.entries(upsert.mergeFields).every(([tag, value]) => existing.mergeFields.get(tag) === value)) {
             plan.unchanged++;
             continue;
         }

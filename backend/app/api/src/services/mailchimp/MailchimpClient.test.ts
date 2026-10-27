@@ -30,6 +30,12 @@ describe('MailchimpClient', () => {
         expect(mailchimp.requests.filter(r => r.method === 'GET').length).toBe(4);
     });
 
+    test('normalizes JSON merge fields without changing empty values', async () => {
+        mailchimp.addList('list1', 'Audience', [{ email: 'member@example.com', mergeFields: { FNAME: 'Jan', LNAME: '' } }]);
+        const result = await client.getMembers('list1');
+        expect(result.get('member@example.com')?.mergeFields).toEqual(new Map([['FNAME', 'Jan'], ['LNAME', '']]));
+    });
+
     test('retries after a 429 with a capped Retry-After and gives up on persistent errors', async () => {
         mailchimp.addList('list1', 'Audience');
         MailchimpClient.retryDelay = 1;

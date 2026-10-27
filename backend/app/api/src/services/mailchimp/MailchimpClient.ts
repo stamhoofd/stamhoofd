@@ -220,7 +220,7 @@ export class MailchimpClient {
                         email,
                         status: asString(member.status),
                         tags: Array.isArray(member.tags) ? member.tags.map(t => asString(asObject(t).name)) : [],
-                        mergeFields: typeof member.merge_fields === 'object' && member.merge_fields !== null ? member.merge_fields as Record<string, unknown> : {},
+                        mergeFields: new Map(Object.entries(typeof member.merge_fields === 'object' && member.merge_fields !== null ? member.merge_fields : {})),
                     });
                 }
                 const total = typeof data.total_items === 'number' ? data.total_items : 0;
