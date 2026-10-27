@@ -252,7 +252,7 @@ export type EmailBuilderOptions = {
     singleBcc?: EmailInterfaceRecipient;
     replaceAll?: { from: string; to: string }[]; // replace in all e-mails, not recipient dependent
     callback?: (error: Error | null) => void; // for each email
-    headers?: Record<string, string>;
+    headers?: ReadonlyMap<string, string>;
 };
 
 /**
@@ -389,7 +389,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
 
             // Override headers
             recipient.headers = new Map([
-                ...Object.entries(email.headers ?? {}),
+                ...(email.headers ?? []),
                 ['List-Unsubscribe', STAMHOOFD.domains.defaultBroadcastEmail !== undefined ? '<mailto:unsubscribe+' + unsubscribe.id + '@' + STAMHOOFD.domains.defaultBroadcastEmail![''] + `>, <${unsubscribeUrl}>` : `<${unsubscribeUrl}>`],
                 ['List-Unsubscribe-Post', 'List-Unsubscribe=One-Click'],
             ]);
@@ -494,7 +494,7 @@ export async function getEmailBuilder(organization: Organization | null, email: 
             subject: replacedSubject,
             html: replacedHtml ?? undefined,
             attachments,
-            headers: recipient.headers === null ? null : Object.fromEntries(recipient.headers),
+            headers: recipient.headers,
             type: email.type,
             callback: email.callback,
         };

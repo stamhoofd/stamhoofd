@@ -21,7 +21,8 @@ export type EmailInterfaceBase = {
     attachments?: { filename: string; path?: string; href?: string; content?: string | Buffer; contentType?: string; encoding?: string; cid?: string }[];
     retryCount?: number;
     type?: 'transactional' | 'broadcast';
-    headers?: Record<string, string> | null;
+    /** Header names remain literal keys until conversion to Nodemailer's transport object. */
+    headers?: ReadonlyMap<string, string> | null;
     callback?: (error: unknown | null) => void;
 };
 
@@ -383,7 +384,7 @@ class EmailStatic {
         }
 
         if (data.headers) {
-            mail.headers = data.headers;
+            mail.headers = Object.fromEntries(data.headers);
         }
 
         if (data.html) {
@@ -414,12 +415,12 @@ class EmailStatic {
 
             if (data.type === 'transactional') {
                 mail.headers = {
-                    ...data.headers,
+                    ...mail.headers,
                     ...STAMHOOFD.TRANSACTIONAL_SMTP_HEADERS,
                 };
             } else {
                 mail.headers = {
-                    ...data.headers,
+                    ...mail.headers,
                     ...STAMHOOFD.SMTP_HEADERS,
                 };
             }

@@ -1,5 +1,5 @@
 import { S3Client } from '@aws-sdk/client-s3';
-import { EmailMocker } from '@stamhoofd/email';
+import { Email as MailTransport, EmailMocker } from '@stamhoofd/email';
 import { EmailContent, EmailTemplateType, File, Recipient, Replacement } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
@@ -292,7 +292,9 @@ describe('Email.getCombinedHtml', () => {
 describe('getEmailBuilder replacement file attachments', () => {
     const from = { email: 'sender@example.com' };
 
-    test('converts recipient header Maps to transport objects', async () => {
+    test('keeps headers as Maps until the mail transport and preserves configured overrides', async () => {
+        TestUtils.setEnvironment('WHITELISTED_EMAIL_DESTINATIONS', ['*@example.com']);
+        TestUtils.setEnvironment('SMTP_HEADERS', { 'X-Custom': 'configured' });
         const headers = new Map([['X-Custom', 'value']]);
         const recipient = Recipient.create({ email: 'customer@example.com', headers });
         const builder = await getEmailBuilder(null, {
@@ -300,11 +302,18 @@ describe('getEmailBuilder replacement file attachments', () => {
             from,
             subject: 'Subject',
             html: '<p>Content</p>',
-            headers: { 'X-Custom': 'value' },
+            headers: new Map([['X-Custom', 'value']]),
         });
-        expect(builder()!.headers).toMatchObject({ 'X-Custom': 'value', 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' });
+        const email = builder()!;
+        expect(email.headers).toBeInstanceOf(Map);
+        expect(email.headers!.get('X-Custom')).toBe('value');
+        expect(email.headers!.get('List-Unsubscribe-Post')).toBe('List-Unsubscribe=One-Click');
         expect(recipient.headers).toBeInstanceOf(Map);
         expect(headers).toEqual(new Map([['X-Custom', 'value']]));
+        MailTransport.send(email);
+        const sent = await EmailMocker.broadcast.getSucceededEmails();
+        expect(sent).toHaveLength(1);
+        expect(sent[0].headers).toMatchObject({ 'X-Custom': 'configured', 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' });
     });
 
     const ownServer = () => 'https://' + STAMHOOFD.SPACES_BUCKET + '.' + STAMHOOFD.SPACES_ENDPOINT;

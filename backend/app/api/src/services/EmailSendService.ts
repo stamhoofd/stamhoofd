@@ -163,10 +163,10 @@ export class EmailSendService {
             callback(error: Error | null) {
                 callback(error).catch(console.error);
             },
-            headers: {
-                'X-Email-Id': email.id,
-                'X-Email-Recipient-Id': recipient.id,
-            },
+            headers: new Map([
+                ['X-Email-Id', email.id],
+                ['X-Email-Recipient-Id', recipient.id],
+            ]),
         });
         EmailClass.schedule(builder);
         return await promise;
