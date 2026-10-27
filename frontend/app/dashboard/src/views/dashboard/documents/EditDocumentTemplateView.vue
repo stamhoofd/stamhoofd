@@ -675,15 +675,11 @@ function getDefaultSupportedIds() {
     ];
 }
 
+/** Returns configured link targets for a field ID, falling back to that same ID. */
 function getAutoLinkingSuggestions(id: string) {
     // Force a mapping of certain fields to multiple or other fields
-    const map: Record<string, string[]> = {
-
-    };
-    if (map[id]) {
-        return map[id];
-    }
-    return [id];
+    const map = new Map<string, string[]>();
+    return map.get(id) ?? [id];
 }
 
 function getLinkedFields(linkedField: RecordSettings) {
