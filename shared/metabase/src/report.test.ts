@@ -1381,7 +1381,7 @@ describe('report', () => {
                 const sql = cardOf(dashboards, 'jeugdbewegingen', key).sql;
 
                 {
-                    expect(`${key}: ${resolveSql(sql, {}).includes("all_registrations.group_type = 'Membership'")}`).toEqual(`${key}: true`);
+                    expect(`${key}: ${resolveSql(sql).includes("all_registrations.group_type = 'Membership'")}`).toEqual(`${key}: true`);
                 }
             }
         });
@@ -1897,15 +1897,21 @@ describe('report', () => {
 
     describe('resolveSql', () => {
         it('keeps an optional clause when its parameter has a value', () => {
-            expect(resolveSql('SELECT 1 [[AND name = {{werkjaar}}]]', { werkjaar: '2024 - 2025' })).toEqual("SELECT 1 AND name = '2024 - 2025'");
+            expect(resolveSql('SELECT 1 [[AND name = {{werkjaar}}]]', new Map([['werkjaar', '2024 - 2025']]))).toEqual("SELECT 1 AND name = '2024 - 2025'");
         });
 
         it('drops an optional clause when it has none, which is what Metabase does', () => {
-            expect(resolveSql('SELECT 1 [[AND name = {{werkjaar}}]]', {})).toEqual('SELECT 1 ');
+            expect(resolveSql('SELECT 1 [[AND name = {{werkjaar}}]]')).toEqual('SELECT 1 ');
         });
 
         it('escapes a quote rather than ending the string', () => {
-            expect(resolveSql('{{eenheid}}', { eenheid: "'t Vloedgat" })).toEqual("'''t Vloedgat'");
+            expect(resolveSql('{{eenheid}}', new Map([['eenheid', "'t Vloedgat"]]))).toEqual("'''t Vloedgat'");
+        });
+
+        it('distinguishes empty parameters from null and missing parameters', () => {
+            expect(resolveSql('[[{{empty}}]][[{{none}}]][[{{missing}}]] {{none}} {{missing}}', new Map([
+                ['empty', ''], ['none', null],
+            ]))).toEqual("'' NULL NULL");
         });
 
         it('finds each parameter once, in the order it appears', () => {

@@ -709,14 +709,15 @@ function required(attributes: Map<string, string>, name: string, file: string, k
  * The sql as it runs outside Metabase: parameters resolved and the `[[...]]` clauses around them
  * kept or dropped. Used by the tests to run a card against a real database, since Metabase is the
  * only thing that understands this syntax.
+ * Values are literal parameter names; null and missing values drop optional clauses.
  */
-export function resolveSql(sql: string, values: Record<string, string | null> = {}): string {
+export function resolveSql(sql: string, values: ReadonlyMap<string, string | null> = new Map()): string {
     const optional = sql.replaceAll(/\[\[([\s\S]*?)\]\]/g, (_match, clause: string) => {
-        return parameterNames(clause).every(name => values[name] !== undefined && values[name] !== null) ? clause : '';
+        return parameterNames(clause).every(name => values.get(name) !== undefined && values.get(name) !== null) ? clause : '';
     });
 
     return optional.replaceAll(/\{\{\s*([a-z_]+)\s*\}\}/g, (_match, name: string) => {
-        const value = values[name];
+        const value = values.get(name);
         return value === undefined || value === null ? 'NULL' : `'${value.replaceAll("'", "''")}'`;
     });
 }
