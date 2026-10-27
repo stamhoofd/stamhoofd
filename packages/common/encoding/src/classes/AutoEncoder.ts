@@ -408,6 +408,7 @@ export class AutoEncoder implements Encodeable, Cloneable {
         return fields;
     }
 
+    /** Returns the newest supported definition per property for the requested wire version. */
     static fieldsForVersion(version: number): Field<any>[] {
         const latestVersion = this.latestVersion;
         if (version > latestVersion) {
@@ -432,15 +433,15 @@ export class AutoEncoder implements Encodeable, Cloneable {
             this.__fieldsForVersion = cc;
         }
 
-        const latestFields: Record<string, Field<any>> = {};
+        const latestFields = new Map<string, Field<any>>();
         for (let i = this.fields.length - 1; i >= 0; i--) {
             const field = this.fields[i];
-            if (field.version <= version && !latestFields[field.property]) {
-                latestFields[field.property] = field;
+            if (field.version <= version && !latestFields.has(field.property)) {
+                latestFields.set(field.property, field);
             }
         }
 
-        const fields = Object.values(latestFields);
+        const fields = [...latestFields.values()];
 
         // Sort fields for stable encodings
         fields.sort((a, b) => sortObjectKeysForEncoding(a.property, b.property));
