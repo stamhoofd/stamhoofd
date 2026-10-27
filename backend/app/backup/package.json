@@ -30,7 +30,7 @@
         "@aws-sdk/lib-storage": "3.1153.0",
         "@simonbackx/simple-database": "1.40.1",
         "@common/encoding": "workspace:*",
-        "@simonbackx/simple-endpoints": "1.23.0",
+        "@node/endpoints": "workspace:*",
         "@common/errors": "workspace:*",
         "@simonbackx/simple-logging": "1.0.1",
         "@stamhoofd/backend-env": "workspace:*",

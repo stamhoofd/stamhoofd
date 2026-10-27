@@ -1,5 +1,5 @@
 import { DatabaseInstance } from '@simonbackx/simple-database';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { EmailMocker } from '@stamhoofd/email';
 import type { Organization, Token, User } from '@stamhoofd/models';
 import { EmailTemplateFactory, EmailVerificationCode, OrganizationFactory, UserFactory } from '@stamhoofd/models';

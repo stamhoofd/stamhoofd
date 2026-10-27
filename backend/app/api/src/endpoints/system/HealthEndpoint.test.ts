@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { MemoryService } from '@stamhoofd/logging/MemoryService';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../tests/helpers/TestServer.js';

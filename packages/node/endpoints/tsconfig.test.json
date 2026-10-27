@@ -1,17 +1,17 @@
 {
-    // File used for test files.
-    "extends": "./tsconfig.base.json",
+    "extends": "../../../tsconfig.test.json",
     "compilerOptions": {
-        "module": "nodenext",
-        "moduleResolution": "nodenext",
-        "outDir": "./dist/test",
-        "types": ["node", "vitest/globals"]
+        "rootDir": "."
     },
     "references": [
-        // Give access to build
         {
-            "path": "./tsconfig.esm.json"
+            "path": "./tsconfig.types.json"
         }
     ],
-    "include": ["./src/**/*.spec.ts", "./src/**/*.test.ts", "./tests"]
+    "include": [
+        "index.ts",
+        "src/**/*.test.ts",
+        "src/**/*.spec.ts",
+        "tests/**/*.ts"
+    ]
 }

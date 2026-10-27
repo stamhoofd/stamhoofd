@@ -1,6 +1,6 @@
 import { PatchableArray } from '@common/encoding';
-import type { Endpoint } from '@simonbackx/simple-endpoints';
-import { Request } from '@simonbackx/simple-endpoints';
+import type { Endpoint } from '@node/endpoints';
+import { Request } from '@node/endpoints';
 import type { Organization, RegistrationPeriod, User, Token } from '@stamhoofd/models';
 import { DocumentTemplate, DocumentTemplateFactory, OrganizationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';

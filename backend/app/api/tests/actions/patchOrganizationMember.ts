@@ -1,6 +1,6 @@
 import type { AutoEncoderPatchType } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { Organization } from '@stamhoofd/models';
 import type { MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 import { PatchOrganizationMembersEndpoint } from '../../src/endpoints/global/members/PatchOrganizationMembersEndpoint.js';

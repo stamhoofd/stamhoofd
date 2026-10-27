@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import type { User } from '@stamhoofd/models';
 import { BalanceItemFactory, Invoice, Organization, OrganizationFactory, Payment, Platform, UserFactory } from '@stamhoofd/models';
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';

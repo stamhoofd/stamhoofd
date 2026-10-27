@@ -1,7 +1,7 @@
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
 import { cloneObject, isPatchableArray, isPatchMap, ObjectData, PatchableArray, PatchMap, patchObject } from '@common/encoding';
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError, SimpleErrors } from '@common/errors';
 import { Organization, OrganizationRegistrationPeriod, PayconiqPayment, Platform, RegistrationPeriod, StripeAccount, Webshop } from '@stamhoofd/models';
 import type { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';

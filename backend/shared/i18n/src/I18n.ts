@@ -1,4 +1,4 @@
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
 import { logger, StyledText } from '@simonbackx/simple-logging';
 import { countries, languages } from '@stamhoofd/locales';
 import { appToUri } from '@stamhoofd/structures';

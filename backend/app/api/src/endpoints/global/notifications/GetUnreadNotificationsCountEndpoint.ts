@@ -1,6 +1,6 @@
 import type { Decoder } from '@common/encoding';
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import { NotificationRecipient } from '@stamhoofd/models/models/NotificationRecipient.js';
 import { SQL } from '@stamhoofd/sql';
 import { CountFilteredRequest, CountResponse } from '@stamhoofd/structures';

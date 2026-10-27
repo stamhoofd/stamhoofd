@@ -1,4 +1,4 @@
-import { TestServer } from '@simonbackx/simple-endpoints';
+import { TestServer } from '@node/endpoints';
 import { VersionMiddleware } from '@stamhoofd/backend-middleware';
 import { Version } from '@stamhoofd/structures';
 

@@ -1,7 +1,7 @@
 import type { Decoder } from '@common/encoding';
 import { AutoEncoder, DateDecoder, EnumDecoder, field } from '@common/encoding';
-import type { DecodedRequest, Request } from '@simonbackx/simple-endpoints';
-import { Endpoint, Response } from '@simonbackx/simple-endpoints';
+import type { DecodedRequest, Request } from '@node/endpoints';
+import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { Email } from '@stamhoofd/email';
 import { Organization, Platform } from '@stamhoofd/models';

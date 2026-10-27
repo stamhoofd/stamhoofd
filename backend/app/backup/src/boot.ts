@@ -1,4 +1,4 @@
-import { CORSPreflightEndpoint, Router, RouterServer } from '@simonbackx/simple-endpoints';
+import { CORSPreflightEndpoint, Router, RouterServer } from '@node/endpoints';
 import { CORSMiddleware, LogMiddleware } from '@stamhoofd/backend-middleware';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { loadLogger } from '@stamhoofd/logging';

@@ -1,4 +1,4 @@
-import type { Request } from '@simonbackx/simple-endpoints';
+import type { Request } from '@node/endpoints';
 
 export interface SessionContextStorageValue {
     request: Request;
