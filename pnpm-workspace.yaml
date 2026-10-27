@@ -14,6 +14,7 @@ disallowWorkspaceCycles: true
 linkWorkspacePackages: true
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
+  - node-forge@1.4.1
   - nodemailer@10.1.4
   - body-parser@1.20.9 || 2.4.0
   - fast-uri@3.1.9
@@ -91,6 +92,7 @@ overrides:
   axios: '1.20.0'
   cookie: '2.0.1'
   fast-xml-parser: '5.11.2'
+  node-forge: '1.4.1'
   nodemailer: '10.1.7'
   pacote: '21.5.1'
   postcss: '8.5.28'
