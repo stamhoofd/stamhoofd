@@ -6,7 +6,7 @@
         {
             "type": "shell",
             "label": "Development",
-            "command": "pnpm run dev",
+            "command": "pnpm stam dev all",
         }
     ]
 }
