@@ -19,7 +19,7 @@
         "@vitest/browser-playwright": "4.1.12",
         "postcss-discard-duplicates": "8.0.4",
         "vite": "8.3.4",
-        "vite-svg-2-webfont": "8.4.0",
+        "vite-svg-2-webfont": "8.5.0",
         "vitest": "4.1.12"
     }
 }
