@@ -6,6 +6,7 @@ import { Formatter, StringCompare } from '@stamhoofd/utility';
 import type { Member, MemberWithRegistrationsBlob } from '@stamhoofd/structures';
 import { CountryDecoder } from '@stamhoofd/structures';
 import type { Country } from '@stamhoofd/types/Country';
+import { SGVPartialObjectDecoder } from './SGVPartialObjectDecoder.js';
 
 export class SGVReportIssue extends AutoEncoder {
     @field({ decoder: StringDecoder, nullable: true })
@@ -574,7 +575,7 @@ export type SGVContactNieuw = Partial<
 
 /** Patch payload for SGV members; immutable identifiers stay excluded while verbondsgegevens can be patched partially. */
 export class SGVLidPatch extends AutoEncoder {
-    @field({ decoder: new RecordDecoder(StringDecoder, AnyDecoder), optional: true })
+    @field({ decoder: new SGVPartialObjectDecoder<SGVPersoonsGegevens>(), optional: true })
     persoonsgegevens?: SGVPersoonsGegevens;
 
     @field({ decoder: new RecordDecoder(StringDecoder, AnyDecoder), optional: true })
