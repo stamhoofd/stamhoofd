@@ -17,6 +17,7 @@ describe('SimpleError', () => {
         const error = new SimpleError({ ...data, statusCode: 422 });
 
         expect(error).toBeInstanceOf(Error);
+        expect(Object.prototype.propertyIsEnumerable.call(error, 'message')).toBe(false);
         expect(error.encode({ version: 0 })).toEqual(data);
         expect(JSON.parse(JSON.stringify(error))).toEqual(data);
         expect(SimpleError.decode(new ObjectData(data, { version: 0 })).encode({ version: 0 })).toEqual(data);
