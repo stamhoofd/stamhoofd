@@ -23,7 +23,7 @@ export class MachineTranslationComparer {
             for (const namespace of this.translationManager.namespaces) {
                 const comparison: MachineTranslationComparison
                     = Object.fromEntries(
-                        Object.entries(
+                        Array.from(
                             this.translationManager.readDist(
                                 defaultLocale,
                                 namespace,
@@ -45,9 +45,7 @@ export class MachineTranslationComparer {
                         namespace,
                     );
 
-                    for (const [uuid, translation] of Object.entries(
-                        translations,
-                    )) {
+                    for (const [uuid, translation] of translations) {
                         const item = comparison[uuid];
                         if (item) {
                             item.translations[translatorType] = translation;

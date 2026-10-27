@@ -111,7 +111,7 @@ export class TranslationManager implements TranslationProvider {
         return (
             TranslationManager.readTranslationsAllowNull(
                 TranslationManager.getSourcePath(locale, namespace),
-            ) ?? {}
+            ) ?? new Map()
         );
     }
 
@@ -150,7 +150,7 @@ export class TranslationManager implements TranslationProvider {
     static convertMachineTranslationDictionaryToTranslations(
         dictionary: TranslationDictionary,
     ): Translations {
-        return Object.fromEntries(
+        return new Map(
             Array.from(dictionary, ([key, value]) => {
                 return [key, value.translation];
             }),
@@ -171,7 +171,7 @@ export class TranslationManager implements TranslationProvider {
 
     readDist(locale: string, namespace: string): Translations {
         const path = TranslationManager.getDistPath(locale, namespace);
-        return TranslationManager.readTranslationsAllowNull(path) ?? {};
+        return TranslationManager.readTranslationsAllowNull(path) ?? new Map();
     }
 
     removeFromMachineTranslationDictionary(args: { locale: string; namespace: string; key: string }) {
@@ -392,7 +392,7 @@ export class TranslationManager implements TranslationProvider {
         return new Map(Object.entries(parsedDictionary));
     }
 
-    static readCompleteSource(filePath: string): (Translations & any) | null {
+    static readCompleteSource(filePath: string): Record<string, any> | null {
         if (!fs.existsSync(filePath)) {
             return null;
         }
@@ -439,6 +439,6 @@ export class TranslationManager implements TranslationProvider {
             );
         }
 
-        return parsedTranslations;
+        return new Map(Object.entries(parsedTranslations));
     }
 }

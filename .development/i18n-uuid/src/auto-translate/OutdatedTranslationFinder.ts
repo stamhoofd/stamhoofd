@@ -53,7 +53,7 @@ export class OutdatedTranslationFinder {
                 // only keep translations that are not changed
                 const filteredDictionary = new Map(
                     [...machineTranslationDictionary].filter(
-                        ([key, { original }]) => defaultTranslations[key] === original,
+                        ([key, { original }]) => defaultTranslations.get(key) === original,
                     ),
                 );
 

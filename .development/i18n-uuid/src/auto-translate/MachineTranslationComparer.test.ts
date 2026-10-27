@@ -9,8 +9,8 @@ function createProvider() {
         locales: [globals.DEFAULT_LOCALE, 'nl', 'fr-BE', 'en-GB'] as const,
         namespaces: ['stamhoofd', 'dashboard'] as const,
         getMappedLocale: vi.fn((locale: string) => locale === 'nl' ? globals.DEFAULT_LOCALE : locale),
-        readDist: vi.fn<TranslationProvider['readDist']>(() => ({ greeting: 'Hallo', missing: 'Dag' })),
-        readMachineTranslations: vi.fn<TranslationProvider['readMachineTranslations']>(() => ({ greeting: 'Bonjour', obsolete: 'Verouderd' })),
+        readDist: vi.fn<TranslationProvider['readDist']>(() => new Map([['greeting', 'Hallo'], ['missing', 'Dag']])),
+        readMachineTranslations: vi.fn<TranslationProvider['readMachineTranslations']>(() => new Map([['greeting', 'Bonjour'], ['obsolete', 'Verouderd']])),
         setComparison: vi.fn<TranslationProvider['setComparison']>(),
     } satisfies TranslationProvider;
 }

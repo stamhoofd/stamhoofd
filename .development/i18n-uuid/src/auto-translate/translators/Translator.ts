@@ -394,7 +394,7 @@ ${error}`;
 
         const translatedBatches = await Promise.all(promises);
 
-        return Object.fromEntries(
+        return new Map(
             translatedBatches
                 .flatMap(x => x)
                 .map(({ uuid, value }) => {
@@ -419,7 +419,7 @@ ${error}`;
             throw new Error(message);
         }
 
-        const batches = this.splitInBatches(Object.entries(translations));
+        const batches = this.splitInBatches(translations);
 
         const consistentWords = this.manager.getConsistentWords(
             targetLocal,
@@ -433,7 +433,7 @@ ${error}`;
         const result = await this.translateBatches(batches, {
             originalLocal: args.originalLocal,
             targetLocal,
-            translations: new Map(Object.entries(translations)),
+            translations,
             consistentWords,
             namespace: args.namespace,
             translateBatch: (batch, args) => this.translateSimpleBatch(batch, args),

@@ -4,6 +4,19 @@ import { TranslationManager } from './TranslationManager.js';
 
 afterEach(() => vi.restoreAllMocks());
 
+it('reads translation text into maps without locale metadata', () => {
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+    vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ greeting: 'Hallo', replacements: { lid: 'member' }, extends: ['nl'] }));
+
+    expect(TranslationManager.readTranslationsAllowNull('locale.json')).toEqual(new Map([['greeting', 'Hallo']]));
+});
+
+it('converts machine dictionary values to translation text', () => {
+    expect(TranslationManager.convertMachineTranslationDictionaryToTranslations(new Map([
+        ['greeting', { original: 'Hallo', translation: 'Hello' }],
+    ]))).toEqual(new Map([['greeting', 'Hello']]));
+});
+
 it('reads only string replacements into a map', () => {
     vi.spyOn(fs, 'existsSync').mockReturnValue(true);
     vi.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ replacements: { lid: 'deelnemer', ignored: [] } }));

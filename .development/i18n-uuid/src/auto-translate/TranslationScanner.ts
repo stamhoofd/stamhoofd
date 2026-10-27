@@ -32,7 +32,7 @@ export class TranslationScanner {
         const minLength = 5;
         const words: Map<string, number> = new Map();
 
-        for (const [id, text] of Object.entries(translations)) {
+        for (const [id, text] of translations) {
             text.split(' ')
                 .map(word =>
                     word

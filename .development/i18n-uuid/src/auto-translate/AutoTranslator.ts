@@ -110,8 +110,8 @@ export class AutoTranslator {
                 locale,
             });
 
-            if (Object.keys(missingTranslations).length > 0) {
-                console.warn(`${Object.keys(missingTranslations).length} translations remain missing for ${locale}.`);
+            if (missingTranslations.size > 0) {
+                console.warn(`${missingTranslations.size} translations remain missing for ${locale}.`);
                 return false;
             }
         }
@@ -130,10 +130,10 @@ export class AutoTranslator {
             = getCountry(globals.DEFAULT_LOCALE) ?? globals.DEFAULT_COUNTRY;
         const locale = `${language}-${country}`;
 
-        this.originalTextsBeforeReplacements = {
+        this.originalTextsBeforeReplacements = new Map([
             ...this.manager.readSource(language, namespace),
             ...this.manager.readSource(locale, namespace),
-        };
+        ]);
 
         return this.originalTextsBeforeReplacements;
     }
@@ -189,7 +189,7 @@ export class AutoTranslator {
 
         // get missing translations
         const missingTranslations = await this.findMissingTranslations(args);
-        let simpleTranslations: Translations = {};
+        let simpleTranslations: Translations = new Map();
         const translationsWithVariants = new Map<string, TranslationWithVariant>();
 
         if (args.namespace !== globals.DEFAULT_NAMESPACE) {
@@ -212,15 +212,13 @@ export class AutoTranslator {
                 ),
             ]);
 
-            for (const [uuid, missingTranslation] of Object.entries(
-                missingTranslations,
-            )) {
+            for (const [uuid, missingTranslation] of missingTranslations) {
                 const originalTextBeforeReplacements
-                    = originalTextsBeforeReplacements[uuid];
+                    = originalTextsBeforeReplacements.get(uuid);
 
                 if (originalTextBeforeReplacements === undefined) {
                     throw new Error(
-                        `No original text before replacements found for key ${uuid} (${JSON.stringify(originalTextsBeforeReplacements)})`,
+                        `No original text before replacements found for key ${uuid} (${JSON.stringify(Object.fromEntries(originalTextsBeforeReplacements))})`,
                     );
                 }
 
@@ -238,7 +236,7 @@ export class AutoTranslator {
                     originalAfterReplacements !== originalTextBeforeReplacements
                 ) {
                     const translationOfOriginal
-                        = translationsOfOriginalTexts[uuid];
+                        = translationsOfOriginalTexts.get(uuid);
 
                     if (translationOfOriginal === undefined) {
                         throw new Error(
@@ -246,7 +244,7 @@ export class AutoTranslator {
                         );
                     }
 
-                    const original = defaultTexts[uuid];
+                    const original = defaultTexts.get(uuid);
 
                     if (original === undefined) {
                         throw new Error(
@@ -261,7 +259,7 @@ export class AutoTranslator {
                     });
                 }
                 else {
-                    simpleTranslations[uuid] = missingTranslation;
+                    simpleTranslations.set(uuid, missingTranslation);
                 }
             }
         }
@@ -269,7 +267,7 @@ export class AutoTranslator {
             simpleTranslations = missingTranslations;
         }
 
-        if (Object.keys(simpleTranslations).length !== 0) {
+        if (simpleTranslations.size !== 0) {
             // translate simple translations
             await this.translator.translateAll(simpleTranslations, {
                 originalLocal: globals.DEFAULT_LOCALE,
@@ -281,7 +279,7 @@ export class AutoTranslator {
                             return [
                                 uuid,
                                 {
-                                    original: simpleTranslations[uuid],
+                                    original: simpleTranslations.get(uuid)!,
                                     translation: value,
                                 },
                             ];
@@ -337,11 +335,7 @@ export class AutoTranslator {
             namespace,
         );
 
-        const baseTranslations: Translations = Object.fromEntries(
-            Object.entries(machineTranslations).concat(
-                Object.entries(sourceTranslations),
-            ),
-        );
+        const baseTranslations: Translations = new Map([...machineTranslations, ...sourceTranslations]);
 
         return baseTranslations;
     }
@@ -371,9 +365,9 @@ export class AutoTranslator {
             namespace,
         );
 
-        const missingTranslations: Translations = Object.fromEntries(
+        const missingTranslations: Translations = new Map(
             missingTranslationIds.map((id) => {
-                const text = defaultDistTranslations[id];
+                const text = defaultDistTranslations.get(id);
                 if (text === undefined) {
                     throw new Error(
                         `Missing default translation for ${id} (namespace: ${namespace})`,
@@ -403,10 +397,10 @@ export class AutoTranslator {
 
         if (isDefaultNamespace) {
             // if already in default namespace
-            return Object.entries(distTranslations)
+            return [...distTranslations]
                 .filter(
                     entry =>
-                        Object.hasOwn(baseTranslations, entry[0]) === false,
+                        baseTranslations.has(entry[0]) === false,
                 )
                 .map(entry => entry[0]);
         }
@@ -422,14 +416,14 @@ export class AutoTranslator {
             namespace,
         );
 
-        return Object.entries(distTranslations)
+        return [...distTranslations]
             .filter((entry) => {
                 const key = entry[0];
-                if (Object.hasOwn(baseTranslations, key) === false) {
+                if (baseTranslations.has(key) === false) {
                     // Only translate this key for this namespace if the
                     // value in dutch for the default namespace is not the same for the value in dutch for this namespace
-                    const defaultText = defaultTexts[key];
-                    const defaultNamespaceText = defaultNamespaceTexts[key];
+                    const defaultText = defaultTexts.get(key);
+                    const defaultNamespaceText = defaultNamespaceTexts.get(key);
 
                     if (defaultText === undefined) {
                         throw new Error(

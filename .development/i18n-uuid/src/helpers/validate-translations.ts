@@ -1,16 +1,15 @@
-import type { Translations } from '../types/Translations.js';
 
 export function validateTranslations(
-    translations: Translations,
+    translations: unknown,
 ): { valid: boolean; message?: string } {
-    if (typeof translations !== 'object' || Array.isArray(translations)) {
+    if (translations === null || typeof translations !== 'object' || Array.isArray(translations)) {
         return {
             valid: false,
             message: 'translations must be an object',
         };
     }
 
-    for (const [key, value] of Object.entries(translations)) {
+    for (const [key, value] of translations instanceof Map ? translations : Object.entries(translations)) {
         if (key === 'replacements') {
             const validationResult = validateReplacements(value);
 
