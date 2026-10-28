@@ -30,17 +30,16 @@
     },
     "dependencies": {
         "@common/errors": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "luxon": "3.7.2",
         "uuid": "14.0.3"
     },
     "devDependencies": {
         "@stamhoofd/types": "workspace:*",
-        "@stamhoofd/utility": "workspace:*",
         "@types/archiver": "6.0.4",
         "@types/luxon": "3.7.6"
     },
     "peerDependencies": {
-        "@stamhoofd/utility": "workspace:*",
         "archiver": "7.0.1"
     },
     "license": "UNLICENCED",

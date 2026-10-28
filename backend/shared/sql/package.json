@@ -23,17 +23,14 @@
         "@node/database": "workspace:*",
         "@node/logging": "workspace:*",
         "@stamhoofd/filters": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "lru-cache": "11.5.3"
     },
     "devDependencies": {
         "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/types": "workspace:*",
-        "@stamhoofd/utility": "workspace:*",
         "mysql2": "3.24.6",
         "vitest": "4.1.12"
-    },
-    "peerDependencies": {
-        "@stamhoofd/utility": "workspace:*"
     },
     "license": "UNLICENCED",
     "publishConfig": {
