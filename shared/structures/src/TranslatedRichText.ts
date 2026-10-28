@@ -69,7 +69,15 @@ export class TranslatedRichText implements Encodeable, Patchable<TranslatedRichT
         if (this.translations instanceof RichText) {
             return [];
         }
-        return Object.keys(this.translations) as Language[];
+        const translations = this.translations;
+        return (Object.keys(translations) as Language[]).filter(language => translations[language] !== undefined);
+    }
+
+    /**
+     * Languages to try, in order, when a translation is requested
+     */
+    private static fallbackLanguages(language: Language): Language[] {
+        return [language, Language.English, Language.Dutch];
     }
 
     getIfExists(language: Language): RichText | null {
@@ -84,15 +92,18 @@ export class TranslatedRichText implements Encodeable, Patchable<TranslatedRichT
             return this.translations;
         }
 
-        if (this.translations[language] !== undefined) {
-            return this.translations[language];
+        for (const fallback of TranslatedRichText.fallbackLanguages(language)) {
+            const value = this.translations[fallback];
+            if (value !== undefined) {
+                return value;
+            }
         }
 
-        const keys = Object.keys(this.translations);
+        const keys = this.languages;
         if (keys.length === 0) {
             return RichText.create({});
         }
-        return this.translations[Language.English] ?? this.translations[Language.Dutch] ?? this.translations[keys[0]];
+        return this.translations[keys[0]]!;
     }
 
     toRichText(): RichText {
@@ -189,19 +200,17 @@ export class TranslatedRichText implements Encodeable, Patchable<TranslatedRichT
         return new TranslatedRichText(translations);
     }
 
+    /**
+     * An untranslated value is encoded as a plain RichText, a translated value as an object keyed by language.
+     * Unlike TranslatedString, a single language is not collapsed to a plain RichText: that would turn it
+     * into an untranslated value after a round trip, and a later language patch would then discard it.
+     */
     encode(context: EncodeContext) {
         if (this.translations instanceof RichText) {
             return this.translations.encode(context);
         }
-        const keys = this.languages;
-        if (keys.length === 0) {
-            return RichText.create({}).encode(context);
-        }
-        if (keys.length === 1) {
-            return this.translations[keys[0]]!.encode(context);
-        }
         const encoded: { [key: string]: PlainObject } = {};
-        for (const key of keys) {
+        for (const key of this.languages) {
             encoded[key] = this.translations[key]!.encode(context);
         }
         return encoded;
@@ -210,33 +219,57 @@ export class TranslatedRichText implements Encodeable, Patchable<TranslatedRichT
     /**
      * Use to change an existing RichText field into a TranslatedRichText field
      */
-    static field(options: { version: number }) {
+    static field(options: { version: number; nullable?: boolean; optional?: boolean; defaultValue?: () => TranslatedRichText | null }) {
         return {
             ...options,
             decoder: TranslatedRichTextDecoder,
-            upgrade: (old: RichText) => new TranslatedRichText(old),
-            downgrade: (value: TranslatedRichText) => value.toRichText(),
-            upgradePatch: (old: RichText | AutoEncoderPatchType<RichText> | undefined): TranslatedRichTextPatch | undefined => {
-                if (!old) {
-                    return undefined;
+            upgrade: (old: RichText | null | undefined): TranslatedRichText | null | undefined => {
+                if (old === null || old === undefined) {
+                    return old;
+                }
+                return new TranslatedRichText(old);
+            },
+            downgrade: (value: TranslatedRichText | null | undefined): RichText | null | undefined => {
+                if (value === null || value === undefined) {
+                    return value;
+                }
+                return value.toRichText();
+            },
+            upgradePatch: (old: RichText | AutoEncoderPatchType<RichText> | null | undefined): TranslatedRichTextPatch | null | undefined => {
+                if (old === null || old === undefined) {
+                    return old;
                 }
                 // Note: before the version we expect the rich text to be in Dutch
                 if (old instanceof RichText) {
                     return new TranslatedRichTextPatch({ [Language.Dutch]: old });
                 }
                 if (old.html === undefined || old.text === undefined) {
-                    return undefined;
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        message: 'A rich text patch must contain both html and text',
+                        human: $t('Deze wijziging wordt niet ondersteund. Werk de app bij en probeer opnieuw.'),
+                    });
                 }
                 return new TranslatedRichTextPatch({ [Language.Dutch]: RichText.create({ html: old.html, text: old.text }) });
             },
-            downgradePatch: (value: TranslatedRichTextPatch | TranslatedRichText | undefined): RichText | undefined => {
-                if (!value) {
-                    return undefined;
+            /**
+             * Only the patched languages are known here, so a patch that does not touch the languages
+             * an old client can display is sent as 'no change'. Old clients keep the previous text in that case.
+             */
+            downgradePatch: (value: TranslatedRichTextPatch | TranslatedRichText | null | undefined): RichText | null | undefined => {
+                if (value === null || value === undefined) {
+                    return value;
                 }
                 if (value instanceof TranslatedRichText) {
                     return value.toRichText();
                 }
-                return value.translations[$getLanguage()] ?? value.translations[Language.English] ?? value.translations[Language.Dutch] ?? undefined;
+                for (const language of TranslatedRichText.fallbackLanguages($getLanguage())) {
+                    const richText = value.translations[language];
+                    if (richText) {
+                        return richText;
+                    }
+                }
+                return undefined;
             },
         };
     }
