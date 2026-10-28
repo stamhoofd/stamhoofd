@@ -175,6 +175,22 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             // Load the user family (required to correctly calculate discounts across family members)
             members = await Member.getMembersWithRegistrationForUser(user);
         }
+
+        // Only allow balance items of the user, the user's members or the paying organization
+        // (members of balance items are access checked below when registering as an organization)
+        const userMemberIds = new Set(members.map(m => m.id));
+        for (const balanceItem of balanceItemsModels) {
+            const allowed = request.body.asOrganizationId
+                ? (balanceItem.memberId !== null || balanceItem.payingOrganizationId === request.body.asOrganizationId)
+                : ((balanceItem.memberId !== null && userMemberIds.has(balanceItem.memberId)) || balanceItem.userId === user.id);
+
+            if (!allowed) {
+                throw new SimpleError({
+                    code: 'invalid_data',
+                    message: $t('%vg'),
+                });
+            }
+        }
         const groupIds = request.body.groupIds;
         const groups = await Group.getByIDs(...groupIds);
 

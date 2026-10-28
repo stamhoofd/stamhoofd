@@ -1,6 +1,6 @@
 import { Request } from '@node/endpoints';
 import type { Token } from '@stamhoofd/models';
-import { BalanceItem, BlockedPaymentMandate, GroupFactory, MemberFactory, Organization, OrganizationFactory, RegistrationFactory, STPackage, STPackageFactory } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemFactory, BlockedPaymentMandate, GroupFactory, MemberFactory, Organization, OrganizationFactory, RegistrationFactory, STPackage, STPackageFactory } from '@stamhoofd/models';
 import {
     Address,
     BalanceItemStatus,
@@ -288,6 +288,31 @@ describe('Endpoint.OrganizationCheckoutEndpoint', () => {
     const getPackages = async (organization: Organization) => {
         return await STPackage.select().where('organizationId', organization.id).fetch();
     };
+
+    describe('Existing balances', () => {
+        test('Balance items of another paying organization are refused', async () => {
+            const { organization, token, customerCompany } = await createBuyer();
+            const { organization: otherOrganization } = await createBuyer();
+
+            // Credit that belongs to the other organization
+            const otherItem = await new BalanceItemFactory({
+                organizationId: membershipOrganization.id,
+                payingOrganizationId: otherOrganization.id,
+                type: BalanceItemType.Other,
+                amount: 1,
+                unitPrice: -1000,
+            }).create();
+
+            const checkout = buildCheckout({ bundles: [], customerCompany });
+            checkout.balances.set(otherItem.id, -1000);
+
+            await expect(post(membershipOrganization.id, checkout, organization, token)).rejects.toMatchObject({ code: 'balance_changed' });
+
+            await otherItem.refresh();
+            expect(otherItem.pricePending).toBe(0);
+            expect(otherItem.pricePaid).toBe(0);
+        });
+    });
 
     describe('Trials', () => {
         test('Activating a trial works for an organization without any companies set (using the default company)', async () => {
