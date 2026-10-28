@@ -673,9 +673,9 @@ async function createEventFromGroup(group: Group, organization: Organization) {
         });
     }
 
-    function descriptionToRichtText(description: TranslatedString) {
-        if (typeof description.translations === 'string') {
-            return TranslatedRichText.create(textToRichText(description.translations));
+    function descriptionToTranslatedRichText(description: TranslatedString) {
+        if (description.isDefault || description.languages.length === 0) {
+            return TranslatedRichText.create(textToRichText(description.toString()));
         }
 
         const translations: { [key in Language]?: RichText } = {};
@@ -778,7 +778,7 @@ async function createEventFromGroup(group: Group, organization: Organization) {
         endDate: group.settings.endDate,
         meta: EventMeta.create({
             visible: true,
-            description: descriptionToRichtText(group.settings.description),
+            description: descriptionToTranslatedRichText(group.settings.description),
             location: group.settings.location ? EventLocation.create({ name: group.settings.location }) : null,
             groups: groupNamedObjects.length === 0 ? undefined : groupNamedObjects,
             coverPhoto: group.settings.coverPhoto,
