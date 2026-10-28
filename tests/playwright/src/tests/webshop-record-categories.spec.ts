@@ -75,7 +75,7 @@ test.describe('Webshop checkout steps @webshop-record-categories', () => {
 
         // The preview shows the contact person step of the webshop
         await topView(page).getByTestId('customer-settings-preview-button').click();
-        await expect(topView(page).getByRole('heading', { name: 'Jouw gegevens', level: 1 }).first()).toBeVisible();
+        await expect(topView(page).getByRole('heading', { name: 'Contactgegevens', level: 1 }).first()).toBeVisible();
         await topView(page).getByTestId('close-button').click();
         await expect(topView(page).getByRole('heading', { name: 'Contactgegevens', level: 1 }).first()).toBeVisible();
 

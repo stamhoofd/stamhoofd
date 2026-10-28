@@ -122,7 +122,7 @@ test.describe('Modern webshop view @webshop-modern', () => {
         await flow.openCart();
         const steps = progress.locator('.titles .title');
         const current = progress.locator('[aria-current="step"] .title');
-        await expect(steps).toHaveText(['Winkelmandje', 'Leveringsadres', 'Gegevens', 'Betalen']);
+        await expect(steps).toHaveText(['Winkelmandje', 'Leveringsadres', 'Contactgegevens', 'Betalen']);
         await expect(current).toHaveText('Winkelmandje');
         await expect(progress.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '25');
 
@@ -130,14 +130,14 @@ test.describe('Modern webshop view @webshop-modern', () => {
         await progress.getByRole('button', { name: 'Leveringsadres' }).click();
         await expect(page.getByTestId('address-step')).toBeVisible();
         await expect(current).toHaveText('Leveringsadres');
-        await progress.getByRole('button', { name: 'Gegevens' }).click();
+        await progress.getByRole('button', { name: 'Contactgegevens' }).click();
         await expect(page.getByTestId('address-step').locator('.error-box').first()).toBeVisible();
         await expect(page.getByTestId('customer-step')).toHaveCount(0);
 
         await progress.getByRole('button', { name: 'Winkelmandje' }).click();
         await expect(page.getByTestId('address-step')).toHaveCount(0);
         await flow.fillDeliveryAddressStep({ street: 'Rue de Test', number: '10', postalCode: '75001', city: 'Paris', country: Country.France });
-        await expect(current).toHaveText('Gegevens');
+        await expect(current).toHaveText('Contactgegevens');
         // Previous steps and the next step can be clicked, later steps not
         await expect(progress.getByRole('button').locator('.title')).toHaveText(['Winkelmandje', 'Leveringsadres', 'Betalen']);
 
@@ -154,7 +154,7 @@ test.describe('Modern webshop view @webshop-modern', () => {
         await expect(page.getByTestId('address-step')).toBeVisible();
         await expect(page.getByTestId('customer-step')).toHaveCount(0);
         await expect(current).toHaveText('Leveringsadres');
-        await progress.getByRole('button', { name: 'Gegevens' }).click();
+        await progress.getByRole('button', { name: 'Contactgegevens' }).click();
         await expect(page.getByTestId('customer-step')).toBeVisible();
 
         await flow.fillCustomer();
@@ -394,7 +394,7 @@ test.describe('Modern webshop view @webshop-modern', () => {
 
         await expect(page.getByTestId('customer-step')).toBeVisible({ timeout: 15000 });
         // Without a cart there is no cart step, and nothing to pay
-        await expect(page.getByTestId('checkout-progress').locator('.titles .title')).toHaveText(['Gegevens', 'Nakijken']);
+        await expect(page.getByTestId('checkout-progress').locator('.titles .title')).toHaveText(['Contactgegevens', 'Nakijken']);
         const flow = new WebshopOrderFlow(page, { cartEnabled: false });
         await flow.fillCustomer();
         await flow.confirmPayment();

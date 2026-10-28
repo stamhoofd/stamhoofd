@@ -88,7 +88,7 @@ const title = computed(() => {
     if (showContactPersonList.value) {
         return $t('%1Kl');
     }
-    return $t('%uE');
+    return $t('%ZlW');
 });
 
 // When a delivery method is chosen, its address is already collected in a separate step

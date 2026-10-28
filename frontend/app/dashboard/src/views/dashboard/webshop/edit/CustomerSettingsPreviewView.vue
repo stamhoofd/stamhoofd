@@ -1,6 +1,6 @@
 <template>
-    <SaveView save-icon-right="arrow-right" :save-text="$t('%16p')" :title="$t('%uE')" @save="save">
-        <h1>{{ $t('%uE') }}</h1>
+    <SaveView save-icon-right="arrow-right" :save-text="$t('%16p')" :title="$t('%ZlW')" @save="save">
+        <h1>{{ $t('%ZlW') }}</h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
