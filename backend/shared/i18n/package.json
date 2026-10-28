@@ -28,14 +28,7 @@
     },
     "dependencies": {
         "@node/endpoints": "workspace:*",
-        "@node/logging": "workspace:*"
-    },
-    "devDependencies": {
-        "@stamhoofd/locales": "workspace:*",
-        "@stamhoofd/structures": "workspace:*",
-        "@stamhoofd/types": "workspace:*"
-    },
-    "peerDependencies": {
+        "@node/logging": "workspace:*",
         "@stamhoofd/locales": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*"

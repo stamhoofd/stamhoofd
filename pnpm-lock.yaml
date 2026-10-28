@@ -899,6 +899,9 @@ importers:
       '@node/logging':
         specifier: workspace:*
         version: link:../../../packages/node/logging
+      '@stamhoofd/utility':
+        specifier: workspace:*
+        version: link:../../../shared/utility
       mysql2:
         specifier: 3.24.6
         version: 3.24.6(@types/node@22.20.4)
@@ -906,9 +909,6 @@ importers:
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:../../../shared/types
-      '@stamhoofd/utility':
-        specifier: workspace:*
-        version: link:../../../shared/utility
 
   backend/shared/email:
     dependencies:
@@ -918,9 +918,24 @@ importers:
       '@node/database':
         specifier: workspace:*
         version: link:../../../packages/node/database
+      '@stamhoofd/backend-i18n':
+        specifier: workspace:*
+        version: link:../i18n
+      '@stamhoofd/queues':
+        specifier: workspace:*
+        version: link:../queues
+      '@stamhoofd/sql':
+        specifier: workspace:*
+        version: link:../sql
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../../shared/test-utils
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../../../shared/types
+      '@stamhoofd/utility':
+        specifier: workspace:*
+        version: link:../../../shared/utility
       html-to-text:
         specifier: 10.0.1
         version: 10.0.1
@@ -934,21 +949,6 @@ importers:
         specifier: 14.0.3
         version: 14.0.3
     devDependencies:
-      '@stamhoofd/backend-i18n':
-        specifier: workspace:*
-        version: link:../i18n
-      '@stamhoofd/queues':
-        specifier: workspace:*
-        version: link:../queues
-      '@stamhoofd/sql':
-        specifier: workspace:*
-        version: link:../sql
-      '@stamhoofd/types':
-        specifier: workspace:*
-        version: link:../../../shared/types
-      '@stamhoofd/utility':
-        specifier: workspace:*
-        version: link:../../../shared/utility
       '@types/html-to-text':
         specifier: 9.0.4
         version: 9.0.4
@@ -983,7 +983,6 @@ importers:
       '@node/logging':
         specifier: workspace:*
         version: link:../../../packages/node/logging
-    devDependencies:
       '@stamhoofd/locales':
         specifier: workspace:*
         version: link:../../../shared/locales
@@ -1018,10 +1017,10 @@ importers:
       '@node/logging':
         specifier: workspace:*
         version: link:../../../packages/node/logging
-    devDependencies:
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../../../shared/structures
+    devDependencies:
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:../../../shared/types
@@ -1049,6 +1048,24 @@ importers:
       '@node/endpoints':
         specifier: workspace:*
         version: link:../../../packages/node/endpoints
+      '@stamhoofd/backend-i18n':
+        specifier: workspace:*
+        version: link:../i18n
+      '@stamhoofd/queues':
+        specifier: workspace:*
+        version: link:../queues
+      '@stamhoofd/sql':
+        specifier: workspace:*
+        version: link:../sql
+      '@stamhoofd/structures':
+        specifier: workspace:*
+        version: link:../../../shared/structures
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../../../shared/types
+      '@stamhoofd/utility':
+        specifier: workspace:*
+        version: link:../../../shared/utility
       argon2:
         specifier: 0.45.1
         version: 0.45.1
@@ -1068,30 +1085,12 @@ importers:
         specifier: 14.0.3
         version: 14.0.3
     devDependencies:
-      '@stamhoofd/backend-i18n':
-        specifier: workspace:*
-        version: link:../i18n
       '@stamhoofd/email':
         specifier: workspace:*
         version: link:../email
-      '@stamhoofd/queues':
-        specifier: workspace:*
-        version: link:../queues
-      '@stamhoofd/sql':
-        specifier: workspace:*
-        version: link:../sql
-      '@stamhoofd/structures':
-        specifier: workspace:*
-        version: link:../../../shared/structures
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../../../shared/test-utils
-      '@stamhoofd/types':
-        specifier: workspace:*
-        version: link:../../../shared/types
-      '@stamhoofd/utility':
-        specifier: workspace:*
-        version: link:../../../shared/utility
       '@types/luxon':
         specifier: 3.7.6
         version: 3.7.6
@@ -1132,6 +1131,9 @@ importers:
       '@stamhoofd/filters':
         specifier: workspace:*
         version: link:../../../shared/filters
+      '@stamhoofd/utility':
+        specifier: workspace:*
+        version: link:../../../shared/utility
       lru-cache:
         specifier: 11.5.3
         version: 11.5.3
@@ -1142,9 +1144,6 @@ importers:
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:../../../shared/types
-      '@stamhoofd/utility':
-        specifier: workspace:*
-        version: link:../../../shared/utility
       mysql2:
         specifier: 3.24.6
         version: 3.24.6(@types/node@22.20.4)
@@ -2859,6 +2858,9 @@ importers:
       '@common/errors':
         specifier: workspace:*
         version: link:../../packages/common/errors
+      '@stamhoofd/utility':
+        specifier: workspace:*
+        version: link:../utility
       archiver:
         specifier: 7.0.1
         version: 7.0.1
@@ -2872,9 +2874,6 @@ importers:
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:../types
-      '@stamhoofd/utility':
-        specifier: workspace:*
-        version: link:../utility
       '@types/archiver':
         specifier: 6.0.4
         version: 6.0.4
@@ -2921,22 +2920,22 @@ importers:
       '@common/encoding':
         specifier: workspace:*
         version: link:../../packages/common/encoding
+      '@stamhoofd/structures':
+        specifier: workspace:*
+        version: link:../structures
+      '@stamhoofd/utility':
+        specifier: workspace:*
+        version: link:../utility
       uuid:
         specifier: 14.0.3
         version: 14.0.3
     devDependencies:
-      '@stamhoofd/structures':
-        specifier: workspace:*
-        version: link:../structures
       '@stamhoofd/test-utils':
         specifier: workspace:*
         version: link:../test-utils
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:../types
-      '@stamhoofd/utility':
-        specifier: workspace:*
-        version: link:../utility
       vitest:
         specifier: 4.1.12
         version: 4.1.12(@opentelemetry/api@1.9.1)(@types/node@22.20.4)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@24.1.3(supports-color@5.5.0))(vite@8.3.4(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.2)(terser@5.51.2)(yaml@2.9.0))
@@ -2980,28 +2979,28 @@ importers:
       '@common/encoding':
         specifier: workspace:*
         version: link:../../packages/common/encoding
-      '@stamhoofd/filters':
-        specifier: workspace:*
-        version: link:../filters
-      uuid:
-        specifier: 14.0.3
-        version: 14.0.3
-    devDependencies:
       '@common/errors':
         specifier: workspace:*
         version: link:../../packages/common/errors
-      '@stamhoofd/excel-writer':
+      '@stamhoofd/filters':
         specifier: workspace:*
-        version: link:../excel-writer
-      '@stamhoofd/test-utils':
-        specifier: workspace:*
-        version: link:../test-utils
+        version: link:../filters
       '@stamhoofd/types':
         specifier: workspace:*
         version: link:../types
       '@stamhoofd/utility':
         specifier: workspace:*
         version: link:../utility
+      uuid:
+        specifier: 14.0.3
+        version: 14.0.3
+    devDependencies:
+      '@stamhoofd/excel-writer':
+        specifier: workspace:*
+        version: link:../excel-writer
+      '@stamhoofd/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
       vitest:
         specifier: 4.1.12
         version: 4.1.12(@opentelemetry/api@1.9.1)(@types/node@22.20.4)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@24.1.3(supports-color@5.5.0))(vite@8.3.4(@types/node@22.20.4)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.105.2)(terser@5.51.2)(yaml@2.9.0))

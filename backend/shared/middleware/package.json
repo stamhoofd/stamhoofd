@@ -18,14 +18,11 @@
     "dependencies": {
         "@common/errors": "workspace:*",
         "@node/endpoints": "workspace:*",
-        "@node/logging": "workspace:*"
+        "@node/logging": "workspace:*",
+        "@stamhoofd/structures": "workspace:*"
     },
     "devDependencies": {
-        "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*"
-    },
-    "peerDependencies": {
-        "@stamhoofd/structures": "workspace:*"
     },
     "license": "UNLICENCED",
     "publishConfig": {

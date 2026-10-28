@@ -17,30 +17,23 @@
         "lint": "eslint --quiet"
     },
     "dependencies": {
+        "@common/errors": "workspace:*",
         "@node/database": "workspace:*",
+        "@stamhoofd/backend-i18n": "workspace:*",
+        "@stamhoofd/queues": "workspace:*",
+        "@stamhoofd/sql": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "html-to-text": "10.0.1",
         "mysql2": "3.24.6",
         "nodemailer": "10.1.7",
         "uuid": "14.0.3"
     },
     "devDependencies": {
-        "@stamhoofd/backend-i18n": "workspace:*",
-        "@stamhoofd/queues": "workspace:*",
-        "@stamhoofd/sql": "workspace:*",
-        "@stamhoofd/types": "workspace:*",
-        "@stamhoofd/utility": "workspace:*",
         "@types/html-to-text": "9.0.4",
         "@types/nodemailer": "8.0.2",
         "sinon": "18.0.1"
-    },
-    "peerDependencies": {
-        "@common/errors": "workspace:*",
-        "@stamhoofd/backend-i18n": "workspace:*",
-        "@stamhoofd/queues": "workspace:*",
-        "@stamhoofd/sql": "workspace:*",
-        "@stamhoofd/types": "workspace:*",
-        "@stamhoofd/utility": "workspace:*"
     },
     "license": "UNLICENCED",
     "publishConfig": {

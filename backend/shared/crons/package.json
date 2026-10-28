@@ -17,14 +17,11 @@
     "dependencies": {
         "@node/database": "workspace:*",
         "@node/logging": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "mysql2": "3.24.6"
     },
     "devDependencies": {
-        "@stamhoofd/types": "workspace:*",
-        "@stamhoofd/utility": "workspace:*"
-    },
-    "peerDependencies": {
-        "@stamhoofd/utility": "workspace:*"
+        "@stamhoofd/types": "workspace:*"
     },
     "license": "UNLICENCED",
     "publishConfig": {

@@ -42,22 +42,19 @@
     },
     "dependencies": {
         "@common/encoding": "workspace:*",
+        "@common/errors": "workspace:*",
         "@stamhoofd/filters": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "@stamhoofd/utility": "workspace:*",
         "uuid": "14.0.3"
     },
     "devDependencies": {
-        "@common/errors": "workspace:*",
         "@stamhoofd/excel-writer": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
-        "@stamhoofd/types": "workspace:*",
-        "@stamhoofd/utility": "workspace:*",
         "vitest": "4.1.12"
     },
     "peerDependencies": {
-        "@common/errors": "workspace:*",
-        "@stamhoofd/excel-writer": "workspace:*",
-        "@stamhoofd/types": "workspace:*",
-        "@stamhoofd/utility": "workspace:*"
+        "@stamhoofd/excel-writer": "workspace:*"
     },
     "license": "UNLICENCED",
     "publishConfig": {
