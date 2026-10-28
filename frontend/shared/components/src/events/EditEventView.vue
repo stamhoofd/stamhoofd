@@ -26,9 +26,7 @@
             {{ type.description }}
         </p>
 
-        <STInputBox :title="$t('%6o')" error-fields="meta.description" :error-box="errors.errorBox" class="max">
-            <WYSIWYGTextInput v-model="description" :placeholder="$t('%7Q')" />
-        </STInputBox>
+        <TWYSIWYGTextInput v-model="description" :title="$t('%6o')" :placeholder="$t('%7Q')" error-fields="meta.description" :error-box="errors.errorBox" class="max" />
 
         <hr><h2>{{ $t('%7R') }}</h2>
 
@@ -287,7 +285,7 @@ import Dropdown from '#inputs/Dropdown.vue';
 import TagIdsInput from '#inputs/TagIdsInput.vue';
 import TimeInput from '#inputs/TimeInput.vue';
 import UploadButton from '#inputs/UploadButton.vue';
-import WYSIWYGTextInput from '#inputs/WYSIWYGTextInput.vue';
+import TWYSIWYGTextInput from '#inputs/TWYSIWYGTextInput.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import ImageComponent from '#views/ImageComponent.vue';
@@ -299,7 +297,7 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { Organization } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { Event, EventLocation, EventMeta, ResolutionRequest } from '@stamhoofd/structures';
+import { Event, EventLocation, EventMeta, ResolutionRequest, TranslatedRichText } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref, watch, watchEffect } from 'vue';
@@ -590,7 +588,7 @@ const description = computed({
     get: () => patched.value.meta.description,
     set: description => addPatch({
         meta: EventMeta.patch({
-            description,
+            description: TranslatedRichText.createPatch(patched.value.meta.description, description),
         }),
     }),
 });
