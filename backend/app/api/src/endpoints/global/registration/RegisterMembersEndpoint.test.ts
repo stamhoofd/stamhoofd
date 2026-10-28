@@ -409,7 +409,7 @@ describe('Endpoint.RegisterMembers', () => {
                             price: -1000,
                         }),
                     ],
-                    deleteRegistrationIds: [],
+                    deleteRegistrations: [],
                 }),
                 administrationFee: 0,
                 freeContribution: 0,
