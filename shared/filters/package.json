@@ -1,6 +1,6 @@
 {
     "name": "@stamhoofd/filters",
-    "version": "2.157.0",
+    "version": "2.157.1",
     "type": "module",
     "sideEffects": false,
     "exports": {
