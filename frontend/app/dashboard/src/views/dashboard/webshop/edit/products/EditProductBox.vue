@@ -27,8 +27,9 @@
             <STInputBox v-if="showName" error-fields="name" :error-box="errorBox" :title="$t(`%1Os`)">
                 <!-- An older form can have its own name: the form takes the name of the webshop again -->
                 <template v-if="formMode && name !== webshop.meta.name" #right>
-                    <button type="button" class="button text" data-testid="use-webshop-name-button" @click="name = webshop.meta.name">
-                        {{ $t('Naam van webshop gebruiken') }}
+                    <button v-tooltip="$t('Naam van webshop gebruiken')" type="button" class="button text only-icon-smartphone" data-testid="use-webshop-name-button" @click="name = webshop.meta.name">
+                        <span class="icon undo" />
+                        <span>{{ $t('Herstellen') }}</span>
                     </button>
                 </template>
                 <input ref="firstInput" v-model="name" v-autofocus="isNew" class="input" type="text" :placeholder="$t(`%1Os`) + ' '+typeName" autocomplete="off" enterkeyhint="next">
