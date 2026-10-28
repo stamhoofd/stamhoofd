@@ -3,7 +3,7 @@ import type { PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray, PatchMap } from '@common/encoding';
 import type { Endpoint } from '@node/endpoints';
 import { Request } from '@node/endpoints';
-import { GroupFactory, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberResponsibilityRecordFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, User, UserFactory } from '@stamhoofd/models';
+import { Group, GroupFactory, Member, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecord, MemberResponsibilityRecordFactory, OrganizationFactory, OrganizationTagFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, User, UserFactory } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { PatchAnswers } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
@@ -14,6 +14,7 @@ import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initUitpasApi } from '../../../../tests/init/index.js';
+import { RegistrationService } from '../../../services/RegistrationService.js';
 import { UniqueMemberNumberService } from '../../../services/UniqueMemberNumberService.js';
 import { PatchOrganizationMembersEndpoint } from './PatchOrganizationMembersEndpoint.js';
 import { SessionService } from '../../../services/SessionService.js';
@@ -6066,6 +6067,39 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
                 expect((await getTypeAMemberships(member.id, typeA.id)).length).toBe(0);
             });
+        });
+    });
+
+    describe('Delete', () => {
+        test('[REGRESSION] Deleting a member frees the stock reservations of its registrations', async () => {
+            TestUtils.setEnvironment('userMode', 'organization');
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                permissions: Permissions.create({
+                    level: PermissionLevel.Full,
+                }),
+                organization,
+            }).create();
+            const token = await SessionService.createSession(user);
+
+            const group = await new GroupFactory({ organization }).create();
+            const member = await new MemberFactory({ organization }).create();
+            const registration = await new RegistrationFactory({ member, group }).create();
+            await RegistrationService.scheduleStockUpdateAsync(registration.id);
+
+            const groupBefore = await Group.getByID(group.id);
+            expect(groupBefore?.stockReservations.length).toBe(1);
+
+            const arr: Body = new PatchableArray();
+            arr.addDelete(member.id);
+
+            const request = Request.buildJson('PATCH', baseUrl, organization.getApiHost(), arr);
+            request.headers.authorization = 'Bearer ' + token.accessToken;
+            await testServer.test(endpoint, request);
+
+            expect(await Member.getByID(member.id)).toBeUndefined();
+            const groupAfter = await Group.getByID(group.id);
+            expect(groupAfter?.stockReservations).toEqual([]);
         });
     });
 });
