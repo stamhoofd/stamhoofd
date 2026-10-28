@@ -96,13 +96,34 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
             }
         } else {
             if (request.body.domain) {
-                webshop.domain = request.body.domain;
+                const cleaned = request.body.domain.toLowerCase().replace(/[^a-z0-9-.]/gi, '');
+
+                if (cleaned.length < 4 || !cleaned.includes('.')) {
+                    throw new SimpleError({
+                        code: 'invalid_field',
+                        message: 'Invalid domain',
+                        human: $t(`%FN`),
+                        field: 'customUrl',
+                    });
+                }
+
+                const knownWebshops = await Webshop.getByDomainOnly(cleaned);
+                if (knownWebshops.find(k => k.meta.domainActive) && !knownWebshops.find(w => w.organizationId === organization.id)) {
+                    throw new SimpleError({
+                        code: 'domain_already_used',
+                        message: 'This domain is already used by another organization',
+                        human: $t(`%FM`),
+                        statusCode: 400,
+                    });
+                }
+
+                webshop.domain = cleaned;
 
                 if (request.body.domainUri) {
                     webshop.domainUri = Formatter.slug(request.body.domainUri);
                 }
 
-                webshop.privateMeta.dnsRecords = WebshopPrivateMetaData.buildDNSRecords(request.body.domain);
+                webshop.privateMeta.dnsRecords = WebshopPrivateMetaData.buildDNSRecords(cleaned);
                 await this.checkDomainUri(webshop);
                 updateDNS = true;
             }
