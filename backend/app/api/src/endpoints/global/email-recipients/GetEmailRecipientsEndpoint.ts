@@ -47,6 +47,11 @@ export class GetEmailRecipientsEndpoint extends Endpoint<Params, Query, Body, Re
             scopeFilter = {
                 organizationId: organization.id,
             };
+        } else if (Context.auth.getPlatformAccessibleOrganizationTags(PermissionLevel.Full) !== 'all') {
+            // Same rule as GetAdminEmailsEndpoint: without full access to all organizations, only platform emails are visible
+            scopeFilter = {
+                organizationId: null,
+            };
         }
         const canReadAllEmails = await Context.auth.canReadAllEmails(organization ?? null);
 

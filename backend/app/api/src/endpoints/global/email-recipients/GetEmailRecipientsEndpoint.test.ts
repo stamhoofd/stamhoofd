@@ -565,4 +565,79 @@ describe('Endpoint.GetEmailRecipients', () => {
             await expectDenied({ $or: [{ emailId: allowedEmail.id }, { emailId: forbiddenEmail.id }] });
         });
     });
+
+    describe('Without organization scope', () => {
+        const createRecipient = async (organizationId: string | null, lastName: string) => {
+            const email = new Email();
+            email.subject = 'test subject';
+            email.status = EmailStatus.Sent;
+            email.text = 'test email';
+            email.html = '<p>test email</p>';
+            email.json = {};
+            email.organizationId = organizationId;
+            await email.save();
+
+            const emailRecipient = new EmailRecipient();
+            emailRecipient.email = 'jan.janssens@geenemail.com';
+            emailRecipient.firstName = 'Jan';
+            emailRecipient.lastName = lastName;
+            emailRecipient.emailId = email.id;
+            emailRecipient.organizationId = organizationId;
+            await emailRecipient.save();
+            return { email, emailRecipient };
+        };
+
+        const createPlatformToken = async (organizationTagsLevel: PermissionLevel | null) => {
+            const permissions = Permissions.create({
+                level: PermissionLevel.None,
+                resources: new Map([
+                    [PermissionsResourceType.Senders, new Map([[PermissionsResourceKey.All, ResourcePermissions.create({
+                        level: PermissionLevel.Read,
+                    })]])],
+                ]),
+            });
+            if (organizationTagsLevel) {
+                permissions.resources.set(PermissionsResourceType.OrganizationTags, new Map([[PermissionsResourceKey.All, ResourcePermissions.create({
+                    level: organizationTagsLevel,
+                })]]));
+            }
+            const platformUser = await new UserFactory({ globalPermissions: permissions }).create();
+            return await SessionService.createSession(platformUser);
+        };
+
+        const fetchRecipients = async (platformToken: Token, filter: StamhoofdFilter) => {
+            const request = Request.get({
+                path: baseUrl,
+                query: new LimitedFilteredRequest({
+                    filter,
+                    limit: 10,
+                }),
+                headers: {
+                    authorization: 'Bearer ' + platformToken.accessToken,
+                },
+            });
+            return (await testServer.test(endpoint, request)).body.results.map(r => r.id);
+        };
+
+        test('A platform admin without access to all organization tags only gets recipients of platform emails', async () => {
+            const lastName = 'ScopeTestA';
+            const platform = await createRecipient(null, lastName);
+            const organizationRecipient = await createRecipient(organization.id, lastName);
+            const platformToken = await createPlatformToken(null);
+
+            const ids = await fetchRecipients(platformToken, { lastName });
+            expect(ids).toEqual([platform.emailRecipient.id]);
+            expect(ids).not.toContain(organizationRecipient.emailRecipient.id);
+        });
+
+        test('A platform admin with full access to all organization tags gets recipients of all emails', async () => {
+            const lastName = 'ScopeTestB';
+            const platform = await createRecipient(null, lastName);
+            const organizationRecipient = await createRecipient(organization.id, lastName);
+            const platformToken = await createPlatformToken(PermissionLevel.Full);
+
+            const ids = await fetchRecipients(platformToken, { lastName });
+            expect(ids).toIncludeSameMembers([platform.emailRecipient.id, organizationRecipient.emailRecipient.id]);
+        });
+    });
 });
