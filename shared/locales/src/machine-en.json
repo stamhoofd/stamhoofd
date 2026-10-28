@@ -5683,10 +5683,6 @@
     "original": "Openstaand",
     "translation": "Open"
   },
-  "%1Nj": {
-    "original": "Deze is altijd verplicht per bestelling.",
-    "translation": "This is always required per order."
-  },
   "%1Nk": {
     "original": ". Dit veld is optioneel.",
     "translation": ". This field is optional."
@@ -5782,10 +5778,6 @@
   "%1OD": {
     "original": "Betaald",
     "translation": "Paid"
-  },
-  "%1OE": {
-    "original": "Wil je deze info graag per ticket verzamelen (niet per bestelling), dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een ticket beperken tot 1 stuk.\nAls je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een ticket, dat is iets makkelijker in gebruik.",
-    "translation": "If you want to collect this information per ticket (not per order), you can disable the shopping cart and limit the maximum number of tickets to 1 each.\nIf you only need drop-down menus, it's easier to use the drop-down menus in the ticket settings."
   },
   "%1OG": {
     "original": "Het minimum is {min}",
@@ -5915,10 +5907,6 @@
     "original": "Betaal met je Bancontact-app of met je bankapp die Bancontact-betalingen ondersteunt",
     "translation": "Pay with your Bancontact app or your banking app that supports Bancontact payments"
   },
-  "%1Ov": {
-    "original": "Geef al dan niet de keuze uit verschillende tickets, of voeg gewoon één ticket toe.",
-    "translation": "You can choose whether to offer a choice between different tickets, or just add a single ticket."
-  },
   "%1Ow": {
     "original": "Meer lezen",
     "translation": "Read more"
@@ -5970,10 +5958,6 @@
   "%1P9": {
     "original": "Wat voor vereniging?",
     "translation": "What kind of association?"
-  },
-  "%1PA": {
-    "original": "Hierop ontvangen bestellers hun bestelbevestiging. Deze is altijd verplicht per bestelling.",
-    "translation": "Order confirmation is sent to buyers at this address. This is always required for each order."
   },
   "%1PC": {
     "original": "Type",
@@ -6078,10 +6062,6 @@
   "%1Ph": {
     "original": "Evenementen",
     "translation": "Events"
-  },
-  "%1Pi": {
-    "original": "Wil je deze info graag per ingeschreven persoon verzamelen, dan kan je het winkelmandje uitschakelen en het maximum aantal stuks van een artikel beperken tot 1 stuk.\nAls je enkel keuzemenu's nodig hebt, gebruik je best de keuzemenu's bij de instellingen van een artikel, dat is iets makkelijker in gebruik.",
-    "translation": "If you want to collect this info per registered person, you can disable the shopping cart and limit the maximum number of items to 1 per person.\nIf you only need drop-down menus, use the drop-down menus in the item settings—it's a bit easier that way."
   },
   "%1Pj": {
     "original": "Aanmaken",
@@ -9322,10 +9302,6 @@
   "%47": {
     "original": "Verminder de zichtbaarheid van Stamhoofd",
     "translation": "Reduce the visibility of Stamhoofd"
-  },
-  "%48": {
-    "original": "Bepaalde gegevens zijn ingebouwd in Stamhoofd zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten.",
-    "translation": "Certain data is built into Stamhoofd so that we can also process it in a special way. You can switch this on or off here."
   },
   "%49": {
     "original": "Importeer een zaalplan dat jij of een andere vereniging eerder uit Stamhoofd hebt geëxporteerd. Importeren vanaf andere systemen is niet mogelijk.",
@@ -14435,10 +14411,6 @@
     "original": "Aanbod tickets en vouchers",
     "translation": "Offer of tickets and vouchers"
   },
-  "%Pi": {
-    "original": "Bewerk en voeg nieuwe tickets en vouchers toe aan je webshop.",
-    "translation": "Edit and add new tickets and vouchers to your webshop."
-  },
   "%Pj": {
     "original": "Afhalen, leveren, ter plaatse eten",
     "translation": "Collection, delivery, eat on the spot"
@@ -14546,10 +14518,6 @@
   "%Q9": {
     "original": "Verwijder deze webshop en alle daarbij horende informatie en bestellingen. Dit is meestal niet nodig.",
     "translation": "Delete this webshop and all related information and orders. This is usually not necessary."
-  },
-  "%QA": {
-    "original": "Externe link:",
-    "translation": "External link:"
   },
   "%QB": {
     "original": "Naar een website",
@@ -14807,10 +14775,6 @@
     "original": "Meerdere artikels worden in vakjes getoond, indien er voldoende plaats is.",
     "translation": "Multiple articles are shown in boxes, if there is enough space."
   },
-  "%RM": {
-    "original": "We raden aan om een foto van minstens 1600 pixels breed up te loaden. De foto zal volledig zichtbaar zijn, knip dus indien nodig bij voor het uploaden.",
-    "translation": "We recommend uploading a photo of at least 1600 pixels wide. The photo will be fully visible, so crop it if necessary before uploading."
-  },
   "%RN": {
     "original": "Externe links",
     "translation": "External links"
@@ -14902,18 +14866,6 @@
   "%Rk": {
     "original": "Je kan zelf kiezen welke extra informatie je van bestellers wilt verzamelen. Dit wordt maar één keer per bestelling gevraagd.",
     "translation": "You can choose which extra information you want to collect from buyers. This is only asked once per order."
-  },
-  "%Rl": {
-    "original": "Ingebouwde gegevens",
-    "translation": "Built-in data"
-  },
-  "%Rm": {
-    "original": "Vragenlijsten tijdens afrekenen",
-    "translation": "Forms during checkout"
-  },
-  "%Rn": {
-    "original": "Voeg zelf vragenlijsten toe die ingevuld kunnen worden bij het plaatsen van een bestelling (na de ingebouwde gegevens).",
-    "translation": "Add your own forms that can be filled in when placing an order (after the built-in data)."
   },
   "%Ro": {
     "original": "Alles is correct ingesteld.",
@@ -15319,18 +15271,6 @@
     "original": "Meer of minkost",
     "translation": "More or less cost"
   },
-  "%TR": {
-    "original": "Prijskeuze toevoegen",
-    "translation": "Add price choice"
-  },
-  "%TS": {
-    "original": "Prijskeuze bewerken",
-    "translation": "Edit price choice"
-  },
-  "%TT": {
-    "original": "Verwijder deze prijskeuze",
-    "translation": "Delete this price choice"
-  },
   "%TU": {
     "original": "Stuks",
     "translation": "Units"
@@ -15342,10 +15282,6 @@
   "%TX": {
     "original": "Datum en tijd",
     "translation": "Date and time"
-  },
-  "%TY": {
-    "original": "Prijzen",
-    "translation": "Prices"
   },
   "%TZ": {
     "original": "Tekstvelden / open vragen",
@@ -15411,14 +15347,6 @@
     "original": "verkocht of gereserveerd)",
     "translation": "sold or reserved)"
   },
-  "%Tq": {
-    "original": "Wijzig aantal verkochte stuks manueel (nu",
-    "translation": "Manually change the number of units sold (now"
-  },
-  "%Tr": {
-    "original": "verkocht)",
-    "translation": "sold)"
-  },
   "%Ts": {
     "original": "Beperk het maximaal aantal stuks per bestelling",
     "translation": "Limit the maximum number of units per order"
@@ -15434,14 +15362,6 @@
   "%Tv": {
     "original": "Als je dit aanzet kan er maar één stuk besteld worden per unieke combinatie van keuzes en open vragen.",
     "translation": "If you enable this, only one unit can be ordered per unique combination of choices and open questions."
-  },
-  "%Tw": {
-    "original": "Verwijder dit artikel",
-    "translation": "Delete this item"
-  },
-  "%Tx": {
-    "original": "Je kan een artikel meerdere prijzen geven en aan elke prijs een naam geven. Bv. small, medium en large. Naast meerdere prijzen kan je ook meerdere keuzemenu's toevoegen (zie onder).",
-    "translation": "You can give an item multiple prices and give each price a name. E.g. small, medium and large. In addition to multiple prices, you can also add multiple dropdown menus (see below)."
   },
   "%Ty": {
     "original": "Open vragen zijn vragen (bv. 'naam op de trui') waarbij bestellers zelf tekst kunnen intypen. Let op: voeg hier geen vragen toe die op bestelniveau moeten komen (want dan moet de gebruiker die meerdere keren beantwoorden), dat kan je doen in de instellingen van de webshop zelf.",
@@ -15502,22 +15422,6 @@
   "%UC": {
     "original": "Verborgen",
     "translation": "Hidden"
-  },
-  "%UD": {
-    "original": "Een andere datum/tijdstip",
-    "translation": "Another date/time"
-  },
-  "%UE": {
-    "original": "Opgelet, alle tickets die deze datum/tijdstip hadden zullen worden gewijzigd. Kies 'Een andere datum/tijdstip' als je een nieuwe datum wilt invoeren.",
-    "translation": "Please note, all tickets with this date/time will be changed. Choose 'Another date/time' if you want to enter a new date."
-  },
-  "%UF": {
-    "original": "Een andere locatie",
-    "translation": "Another location"
-  },
-  "%UG": {
-    "original": "Opgelet, alle tickets met deze locatie zullen worden gewijzigd. Kies 'Een andere locatie' als je een nieuwe locatie wilt invoeren.",
-    "translation": "Please note, all tickets with this location will be changed. Choose 'Another location' if you want to enter a new location."
   },
   "%UH": {
     "original": "Kies een zaalplan",
@@ -19019,10 +18923,6 @@
     "original": "Jouw tickets zijn bevestigd",
     "translation": "Your tickets have been confirmed"
   },
-  "%Zku": {
-    "original": "Crowdfunding instellen",
-    "translation": "Set up crowdfunding"
-  },
   "%Zkv": {
     "original": "Kies een bedrag",
     "translation": "Choose an amount"
@@ -21467,10 +21367,6 @@
     "original": "Eén artikel per bestelling",
     "translation": "One article per order"
   },
-  "%Zxt": {
-    "original": "Snel bestellen zonder winkelmandje",
-    "translation": "Quick order without a shopping cart"
-  },
   "%Zxu": {
     "original": "Bestellingen ophalen... Dit gebeurt eenmalig, daarna zijn ze offline beschikbaar en laden ze sneller.",
     "translation": "Retrieving orders... This only happens once; after that, they are available offline and will load faster."
@@ -21494,10 +21390,6 @@
   "%Zxz": {
     "original": "Leden met een nationale functie krijgen enkel de rechten van die functie via e-mailadressen op exact deze domeinen. Subdomeinen (bv. afdeling.voorbeeld.be) moet je apart toevoegen. Andere e-mailadressen van hetzelfde lid krijgen geen rechten. Laat leeg om geen beperkingen in te stellen.",
     "translation": "Members with a national role only receive the permissions of that role through email addresses exactly matching these domains. Subdomains (e.g. department.example.be) need to be added separately. Other email addresses of the same member will not get permissions. Leave empty if you do not want to set any restrictions."
-  },
-  "%Zy0": {
-    "original": "Zonder winkelmandje kunnen er geen kortingscodes worden ingevoerd bij een bestelling, enkel de link kan dan gebruikt worden.",
-    "translation": "Without a shopping cart, discount codes can't be applied during checkout; only the link can be used."
   },
   "%Zy1": {
     "original": "Domeinnamen",
@@ -21523,9 +21415,469 @@
     "original": "Ga naar het administratieportaal om het toegangsbeheer van deze nationale activiteit aan te passen.",
     "translation": "Go to the administration portal to change the access management for this national activity."
   },
+  "%Zy7": {
+    "original": "Je ontvangt jouw ticket zodra je bevestigt.",
+    "translation": "You will receive your ticket once you confirm."
+  },
+  "%Zy8": {
+    "original": "Dit bestand is geen afbeelding. Kies een PNG-, JPEG-, SVG- of WEBP-bestand.",
+    "translation": "This file is not an image. Please choose a PNG, JPEG, SVG, or WEBP file."
+  },
+  "%Zy9": {
+    "original": "Log in via de aanmeldpagina van je eigen account.",
+    "translation": "Log in through the login page for your own account."
+  },
+  "%ZyA": {
+    "original": "Iedereen vult dezelfde gegevens in, ongeacht de gekozen inschrijving.",
+    "translation": "Everyone enters the same data, regardless of how they register."
+  },
+  "%ZyC": {
+    "original": "Jouw inschrijvingen zijn definitief zodra je bevestigt.",
+    "translation": "Your registrations become final once you confirm."
+  },
+  "%ZyD": {
+    "original": "Smartphone",
+    "translation": "Smartphone"
+  },
+  "%ZyE": {
+    "original": "Je kan elk ticket meerdere tarieven geven, bijvoorbeeld 'Volwassenen', 'Kind', 'UiTPAS-Tarief'. Gebruik tarieven in plaats van meerdere tickets als het om een evenement gaat op hetzelfde tijdstip.",
+    "translation": "You can assign multiple tarriffs to each ticket, such as 'Adults', 'Child', 'UiTPAS Tarriff'. For events happening at the same time, use tarriffs instead of multiple tickets."
+  },
+  "%ZyF": {
+    "original": "Kies welke gegevens je van elke deelnemer wil verzamelen.",
+    "translation": "Choose which data you want to collect for each participant."
+  },
+  "%ZyH": {
+    "original": "Vink aan voor welke tickets je de gegevens van een deelnemer wil vragen.",
+    "translation": "Select for which tickets you would like to request participant data."
+  },
+  "%ZyI": {
+    "original": "Steun ons",
+    "translation": "Support us"
+  },
+  "%ZyJ": {
+    "original": "Welke gegevens en vragen iemand invult bij het inschrijven.",
+    "translation": "Which data and questions someone completes when registering."
+  },
+  "%ZyM": {
+    "original": "Nieuwe stap",
+    "translation": "New step"
+  },
+  "%ZyN": {
+    "original": "Verschillend per ticket",
+    "translation": "Varies per ticket"
+  },
+  "%ZyO": {
+    "original": "vouchers",
+    "translation": "vouchers"
+  },
+  "%ZyP": {
+    "original": "Voeg extra stappen toe aan het afrekenen, elk met hun eigen vragen. Een stap kan je enkel in bepaalde gevallen tonen.",
+    "translation": "Add extra steps to the checkout, each with their own questions. You can show a step only in certain cases."
+  },
+  "%ZyS": {
+    "original": "Gegevens per deelnemer verwijderen?",
+    "translation": "Remove data for each participant?"
+  },
+  "%ZyT": {
+    "original": "Eén inschrijving per bestelling",
+    "translation": "One registration per order"
+  },
+  "%ZyU": {
+    "original": "Geen gegevens per deelnemer",
+    "translation": "No data per participant"
+  },
+  "%ZyV": {
+    "original": "Keuzemenu {name} werd geplakt vanaf je klembord",
+    "translation": "Selection menu {name} was pasted from your clipboard"
+  },
+  "%ZyW": {
+    "original": "Extra vragen",
+    "translation": "Extra questions"
+  },
+  "%ZyX": {
+    "original": "De link wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.",
+    "translation": "The link will be deleted only when you proceed and save all changes."
+  },
+  "%ZyY": {
+    "original": "Details",
+    "translation": "Details"
+  },
+  "%ZyZ": {
+    "original": "In een voorbeeld kan je niet bestellen",
+    "translation": "You cannot order in an example."
+  },
+  "%Zya": {
+    "original": "Eigen vraag",
+    "translation": "Custom question"
+  },
+  "%Zyb": {
+    "original": "Tarief bewerken",
+    "translation": "Edit tarriff"
+  },
+  "%Zyd": {
+    "original": "Je ontvangt jouw tickets zodra je bevestigt.",
+    "translation": "You will receive your tickets once you confirm."
+  },
+  "%Zye": {
+    "original": "Wordt één keer per bestelling gevraagd.",
+    "translation": "Asked once per order."
+  },
+  "%Zyf": {
+    "original": "Eén ticket per bestelling",
+    "translation": "One ticket per order"
+  },
+  "%Zyh": {
+    "original": "voucher",
+    "translation": "voucher"
+  },
+  "%Zyi": {
+    "original": "Maak een apart ticket per voorstelling, evenement of drankkaart. Verschillende prijzen voor hetzelfde evenement (bv. volwassenen en kinderen) stel je best in als tarieven binnen één ticket.",
+    "translation": "Create a separate ticket for each show, event, or drinks card. For different prices for the same event (e.g. adults and children), it's best to use tarriffs within one ticket."
+  },
+  "%Zyl": {
+    "original": "Bevestig jouw inschrijvingen",
+    "translation": "Confirm your registrations"
+  },
+  "%Zym": {
+    "original": "{name} is toegevoegd aan jouw winkelmandje",
+    "translation": "{name} has been added to your shopping cart"
+  },
+  "%Zyn": {
+    "original": "Vul de gegevens van deze persoon in",
+    "translation": "Enter this person's data"
+  },
+  "%Zyo": {
+    "original": "Gegevens per deelnemer",
+    "translation": "Data per participant"
+  },
+  "%Zyp": {
+    "original": "Voeg een vraag toe",
+    "translation": "Add a question"
+  },
+  "%Zyq": {
+    "original": "Naam vereniging enkel aanpasbaar door platformbeheerders",
+    "translation": "Association name can only be changed by platform administrators"
+  },
+  "%Zyr": {
+    "original": "artikel",
+    "translation": "article"
+  },
+  "%Zys": {
+    "original": "Bekijk winkelmandje",
+    "translation": "View cart"
+  },
+  "%Zyt": {
+    "original": "Deze categorie heeft nog geen vragen",
+    "translation": "There are no questions in this category yet"
+  },
+  "%Zyu": {
+    "original": "Je kan een artikel meerdere tarieven geven en aan elk tarief een naam geven. Bv. small, medium en large.",
+    "translation": "You can set multiple tarriffs for one article, and give each tarriff a name. E.g. small, medium, and large."
+  },
+  "%Zyv": {
+    "original": "Vink aan voor welke inschrijvingen je de gegevens van een deelnemer wil vragen.",
+    "translation": "Select for which registrations you want to request participant data."
+  },
+  "%Zyw": {
+    "original": "Laptop",
+    "translation": "Laptop"
+  },
+  "%Zyx": {
+    "original": "Verschillend per inschrijving",
+    "translation": "Varies per registration"
+  },
+  "%Zyy": {
+    "original": "Kies zelf een bedrag",
+    "translation": "Choose your own amount"
+  },
+  "%Zyz": {
+    "original": "Meteen aantallen kiezen. Ideaal voor tickets.",
+    "translation": "Choose quantities immediately. Ideal for tickets."
+  },
+  "%Zz0": {
+    "original": "Per inschrijving",
+    "translation": "Per registration"
+  },
+  "%Zz1": {
+    "original": "Enkel op laptop",
+    "translation": "Only on laptop"
+  },
+  "%Zz2": {
+    "original": "Wie is de contactpersoon voor deze bestelling?",
+    "translation": "Who is the contact person for this order?"
+  },
+  "%Zz3": {
+    "original": "Kies hoe bezoekers artikels selecteren en afrekenen.",
+    "translation": "Choose how visitors select articles and check out."
+  },
+  "%Zz4": {
+    "original": "Plaatsen voor {product}",
+    "translation": "Seats for {product}"
+  },
+  "%Zz5": {
+    "original": "Tarieven en keuzeopties bewerken",
+    "translation": "Edit tarriffs and options"
+  },
+  "%Zz7": {
+    "original": "De besteller vult zijn gegevens één keer in, hoeveel inschrijvingen er ook gebeuren.",
+    "translation": "The person placing the order fills out their data once, no matter how many registrations they make."
+  },
+  "%Zz8": {
+    "original": "Titel rechterpaneel",
+    "translation": "Right panel title"
+  },
+  "%ZzA": {
+    "original": "Volledig scherm",
+    "translation": "Full screen"
+  },
+  "%ZzB": {
+    "original": "Externe link bewerken",
+    "translation": "Edit external link"
+  },
+  "%ZzC": {
+    "original": "{choices} (optioneel)",
+    "translation": "{choices} (optional)"
+  },
+  "%ZzD": {
+    "original": "Eén keer per bestelling",
+    "translation": "Once per order"
+  },
+  "%ZzE": {
+    "original": "Precies één ticket, inschrijving of inzending per bestelling.",
+    "translation": "Exactly one ticket, registration, or submission per order."
+  },
+  "%ZzF": {
+    "original": "De besteller vult zijn gegevens één keer in, hoeveel tickets er ook besteld worden. Bv. een eetfestijn: 5× vlees en 1× veggie op één naam.",
+    "translation": "The person placing the order enters their data once, regardless of the number of tickets ordered. For example, at a dinner event: 5× meat and 1× veggie on one name."
+  },
+  "%ZzI": {
+    "original": "deelnemer",
+    "translation": "participant"
+  },
+  "%ZzJ": {
+    "original": "Vanaf inkomstenjaar 2026 aanvaardt Belcotax geen XML-bestanden meer. De nieuwe export wordt binnenkort beschikbaar in Stamhoofd.",
+    "translation": "Starting with the 2026 income year, Belcotax will no longer accept XML files. The new export will soon be available in Stamhoofd."
+  },
+  "%ZzK": {
+    "original": "Voor elke inschrijving vult de besteller de gegevens van elke deelnemer in. Bv. een kamp.",
+    "translation": "For every registration, the person placing the order enters the data for each participant. For example, a camp."
+  },
+  "%ZzM": {
+    "original": "Je kiest per inschrijving welke gegevens van de deelnemer gevraagd worden.",
+    "translation": "You can choose per registration which participant data is requested."
+  },
+  "%ZzN": {
+    "original": "Vraag de naam en eventueel andere contactgegevens per ticket in plaats van enkel op bestelniveau.",
+    "translation": "Ask for name and possibly other contact data per ticket rather than only at the order level."
+  },
+  "%ZzO": {
+    "original": "Product toevoegen",
+    "translation": "Add product"
+  },
+  "%ZzP": {
+    "original": "{products} vragen dan geen gegevens per deelnemer meer. De gegevens en vragen die je per ticket instelde, worden verwijderd.",
+    "translation": "{products} will no longer request participant data. Any participant data and questions you set up per ticket will be deleted."
+  },
+  "%ZzQ": {
+    "original": "Vraag de gegevens van de deelnemer per artikel",
+    "translation": "Request participant data per article"
+  },
+  "%ZzR": {
+    "original": "Wordt één keer per bestelling gevraagd. Is de besteller zelf een deelnemer, dan worden die gegevens overgenomen. De besteller ontvangt de bevestigingsmail.",
+    "translation": "This is requested once per order. If the person ordering is also a participant, their data will be used. The order confirmation will be sent to them."
+  },
+  "%ZzS": {
+    "original": "Bevestig jouw inschrijving",
+    "translation": "Confirm your registration"
+  },
+  "%ZzT": {
+    "original": "Nieuwe webshopfuncties: deelnemers en bulkbestellingen",
+    "translation": "New shop features: participants and bulk orders"
+  },
+  "%ZzU": {
+    "original": "Iedereen vult dezelfde gegevens in, ongeacht het gekozen ticket.",
+    "translation": "Everyone fills in the same data, regardless of the ticket chosen."
+  },
+  "%ZzV": {
+    "original": "Nog niets toegevoegd",
+    "translation": "Nothing added yet"
+  },
+  "%ZzW": {
+    "original": "Tarief toevoegen",
+    "translation": "Add tarriff"
+  },
+  "%ZzX": {
+    "original": "Dezelfde ongeacht de inschrijving",
+    "translation": "The same for every registration"
+  },
+  "%ZzY": {
+    "original": "Minstens 1600 pixels breed. De foto wordt volledig getoond.",
+    "translation": "At least 1600 pixels wide. The entire photo will be shown."
+  },
+  "%ZzZ": {
+    "original": "Bevestig jouw ticket",
+    "translation": "Confirm your ticket"
+  },
+  "%Zzb": {
+    "original": "Maak eerst een keuze",
+    "translation": "Please make a selection first"
+  },
+  "%Zzc": {
+    "original": "Jouw inschrijving is definitief zodra je bevestigt.",
+    "translation": "Your registration is final once you confirm."
+  },
+  "%Zzd": {
+    "original": "Bestelwijze",
+    "translation": "Order method"
+  },
+  "%Zze": {
+    "original": "{products} vragen dan geen gegevens per deelnemer meer. De gegevens en vragen die je per inschrijving instelde, worden verwijderd.",
+    "translation": "{products} will no longer ask for data per participant. The data and questions you set up per registration will be removed."
+  },
+  "%Zzg": {
+    "original": "Voor elk ticket vult de besteller de gegevens van elke deelnemer in. Bv. een kamp of tickets op naam.",
+    "translation": "For each ticket, the person ordering fills in the data for every participant. For example, for a camp or name-specific tickets."
+  },
+  "%Zzh": {
+    "original": "Je kiest per ticket welke gegevens van de deelnemer gevraagd worden.",
+    "translation": "You choose for each ticket which participant data will be requested."
+  },
+  "%Zzi": {
+    "original": "Welke gegevens en vragen bestellers invullen bij het bestellen.",
+    "translation": "Specify which data and questions orderers need to fill in when ordering."
+  },
+  "%Zzj": {
+    "original": "Artikelen",
+    "translation": "Items"
+  },
+  "%Zzk": {
+    "original": "Ticket op naam",
+    "translation": "Ticket with name"
+  },
+  "%Zzl": {
+    "original": "Per ticket",
+    "translation": "Per ticket"
+  },
+  "%Zzm": {
+    "original": "Deelnemer",
+    "translation": "Participant"
+  },
+  "%Zzo": {
+    "original": "Aantallen kiezen",
+    "translation": "Choose quantities"
+  },
+  "%Zzp": {
+    "original": "Bijdrage doen",
+    "translation": "Make a contribution"
+  },
+  "%Zzq": {
+    "original": "Dit product heeft geen zitplaatsen. Verwijder de zitplaatsen en probeer opnieuw.",
+    "translation": "This product has no seating. Remove the seats and try again."
+  },
+  "%Zzr": {
+    "original": "Bevestig jouw bijdrage",
+    "translation": "Confirm your contribution"
+  },
+  "%Zzs": {
+    "original": "Bevestig jouw tickets",
+    "translation": "Confirm your tickets"
+  },
+  "%Zzt": {
+    "original": "Winkelmandje openen",
+    "translation": "Open basket"
+  },
+  "%Zzu": {
+    "original": "Externe link toevoegen",
+    "translation": "Add external link"
+  },
+  "%Zzv": {
+    "original": "Kies welke gegevens bestellers invullen.",
+    "translation": "Choose which data orderers should fill in."
+  },
+  "%Zzw": {
+    "original": "Voeg toe wat er besteld wordt.",
+    "translation": "Add what will be ordered."
+  },
+  "%Zzx": {
+    "original": "Enkel een platformbeheerder kan de naam van een vereniging aanpassen",
+    "translation": "Only a platform administrator can change the name of an association"
+  },
+  "%Zzy": {
+    "original": "Kies eerst alle plaatsen voor {product}",
+    "translation": "First select all seats for {product}"
+  },
+  "%Zzz": {
+    "original": "Geef het UiTPAS-nummer in",
+    "translation": "Enter the UiTPAS number"
+  },
   "%a0": {
     "original": "Kanaal",
     "translation": "Channel"
+  },
+  "%a00": {
+    "original": "Jouw bijdrage is definitief zodra je bevestigt.",
+    "translation": "Your contribution is final once you confirm."
+  },
+  "%a02": {
+    "original": "Artikels verzamelen en alles in één keer afrekenen.",
+    "translation": "Collect items and check out everything at once."
+  },
+  "%a04": {
+    "original": "Gegevens deelnemer",
+    "translation": "Participant data"
+  },
+  "%a05": {
+    "original": "Dezelfde ongeacht het ticket",
+    "translation": "The same regardless of the ticket"
+  },
+  "%a07": {
+    "original": "Deelnemersgegevens",
+    "translation": "Participant data"
+  },
+  "%a08": {
+    "original": "artikelen",
+    "translation": "items"
+  },
+  "%a09": {
+    "original": "Sleep een afbeelding hierheen of klik om te uploaden",
+    "translation": "Drag an image here or click to upload"
+  },
+  "%a0A": {
+    "original": "{firstName} is te oud. Inschrijvingen is beperkt tot leden {born-in-after-1995}",
+    "translation": "{firstName} is too old. Registrations are limited to members {born-in-after-1995}"
+  },
+  "%a0C": {
+    "original": "deelnemers",
+    "translation": "participants"
+  },
+  "%a0D": {
+    "original": "Kies welke gegevens iemand invult bij het inschrijven.",
+    "translation": "Choose which data someone needs to fill in when registering."
+  },
+  "%a0E": {
+    "original": "Jouw inschrijvingen",
+    "translation": "Your registrations"
+  },
+  "%a0F": {
+    "original": "Extra stappen",
+    "translation": "Extra steps"
+  },
+  "%a0G": {
+    "original": "Iemand anders",
+    "translation": "Someone else"
+  },
+  "%a0H": {
+    "original": "Vraag de naam en eventueel andere contactgegevens per artikel in plaats van enkel op bestelniveau.",
+    "translation": "Request the name and any additional contact data for each item, instead of only once per order."
+  },
+  "%a0I": {
+    "original": "Gegevens van de besteller",
+    "translation": "Data of the orderer"
+  },
+  "%a0J": {
+    "original": "Vul de gegevens aan",
+    "translation": "Complete the data"
   },
   "%a1": {
     "original": "Vul een URL in",
@@ -23430,14 +23782,6 @@
   "%iH": {
     "original": "Deze vragenlijst is leeg en zal nog niet getoond worden.",
     "translation": "This form is empty and will not yet be shown."
-  },
-  "%iI": {
-    "original": "Vraag",
-    "translation": "Question"
-  },
-  "%iJ": {
-    "original": "Deze categorie bevat nog geen vragen.",
-    "translation": "This category does not yet contain any questions."
   },
   "%iK": {
     "original": "Slim in- en uitschakelen",
@@ -26298,10 +26642,6 @@
   "%u0": {
     "original": "Webshop archief",
     "translation": "Webshop archive"
-  },
-  "%u1": {
-    "original": "Vragenlijsten en gegevens",
-    "translation": "Forms and data"
   },
   "%u2": {
     "original": "Kortingscode toevoegen",

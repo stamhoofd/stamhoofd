@@ -327,7 +327,7 @@
                         <Checkbox :model-value="getFeatureFlag('modern-webshop')" @update:model-value="setFeatureFlag('modern-webshop', !!$event)" />
                     </template>
                     <h3 class="style-title-list">
-                        {{ $t('Nieuwe webshopfuncties: deelnemers en bulkbestellingen') }}
+                        {{ $t('%ZzT') }}
                     </h3>
                 </STListItem>
             </STList>

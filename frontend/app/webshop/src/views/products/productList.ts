@@ -35,7 +35,7 @@ export function getProductListGroups(webshop: Webshop, options: { title?: string
 
     const rest = visibleProducts.filter(p => !categorised.has(p.id));
     if (rest.length > 0) {
-        groups.push({ id: 'uncategorised', name: groups.length > 0 ? $t('Andere') : (options.title ?? ''), description: '', products: rest });
+        groups.push({ id: 'uncategorised', name: groups.length > 0 ? $t('%1JG') : (options.title ?? ''), description: '', products: rest });
     }
     return groups;
 }

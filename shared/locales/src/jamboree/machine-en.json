@@ -695,10 +695,6 @@
     "original": "Verminder de zichtbaarheid van Jamboree",
     "translation": "Reduce the visibility of Jamboree"
   },
-  "%48": {
-    "original": "Bepaalde gegevens zijn ingebouwd in Jamboree zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten.",
-    "translation": "Certain data is built into Jamboree so that we can also process it in a special way. You can turn this on or off here."
-  },
   "%49": {
     "original": "Importeer een zaalplan dat jij of een andere eenheid eerder uit Jamboree hebt geëxporteerd. Importeren vanaf andere systemen is niet mogelijk.",
     "translation": "Import a seating plan that you or another unit previously exported from Jamboree. Importing from other systems is not possible."
@@ -1826,6 +1822,18 @@
   "%Zy3": {
     "original": "Kies een eenheid waarvan je beheerder bent. Daarna word je automatisch ingelogd in het feedbacksysteem.",
     "translation": "Choose a unit for which you are an administrator. Afterwards, you will be automatically logged into the feedback system."
+  },
+  "%Zyq": {
+    "original": "Naam eenheid enkel aanpasbaar door platformbeheerders",
+    "translation": "Unit name can only be changed by platform administrators"
+  },
+  "%ZzJ": {
+    "original": "Vanaf inkomstenjaar 2026 aanvaardt Belcotax geen XML-bestanden meer. De nieuwe export wordt binnenkort beschikbaar in Jamboree.",
+    "translation": "Starting with the 2026 income year, Belcotax will no longer accept XML files. The new export will soon be available in Jamboree."
+  },
+  "%Zzx": {
+    "original": "Enkel een platformbeheerder kan de naam van een eenheid aanpassen",
+    "translation": "Only a platform administrator can change the name of a unit"
   },
   "%ad": {
     "original": "Een hoofdbeheerder van jouw eenheid moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",

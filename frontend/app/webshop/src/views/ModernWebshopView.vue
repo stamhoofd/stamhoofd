@@ -256,7 +256,7 @@ function saveLiveCartItem(item: CartItem) {
 
 function startBulkOrder() {
     if (cartCount.value === 0) {
-        Toast.warning($t('Maak eerst een keuze')).show();
+        Toast.warning($t('%Zzb')).show();
         return;
     }
     openCheckout(true, true).catch(console.error);
@@ -419,8 +419,8 @@ function onAddItem(cartItem: CartItem, oldItem: CartItem | null, args: { dismiss
 
         // Stay in the webshop to add more, the cart opens from the toast or the cart button
         hideCartToast();
-        cartToast = Toast.success($t('{name} is toegevoegd aan jouw winkelmandje', { name: cartItem.product.name }))
-            .setButton(new ToastButton($t('Bekijk winkelmandje'), () => {
+        cartToast = Toast.success($t('%Zym', { name: cartItem.product.name }))
+            .setButton(new ToastButton($t('%Zys'), () => {
                 showCart().catch(console.error);
             }))
             .setTestId('cart-added-toast')
@@ -535,7 +535,7 @@ onMounted(() => {
                                 console.error(e);
                             });
 
-                            new CenteredMessage($t('Betaling mislukt'), $t('De betaling werd niet voltooid of de bank heeft de betaling geweigerd. Probeer het opnieuw.')).addCloseButton(undefined, async () => {
+                            new CenteredMessage($t('%Je'), $t('%Jf')).addCloseButton(undefined, async () => {
                                 await resumeStep('/checkout/payment');
                             }).show();
                         }

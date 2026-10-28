@@ -14,9 +14,9 @@
             <STErrorsDefault :error-box="errors.errorBox" />
 
             <template v-if="modernWebshopEnabled">
-                <h2>{{ $t('Bestelwijze') }}</h2>
+                <h2>{{ $t('%Zzd') }}</h2>
                 <p>
-                    {{ $t('Kies hoe bezoekers artikels selecteren en afrekenen.') }}
+                    {{ $t('%Zz3') }}
                 </p>
 
                 <OrderModeInput v-model="orderMode" :meta="webshop.meta" :show-single="showSingleOrderMode" />
@@ -29,7 +29,7 @@
                     <p>
                         <button class="button text" type="button" data-testid="add-product-button" @click="addProduct">
                             <span class="icon add" />
-                            <span>{{ isTickets ? $t('%Rf') : $t('Product toevoegen') }}</span>
+                            <span>{{ isTickets ? $t('%Rf') : $t('%ZzO') }}</span>
                         </button>
                     </p>
                 </template>
@@ -125,7 +125,7 @@ const { webshop, originalWebshop, addPatch, errors, saving, save, hasChanges, sh
 });
 
 const description = computed(() => {
-    return webshop.value.meta.ticketType === WebshopTicketType.Tickets ? $t('Maak een apart ticket per voorstelling, evenement of drankkaart. Verschillende prijzen voor hetzelfde evenement (bv. volwassenen en kinderen) stel je best in als tarieven binnen één ticket.') : $t('%1Oq');
+    return webshop.value.meta.ticketType === WebshopTicketType.Tickets ? $t('%Zyi') : $t('%1Oq');
 });
 
 const viewTitle = computed(() => {

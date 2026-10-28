@@ -83,7 +83,7 @@ function openSelectedProduct() {
     // The choice of an earlier visit can no longer be orderable (e.g. sold out): its radio is disabled
     const product = props.products.length === 1 ? props.products[0] : props.products.find(p => p.id === selectedProductId.value && canOrderProduct(p));
     if (!product) {
-        Toast.warning($t('Maak eerst een keuze')).show();
+        Toast.warning($t('%Zzb')).show();
         return;
     }
     emit('openSingleProduct', product);

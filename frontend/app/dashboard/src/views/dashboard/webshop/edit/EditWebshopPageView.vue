@@ -7,7 +7,7 @@
             </template>
             <h1>{{ viewTitle }}</h1>
             <STErrorsDefault :error-box="errors.errorBox" />
-            <ImageDropArea v-model="coverPhoto" :title="$t('%7M')" :description="$t('Minstens 1600 pixels breed. De foto wordt volledig getoond.')" :resolutions="hs" />
+            <ImageDropArea v-model="coverPhoto" :title="$t('%7M')" :description="$t('%ZzY')" :resolutions="hs" />
             <STInputBox error-fields="meta.title" :error-box="errors.errorBox" :title="$t(`%vC`)">
                 <input v-model="title" class="input" type="text" autocomplete="off" :placeholder="webshop.meta.name">
             </STInputBox>
@@ -32,7 +32,7 @@
             <hr>
             <h2>
                 {{ $t('%2A') }}
-                <span class="style-tag gray"><span class="icon laptop tiny" /><span>{{ $t('Enkel op laptop') }}</span></span>
+                <span class="style-tag gray"><span class="icon laptop tiny" /><span>{{ $t('%Zz1') }}</span></span>
             </h2>
 
             <STList>
@@ -47,7 +47,7 @@
                     <p class="style-description">
                         {{ $t('%RJ') }}
                     </p>
-                    <STInputBox v-if="layout === WebshopLayout.Split" error-fields="meta.orderTitle" :error-box="errors.errorBox" :title="$t('Titel rechterpaneel')">
+                    <STInputBox v-if="layout === WebshopLayout.Split" error-fields="meta.orderTitle" :error-box="errors.errorBox" :title="$t('%Zz8')">
                         <input v-model="orderTitle" class="input" type="text" autocomplete="off" :placeholder="defaultOrderTitle">
                     </STInputBox>
                 </STListItem>
@@ -368,7 +368,7 @@ async function confirmDeletePolicy(policy: Policy) {
     if (!await CenteredMessage.confirm({
         title: policy.name ? $t('%Zn2', { name: policy.name }) : $t('Deze link verwijderen?'),
         confirmText: $t('%CJ'),
-        description: $t('De link wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+        description: $t('%ZyX'),
         availabilityDelay: 2_000,
     })) {
         return;

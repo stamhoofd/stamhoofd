@@ -16,7 +16,7 @@
                     <input id="organization-name" ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%8C')" autocomplete="organization" :disabled="!canEditOrganizationName">
                 </STInputBox>
                 <p v-if="!canEditOrganizationName" class="style-description-small">
-                    {{ $t('Enkel een platformbeheerder kan de naam van een vereniging aanpassen') }}
+                    {{ $t('%Zzx') }}
                 </p>
 
                 <AddressInput v-model="address" :title="$t('%8a')" :validator="errors.validator" :link-country-to-locale="true" :optional-except-city="STAMHOOFD.userMode !== 'platform'" />

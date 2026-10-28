@@ -1,6 +1,6 @@
 <template>
     <div ref="container" class="webshop-preview-frame" :class="{ scaled: !!scaledStyle }">
-        <iframe v-if="visible" ref="frame" :src="src" :title="$t('Voorbeeld')" :style="scaledStyle" />
+        <iframe v-if="visible" ref="frame" :src="src" :title="$t('%ID')" :style="scaledStyle" />
     </div>
 </template>
 

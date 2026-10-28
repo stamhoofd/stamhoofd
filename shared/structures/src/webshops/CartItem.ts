@@ -835,7 +835,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'missing_customer',
                 message: 'Missing customer for cart item',
-                human: $t('Vul de gegevens van deze persoon in'),
+                human: $t('%Zyn'),
                 field: 'customer',
             });
         }
@@ -938,7 +938,7 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
             throw new SimpleError({
                 code: 'invalid_seats',
                 message: 'Seats require a seating plan',
-                human: $t('Dit product heeft geen zitplaatsen. Verwijder de zitplaatsen en probeer opnieuw.'),
+                human: $t('%Zzq'),
             });
         }
 

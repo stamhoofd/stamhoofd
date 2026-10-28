@@ -308,7 +308,7 @@ async function exportXml() {
     // if fiscal document
     if (props.template.privateSettings.templateDefinition.type === fiscal.type) {
         if (!fiscalDocumentYearHelper.isXmlExportSupported(props.template.year)) {
-            Toast.error($t('Vanaf inkomstenjaar 2026 aanvaardt Belcotax geen XML-bestanden meer. De nieuwe export wordt binnenkort beschikbaar in Stamhoofd.')).show();
+            Toast.error($t('%ZzJ')).show();
             return;
         }
 

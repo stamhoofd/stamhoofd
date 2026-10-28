@@ -125,7 +125,7 @@ export class CheckoutStepsManager {
                         throw new SimpleError({
                             code: 'invalid_seats',
                             message: 'Missing seats',
-                            human: $t('Kies eerst alle plaatsen voor {product}', { product: product.name }),
+                            human: $t('%Zzy', { product: product.name }),
                             field: 'cart',
                         });
                     }
@@ -138,7 +138,7 @@ export class CheckoutStepsManager {
 
         steps.push(new CheckoutStep({
             id: CheckoutStepType.Details,
-            title: detailsUnitNames.size === 1 ? Formatter.capitalizeFirstLetter([...detailsUnitNames][0]) : $t('Details'),
+            title: detailsUnitNames.size === 1 ? Formatter.capitalizeFirstLetter([...detailsUnitNames][0]) : $t('%ZyY'),
             url: '/checkout/' + CheckoutStepType.Details.toLowerCase(),
             active: bulk && detailsUnitNames.size > 0,
             getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './BulkItemDetailsView.vue').then(m => new ComponentWithProperties(m.default, {

@@ -22,7 +22,7 @@ export function useImageUpload(options: { resolutions: () => ResolutionRequest[]
         if (!file.type.startsWith('image/')) {
             throw new SimpleError({
                 code: 'invalid_file_type',
-                message: $t('Dit bestand is geen afbeelding. Kies een PNG-, JPEG-, SVG- of WEBP-bestand.'),
+                message: $t('%Zy8'),
             });
         }
 

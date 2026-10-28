@@ -47,7 +47,7 @@ export class GetDocumentTemplateXMLEndpoint extends Endpoint<Params, Query, Body
             throw new SimpleError({
                 code: 'xml_export_not_supported',
                 message: 'Fiscal documents from income year 2026 onwards can no longer be exported as XML',
-                human: $t('Vanaf inkomstenjaar 2026 aanvaardt Belcotax geen XML-bestanden meer. De nieuwe export wordt binnenkort beschikbaar in Stamhoofd.'),
+                human: $t('%ZzJ'),
             });
         }
 

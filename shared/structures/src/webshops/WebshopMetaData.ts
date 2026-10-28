@@ -437,14 +437,14 @@ export function getWebshopOrderModeName(mode: WebshopOrderMode, meta: WebshopMet
         case WebshopOrderMode.Cart: return $t('%1DQ');
         case WebshopOrderMode.Single: {
             if (meta.isTicketBased) {
-                return $t('Eén ticket per bestelling');
+                return $t('%Zyf');
             }
             if (meta.isRegistrations) {
-                return $t('Eén inschrijving per bestelling');
+                return $t('%ZyT');
             }
-            return $t('Eén artikel per bestelling');
+            return $t('%Zxs');
         }
-        case WebshopOrderMode.Bulk: return $t('Aantallen kiezen');
+        case WebshopOrderMode.Bulk: return $t('%Zzo');
     }
 }
 

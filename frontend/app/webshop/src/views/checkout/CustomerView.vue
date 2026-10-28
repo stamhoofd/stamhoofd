@@ -33,7 +33,7 @@
                     <Radio :model-value="selectedItemId" value="" name="main-customer" @update:model-value="selectOtherCustomer" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Iemand anders') }}
+                    {{ $t('%a0G') }}
                 </h3>
             </STListItem>
             <div v-if="selectedItemId === '' && asksDetails" class="contact-person-details">
@@ -86,7 +86,7 @@ const isLoggedIn = computed(() => context.value.isComplete() ?? false);
 
 const title = computed(() => {
     if (showContactPersonList.value) {
-        return $t('Contactpersoon');
+        return $t('%1Kl');
     }
     return $t('%uE');
 });

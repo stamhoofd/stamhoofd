@@ -30,7 +30,7 @@
                     {{ title }}
                 </h3>
                 <p class="style-description-small">
-                    {{ $t('Sleep een afbeelding hierheen of klik om te uploaden') }}
+                    {{ $t('%a09') }}
                 </p>
                 <p v-if="description" class="style-description-small">
                     {{ description }}

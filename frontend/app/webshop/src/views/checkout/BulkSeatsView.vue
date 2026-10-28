@@ -3,7 +3,7 @@
         <STNavigationBar :title="product.name" />
         <main v-if="seatingPlan">
             <h1>
-                {{ $t('Plaatsen voor {product}', { product: product.name }) }}
+                {{ $t('%Zz4', { product: product.name }) }}
                 <span class="title-suffix">
                     {{ selectedAmount }} / {{ amount }}
                 </span>

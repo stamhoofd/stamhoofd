@@ -113,8 +113,8 @@
 
             <template v-if="cartItem.product.enableCustomer && cartItem.customer">
                 <hr>
-                <h2>{{ $t('Gegevens deelnemer') }}</h2>
-                <CustomerInputs :customer="cartItem.customer" :settings="cartItem.product.resolvedCustomerSettings" :name-title="$t('Naam')" :enable-autocomplete="false" :error-box="errors.errorBox" :validator="errors.validator" />
+                <h2>{{ $t('%a04') }}</h2>
+                <CustomerInputs :customer="cartItem.customer" :settings="cartItem.product.resolvedCustomerSettings" :name-title="$t('%1Os')" :enable-autocomplete="false" :error-box="errors.errorBox" :validator="errors.validator" />
                 <FillRecordCategoryBox v-if="customerRecordCategory" :category="customerRecordCategory" :value="cartItem" :validator="errors.validator" :force-mark-reviewed="true" :hide-title="true" :parent-error-box="errors.errorBox" @patch="patchRecordAnswers" />
             </template>
 

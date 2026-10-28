@@ -611,10 +611,6 @@
     "original": "Verminder de zichtbaarheid van Ravot",
     "translation": "Reduce the visibility of Ravot"
   },
-  "%48": {
-    "original": "Bepaalde gegevens zijn ingebouwd in Ravot zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten.",
-    "translation": "Certain data is built into Ravot so that we can also process it in a special way. You can switch this on or off here."
-  },
   "%49": {
     "original": "Importeer een zaalplan dat jij of een andere groep eerder uit Ravot hebt geëxporteerd. Importeren vanaf andere systemen is niet mogelijk.",
     "translation": "Import a seating plan that you or another group has previously exported from Ravot. Importing from other systems is not possible."
@@ -1498,6 +1494,18 @@
   "%Zy3": {
     "original": "Kies een groep waarvan je beheerder bent. Daarna word je automatisch ingelogd in het feedbacksysteem.",
     "translation": "Choose a group you manage. You'll then be logged in to the feedback system automatically."
+  },
+  "%Zyq": {
+    "original": "Naam groep enkel aanpasbaar door platformbeheerders",
+    "translation": "Only platform administrators can change the group name"
+  },
+  "%ZzJ": {
+    "original": "Vanaf inkomstenjaar 2026 aanvaardt Belcotax geen XML-bestanden meer. De nieuwe export wordt binnenkort beschikbaar in Ravot.",
+    "translation": "Starting with the 2026 income year, Belcotax will no longer accept XML files. The new export will soon be available in Ravot."
+  },
+  "%Zzx": {
+    "original": "Enkel een platformbeheerder kan de naam van een groep aanpassen",
+    "translation": "Only a platform administrator can edit a group's name"
   },
   "%a6": {
     "original": "Portaal voor beroepsmedewerkers",

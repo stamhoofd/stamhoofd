@@ -83,7 +83,7 @@ async function showAddMenu(event: MouseEvent) {
             ? [
                     // A submenu, so the question types are not confused with the built-in fields above
                     new ContextMenuItem({
-                        name: $t('Eigen vraag'),
+                        name: $t('%Zya'),
                         icon: 'text-style',
                         childMenu: new ContextMenu(getRecordTypeMenuItems(type => actions.addRecord(type))),
                     }),
@@ -103,7 +103,7 @@ async function showAddMenu(event: MouseEvent) {
 }
 
 // The extra questions are stored in a single category that is never shown to the user: it is only saved once it contains questions
-const emptyRecordCategory = RecordCategory.create({ name: TranslatedString.create($t('Extra vragen')) });
+const emptyRecordCategory = RecordCategory.create({ name: TranslatedString.create($t('%ZyW')) });
 const recordCategory = computed(() => props.customerSettings.recordCategory ?? emptyRecordCategory);
 const rootCategories = computed(() => [recordCategory.value]);
 

@@ -1,10 +1,10 @@
 <template>
-    <SaveView :title="isNew ? $t(`Tarief toevoegen`) : $t(`Tarief bewerken`)" :disabled="!hasChanges && !isNew" :loading="saveLoading" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
+    <SaveView :title="isNew ? $t(`%ZzW`) : $t(`%Zyb`)" :disabled="!hasChanges && !isNew" :loading="saveLoading" @save="save" v-on="!isNew ? {delete: deleteMe} : {}">
         <h1 v-if="isNew">
-            {{ $t('Tarief toevoegen') }}
+            {{ $t('%ZzW') }}
         </h1>
         <h1 v-else>
-            {{ $t('Tarief bewerken') }}
+            {{ $t('%Zyb') }}
         </h1>
 
         <STErrorsDefault :error-box="errors.errorBox" />
