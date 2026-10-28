@@ -30,7 +30,7 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "@anthropic-ai/sdk": "0.135.0",
+        "@anthropic-ai/sdk": "0.137.0",
         "@aws-sdk/client-s3": "3.1153.0",
         "@inquirer/prompts": "7.10.1",
         "@oclif/core": "4.14.0",
