@@ -8,6 +8,8 @@ import { Image, RateLimiter } from '@stamhoofd/models';
 import { Image as ImageStruct, ResolutionRequest, supportedImageTypes } from '@stamhoofd/structures';
 import formidable from 'formidable';
 import { promises as fs } from 'fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 import { Context } from '../../../helpers/Context.js';
 
@@ -110,58 +112,62 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
             }
         }
 
-        const form = formidable({
-            maxFileSize: 5 * 1024 * 1024,
-            keepExtensions: true,
-            maxFiles: 1,
-            // Allow at most one metadata field and bound its size independently of file bytes.
-            maxFields: 1,
-            maxFieldsSize: 16 * 1024,
-        });
-
-        const [file, resolutions] = await new Promise<[FormidableFile, ResolutionRequest[]]>((resolve, reject) => {
-            if (!request.request.request) {
-                reject(new SimpleError({
-                    code: 'invalid_request',
-                    message: 'Invalid request',
-                    statusCode: 500,
-                }));
-                return;
-            }
-
-            form.parse(request.request.request, (err, fields, files) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                if (!fields.resolutions || !Array.isArray(fields.resolutions) || fields.resolutions.length !== 1) {
-                    reject(new SimpleError({
-                        code: 'missing_field',
-                        message: 'Field resolutions is required',
-                        field: 'resolutions',
-                    }));
-                    return;
-                }
-                if (!files.file || !Array.isArray(files.file) || files.file.length !== 1) {
-                    reject(new SimpleError({
-                        code: 'missing_field',
-                        message: 'Missing file',
-                        field: 'file',
-                    }));
-                    return;
-                }
-
-                try {
-                    const resolutions = new ObjectData(JSON.parse(fields.resolutions[0]), { version: request.request.getVersion() }).array(ResolutionRequest as Decoder<ResolutionRequest>);
-                    Image.validateResolutions(resolutions);
-                    resolve([files.file[0], resolutions]);
-                } catch (e) {
-                    reject(e);
-                }
-            });
-        });
-
+        // Allocate before parsing so every temporary artifact belongs to this request,
+        // including files that never reach the upload or resolution-validation stage.
+        const uploadDirectory = await fs.mkdtemp(join(tmpdir(), 'stamhoofd-image-'));
         try {
+            const form = formidable({
+                uploadDir: uploadDirectory,
+                maxFileSize: 5 * 1024 * 1024,
+                keepExtensions: true,
+                maxFiles: 1,
+                // Allow at most one metadata field and bound its size independently of file bytes.
+                maxFields: 1,
+                maxFieldsSize: 16 * 1024,
+            });
+
+            const [file, resolutions] = await new Promise<[FormidableFile, ResolutionRequest[]]>((resolve, reject) => {
+                if (!request.request.request) {
+                    reject(new SimpleError({
+                        code: 'invalid_request',
+                        message: 'Invalid request',
+                        statusCode: 500,
+                    }));
+                    return;
+                }
+
+                form.parse(request.request.request, (err, fields, files) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    if (!fields.resolutions || !Array.isArray(fields.resolutions) || fields.resolutions.length !== 1) {
+                        reject(new SimpleError({
+                            code: 'missing_field',
+                            message: 'Field resolutions is required',
+                            field: 'resolutions',
+                        }));
+                        return;
+                    }
+                    if (!files.file || !Array.isArray(files.file) || files.file.length !== 1) {
+                        reject(new SimpleError({
+                            code: 'missing_field',
+                            message: 'Missing file',
+                            field: 'file',
+                        }));
+                        return;
+                    }
+
+                    try {
+                        const resolutions = new ObjectData(JSON.parse(fields.resolutions[0]), { version: request.request.getVersion() }).array(ResolutionRequest as Decoder<ResolutionRequest>);
+                        Image.validateResolutions(resolutions);
+                        resolve([files.file[0], resolutions]);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            });
+
             // Never trust the content type of the uploader: it decides how we store the image, so only accept
             // the image types we know we can generate our resolutions from.
             const imageType = supportedImageTypes.resolveUpload({ contentType: file.mimetype, filename: file.originalFilename });
@@ -180,8 +186,9 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
             const image = await Image.create(fileContent, imageType.contentType, resolutions, request.query.isPrivate, user, organization as Organization | null | undefined);
             return new Response(ImageStruct.create(image));
         } finally {
-            // Formidable wrote the upload to a temporary file
-            await fs.rm(file.filepath, { force: true }).catch(() => { /* we can't do anything about this */ });
+            // Enclose parsing, validation, rendering and storage: each exit removes
+            // the entire directory, including partial uploads and unexpected fields.
+            await fs.rm(uploadDirectory, { recursive: true, force: true });
         }
     }
 }
