@@ -1,5 +1,5 @@
 <template>
-    <div class="webshop-products container">
+    <div class="webshop-products container" :class="{ 'with-sticky-order-bar': bulk && hasUnits }">
         <template v-if="bulk">
             <BulkProductList :title="listTitle" />
 
@@ -73,7 +73,6 @@ const emit = defineEmits<{
 
 const bulk = computed(() => props.webshop.orderMode === WebshopOrderMode.Bulk);
 const totalPrice = computed(() => props.checkout.totalPrice);
-// Once a unit is chosen, the order button sticks to the bottom of the screen like the cart button of a webshop with a cart
 const hasUnits = computed(() => props.checkout.cart.count > 0);
 
 const single = computed(() => props.webshop.orderMode === WebshopOrderMode.Single);
@@ -100,6 +99,12 @@ const orderButtonText = computed(() => getOrderButtonText(props.webshop, bulk.va
 .webshop-products {
     // Once a unit is chosen, the order button sticks to the bottom of the screen like the cart button of a webshop with a cart.
     // The space below the stuck button is an overlay instead of padding: the spacing in the page stays the same, so nothing moves when the first unit is chosen.
+    // It only hides the products scrolling below it: it is cut off right below the products (with room for the focus ring of the button),
+    // and the platform footer that can start within that room is shown above it (see WebshopPlatformFooter).
+    &.with-sticky-order-bar {
+        clip-path: inset(-100vh -100vw -4px -100vw);
+    }
+
     .bulk-order-bar.sticky {
         position: sticky;
         bottom: calc(15px + var(--st-safe-area-bottom, 0px));
@@ -109,6 +114,7 @@ const orderButtonText = computed(() => getOrderButtonText(props.webshop, bulk.va
         &::after {
             content: '';
             position: absolute;
+            z-index: -1;
             top: 100%;
             left: 0;
             right: 0;
