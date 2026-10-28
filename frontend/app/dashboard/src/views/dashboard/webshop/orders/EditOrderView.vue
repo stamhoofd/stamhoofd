@@ -25,7 +25,7 @@
                     <CartItemRow v-for="cartItem of patchedOrder.data.cart.items" :key="cartItem.id" :cart-item="cartItem" :cart="patchedOrder.data.cart" :webshop="webshopFull" :editable="true" :admin="true" @edit="editCartItem(cartItem)" @delete="deleteItem(cartItem)" @amount="setCartItemAmount(cartItem, $event)" />
                 </STList>
 
-                <EmptyStateCard v-else :icon="emptyCartIcon" :title="$t('Nog niets toegevoegd')" :description="$t('Voeg toe wat er besteld wordt.')">
+                <EmptyStateCard v-else :icon="emptyCartIcon" :title="$t('%ZzV')" :description="$t('%Zzw')">
                     <button class="button text" type="button" data-testid="add-product-button" @click="addProduct">
                         <span class="icon add" />
                         <span>{{ $t('%1IY') }}</span>
@@ -135,7 +135,7 @@
 
             <template v-if="contactPersonCandidates.length > 0">
                 <p class="style-description-block">
-                    {{ $t('Wie is de contactpersoon voor deze bestelling?') }}
+                    {{ $t('%Zz2') }}
                 </p>
                 <STList class="customer-selection-list" data-testid="main-customer-list">
                     <template v-for="option of contactPersonOptions" :key="option.id">
@@ -418,7 +418,7 @@ const contactPersonOptions = computed(() => [
     })),
     {
         id: '',
-        title: $t('Iemand anders'),
+        title: $t('%a0G'),
         description: '',
         selected: selectedContactItemId.value === '',
         select: () => selectContactPerson(null),

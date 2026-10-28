@@ -81,11 +81,11 @@ const title = computed(() => {
         return $t('%1Dn');
     }
     const texts: Record<CartKind, string> = {
-        donation: $t('Bevestig jouw bijdrage'),
-        ticket: $t('Bevestig jouw ticket'),
-        tickets: $t('Bevestig jouw tickets'),
-        registration: $t('Bevestig jouw inschrijving'),
-        registrations: $t('Bevestig jouw inschrijvingen'),
+        donation: $t('%Zzr'),
+        ticket: $t('%ZzZ'),
+        tickets: $t('%Zzs'),
+        registration: $t('%ZzS'),
+        registrations: $t('%Zyl'),
         order: $t('%1Do'),
     };
     return texts[cartKind.value];
@@ -93,11 +93,11 @@ const title = computed(() => {
 
 const freeDescription = computed(() => {
     const texts: Record<CartKind, string> = {
-        donation: $t('Jouw bijdrage is definitief zodra je bevestigt.'),
-        ticket: $t('Je ontvangt jouw ticket zodra je bevestigt.'),
-        tickets: $t('Je ontvangt jouw tickets zodra je bevestigt.'),
-        registration: $t('Jouw inschrijving is definitief zodra je bevestigt.'),
-        registrations: $t('Jouw inschrijvingen zijn definitief zodra je bevestigt.'),
+        donation: $t('%a00'),
+        ticket: $t('%Zy7'),
+        tickets: $t('%Zyd'),
+        registration: $t('%Zzc'),
+        registrations: $t('%ZyC'),
         order: $t('%Xx'),
     };
     return texts[cartKind.value];
@@ -171,7 +171,7 @@ async function goNext() {
 
     // The preview in the dashboard goes through all steps, but never places an order
     if (webshopManager.preview) {
-        Toast.info($t('In een voorbeeld kan je niet bestellen')).show();
+        Toast.info($t('%ZyZ')).show();
         return;
     }
     loading.value = true;

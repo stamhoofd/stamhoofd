@@ -1,8 +1,8 @@
 <template>
     <div class="webshop-device-preview">
         <header>
-            <h1>{{ $t('Voorbeeld') }}</h1>
-            <SegmentedControl v-model="device" class="devices" :items="['laptop', 'smartphone']" :icons="['laptop', 'smartphone']" :labels="[$t('Laptop'), $t('Smartphone')]" />
+            <h1>{{ $t('%ID') }}</h1>
+            <SegmentedControl v-model="device" class="devices" :items="['laptop', 'smartphone']" :icons="['laptop', 'smartphone']" :labels="[$t('%Zyw'), $t('%ZyD')]" />
             <div class="right">
                 <slot name="right" />
             </div>

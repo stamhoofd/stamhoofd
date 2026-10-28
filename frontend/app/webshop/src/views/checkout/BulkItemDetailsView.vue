@@ -15,7 +15,7 @@
                 <STErrorsDefault :error-box="entry.errors.errorBox" />
 
                 <template v-if="entry.item.product.enableCustomer && entry.item.customer">
-                    <CustomerInputs :customer="entry.item.customer" :settings="entry.item.product.resolvedCustomerSettings" :name-title="$t('Naam')" :enable-autocomplete="false" :error-box="entry.errors.errorBox" :validator="entry.errors.validator" @change="checkoutManager.saveCart()" />
+                    <CustomerInputs :customer="entry.item.customer" :settings="entry.item.product.resolvedCustomerSettings" :name-title="$t('%1Os')" :enable-autocomplete="false" :error-box="entry.errors.errorBox" :validator="entry.errors.validator" @change="checkoutManager.saveCart()" />
                     <FillRecordCategoryBox v-if="entry.item.product.resolvedCustomerSettings.recordCategory" :category="entry.item.product.resolvedCustomerSettings.recordCategory" :value="entry.item" :validator="entry.errors.validator" :force-mark-reviewed="true" :hide-title="true" :parent-error-box="entry.errors.errorBox" @patch="patchRecordAnswers(entry.item, $event)" />
                 </template>
 
@@ -26,7 +26,7 @@
                 <template v-if="entry.item.productPrice.uitpasBaseProductPriceId !== null && entry.item.uitpasNumbers[0]">
                     <hr v-if="hasQuestionsAboveUitpas(entry.item)" class="style-hr">
                     <h3>{{ $t('%wF') }}</h3>
-                    <UitpasNumberInput v-model="entry.item.uitpasNumbers[0].uitpasNumber" :placeholder="$t('Geef het UiTPAS-nummer in')" class="max" :validator="entry.errors.validator" :required="true" error-fields="uitpasNumbers.0" :error-box="entry.errors.errorBox" />
+                    <UitpasNumberInput v-model="entry.item.uitpasNumbers[0].uitpasNumber" :placeholder="$t('%Zzz')" class="max" :validator="entry.errors.validator" :required="true" error-fields="uitpasNumbers.0" :error-box="entry.errors.errorBox" />
                 </template>
             </STCard>
         </template>
@@ -83,7 +83,7 @@ const navigationActions = useNavigationActions();
 
 const webshop = computed(() => webshopManager.webshop);
 const cart = computed(() => checkoutManager.cart);
-const title = $t('Vul de gegevens aan');
+const title = $t('%a0J');
 
 // One error box + validator per item, keyed on the item id so they survive cart changes
 const itemErrors = reactive(new Map<string, ItemErrors>());

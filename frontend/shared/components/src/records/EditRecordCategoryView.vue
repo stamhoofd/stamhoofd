@@ -38,7 +38,7 @@
             </STListItem>
         </STList>
 
-        <STInputBox :title="$t('Vragen')" class="max">
+        <STInputBox :title="$t('%ZeZ')" class="max">
             <template #right>
                 <button class="button icon add small" type="button" data-testid="records-add-button" @click="recordsBox?.showAddMenu($event)" />
             </template>
@@ -321,7 +321,7 @@ async function showExample() {
                 category: isRootCategory.value
                     ? category
                     : RecordCategory.create({
-                            name: TranslatedString.create($t('Voorbeeld')),
+                            name: TranslatedString.create($t('%ID')),
                             childCategories: [category],
                         }),
                 value: reactiveValue,

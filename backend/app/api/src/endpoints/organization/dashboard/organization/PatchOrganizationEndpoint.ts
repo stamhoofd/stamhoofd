@@ -86,7 +86,7 @@ export class PatchOrganizationEndpoint extends Endpoint<Params, Query, Body, Res
                 if (platform.config.onlyAdminCanChangeOrganizationName && !Context.auth.hasPlatformFullAccess() && organization.name !== request.body.name)
                     throw Context.auth.error({
                         message: 'Only platform admin can change organization name',
-                        human: $t('Enkel een platformbeheerder kan de naam van een vereniging aanpassen'),
+                        human: $t('%Zzx'),
                     });
 
                 if (request.body.name.length < 2) {

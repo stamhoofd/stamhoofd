@@ -128,7 +128,7 @@
         </Checkbox>
 
         <Checkbox v-model="onlyAdminCanChangeOrganizationName">
-            {{ $t('Naam vereniging enkel aanpasbaar door platformbeheerders') }}
+            {{ $t('%Zyq') }}
         </Checkbox>
     </SaveView>
 </template>

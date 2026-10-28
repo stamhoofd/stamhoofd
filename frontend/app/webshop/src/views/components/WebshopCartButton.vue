@@ -2,7 +2,7 @@
     <div class="webshop-cart-button">
         <button class="button primary full" type="button" data-testid="open-cart-button" @click="emit('open')">
             <span class="icon basket" />
-            <span class="title">{{ $t('Winkelmandje openen') }}</span>
+            <span class="title">{{ $t('%Zzt') }}</span>
             <span class="separator" />
             <span class="count">{{ count }}</span>
         </button>

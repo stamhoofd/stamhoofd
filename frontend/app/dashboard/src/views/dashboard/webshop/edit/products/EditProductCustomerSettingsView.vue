@@ -1,5 +1,5 @@
 <template>
-    <SaveView :title="product.name" :disabled="!hasChanges" :save-text="$t('Klaar')" @save="save">
+    <SaveView :title="product.name" :disabled="!hasChanges" :save-text="$t('%K8')" @save="save">
         <template #buttons>
             <button v-if="customerSettingsBox?.canAdd" class="button text only-icon-smartphone" type="button" data-testid="customer-settings-add-button" @click="customerSettingsBox?.showAddMenu($event)">
                 <span class="icon add" />
@@ -9,7 +9,7 @@
 
         <h1>{{ product.name }}</h1>
         <p class="style-description-block">
-            {{ $t('Kies welke gegevens je van elke deelnemer wil verzamelen.') }}
+            {{ $t('%ZyF') }}
         </p>
 
         <CustomerSettingsBox ref="customerSettingsBox" :customer-settings="patched.resolvedCustomerSettings" :fixed-fields="['name']" :record-editor-settings="recordEditorSettings" :saved-record-ids="savedRecordIds" @patch="patchCustomerSettings" />

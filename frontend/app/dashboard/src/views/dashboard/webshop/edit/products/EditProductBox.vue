@@ -116,19 +116,19 @@
 
         <hr>
         <h2 class="style-with-button">
-            <div>{{ $t('Tarieven') }}</div>
+            <div>{{ $t('%61') }}</div>
             <div>
                 <button class="button text only-icon-smartphone" type="button" @click="addProductPrice()">
                     <span class="icon add" />
-                    <span>{{ $t('Tarief') }}</span>
+                    <span>{{ $t('%62') }}</span>
                 </button>
             </div>
         </h2>
         <p v-if="!isTicket">
-            {{ $t("Je kan een artikel meerdere tarieven geven en aan elk tarief een naam geven. Bv. small, medium en large.") }}
+            {{ $t("%Zyu") }}
         </p>
         <p v-else>
-            {{ $t("Je kan elk ticket meerdere tarieven geven, bijvoorbeeld 'Volwassenen', 'Kind', 'UiTPAS-Tarief'. Gebruik tarieven in plaats van meerdere tickets als het om een evenement gaat op hetzelfde tijdstip.") }}
+            {{ $t("%ZyE") }}
         </p>
 
         <ProductPriceBox v-if="patchedProduct.prices.length === 1" :is-new="isNew" :product-price="patchedProduct.prices[0]" :product="patchedProduct" :error-box="errorBox" :validator="validator" @patch="addProductPatch($event)" />
@@ -216,7 +216,7 @@
                     <span class="icon location gray" />
                 </template>
                 <h3 class="style-title-list">
-                    {{ $t('Locatie toevoegen') }}
+                    {{ $t('%4S') }}
                 </h3>
             </STListItem>
 
@@ -435,16 +435,16 @@
                 </template>
 
                 <h3 v-if="isTicket" class="style-title-list">
-                    {{ $t('Ticket op naam') }}
+                    {{ $t('%Zzk') }}
                 </h3>
                 <h3 v-else class="style-title-list">
-                    {{ $t('Vraag de gegevens van de deelnemer per artikel') }}
+                    {{ $t('%ZzQ') }}
                 </h3>
                 <p v-if="isTicket" class="style-description-small">
-                    {{ $t('Vraag de naam en eventueel andere contactgegevens per ticket in plaats van enkel op bestelniveau.') }}
+                    {{ $t('%ZzN') }}
                 </p>
                 <p v-else class="style-description-small">
-                    {{ $t('Vraag de naam en eventueel andere contactgegevens per artikel in plaats van enkel op bestelniveau.') }}
+                    {{ $t('%a0H') }}
                 </p>
             </STListItem>
         </STList>
@@ -452,13 +452,13 @@
         <div v-if="modernWebshopEnabled && enableCustomer" class="container">
             <hr>
             <h2 class="style-with-button">
-                <div>{{ $t('Gegevens per deelnemer') }}</div>
+                <div>{{ $t('%Zyo') }}</div>
                 <div>
                     <button v-if="customerSettingsBox?.canAdd" v-tooltip="$t('%SN')" class="button icon add" type="button" data-testid="customer-settings-add-button" @click="customerSettingsBox?.showAddMenu($event)" />
                 </div>
             </h2>
             <p class="style-description-block">
-                {{ $t('Kies welke gegevens je van elke deelnemer wil verzamelen.') }}
+                {{ $t('%ZyF') }}
             </p>
 
             <CustomerSettingsBox ref="customerSettingsBox" :customer-settings="customerSettings" :fixed-fields="['name']" :record-editor-settings="customerRecordEditorSettings" :saved-record-ids="savedCustomerRecordIds" @patch="patchCustomerSettings" />
@@ -606,7 +606,7 @@ async function onPaste(event: Event) {
                     p.optionMenus.addPut(decoded.data);
                     addProductPatch(p);
 
-                    new Toast($t('Keuzemenu {name} werd geplakt vanaf je klembord', { name: decoded.data.name || $t('Naamloos') }), 'copy').show();
+                    new Toast($t('%ZyV', { name: decoded.data.name || $t('Naamloos') }), 'copy').show();
 
                     event.preventDefault();
                 }

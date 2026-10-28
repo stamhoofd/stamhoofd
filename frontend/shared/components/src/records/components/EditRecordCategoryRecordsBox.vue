@@ -9,7 +9,7 @@
         </STList>
     </STList>
 
-    <EmptyStateCard v-if="showEmptyState" icon="text-style" :title="$t('Voeg een vraag toe')" :description="emptyDescription ?? undefined">
+    <EmptyStateCard v-if="showEmptyState" icon="text-style" :title="$t('%Zyp')" :description="emptyDescription ?? undefined">
         <button class="button text" type="button" data-testid="empty-records-add-button" @click="showAddMenu($event)">
             <span class="icon add" />
             <span>{{ $t('%SN') }}</span>
@@ -27,7 +27,7 @@
             <button type="button" class="button icon edit" />
         </p>
 
-        <EmptyStateCard v-if="c.records.length === 0" icon="text-style" :title="$t('Voeg een vraag toe')" :description="$t('Deze categorie heeft nog geen vragen')">
+        <EmptyStateCard v-if="c.records.length === 0" icon="text-style" :title="$t('%Zyp')" :description="$t('%Zyt')">
             <button class="button text" type="button" @click="showRecordTypeMenu($event, c)">
                 <span class="icon add" />
                 <span>{{ $t('%SN') }}</span>

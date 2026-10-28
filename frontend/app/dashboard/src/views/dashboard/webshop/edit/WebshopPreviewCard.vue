@@ -1,7 +1,7 @@
 <template>
     <WebshopDevicePreview v-model:device="device" class="webshop-preview-card" :webshop="webshop">
         <template #right>
-            <button v-tooltip="$t('Volledig scherm')" class="button icon fullscreen" type="button" data-testid="webshop-full-preview-button" @click="openPreview(device)" />
+            <button v-tooltip="$t('%ZzA')" class="button icon fullscreen" type="button" data-testid="webshop-full-preview-button" @click="openPreview(device)" />
         </template>
     </WebshopDevicePreview>
 </template>

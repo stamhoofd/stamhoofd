@@ -78,7 +78,7 @@ const description = computed(() => {
         // Few short choices read better than a count
         if (choices.length > 0 && choices.length < 4 && choices.every(c => c.name.toString().length <= 20)) {
             const names = choices.map(c => c.name.toString()).join(' · ');
-            return props.record.required ? names : $t('{choices} (optioneel)', { choices: names });
+            return props.record.required ? names : $t('%ZzC', { choices: names });
         }
         if (props.record.type === RecordType.ChooseOne) {
             if (!props.record.required) {

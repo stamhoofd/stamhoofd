@@ -60,17 +60,17 @@ const options = [
     {
         mode: WebshopOrderMode.Cart,
         testId: 'order-mode-cart',
-        description: $t('Artikels verzamelen en alles in één keer afrekenen.'),
+        description: $t('%a02'),
     },
     {
         mode: WebshopOrderMode.Bulk,
         testId: 'order-mode-bulk',
-        description: $t('Meteen aantallen kiezen. Ideaal voor tickets.'),
+        description: $t('%Zyz'),
     },
     {
         mode: WebshopOrderMode.Single,
         testId: 'order-mode-single',
-        description: $t('Precies één ticket, inschrijving of inzending per bestelling.'),
+        description: $t('%ZzE'),
     },
 ];
 

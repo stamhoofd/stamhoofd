@@ -715,10 +715,6 @@
     "original": "Verminder de zichtbaarheid van Jamboree",
     "translation": "Réduire la visibilité de Jamboree"
   },
-  "%48": {
-    "original": "Bepaalde gegevens zijn ingebouwd in Jamboree zodat we die ook op een speciale manier kunnen verwerken. Je kan deze hier aan of uit zetten.",
-    "translation": "Certaines données sont intégrées dans Jamboree afin que nous puissions également les traiter d'une manière spéciale. Vous pouvez les activer ou les désactiver ici."
-  },
   "%49": {
     "original": "Importeer een zaalplan dat jij of een andere eenheid eerder uit Jamboree hebt geëxporteerd. Importeren vanaf andere systemen is niet mogelijk.",
     "translation": "Importez un plan de salle que vous ou une autre unité avez exporté précédemment de Jamboree. L'importation à partir d'autres systèmes n'est pas possible."
@@ -1842,6 +1838,18 @@
   "%Zy3": {
     "original": "Kies een eenheid waarvan je beheerder bent. Daarna word je automatisch ingelogd in het feedbacksysteem.",
     "translation": "Choisissez une unité dont vous êtes administrateur. Vous serez ensuite automatiquement connecté au système de feedback."
+  },
+  "%Zyq": {
+    "original": "Naam eenheid enkel aanpasbaar door platformbeheerders",
+    "translation": "Le nom de l’unité ne peut être modifié que par les administrateurs de la plateforme"
+  },
+  "%ZzJ": {
+    "original": "Vanaf inkomstenjaar 2026 aanvaardt Belcotax geen XML-bestanden meer. De nieuwe export wordt binnenkort beschikbaar in Jamboree.",
+    "translation": "À partir de l’exercice fiscal 2026, Belcotax n’acceptera plus les fichiers XML. La nouvelle exportation sera prochainement disponible dans Jamboree."
+  },
+  "%Zzx": {
+    "original": "Enkel een platformbeheerder kan de naam van een eenheid aanpassen",
+    "translation": "Seul un gestionnaire de plateforme peut modifier le nom d’une unité"
   },
   "%ad": {
     "original": "Een hoofdbeheerder van jouw eenheid moet eerst een afzender toevoegen die je kan gebruiken voor je een bericht kan versturen.",

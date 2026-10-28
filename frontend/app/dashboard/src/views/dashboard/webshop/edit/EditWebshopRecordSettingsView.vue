@@ -11,7 +11,7 @@
             {{ title }}
         </h1>
         <p v-if="showParticipantSettings">
-            {{ webshop.meta.isRegistrations ? $t('Kies welke gegevens iemand invult bij het inschrijven.') : $t('Kies welke gegevens bestellers invullen.') }}
+            {{ webshop.meta.isRegistrations ? $t('%a0D') : $t('%Zzv') }}
         </p>
         <p v-else>
             {{ $t('%Rk') }}
@@ -23,22 +23,22 @@
             <ParticipantSettingsBox :webshop="webshop" :original-webshop="originalWebshop" @patch="addPatch" />
 
             <hr>
-            <h2>{{ $t('Gegevens van de besteller') }}</h2>
+            <h2>{{ $t('%a0I') }}</h2>
             <p>
-                {{ webshop.products.some(p => p.enableCustomer) ? $t('Wordt één keer per bestelling gevraagd. Is de besteller zelf een deelnemer, dan worden die gegevens overgenomen. De besteller ontvangt de bevestigingsmail.') : $t('Wordt één keer per bestelling gevraagd.') }}
+                {{ webshop.products.some(p => p.enableCustomer) ? $t('%ZzR') : $t('%Zye') }}
             </p>
         </template>
 
         <CustomerSettingsBox ref="customerSettingsBox" :customer-settings="webshop.meta.customerSettings" :fixed-fields="['name', 'email']" :record-editor-settings="editorSettings" :saved-record-ids="savedCustomerRecordIds" @patch="patchCustomerSettings" />
 
         <hr>
-        <h2>{{ $t('Extra stappen') }}</h2>
+        <h2>{{ $t('%a0F') }}</h2>
 
         <p>
-            {{ $t('Voeg extra stappen toe aan het afrekenen, elk met hun eigen vragen. Een stap kan je enkel in bepaalde gevallen tonen.') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('%19t') }}</a>
+            {{ $t('%ZyP') }} <a :href="$domains.getDocs('vragenlijsten-instellen')" class="inline-link" target="_blank">{{ $t('%19t') }}</a>
         </p>
 
-        <EditRecordCategoriesBox :categories="categories" :settings="editorSettings" :add-text="$t('Nieuwe stap')" @patch:categories="addCategoriesPatch" />
+        <EditRecordCategoriesBox :categories="categories" :settings="editorSettings" :add-text="$t('%ZyM')" @patch:categories="addCategoriesPatch" />
     </SaveView>
 </template>
 
@@ -72,7 +72,7 @@ const savedCustomerRecordIds = new Set(originalWebshop.meta.customerSettings.rec
 
 const categories = computed(() => webshop.value.meta.recordCategories);
 const customerSettingsBox = useTemplateRef('customerSettingsBox');
-const title = $t('Contactgegevens');
+const title = $t('%ZlW');
 const modernWebshopEnabled = useFeatureFlagComputed('modern-webshop');
 
 // Only where a piece is usually for one person: elsewhere details per order are the norm (e.g. 5× a meal on one name)

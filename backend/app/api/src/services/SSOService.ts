@@ -653,7 +653,7 @@ export class SSOServiceWithSession {
                 throw new SimpleError({
                     code: 'invalid_user',
                     message: 'User does not belong to this identity provider scope',
-                    human: $t('Log in via de aanmeldpagina van je eigen account.'),
+                    human: $t('%Zy9'),
                     statusCode: 403,
                 });
             }

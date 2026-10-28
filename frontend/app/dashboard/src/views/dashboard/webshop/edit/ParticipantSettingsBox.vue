@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <h2>{{ $t('Deelnemersgegevens') }}</h2>
+        <h2>{{ $t('%a07') }}</h2>
 
         <STList :key="radioRenderKey">
             <STListItem :selectable="true" element-name="label" data-testid="participant-mode-order">
@@ -29,7 +29,7 @@
 
         <div v-if="mode === 'item'" class="participant-products">
             <p v-if="!products.some(p => p.enableCustomer)" class="warning-box">
-                {{ isRegistrations ? $t('Vink aan voor welke inschrijvingen je de gegevens van een deelnemer wil vragen.') : $t('Vink aan voor welke tickets je de gegevens van een deelnemer wil vragen.') }}
+                {{ isRegistrations ? $t('%Zyv') : $t('%ZyH') }}
             </p>
 
             <STCard>
@@ -97,30 +97,30 @@ const isSingle = computed(() => props.webshop.meta.orderMode === WebshopOrderMod
 
 const orderTitle = computed(() => {
     if (isSingle.value) {
-        return isRegistrations.value ? $t('Dezelfde ongeacht de inschrijving') : $t('Dezelfde ongeacht het ticket');
+        return isRegistrations.value ? $t('%ZzX') : $t('%a05');
     }
-    return $t('Eén keer per bestelling');
+    return $t('%ZzD');
 });
 
 const orderDescription = computed(() => {
     if (isSingle.value) {
-        return isRegistrations.value ? $t('Iedereen vult dezelfde gegevens in, ongeacht de gekozen inschrijving.') : $t('Iedereen vult dezelfde gegevens in, ongeacht het gekozen ticket.');
+        return isRegistrations.value ? $t('%ZyA') : $t('%ZzU');
     }
-    return isRegistrations.value ? $t('De besteller vult zijn gegevens één keer in, hoeveel inschrijvingen er ook gebeuren.') : $t('De besteller vult zijn gegevens één keer in, hoeveel tickets er ook besteld worden. Bv. een eetfestijn: 5× vlees en 1× veggie op één naam.');
+    return isRegistrations.value ? $t('%Zz7') : $t('%ZzF');
 });
 
 const itemTitle = computed(() => {
     if (isSingle.value) {
-        return isRegistrations.value ? $t('Verschillend per inschrijving') : $t('Verschillend per ticket');
+        return isRegistrations.value ? $t('%Zyx') : $t('%ZyN');
     }
-    return isRegistrations.value ? $t('Per inschrijving') : $t('Per ticket');
+    return isRegistrations.value ? $t('%Zz0') : $t('%Zzl');
 });
 
 const itemDescription = computed(() => {
     if (isSingle.value) {
-        return isRegistrations.value ? $t('Je kiest per inschrijving welke gegevens van de deelnemer gevraagd worden.') : $t('Je kiest per ticket welke gegevens van de deelnemer gevraagd worden.');
+        return isRegistrations.value ? $t('%ZzM') : $t('%Zzh');
     }
-    return isRegistrations.value ? $t('Voor elke inschrijving vult de besteller de gegevens van elke deelnemer in. Bv. een kamp.') : $t('Voor elk ticket vult de besteller de gegevens van elke deelnemer in. Bv. een kamp of tickets op naam.');
+    return isRegistrations.value ? $t('%ZzK') : $t('%Zzg');
 });
 
 // Local, so 'per ticket' stays selected while no ticket is checked yet
@@ -136,7 +136,7 @@ const fields = getCustomerFields();
 
 function getSummary(product: Product) {
     if (!product.enableCustomer) {
-        return $t('Geen gegevens per deelnemer');
+        return $t('%ZyU');
     }
     const settings = product.resolvedCustomerSettings;
     const names = fields.filter(field => settings[field.key] !== CustomerFieldRequirement.Disabled).map(field => field.name);
@@ -199,9 +199,9 @@ async function selectPerOrder() {
     if (enabled.some(p => hasCustomSettings(p))) {
         const names = Formatter.joinLast(enabled.map(p => p.name), ', ', ' en ');
         const description = isRegistrations.value
-            ? $t('{products} vragen dan geen gegevens per deelnemer meer. De gegevens en vragen die je per inschrijving instelde, worden verwijderd.', { products: names })
-            : $t('{products} vragen dan geen gegevens per deelnemer meer. De gegevens en vragen die je per ticket instelde, worden verwijderd.', { products: names });
-        if (!await CenteredMessage.confirm($t('Gegevens per deelnemer verwijderen?'), $t('%CJ'), description)) {
+            ? $t('%Zze', { products: names })
+            : $t('%ZzP', { products: names });
+        if (!await CenteredMessage.confirm($t('%ZyS'), $t('%CJ'), description)) {
             radioRenderKey.value++;
             return;
         }

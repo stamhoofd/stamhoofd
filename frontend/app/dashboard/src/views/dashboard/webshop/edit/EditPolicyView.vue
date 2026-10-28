@@ -53,7 +53,7 @@ const props = defineProps<{
 
 const errors = useErrors();
 const pop = usePop();
-const title = props.isNew ? $t('Externe link toevoegen') : $t('Externe link bewerken');
+const title = props.isNew ? $t('%Zzu') : $t('%ZzB');
 
 const { patch, patched, addPatch, hasChanges } = usePatch(props.policy);
 
@@ -126,7 +126,7 @@ async function deleteMe() {
     if (!await CenteredMessage.confirm({
         title: name.value ? $t('%Zn2', { name: name.value }) : $t('Deze link verwijderen?'),
         confirmText: $t('%CJ'),
-        description: $t('De link wordt pas echt verwijderd als je verder gaat en alle wijzigingen opslaat.'),
+        description: $t('%ZyX'),
         availabilityDelay: 2_000,
     })) {
         return;

@@ -127,7 +127,7 @@ function isCheckboxRow(product: Product) {
 
 function formatPriceName(price: ProductPrice) {
     if (price.allowCustomPrice) {
-        return $t('Kies zelf een bedrag');
+        return $t('%Zyy');
     }
     return Formatter.price(price.price);
 }

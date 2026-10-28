@@ -14,7 +14,7 @@
             {{ $t('%14p') }}
         </p>
         <template #right>
-            <span v-if="fixed" v-tooltip="$t('Altijd verplicht')" class="icon lock small gray hover-show" />
+            <span v-if="fixed" v-tooltip="$t('%1Ip')" class="icon lock small gray hover-show" />
             <button v-else type="button" class="hover-show button icon more small" :data-testid="dataTestid ? dataTestid + '-more' : undefined" @click.stop="showContextMenu" />
         </template>
     </STListItem>

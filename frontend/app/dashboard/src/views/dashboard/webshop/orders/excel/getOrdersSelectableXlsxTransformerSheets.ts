@@ -28,7 +28,7 @@ const columnCategories = {
         return $t(`%Sc`);
     },
     get participant() {
-        return $t('Deelnemer');
+        return $t('%Zzm');
     },
     get checkout() {
         return $t(`%Zeq`);

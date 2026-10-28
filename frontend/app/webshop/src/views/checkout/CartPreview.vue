@@ -98,7 +98,7 @@ const title = computed(() => {
         ticket: $t('%YC'),
         tickets: $t('%YD'),
         registration: $t('%ZkZ'),
-        registrations: $t('Jouw inschrijvingen'),
+        registrations: $t('%a0E'),
         order: $t('%Y6'),
     };
     return texts[cartKind.value];

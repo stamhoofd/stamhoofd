@@ -2,7 +2,7 @@
     <div class="st-view webshop-full-preview-view">
         <WebshopDevicePreview v-model:device="device" :webshop="webshop">
             <template #right>
-                <button class="button icon close" type="button" data-testid="close-button" :aria-label="$t('Sluiten')" @click="dismiss()" />
+                <button class="button icon close" type="button" data-testid="close-button" :aria-label="$t('%9b')" @click="dismiss()" />
             </template>
         </WebshopDevicePreview>
     </div>
