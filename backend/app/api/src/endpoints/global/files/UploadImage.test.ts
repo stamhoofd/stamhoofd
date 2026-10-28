@@ -6,6 +6,8 @@ import { Permissions } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import type { IncomingMessage } from 'node:http';
 import { Readable } from 'node:stream';
+// The root pins the same sharp used by models; intercept rendering without allocating large images.
+// eslint-disable-next-line import/no-extraneous-dependencies
 import sharp from 'sharp';
 import { SessionService } from '../../../services/SessionService.js';
 
@@ -117,6 +119,40 @@ describe('Endpoint.UploadImage', () => {
         await expect(testServer.test(endpoint, r)).rejects.toThrow(/pixel limit/i);
         expect(render).not.toHaveBeenCalled();
         expect(uploads).toHaveLength(0);
+    });
+
+    /**
+     * A 1:100 SVG needs a 100,000-pixel height when resized to width 1000,
+     * whether height is omitted or an outside fit supplies a square minimum.
+     * Validate the derived dimensions, not just the requested axes, before any
+     * buffer rendering or storage can occur.
+     */
+    test.each([
+        [{ width: 1000 }],
+        [{ width: 1000, height: 1000, fit: 'outside' }],
+    ])('It bounds aspect-ratio-derived output dimensions (%j)', async (resolution) => {
+        const render = vi.spyOn(sharp.prototype, 'toBuffer').mockRejectedValue(new Error('Rendering was reached'));
+        const r = await buildUploadRequest({
+            filename: 'tall.svg', contentType: 'image/svg+xml', resolutions: [resolution],
+            content: Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="1" height="100"/>'),
+        });
+        await expect(testServer.test(endpoint, r)).rejects.toMatchObject({ code: 'invalid_resolutions' });
+        expect(render).not.toHaveBeenCalled();
+        expect(uploads).toHaveLength(0);
+    });
+
+    /**
+     * Positive controls for the UI's seven cover variants and invoice background.
+     * The small PNG keeps real rendering inexpensive; one returned resolution per
+     * request verifies that valid presets are accepted without dropping variants.
+     */
+    test.each([
+        [[1920, 1280, 960, 700, 600, 300, 100].map(width => ({ width }))],
+        [[{ width: 2480, height: 3508, fit: 'outside' }]],
+    ])('It accepts existing cover and invoice requests (%j)', async (resolutions) => {
+        const r = await buildUploadRequest({ filename: 'logo.png', contentType: 'image/png', content: pngContent, resolutions });
+        const response = await testServer.test(endpoint, r);
+        expect(response.body.resolutions).toHaveLength(resolutions.length);
     });
 
     test('It stores a png, and never stores the original with a content type of the uploader', async () => {

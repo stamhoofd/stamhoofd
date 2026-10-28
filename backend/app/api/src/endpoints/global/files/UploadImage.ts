@@ -114,6 +114,9 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
             maxFileSize: 5 * 1024 * 1024,
             keepExtensions: true,
             maxFiles: 1,
+            // Allow at most one metadata field and bound its size independently of file bytes.
+            maxFields: 1,
+            maxFieldsSize: 16 * 1024,
         });
 
         const [file, resolutions] = await new Promise<[FormidableFile, ResolutionRequest[]]>((resolve, reject) => {
@@ -150,6 +153,7 @@ export class UploadImage extends Endpoint<Params, Query, Body, ResponseBody> {
 
                 try {
                     const resolutions = new ObjectData(JSON.parse(fields.resolutions[0]), { version: request.request.getVersion() }).array(ResolutionRequest as Decoder<ResolutionRequest>);
+                    Image.validateResolutions(resolutions);
                     resolve([files.file[0], resolutions]);
                 } catch (e) {
                     reject(e);
