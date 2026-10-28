@@ -7,7 +7,7 @@
             >
                 <WYSIWYGTextInput
                     :model-value="getForLanguage(language)"
-                    :placeholder="placeholder"
+                    :placeholder="typeof placeholder === 'string' ? placeholder : (language ? placeholder.get(language) : placeholder.toString()) ?? ''"
                     @update:model-value="setForLanguage($event, language)"
                 />
                 <span v-if="language">
@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
-import type { TranslatedRichText } from '@stamhoofd/structures';
+import type { TranslatedRichText, TranslatedString } from '@stamhoofd/structures';
 import { RichText } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import { computed } from 'vue';
@@ -42,7 +42,7 @@ registerTranslateableComponent(value);
 withDefaults(
     defineProps<{
         title: string;
-        placeholder?: string;
+        placeholder?: string | TranslatedString;
     }>(), {
         title: '',
         placeholder: '',
@@ -73,9 +73,16 @@ function setForLanguage(val: RichText, lang: Language | null) {
         return;
     }
 
+    // Remove a cleared language so readers fall back to another language, like TInput does.
+    // The last language is kept, otherwise there would be no editor left.
+    const remove = isEmpty(val) && value.value.languages.length > 1;
     value.value = value.value.patch({
-        [lang]: val,
+        [lang]: remove ? null : val,
     });
+}
+
+function isEmpty(val: RichText) {
+    return val.text === '' && (val.html === '' || val.html === '<p></p>');
 }
 </script>
 

@@ -7,27 +7,13 @@
 <script setup lang="ts">
 import { LanguageHelper, RichText, TranslatedRichText, TranslatedString } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
-import { computed } from 'vue';
 import type { TranslateableValue } from './hooks/useEditorContext';
-import { useEditorLanguage } from './hooks/useEditorLanguage';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
 
 const value = defineModel<TranslateableValue>({ required: true });
-const editorLanguage = useEditorLanguage();
 const { hasLanguages } = useSwitchLanguage();
-const isDefault = computed(() => {
-    return typeof value.value.translations === 'string';
-});
-
-const isMissing = computed(() => {
-    return editorLanguage.value && (!value.value.getIfExists(editorLanguage.value) && value.value.get(editorLanguage.value));
-});
-
-async function showAll() {
-    editorLanguage.value = null;
-}
 
 function untranslated(): TranslateableValue {
     if (value.value instanceof TranslatedRichText) {
@@ -37,15 +23,10 @@ function untranslated(): TranslateableValue {
 }
 
 function withLanguage(lang: Language): TranslateableValue {
+    // On an untranslated value, getIfExists returns the untranslated content and patch converts it into a language map
     const v = value.value;
     if (v instanceof TranslatedRichText) {
-        if (v.isDefault) {
-            return new TranslatedRichText({ [lang]: v.toRichText() });
-        }
         return v.patch({ [lang]: v.getIfExists(lang) ?? RichText.create({}) });
-    }
-    if (v.isDefault) {
-        return new TranslatedString({ [lang]: v.toString() });
     }
     return v.patch({ [lang]: v.getIfExists(lang) ?? '' });
 }
