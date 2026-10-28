@@ -1,4 +1,4 @@
-import { Request } from '@simonbackx/simple-endpoints';
+import { Request } from '@node/endpoints';
 import { OrganizationFactory, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Permissions, PrivateWebshop, WebshopMetaData } from '@stamhoofd/structures';
@@ -19,10 +19,13 @@ describe('Endpoint.CreateWebshop', () => {
         });
     });
 
-    async function createAdminContext() {
+    async function createAdminContext(options?: {
+        isStamhoofd?: boolean;
+    }) {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({
             organization,
+            isStamhoofd: options?.isStamhoofd ?? false,
             permissions: Permissions.create({
                 level: PermissionLevel.Full,
             }),
@@ -95,6 +98,40 @@ describe('Endpoint.CreateWebshop', () => {
 
             expect(response.body.domain).toBe(domain);
             expect(response.body.domainUri).toBe('promo');
+        });
+    });
+
+    function buildRequest(organization: Awaited<ReturnType<typeof createAdminContext>>['organization'], accessToken: string) {
+        const body = PrivateWebshop.create({
+            meta: WebshopMetaData.create({
+                name: 'Test webshop',
+                noServiceFees: true,
+            }),
+        });
+        const request = Request.buildJson('POST', '/webshop', organization.getApiHost(), body);
+        request.headers.authorization = 'Bearer ' + accessToken;
+        return request;
+    }
+
+    describe('meta.noServiceFees', () => {
+        test('is kept when created by a @stamhoofd.be user', async () => {
+            const { organization, token } = await createAdminContext({ isStamhoofd: true });
+
+            const response = await testServer.test(endpoint, buildRequest(organization, token.accessToken));
+            expect(response.body.meta.noServiceFees).toBe(true);
+
+            const reloaded = await Webshop.getByID(response.body.id);
+            expect(reloaded?.meta.noServiceFees).toBe(true);
+        });
+
+        test('is reset when created by a non-@stamhoofd.be user', async () => {
+            const { organization, token } = await createAdminContext();
+
+            const response = await testServer.test(endpoint, buildRequest(organization, token.accessToken));
+            expect(response.body.meta.noServiceFees).toBe(false);
+
+            const reloaded = await Webshop.getByID(response.body.id);
+            expect(reloaded?.meta.noServiceFees).toBe(false);
         });
     });
 });
