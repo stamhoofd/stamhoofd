@@ -545,6 +545,35 @@ test.describe('Webshop bulk ordering @webshop-bulk', () => {
         expect(orders[0].data.totalPrice).toBe(15_0000 - 5_0000);
     });
 
+    test('The order button sticks to the bottom of a small screen once a unit is chosen', async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        const organization = await createOrganization({ modernWebshop: true });
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Bulk sticky ${WorkerData.id}`,
+            orderMode: WebshopOrderMode.Bulk,
+            productCount: 15,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+
+        const flow = new WebshopOrderFlow(page, { orderMode: WebshopOrderMode.Bulk });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+        const orderButton = page.getByTestId('bulk-order-button');
+
+        // Without units the button stays below the long list
+        await expect(flow.bulkAmount('Product 1')).toBeInViewport();
+        await expect(orderButton).not.toBeInViewport();
+
+        // The first unit brings the button within reach, like the cart button of a webshop with a cart
+        await flow.setBulkAmount('Product 1', 1);
+        await expect(flow.bulkAmount('Product 1')).toBeInViewport();
+        await expect(orderButton).toBeInViewport();
+
+        await flow.typeBulkAmount('Product 1', 0);
+        await expect(flow.bulkAmount('Product 1')).toHaveValue('');
+        await expect(orderButton).not.toBeInViewport();
+    });
+
     test('The order mode can be changed in the dashboard', async ({ page }) => {
         const organization = await createOrganization({ modernWebshop: true });
         const { webshop } = await TestWebshops.create({

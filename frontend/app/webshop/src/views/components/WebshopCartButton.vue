@@ -24,15 +24,10 @@ const emit = defineEmits<{
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
+@use "./sticky-button.mixin.scss" as *;
 
 .webshop-cart-button {
-    position: sticky;
-    bottom: 0;
-    z-index: 1;
-    // A margin above the button instead of padding: while it sticks, the content stays visible right up to the button
-    margin-top: 15px;
-    padding: 0 0 calc(15px + var(--st-safe-area-bottom, 0px));
-    background: $color-current-background;
+    @include sticky-button;
 
     > .button {
         // The count gets the same space on both sides of it

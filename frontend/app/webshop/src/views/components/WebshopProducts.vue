@@ -3,7 +3,7 @@
         <template v-if="bulk">
             <BulkProductList :title="listTitle" />
 
-            <div class="style-button-bar">
+            <div class="style-button-bar" :class="{ sticky: hasUnits }">
                 <button type="button" class="button primary full" data-testid="bulk-order-button" @click="emit('startBulkOrder')">
                     <span>{{ orderButtonText }}</span>
                     <span v-if="totalPrice > 0" class="bulk-total">{{ formatPrice(totalPrice) }}</span>
@@ -73,6 +73,8 @@ const emit = defineEmits<{
 
 const bulk = computed(() => props.webshop.orderMode === WebshopOrderMode.Bulk);
 const totalPrice = computed(() => props.checkout.totalPrice);
+// Once a unit is chosen, the order button sticks to the bottom of the screen like the cart button of a webshop with a cart
+const hasUnits = computed(() => props.checkout.cart.count > 0);
 
 const single = computed(() => props.webshop.orderMode === WebshopOrderMode.Single);
 
@@ -93,8 +95,16 @@ const orderButtonText = computed(() => getOrderButtonText(props.webshop, bulk.va
 </script>
 
 <style lang="scss">
-.webshop-products .bulk-total {
-    opacity: 0.7;
-    padding-left: 5px;
+@use "./sticky-button.mixin.scss" as *;
+
+.webshop-products {
+    .style-button-bar.sticky {
+        @include sticky-button;
+    }
+
+    .bulk-total {
+        opacity: 0.7;
+        padding-left: 5px;
+    }
 }
 </style>
