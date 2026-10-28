@@ -3,7 +3,7 @@
         <template v-if="bulk">
             <BulkProductList :title="listTitle" />
 
-            <div class="style-button-bar" :class="{ sticky: hasUnits }">
+            <div class="style-button-bar bulk-order-bar" :class="{ sticky: hasUnits }">
                 <button type="button" class="button primary full" data-testid="bulk-order-button" @click="emit('startBulkOrder')">
                     <span>{{ orderButtonText }}</span>
                     <span v-if="totalPrice > 0" class="bulk-total">{{ formatPrice(totalPrice) }}</span>
@@ -95,11 +95,26 @@ const orderButtonText = computed(() => getOrderButtonText(props.webshop, bulk.va
 </script>
 
 <style lang="scss">
-@use "./sticky-button.mixin.scss" as *;
+@use "@stamhoofd/scss/base/variables.scss" as *;
 
 .webshop-products {
-    .style-button-bar.sticky {
-        @include sticky-button;
+    // Once a unit is chosen, the order button sticks to the bottom of the screen like the cart button of a webshop with a cart.
+    // The space below the stuck button is an overlay instead of padding: the spacing in the page stays the same, so nothing moves when the first unit is chosen.
+    .bulk-order-bar.sticky {
+        position: sticky;
+        bottom: calc(15px + var(--st-safe-area-bottom, 0px));
+        z-index: 1;
+        background: $color-current-background;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            height: calc(15px + var(--st-safe-area-bottom, 0px));
+            background: $color-current-background;
+        }
     }
 
     .bulk-total {

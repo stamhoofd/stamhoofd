@@ -559,15 +559,20 @@ test.describe('Webshop bulk ordering @webshop-bulk', () => {
         const flow = new WebshopOrderFlow(page, { orderMode: WebshopOrderMode.Bulk });
         await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
         const orderButton = page.getByTestId('bulk-order-button');
+        // Position of the platform footer below the button in the page, independent of the scroll position
+        const footerTop = () => page.locator('.webshop-products + div').evaluate(el => el.getBoundingClientRect().top + window.scrollY);
 
         // Without units the button stays below the long list
         await expect(flow.bulkAmount('Product 1')).toBeInViewport();
         await expect(orderButton).not.toBeInViewport();
+        const footerTopWithoutUnits = await footerTop();
 
         // The first unit brings the button within reach, like the cart button of a webshop with a cart
         await flow.setBulkAmount('Product 1', 1);
         await expect(flow.bulkAmount('Product 1')).toBeInViewport();
         await expect(orderButton).toBeInViewport();
+        // Sticking keeps the spacing below the button, so the footer does not move
+        expect(await footerTop()).toBe(footerTopWithoutUnits);
 
         await flow.typeBulkAmount('Product 1', 0);
         await expect(flow.bulkAmount('Product 1')).toHaveValue('');
