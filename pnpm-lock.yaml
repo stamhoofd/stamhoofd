@@ -205,7 +205,7 @@ overrides:
   yargs: 17.7.3
   js-yaml: 4.3.2
   '@colors/colors': 1.6.1
-  '@trapezedev/project': 7.1.10
+  '@trapezedev/project': 7.1.11
   nx>brace-expansion: 5.0.12
   nx>follow-redirects: 1.16.1
   nx>smol-toml: 1.9.0
@@ -1600,8 +1600,8 @@ importers:
         specifier: 8.0.4
         version: 8.0.4(@capacitor/core@8.5.3)
       '@capgo/capacitor-updater':
-        specifier: 8.53.0
-        version: 8.53.0(@capacitor/core@8.5.3)
+        specifier: 8.53.1
+        version: 8.53.1(@capacitor/core@8.5.3)
       '@common/encoding':
         specifier: workspace:*
         version: link:../../../packages/common/encoding
@@ -1673,8 +1673,8 @@ importers:
         specifier: workspace:*
         version: link:../../shared/vite-config
       '@trapezedev/configure':
-        specifier: 7.1.10
-        version: 7.1.10(supports-color@10.2.2)
+        specifier: 7.1.11
+        version: 7.1.11(supports-color@10.2.2)
       eslint-plugin-stamhoofd:
         specifier: workspace:*
         version: link:../../../shared/eslint
@@ -3595,8 +3595,8 @@ packages:
   '@capacitor/synapse@1.0.4':
     resolution: {integrity: sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw==}
 
-  '@capgo/capacitor-updater@8.53.0':
-    resolution: {integrity: sha512-fJfHi/h6AwZLvLrRlztxFUhKt+CDCHiMsRLzuOT0wFUvqP2qIK/B39nMr8xNXuRLzQoQWBkriQJO1ZWzhq3Afg==}
+  '@capgo/capacitor-updater@8.53.1':
+    resolution: {integrity: sha512-aUSFWd75p+b1qo0qHEQVawffifgrgIjvdKEazCIHZVwwK3MNxWUYDU9wkdP51j1VX0cCMMpPiA+j9IX96jZT6g==}
     peerDependencies:
       '@capacitor/core': ^8.0.0
 
@@ -7239,16 +7239,16 @@ packages:
       y-protocols: ^1.0.1
       yjs: ^13.5.38
 
-  '@trapezedev/configure@7.1.10':
-    resolution: {integrity: sha512-VKeQItOO7pPWO5XCLgVlcaguz98ZlBra1DmT9bCr34/JfjjgSvmi07sPwqc3gVZI1t5NYIH85cpWXl41CtetEQ==}
+  '@trapezedev/configure@7.1.11':
+    resolution: {integrity: sha512-xfGIisoAnVSv/3hJn8uCCCn59s8gyR+5Frpp3HXOkqPJ+3mixslWNe1fKmM4She4ih94GGgRjAdg0wRslAfwSA==}
     engines: {node: '>=18'}
     hasBin: true
 
-  '@trapezedev/gradle-parse@7.1.10':
-    resolution: {integrity: sha512-muL6ptcxnqrgrYushL78pLF5GGJSWoo/kk8pb7mQ+Og8eef6zY6XI9iwhVS9bo8yCpuh6EZfq9odKWkGPVB4BQ==}
+  '@trapezedev/gradle-parse@7.1.11':
+    resolution: {integrity: sha512-yOhKGCrrCa2PrqEjwpWHKhlQ0tySDRbNMVTFCPW/KVuH+fQcLBAlkQvbAcGRTTBgwVlQwvWn+tCJGgHueNH/NQ==}
 
-  '@trapezedev/project@7.1.10':
-    resolution: {integrity: sha512-SdmYuV5qCPX+sqOiJ/gIq6dbGav6j/M6OO1F8A6m89hbDi/3FiV1JRnp0FHLqs/wBW2vPHBvts+y7MiHCWuXig==}
+  '@trapezedev/project@7.1.11':
+    resolution: {integrity: sha512-/8aALgJji4gXoILcPxFIQp7x3dDDtoinVseaUf4LdH2QqFSHOqjQ0cJdmfVnJNGCe8ZkMOM30bHAGE4G6LPXGw==}
     engines: {node: '>=18'}
 
   '@tufjs/canonical-json@2.0.0':
@@ -15690,7 +15690,7 @@ snapshots:
       '@capacitor/cli': 5.7.8(supports-color@10.2.2)
       '@ionic/utils-array': 2.1.6(supports-color@10.2.2)
       '@ionic/utils-fs': 3.1.7(supports-color@10.2.2)
-      '@trapezedev/project': 7.1.10(supports-color@10.2.2)
+      '@trapezedev/project': 7.1.11(supports-color@10.2.2)
       commander: 8.3.0
       debug: 4.3.4(supports-color@10.2.2)
       fs-extra: 10.1.0
@@ -15788,7 +15788,7 @@ snapshots:
 
   '@capacitor/synapse@1.0.4': {}
 
-  '@capgo/capacitor-updater@8.53.0(@capacitor/core@8.5.3)':
+  '@capgo/capacitor-updater@8.53.1(@capacitor/core@8.5.3)':
     dependencies:
       '@capacitor/core': 8.5.3
 
@@ -19745,12 +19745,12 @@ snapshots:
       y-protocols: 1.0.7(yjs@13.6.32)
       yjs: 13.6.32
 
-  '@trapezedev/configure@7.1.10(supports-color@10.2.2)':
+  '@trapezedev/configure@7.1.11(supports-color@10.2.2)':
     dependencies:
       '@ionic/cli-framework-output': 2.2.8(supports-color@10.2.2)
       '@ionic/utils-fs': 3.1.7(supports-color@10.2.2)
       '@ionic/utils-terminal': 2.3.5(supports-color@10.2.2)
-      '@trapezedev/project': 7.1.10(supports-color@10.2.2)
+      '@trapezedev/project': 7.1.11(supports-color@10.2.2)
       commander: 8.3.0
       kleur: 4.1.5
       lodash: 4.18.1
@@ -19760,14 +19760,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@trapezedev/gradle-parse@7.1.10': {}
+  '@trapezedev/gradle-parse@7.1.11': {}
 
-  '@trapezedev/project@7.1.10(supports-color@10.2.2)':
+  '@trapezedev/project@7.1.11(supports-color@10.2.2)':
     dependencies:
       '@ionic/utils-fs': 3.1.7(supports-color@10.2.2)
       '@ionic/utils-subprocess': 2.1.14(supports-color@10.2.2)
       '@prettier/plugin-xml': 2.2.0
-      '@trapezedev/gradle-parse': 7.1.10
+      '@trapezedev/gradle-parse': 7.1.11
       '@xmldom/xmldom': 0.9.12
       cross-spawn: 7.0.6
       diff: 5.2.2
