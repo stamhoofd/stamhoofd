@@ -66,7 +66,8 @@ export class SearchOrganizationEndpoint extends Endpoint<Params, Query, Body, Re
         // if the limit is reached it is possible that organizations where the name starts with the query are missing -> fetch them and add them at the start
         if (organizations.length === limit) {
             const organizationsStartingWith = await Organization.select()
-                .where(new SQLWhereLike(SQL.column(Organization.table, 'name'), scalarToSQLExpression(`${query}%`)))
+                .where('active', true)
+                .where(new SQLWhereLike(SQL.column(Organization.table, 'name'), scalarToSQLExpression(`${SQLWhereLike.escape(query)}%`)))
                 // order by relevance
                 .orderBy(whereMatch, 'DESC')
                 .limit(limit).fetch();
