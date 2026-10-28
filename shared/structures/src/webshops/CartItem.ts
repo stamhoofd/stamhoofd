@@ -166,13 +166,13 @@ export class CartItem extends AutoEncoder implements ObjectWithRecords {
     /**
      * Only set when `product.enableCustomer`. Such items always have amount 1.
      */
-    @field({ decoder: Customer, nullable: true, ...NextVersion })
+    @field({ decoder: Customer, nullable: true, version: 425 })
     customer: Customer | null = null;
 
     /**
      * Answers for `product.customerSettings.recordCategory`
      */
-    @field({ decoder: RecordAnswerMapDecoder, ...NextVersion })
+    @field({ decoder: RecordAnswerMapDecoder, version: 425 })
     recordAnswers: Map<string, RecordAnswer> = new Map();
 
     /**

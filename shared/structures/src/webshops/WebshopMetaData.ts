@@ -741,7 +741,7 @@ export class WebshopMetaData extends AutoEncoder {
      * Split layout only: the title above the ordering part next to the content.
      * Empty = the default title, which depends on what the webshop sells (e.g. 'Tickets').
      */
-    @field({ decoder: StringDecoder, ...NextVersion })
+    @field({ decoder: StringDecoder, version: 425 })
     orderTitle = '';
 
     @field({ decoder: new EnumDecoder(DarkMode), version: 182 })

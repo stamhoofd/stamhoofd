@@ -526,7 +526,7 @@ export class PlatformConfig extends AutoEncoder {
         LoginMethodConfig.create({}),
     ]]);
 
-    @field({ decoder: BooleanDecoder, optional: true, ...NextVersion })
+    @field({ decoder: BooleanDecoder, optional: true, version: 425 })
     onlyAdminCanChangeOrganizationName = false;
 
     getEmailReplacements(platform: { privateConfig: PlatformPrivateConfig | null }, isPreviewing = false) {
