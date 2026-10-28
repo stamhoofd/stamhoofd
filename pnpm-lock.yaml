@@ -977,13 +977,13 @@ importers:
 
   backend/shared/i18n:
     dependencies:
+      '@node/endpoints':
+        specifier: workspace:*
+        version: link:../../../packages/node/endpoints
       '@node/logging':
         specifier: workspace:*
         version: link:../../../packages/node/logging
     devDependencies:
-      '@node/endpoints':
-        specifier: workspace:*
-        version: link:../../../packages/node/endpoints
       '@stamhoofd/locales':
         specifier: workspace:*
         version: link:../../../shared/locales
