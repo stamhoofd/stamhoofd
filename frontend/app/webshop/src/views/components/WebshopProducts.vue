@@ -1,7 +1,7 @@
 <template>
     <div class="webshop-products container">
         <template v-if="bulk">
-            <BulkProductList :hide-title="hideListTitle" />
+            <BulkProductList :title="listTitle" />
 
             <div class="style-button-bar">
                 <button type="button" class="button primary full" data-testid="bulk-order-button" @click="emit('startBulkOrder')">
@@ -12,7 +12,7 @@
             </div>
         </template>
         <template v-else-if="single">
-            <SingleProductList v-if="products.length > 1" v-model="selectedProductId" :webshop="webshop" :cart="checkout.cart" :hide-title="hideListTitle" />
+            <SingleProductList v-if="products.length > 1" v-model="selectedProductId" :webshop="webshop" :cart="checkout.cart" :title="listTitle" />
 
             <div class="style-button-bar">
                 <button type="button" class="button primary full" data-testid="single-order-button" @click="openSelectedProduct">
@@ -23,7 +23,12 @@
         </template>
         <div v-else class="products">
             <CategoryBox v-for="(category, index) in categories" :key="category.id" :category="category" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :is-last="index === categories.length - 1" />
-            <ProductGrid v-if="categories.length === 0" :products="products" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" />
+            <div v-if="categories.length === 0" class="container">
+                <h2 v-if="listTitle" class="larger">
+                    {{ listTitle }}
+                </h2>
+                <ProductGrid :products="products" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" />
+            </div>
         </div>
     </div>
 </template>
@@ -51,9 +56,9 @@ const props = defineProps<{
     products: Product[];
     categories: Category[];
     /**
-     * Bulk and single mode: hides the title of a list without categories, e.g. when it follows the title of the webshop
+     * The title above the products when there are no categories (empty: no title)
      */
-    hideListTitle?: boolean;
+    listTitle?: string;
     saveHandler: (
         newItem: CartItem,
         oldItem: CartItem | null,

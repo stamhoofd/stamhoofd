@@ -509,11 +509,14 @@ test.describe('Modern webshop view @webshop-modern', () => {
         const column = page.locator('.preview-panel-column');
         await expect(column.getByTestId('product-box')).toHaveCount(2, { timeout: 15000 });
         await expect(page.locator('.modern-webshop-view').getByText('Alle info over deze actie')).toBeVisible();
+        // Without a custom title: the default title for what the webshop sells
+        await expect(column.getByRole('heading', { level: 2, name: 'Artikelen' })).toBeVisible();
 
         // On small screens the products move below the content
         await page.setViewportSize({ width: 390, height: 844 });
         await expect(column).toBeHidden();
         await expect(page.locator('.modern-webshop-view').getByTestId('product-box')).toHaveCount(2);
+        await expect(page.getByRole('heading', { level: 2, name: 'Artikelen' })).toHaveCount(0);
     });
 
     test('Shows the product form next to the description in the split layout', async ({ page }) => {
@@ -527,6 +530,7 @@ test.describe('Modern webshop view @webshop-modern', () => {
             paymentMethods: [PaymentMethod.PointOfSale],
         });
         webshop.meta.layout = WebshopLayout.Split;
+        webshop.meta.orderTitle = 'Koop hier je ticket';
         webshop.meta.description = RichText.create({ text: 'Alle info over deze actie', html: '<p>Alle info over deze actie</p>' });
         await webshop.save();
 
@@ -534,6 +538,12 @@ test.describe('Modern webshop view @webshop-modern', () => {
         await expect(page.locator('.preview-panel-column').getByTestId('cart-item-view')).toBeVisible({ timeout: 15000 });
         await expect(page.getByTestId('single-order-button')).toHaveCount(0);
         await expect(page.locator('.modern-webshop-view').getByText('Alle info over deze actie')).toBeVisible();
+        await expect(page.locator('.preview-panel-column').getByRole('heading', { level: 2, name: 'Koop hier je ticket' })).toBeVisible();
+
+        // Below the content, the form follows the title of the webshop without a title of its own
+        await page.setViewportSize({ width: 390, height: 844 });
+        await expect(page.getByTestId('cart-item-view')).toBeVisible();
+        await expect(page.getByRole('heading', { level: 2, name: 'Koop hier je ticket' })).toHaveCount(0);
     });
 
     test('Keeps the order button below the description in the stacked layout', async ({ page }) => {
@@ -573,6 +583,9 @@ test.describe('Modern webshop view @webshop-modern', () => {
         await expect(view.getByTestId('cart-item-view')).toBeVisible({ timeout: 15000 });
         await expect(view.getByText('Alle info over deze actie')).toBeVisible();
         await expect(page.getByTestId('single-order-button')).toHaveCount(0);
+
+        // Below the content, the form has no title of its own
+        await expect(view.getByTestId('cart-item-view').getByRole('heading', { level: 2, name: 'Product 1' })).toHaveCount(0);
     });
 
     test('Shows an order button when the single product has a photo', async ({ page }) => {

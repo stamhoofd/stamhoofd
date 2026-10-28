@@ -1,6 +1,7 @@
 import type { Decoder } from '@common/encoding';
 import { ObjectData } from '@common/encoding';
 import { Version, Webshop } from '@stamhoofd/structures';
+import { Language } from '@stamhoofd/types/Language';
 
 /**
  * The dashboard shows the real webshop in an iframe as a preview, with the settings that are not saved yet.
@@ -11,6 +12,34 @@ export const webshopPreviewParameter = 'stamhoofd-preview';
 
 const readyType = 'stamhoofd-webshop-preview-ready';
 const updateType = 'stamhoofd-webshop-preview-update';
+
+/**
+ * The webshop only loads its language when it opens, so the language is part of the url of the preview: the preview
+ * opens again when the default language changes. Empty for a webshop without default language.
+ */
+const languageParameter = 'stamhoofd-preview-language';
+
+export function getWebshopPreviewUrl(webshopUrl: string, webshop: Webshop) {
+    const search = new URLSearchParams({
+        [webshopPreviewParameter]: '',
+        [languageParameter]: webshop.meta.defaultLanguage ?? '',
+    });
+    return 'https://' + webshopUrl + '?' + search.toString();
+}
+
+/**
+ * The default language of the webshop in the preview, which might not be saved yet
+ */
+export function getWebshopPreviewLanguage(search: URLSearchParams, savedLanguage: Language | null): Language | null {
+    const language = search.get(languageParameter);
+    if (language === null) {
+        return savedLanguage;
+    }
+    if (language === '') {
+        return null;
+    }
+    return Object.values(Language).includes(language as Language) ? language as Language : savedLanguage;
+}
 
 /**
  * Only the dashboard can send a webshop to a preview

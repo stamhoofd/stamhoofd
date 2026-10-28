@@ -12,11 +12,11 @@ export function getWebshopIdentity(organization: Organization, webshop?: Webshop
 }
 
 /**
- * The square logo of the webshop, or of the organization when the webshop has no logo of its own.
- * A webshop with only a horizontal logo has no square logo: the organization's would show a different identity.
+ * The square logo of the webshop, or of the organization when the webshop uses the organization logo.
+ * A webshop with its own identity never falls back to the organization logo, even when it has no square logo.
  */
 export function getWebshopSquareLogo(organization: Organization, webshop?: Webshop | null): { logo: Image; logoDark: Image | null } | null {
-    const metaData = webshop?.meta.useLogo && (webshop.meta.squareLogo || webshop.meta.horizontalLogo) ? webshop.meta : organization.meta;
+    const metaData = getWebshopIdentity(organization, webshop).metaData;
     if (!metaData.squareLogo) {
         return null;
     }

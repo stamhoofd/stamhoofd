@@ -3,7 +3,7 @@
         <SaveView :title="viewTitle" :loading="saving" :disabled="!hasChanges" @save="save">
             <!-- The preview only fits next to the settings on large screens -->
             <template v-if="showPreview && !previewWide" #navigation-buttons>
-                <button v-tooltip="$t('%jH')" class="button icon eye" type="button" data-testid="webshop-preview-button" @click="openPreview" />
+                <button v-tooltip="$t('%jH')" class="button icon eye" type="button" data-testid="webshop-preview-button" @click="openPreview()" />
             </template>
             <h1 class="larger">
                 {{ viewTitle }}
@@ -99,7 +99,7 @@
 
 <script lang="ts" setup>
 import type { AutoEncoderPatchType } from '@common/encoding';
-import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
+import { usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { useFeatureFlagComputed } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import PreviewPanel from '@stamhoofd/components/layout/PreviewPanel.vue';
@@ -112,8 +112,8 @@ import ProductRow from './products/ProductRow.vue';
 import { getSingleFormProduct } from './singleForm';
 import type { UseEditWebshopProps } from './useEditWebshop';
 import { useEditWebshop } from './useEditWebshop';
+import { useWebshopPreview } from './useWebshopPreview';
 import WebshopPreviewCard from './WebshopPreviewCard.vue';
-import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { computed, ref } from 'vue';
 
 const props = defineProps<UseEditWebshopProps>();
@@ -145,22 +145,8 @@ const isTickets = computed(() => webshop.value.meta.ticketType === WebshopTicket
 
 const modernWebshopEnabled = useFeatureFlagComputed('modern-webshop');
 
-// Not in the app: the webshop in the preview only talks to the dashboard on the web
-const showPreview = computed(() => modernWebshopEnabled.value && !AppManager.shared.isNative);
+const { showPreview, openPreview } = useWebshopPreview(webshop);
 const previewWide = ref(false);
-
-function openPreview() {
-    present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: AsyncComponent(() => import('./WebshopFullPreviewView.vue'), {
-                    webshop: webshop.value,
-                }),
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-    }).catch(console.error);
-}
 
 function setOrderMode(orderMode: WebshopOrderMode) {
     addPatch(PrivateWebshop.patch({ meta: WebshopMetaData.patch({ orderMode }) }));

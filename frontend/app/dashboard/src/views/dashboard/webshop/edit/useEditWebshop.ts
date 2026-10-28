@@ -9,7 +9,7 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { PrivateWebshop, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
+import { DarkMode, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopTicketType } from '@stamhoofd/structures';
 import type { Ref } from 'vue';
 import { computed, readonly, ref } from 'vue';
 import { WebshopManager } from '../WebshopManager';
@@ -36,7 +36,11 @@ export function useEditWebshop({ validate, afterSave, shouldDismiss, getProps }:
     const isNew = computed(() => webshopManager.value === undefined);
     const saving = ref(false);
 
-    const originalWebshop: PrivateWebshop = getProps().webshopManager?.webshop ?? getProps().initialWebshop ?? PrivateWebshop.create({});
+    const originalWebshop: PrivateWebshop = getProps().webshopManager?.webshop ?? getProps().initialWebshop ?? PrivateWebshop.create({
+        meta: WebshopMetaData.create({
+            darkMode: DarkMode.Auto,
+        }),
+    });
     const { patched: webshop, patch, addPatch, hasChanges, reset } = usePatch(originalWebshop);
 
     async function save() {

@@ -310,21 +310,6 @@
                         </template>
                     </STListItem>
 
-                    <STListItem v-if="webshopManager.preview.meta.type === WebshopType.Donations || webshopManager.preview.meta.crowdfunding" :selectable="true" class="left-center" @click="$navigate(Routes.EditCrowdfunding)">
-                        <template #left>
-                            <img src="@stamhoofd/assets/images/illustrations/credits.svg">
-                        </template>
-                        <h2 class="style-title-list">
-                            {{ $t('%Zkb') }}
-                        </h2>
-                        <p class="style-description">
-                            {{ $t('%Zkn') }}
-                        </p>
-                        <template #right>
-                            <span class="icon arrow-right-small gray" />
-                        </template>
-                    </STListItem>
-
                     <STListItem :selectable="true" class="left-center" @click="$navigate(Routes.EditLink)">
                         <template #left>
                             <img src="@stamhoofd/assets/images/illustrations/compass.svg">
@@ -528,7 +513,6 @@ enum Routes {
     Statistics = 'statistieken',
     EditGeneral = 'algemeen',
     EditPage = 'vormgeving',
-    EditCrowdfunding = 'crowdfunding',
     EditLink = 'link',
     EditProducts = 'artikels',
     EditDiscounts = 'kortingen',
@@ -585,13 +569,6 @@ defineRoute({
 defineRoute({
     url: Routes.EditPage,
     component: async () => (await import('./edit/EditWebshopPageView.vue')).default,
-    defaultProperties: loadWebshopProperties,
-});
-
-defineRoute({
-    url: Routes.EditCrowdfunding,
-    present: 'popup',
-    component: async () => (await import('./edit/EditWebshopCrowdfundingView.vue')).default,
     defaultProperties: loadWebshopProperties,
 });
 
@@ -1002,7 +979,7 @@ const todoList = computed(() => {
             icon: 'partially',
             title: $t('%Zkf'),
             description: $t('%ZkY'),
-            action: () => $navigate(Routes.EditCrowdfunding),
+            action: () => $navigate(Routes.EditPage),
             done: !!webshop.value?.meta.crowdfunding,
         });
     }

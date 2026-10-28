@@ -52,4 +52,10 @@ const platform = usePlatform();
         }
     }
 }
+
+// The cart button and the ordering part below the content already end with 15px spacing: the badge stays as close to the button as next to the content
+.webshop-cart-button + .stamhoofd-badge,
+.modern-webshop-view > main > :is(.webshop-products, .cart-item-view) + .stamhoofd-badge {
+    padding-top: 0;
+}
 </style>

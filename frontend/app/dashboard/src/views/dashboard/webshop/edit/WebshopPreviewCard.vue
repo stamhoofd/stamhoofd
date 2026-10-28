@@ -1,58 +1,41 @@
 <template>
-    <STInputBox :title="$t('Voorbeeld op smartphone')" class="max webshop-preview-card">
+    <WebshopDevicePreview v-model:device="device" class="webshop-preview-card" :webshop="webshop">
         <template #right>
-            <button class="button text" type="button" data-testid="webshop-full-preview-button" @click="openFullPreview">
-                <span class="icon eye" />
-                <span>{{ $t('Groot voorbeeld') }}</span>
-            </button>
+            <button v-tooltip="$t('Volledig scherm')" class="button icon fullscreen" type="button" data-testid="webshop-full-preview-button" @click="openPreview(device)" />
         </template>
-
-        <STCard>
-            <WebshopPreviewFrame :webshop="webshop" />
-        </STCard>
-    </STInputBox>
+    </WebshopDevicePreview>
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
-import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
-import STCard from '@stamhoofd/components/layout/STCard.vue';
 import type { Webshop } from '@stamhoofd/structures';
-import WebshopPreviewFrame from './WebshopPreviewFrame.vue';
+import { toRef } from 'vue';
+import { useWebshopPreview } from './useWebshopPreview';
+import WebshopDevicePreview from './WebshopDevicePreview.vue';
 
 /**
- * The webshop as visitors see it on their phone, next to the settings that change it
+ * The webshop as visitors see it, next to the settings that change it (in the preview slot of a PreviewPanel)
  */
 const props = defineProps<{
     webshop: Webshop;
 }>();
 
-const present = usePresent();
-
-function openFullPreview() {
-    present({
-        components: [
-            new ComponentWithProperties(NavigationController, {
-                root: AsyncComponent(() => import('./WebshopFullPreviewView.vue'), {
-                    webshop: props.webshop,
-                }),
-            }),
-        ],
-        modalDisplayStyle: 'popup',
-    }).catch(console.error);
-}
+const device = defineModel<'laptop' | 'smartphone'>('device', { default: 'smartphone' });
+const { openPreview } = useWebshopPreview(toRef(props, 'webshop'));
 </script>
 
 <style lang="scss">
-.webshop-preview-card .st-card {
-    // The webshop runs from edge to edge of the card
-    padding: 0;
-
-    .st-card-body > .webshop-preview-frame {
-        // The screen of a phone, within the column of the preview
-        height: max(480px, calc(100vh - 220px));
-        height: max(480px, calc(100dvh - 220px));
+.preview-panel:has(.webshop-preview-card) {
+    // Room for the smartphone and the controls of the preview, once the settings keep enough room themselves
+    @media (min-width: 1400px) {
+        --preview-panel-width: 520px;
     }
+}
+
+.webshop-preview-card {
+    // Directly below the controls instead of centered in the column
+    --webshop-device-preview-margin-top: 0px;
+
+    // Fills the column of the preview panel without scrolling it: the height and padding of that column (see PreviewPanel.vue)
+    height: max(480px, calc(var(--vh, 1vh) * 100 - 2 * var(--st-vertical-padding, 20px) - var(--st-safe-area-top, 0px) - var(--st-safe-area-bottom, 0px)));
 }
 </style>

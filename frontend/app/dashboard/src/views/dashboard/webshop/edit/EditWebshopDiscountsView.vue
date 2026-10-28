@@ -3,7 +3,8 @@
         <h1>{{ viewTitle }}</h1>
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <hr><h2>{{ $t('%QJ') }}</h2>
+        <hr>
+        <h2>{{ $t('%QJ') }}</h2>
         <p>{{ $t('%QK') }}</p>
 
         <STList v-if="defaultDiscounts.length">
@@ -35,10 +36,6 @@
             <div>{{ $t('%QM') }}</div>
         </h2>
         <p>{{ $t('%Zv6') }} <a class="inline-link" :href="$domains.getDocs('persoonlijke-kortingscodes')" target="_blank">{{ $t('%19t') }}</a></p>
-
-        <div v-if="webshop.canEnableCart && !webshop.shouldEnableCart" class="warning-box">
-            <p>{{ $t('%Zy0') }}</p>
-        </div>
 
         <STList>
             <STListItem :selectable="true" element-name="label">

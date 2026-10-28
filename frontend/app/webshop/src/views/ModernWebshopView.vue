@@ -38,8 +38,8 @@
                 </div>
 
                 <template v-if="!showPreview">
-                    <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" :show-title="showOrderTitleBelowContent" />
-                    <WebshopProducts v-else-if="canOrder" :webshop="webshop" :hide-list-title="!showOrderTitleBelowContent" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
+                    <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" />
+                    <WebshopProducts v-else-if="canOrder" :webshop="webshop" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
                     <WebshopCartButton v-if="showCartButton" :count="cartCount" @open="showCart().catch(console.error)" />
                     <WebshopPlatformFooter />
                 </template>
@@ -52,9 +52,9 @@
 
         <!-- Ordering happens next to the content (below it on small screens) -->
         <template v-if="showPreview" #preview>
-            <!-- Below the content (not wide), the titles behave like in the stacked layout -->
-            <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" :show-title="previewWide || showOrderTitleBelowContent" />
-            <WebshopProducts v-else :webshop="webshop" :hide-list-title="!previewWide && !showOrderTitleBelowContent" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
+            <!-- Only next to the content (wide) the ordering part gets a title: below the content it follows the title of the webshop -->
+            <CartItemView v-if="embeddedCartItem" :key="embeddedCartItem.id" :cart-item="embeddedCartItem" :old-item="embeddedCartItem" :checkout="checkout" :webshop="webshop" :save-handler="onAddEmbeddedItem" :live-save-handler="saveLiveCartItem" :embedded="true" :title="previewWide ? (webshop.meta.orderTitle || embeddedCartItem.product.name) : ''" />
+            <WebshopProducts v-else :webshop="webshop" :list-title="previewWide ? orderListTitle : ''" :checkout="checkout" :products="products" :categories="categories" :save-handler="onAddItem" @click="hideCartToast" @open-single-product="openSingleProduct" @start-bulk-order="startBulkOrder" />
             <WebshopCartButton v-if="showCartButton" :count="cartCount" @open="showCart().catch(console.error)" />
             <WebshopPlatformFooter />
         </template>
@@ -68,6 +68,7 @@ import { ComponentWithProperties, NavigationController, ReactiveUrl, useNavigati
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import { injectCustomCode } from '@stamhoofd/components/helpers/injectCustomCode.ts';
 import { MetaKey, useMetaInfo } from '@stamhoofd/components/helpers/useMetaInfo.ts';
+import { getProductListTitle } from '@stamhoofd/components/helpers/webshopWording.ts';
 import PreviewOutlet from '@stamhoofd/components/layout/PreviewOutlet.vue';
 import PreviewPanel from '@stamhoofd/components/layout/PreviewPanel.vue';
 import LegalFooter from '@stamhoofd/components/navigation/LegalFooter.vue';
@@ -308,12 +309,8 @@ const products = computed(() => getVisibleProducts(webshop.value));
 // Check the text: a description that was cleared in the editor still has html like <p></p>
 const hasDescription = computed(() => webshop.value.meta.description.text.trim().length > 0);
 
-/**
- * Below the content, the ordering part (a list or the form) only gets its own title when a description separates it
- * from the title of the webshop. Without a title, the name of the webshop already says what to order (e.g. 'Koop hier je tickets').
- * Next to the content, the ordering part always has a title.
- */
-const showOrderTitleBelowContent = computed(() => !!webshop.value.meta.title && hasDescription.value);
+// Next to the content, above the products. The embedded form defaults to the name of the product instead
+const orderListTitle = computed(() => webshop.value.meta.orderTitle || getProductListTitle(webshop.value));
 
 /**
  * Single mode with one product: the order form is shown on the page itself instead of an order button.
@@ -602,6 +599,15 @@ async function resumeStep(destination: string, animated = true) {
         padding-bottom: 10px;
     }
 
+    > main > .legal-footer {
+        padding-top: 30px;
+    }
+
+    // Without a cover photo, the title would touch the bar: same spacing as the top of the column next to the content
+    > main > .content:first-child {
+        padding-top: 20px;
+    }
+
     // Right below the title (nothing else in the content): the extra space that separates the ordering part from a description is not needed
     > main > .content:has(> h1:only-child) {
         + .webshop-products, + .cart-item-view, + .preview-outlet > .preview-panel-preview {
@@ -618,6 +624,8 @@ async function resumeStep(destination: string, animated = true) {
 
 .modern-webshop-view .preview-outlet > .preview-panel-preview {
     padding-top: 30px;
+    // The legal footer follows with its own spacing, like in the stacked layout
+    padding-bottom: 0;
     background: $color-background;
     --color-current-background: #{$color-background};
     --color-current-background-shade: #{$color-background-shade};

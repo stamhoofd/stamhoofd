@@ -1,9 +1,9 @@
 <template>
-    <Sortable v-if="draggable" :list="listModel" :item-key="itemKey" tag="div" class="st-list" :class="{'is-dragging': isDrag}" :options="options" @start="onStart" @end="onEnd" @update="onUpdate">
+    <SortableList v-if="draggable" :list="listModel" :item-key="itemKey" tag="div" class="st-list" :class="{'is-dragging': isDrag}" :options="options" @start="onStart" @end="onEnd" @update="onUpdate">
         <template #item="{element, index}">
             <slot name="item" v-bind="{item: element as T, index}" />
         </template>
-    </Sortable>
+    </SortableList>
     <TransitionGroup v-else-if="withAnimation" tag="div" name="list" class="st-list">
         <slot />
     </TransitionGroup>
@@ -13,8 +13,9 @@
 </template>
 
 <script setup lang="ts" generic="T">
+import Sortable from 'sortablejs';
 import type { SortableEvent, SortableOptions } from 'sortablejs';
-import { Sortable } from 'sortablejs-vue3';
+import { Sortable as SortableList } from 'sortablejs-vue3';
 import { computed, nextTick, ref } from 'vue';
 
 const props = withDefaults(
@@ -49,9 +50,25 @@ const options = computed<SortableOptions>(() => {
 
 const isDrag = ref(false);
 
-const onStart = () => {
+const onStart = ({ item }: SortableEvent) => {
     isDrag.value = true;
+    alignGhost(item);
 };
+
+/**
+ * Sortable places the fallback ghost with position: fixed inside the list and only corrects for transformed ancestors.
+ * An ancestor with `contain` (such as .st-view) also becomes its containing block, which offsets the ghost by that ancestor's position.
+ */
+function alignGhost(item: HTMLElement) {
+    const ghost = Sortable.ghost;
+    if (!ghost) {
+        return;
+    }
+    const ghostRect = ghost.getBoundingClientRect();
+    const itemRect = item.getBoundingClientRect();
+    ghost.style.left = `${parseFloat(ghost.style.left) + itemRect.left - ghostRect.left}px`;
+    ghost.style.top = `${parseFloat(ghost.style.top) + itemRect.top - ghostRect.top}px`;
+}
 const onEnd = () => {
     isDrag.value = false;
 };

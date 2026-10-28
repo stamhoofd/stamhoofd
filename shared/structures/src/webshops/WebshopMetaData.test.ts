@@ -40,6 +40,20 @@ describe('WebshopMetaData.customerSettings 418 <-> 419', () => {
         expect(meta.customerSettings.email).toBe(Required);
     });
 
+    it('keeps asking the phone number in older data without settings', () => {
+        const meta = decode({}, 423);
+
+        expect(meta.customerSettings.phone).toBe(Required);
+        expect(meta.customerSettings.name).toBe(Required);
+        expect(meta.customerSettings.email).toBe(Required);
+    });
+
+    it('does not ask the phone number in 424 data without settings', () => {
+        const meta = decode({}, 424);
+
+        expect(meta.customerSettings.phone).toBe(Disabled);
+    });
+
     describe('upgrade: 418 -> 419', () => {
         it('builds the settings from the flags', () => {
             const meta = decode({ phoneEnabled: false, birthDayEnabled: true, addressEnabled: false, genderEnabled: true }, oldVersion);

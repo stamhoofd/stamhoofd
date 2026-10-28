@@ -51,13 +51,14 @@ import { canOrderProduct, getProductListDescription, getProductListGroups, useSh
 const props = defineProps<{
     webshop: Webshop;
     cart: Cart;
-    hideTitle?: boolean;
+    // Above products without a category (empty: no title)
+    title?: string;
 }>();
 
 /** The id of the chosen product */
 const model = defineModel<string | null>({ required: true });
 
-const groups = computed(() => getProductListGroups(props.webshop, { hideTitle: props.hideTitle }));
+const groups = computed(() => getProductListGroups(props.webshop, { title: props.title }));
 const showProductInfo = useShowProductInfo();
 
 // The price is chosen in the next step: show the range of prices of the product
