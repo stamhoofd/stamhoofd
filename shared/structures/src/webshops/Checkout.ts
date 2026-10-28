@@ -50,7 +50,7 @@ export class Checkout extends AutoEncoder implements ObjectWithRecords {
      * Cart item whose participant is also the contact person of the order. The details collected for that
      * participant are copied to `customer` instead of asking them again (see `customerFieldsFromCartItem`).
      */
-    @field({ decoder: StringDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: StringDecoder, nullable: true, version: 425 })
     customerCartItemId: string | null = null;
 
     @field({ decoder: new ArrayDecoder(WebshopFieldAnswer), version: 94 })

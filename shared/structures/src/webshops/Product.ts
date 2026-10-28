@@ -284,13 +284,13 @@ export class Product extends AutoEncoder {
     /**
      * Collect customer details for every cart item of this product. Forces amount 1 per cart item.
      */
-    @field({ decoder: BooleanDecoder, ...NextVersion })
+    @field({ decoder: BooleanDecoder, version: 425 })
     enableCustomer = false;
 
     /**
      * null = default settings (only the name is asked)
      */
-    @field({ decoder: CustomerSettings, nullable: true, ...NextVersion })
+    @field({ decoder: CustomerSettings, nullable: true, version: 425 })
     customerSettings: CustomerSettings | null = null;
 
     get resolvedCustomerSettings(): CustomerSettings {
