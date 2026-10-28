@@ -1,9 +1,10 @@
 import type { Decoder } from '@common/encoding';
 import { ColorHelper } from '@stamhoofd/components/ColorHelper.ts';
 import { setFavicon } from '@stamhoofd/components/helpers/favicon.ts';
+import { forceWebshopOpenForPreview } from '@stamhoofd/components/webshops/webshopPreview.ts';
 import { NetworkManager } from '@stamhoofd/networking/NetworkManager';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
-import type { Platform} from '@stamhoofd/structures';
+import type { Platform } from '@stamhoofd/structures';
 import { DarkMode, Webshop } from '@stamhoofd/structures';
 
 /**
@@ -19,12 +20,13 @@ export class WebshopManager {
     }
 
     /**
-     * Shown as a preview in the dashboard: the webshop comes from the dashboard and nothing can be ordered
+     * Shown as a preview in the dashboard: the webshop comes from the dashboard, is always shown as open and nothing
+     * can be ordered
      */
     preview: boolean;
 
     constructor($context: SessionContext, platform: Platform, webshop: Webshop, { preview = false }: { preview?: boolean } = {}) {
-        this.webshop = webshop;
+        this.webshop = preview ? forceWebshopOpenForPreview(webshop) : webshop;
         this.$context = $context;
         this.platform = platform;
         this.preview = preview;
@@ -37,18 +39,16 @@ export class WebshopManager {
      * Preview: the webshop with the settings in the dashboard that are not saved yet
      */
     setPreviewWebshop(webshop: Webshop) {
-        this.webshop = webshop;
+        this.webshop = forceWebshopOpenForPreview(webshop);
         this.applyTheme();
     }
 
     private applyTheme() {
         if (this.webshop.meta.color) {
             ColorHelper.setColor(this.webshop.meta.color);
-        }
-        else if (this.$context.organization?.meta.color) {
+        } else if (this.$context.organization?.meta.color) {
             ColorHelper.setColor(this.$context.organization?.meta.color);
-        }
-        else {
+        } else {
             if (this.platform.config.color) {
                 ColorHelper.setColor(this.platform.config.color);
             }
