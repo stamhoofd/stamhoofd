@@ -115,6 +115,10 @@
             {{ $t('%15o') }}
         </Checkbox>
 
+        <Checkbox v-if="!!STAMHOOFD.domains.webshop" :model-value="getFeatureFlag('modern-webshop')" @update:model-value="setFeatureFlag('modern-webshop', !!$event)">
+            {{ $t('%ZzT') }}
+        </Checkbox>
+
         <Checkbox :model-value="getFeatureFlag('notifications')" @update:model-value="setFeatureFlag('notifications', !!$event)">
             {{ $t('%Zta') }}
         </Checkbox>
