@@ -124,7 +124,6 @@
         "@types/luxon": "3.7.6",
         "@types/mailparser": "3.9.0",
         "@types/node": "22.20.4",
-        "@types/uuid": "8.3.4",
         "nock": "14.0.17",
         "qs": "6.16.1",
         "sinon": "18.0.1",
