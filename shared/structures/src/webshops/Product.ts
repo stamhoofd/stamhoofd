@@ -218,14 +218,15 @@ export class Product extends AutoEncoder {
      * Allow to order multiple pieces of the same product combination.
      * Null: follows the order mode of the webshop, see Webshop.allowsMultiple. Only older products have their own value.
      */
-    @field({ decoder: BooleanDecoder, version: 173 })
+    @field({ decoder: BooleanDecoder, version: 173, defaultValue: () => true })
     @field({
         decoder: BooleanDecoder,
         nullable: true,
         version: 424,
         downgrade: (allowMultiple: boolean | null) => allowMultiple ?? true,
+        defaultValue: () => null,
     })
-    allowMultiple: boolean | null = null;
+    allowMultiple: boolean | null;
 
     /**
      * Only allow one piece per product combination

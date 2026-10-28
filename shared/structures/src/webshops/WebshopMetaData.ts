@@ -595,11 +595,21 @@ export class WebshopMetaData extends AutoEncoder {
 
             return patch;
         },
+        defaultValue: () => CustomerSettings.create({
+            name: CustomerFieldRequirement.Required,
+            email: CustomerFieldRequirement.Required,
+            phone: CustomerFieldRequirement.Required,
+        }),
     })
-    customerSettings = CustomerSettings.create({
-        name: CustomerFieldRequirement.Required,
-        email: CustomerFieldRequirement.Required,
-    });
+    @field({
+        decoder: CustomerSettings,
+        version: 424,
+        defaultValue: () => CustomerSettings.create({
+            name: CustomerFieldRequirement.Required,
+            email: CustomerFieldRequirement.Required,
+        }),
+    })
+    customerSettings: CustomerSettings;
 
     @field({ decoder: BooleanDecoder, version: 242 })
     allowDiscountCodeEntry = false;
@@ -726,6 +736,13 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: new EnumDecoder(WebshopLayout), version: 180 })
     layout = WebshopLayout.Default;
+
+    /**
+     * Split layout only: the title above the ordering part next to the content.
+     * Empty = the default title, which depends on what the webshop sells (e.g. 'Tickets').
+     */
+    @field({ decoder: StringDecoder, ...NextVersion })
+    orderTitle = '';
 
     @field({ decoder: new EnumDecoder(DarkMode), version: 182 })
     darkMode = DarkMode.Off;

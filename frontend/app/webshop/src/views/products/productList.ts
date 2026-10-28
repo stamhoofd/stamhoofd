@@ -1,6 +1,5 @@
 import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
-import { getProductListTitle } from '@stamhoofd/components/helpers/webshopWording.ts';
 import type { Product, Webshop } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { getVisibleProducts } from './visibleProducts';
@@ -14,9 +13,9 @@ export type ProductListGroup = { id: string; name: string; description: string; 
 /**
  * The visible products per category, followed by the products without a category
  *
- * @param options.hideTitle Leave out the general title (e.g. 'Tickets') when no product has a category
+ * @param options.title The general title (e.g. 'Tickets') when no product has a category. Empty: no title
  */
-export function getProductListGroups(webshop: Webshop, options: { hideTitle?: boolean } = {}): ProductListGroup[] {
+export function getProductListGroups(webshop: Webshop, options: { title?: string } = {}): ProductListGroup[] {
     const visibleProducts = getVisibleProducts(webshop);
     const categorised = new Set<string>();
     const groups = webshop.categories.flatMap((category) => {
@@ -36,7 +35,7 @@ export function getProductListGroups(webshop: Webshop, options: { hideTitle?: bo
 
     const rest = visibleProducts.filter(p => !categorised.has(p.id));
     if (rest.length > 0) {
-        groups.push({ id: 'uncategorised', name: groups.length > 0 ? $t('Andere') : (options.hideTitle ? '' : getProductListTitle(webshop)), description: '', products: rest });
+        groups.push({ id: 'uncategorised', name: groups.length > 0 ? $t('Andere') : (options.title ?? ''), description: '', products: rest });
     }
     return groups;
 }

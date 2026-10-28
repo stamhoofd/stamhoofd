@@ -87,7 +87,8 @@ import { canOrderProduct, getProductListDescription, getProductListGroups, useSh
 import { getVisibleProducts } from './visibleProducts';
 
 const props = defineProps<{
-    hideTitle?: boolean;
+    // Above products without a category (empty: no title)
+    title?: string;
 }>();
 
 const webshopManager = useWebshopManager();
@@ -96,7 +97,7 @@ const webshop = computed(() => webshopManager.webshop);
 const cart = computed(() => checkoutManager.cart);
 
 const visibleProducts = computed(() => getVisibleProducts(webshop.value));
-const groups = computed(() => getProductListGroups(webshop.value, { hideTitle: props.hideTitle }));
+const groups = computed(() => getProductListGroups(webshop.value, { title: props.title }));
 
 function getPrices(product: Product) {
     return product.filteredPrices({ admin: false });

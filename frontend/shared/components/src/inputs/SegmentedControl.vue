@@ -5,9 +5,11 @@
             :key="index"
             class="item"
             :class="{ selected: item === model }"
+            :title="icons && labels ? labels[index] : undefined"
             @click="selectItem(index)"
         >
-            <div :data-text="labels ? labels[index] : item" />
+            <span v-if="icons" class="icon small" :class="icons[index]" />
+            <div v-else :data-text="labels ? labels[index] : item" />
         </div>
         <div
             class="pointer"
@@ -32,8 +34,11 @@ const model = defineModel<any>();
 const props = withDefaults(defineProps<{
     items: any[];
     labels?: string[] | null;
+    /** Shown instead of the labels, which become the tooltips */
+    icons?: string[] | null;
 }>(), {
     labels: null,
+    icons: null,
 });
 
 const selectedIndex = computed(() => props.items.indexOf(model.value));
@@ -157,7 +162,19 @@ $border-radius: 11px;
             }
         }
 
-        &:active > div {
+        & > .icon {
+            display: flex;
+            height: $segmented-control-inner-height;
+            margin: 0 auto;
+            color: $color-gray-5;
+            transition: color 0.2s;
+        }
+
+        &.selected > .icon {
+            color: $color-dark;
+        }
+
+        &:active > div, &:active > .icon {
             opacity: 0.4;
         }
 

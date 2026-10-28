@@ -506,8 +506,8 @@
     }
 
     &.gray {
-        color: $color-gray-1;
-        background: $color-background-shade;
+        color: $color-gray-text;
+        background: $color-background-shade-darker;
     }
 
     &.payconiq {
@@ -742,7 +742,7 @@
         Small optimizations for modern browsers only
     */
     &.flex, &:has(> .icon), &:has(> svg) {
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 5px;
     }

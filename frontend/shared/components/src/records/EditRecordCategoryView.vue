@@ -62,7 +62,7 @@
             <PropertyFilterInput v-model="filter" :allow-optional="allowChildCategories && patchedCategory.getAllRecords().length > 1" :builder="filterBuilder" />
         </div>
 
-        <template #buttons>
+        <template #navigation-buttons>
             <button class="button text only-icon-smartphone" type="button" data-testid="records-add-button" @click="recordsBox?.showAddMenu($event)">
                 <span class="icon add" />
                 <span>{{ $t('%SN') }}</span>

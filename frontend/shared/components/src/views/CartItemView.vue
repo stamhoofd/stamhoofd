@@ -13,8 +13,8 @@
             <h1 v-if="!embedded">
                 {{ cartItem.product.name }}
             </h1>
-            <h2 v-else-if="showTitle" class="larger">
-                {{ cartItem.product.name }}
+            <h2 v-else-if="title" class="larger">
+                {{ title }}
             </h2>
 
             <ImageGallery :images="images" />
@@ -239,9 +239,9 @@ const props = withDefaults(defineProps<{
      */
     embedded?: boolean;
     /**
-     * Embedded only: still show the product name, e.g. when the form is in a column next to the content of the page
+     * Embedded only: a title above the form, e.g. when the form is in a column next to the content of the page
      */
-    showTitle?: boolean;
+    title?: string;
     /**
      * Live editing: every change is passed to this handler right away (e.g. to store the cart), so nothing is lost
      * when the page reloads and closing never asks to discard changes.
@@ -253,7 +253,7 @@ const props = withDefaults(defineProps<{
     oldItem: null,
     isPreview: false,
     embedded: false,
-    showTitle: false,
+    title: '',
     liveSaveHandler: null,
 });
 

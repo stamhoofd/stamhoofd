@@ -27,6 +27,21 @@ describe('Product.allowMultiple 423 <-> 424', () => {
         expect(decode({ allowMultiple: false }, before).allowMultiple).toBe(false);
     });
 
+    it('keeps the old default for older data without a value', () => {
+        const data = encode(Product.create({}), before);
+        delete data.allowMultiple;
+
+        expect(Product.decode(new ObjectData(data, { version: before })).allowMultiple).toBe(true);
+    });
+
+    it('uses null as default for new products', () => {
+        expect(Product.create({}).allowMultiple).toBeNull();
+
+        const data = encode(Product.create({}), after);
+        delete data.allowMultiple;
+        expect(Product.decode(new ObjectData(data, { version: after })).allowMultiple).toBeNull();
+    });
+
     it('keeps null on 424', () => {
         expect(decode({ allowMultiple: null }, after).allowMultiple).toBeNull();
     });

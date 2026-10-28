@@ -1,38 +1,46 @@
 <template>
     <div class="st-view webshop-full-preview-view">
-        <STNavigationBar :title="$t('Voorbeeld')" />
-        <main>
-            <WebshopPreviewFrame :webshop="webshop" />
-        </main>
+        <WebshopDevicePreview v-model:device="device" :webshop="webshop">
+            <template #right>
+                <button class="button icon close" type="button" data-testid="close-button" :aria-label="$t('Sluiten')" @click="dismiss()" />
+            </template>
+        </WebshopDevicePreview>
     </div>
 </template>
 
 <script lang="ts" setup>
-import STNavigationBar from '@stamhoofd/components/navigation/STNavigationBar.vue';
+import { useDismiss } from '@browser/navigation';
+import { useIsMobile } from '@stamhoofd/components/hooks/useIsMobile.ts';
 import type { Webshop } from '@stamhoofd/structures';
-import WebshopPreviewFrame from './WebshopPreviewFrame.vue';
+import { ref } from 'vue';
+import WebshopDevicePreview from './WebshopDevicePreview.vue';
 
 /**
- * The webshop as visitors see it on a large screen, with the changes that are not saved yet
+ * The webshop as visitors see it on a laptop or smartphone, with the changes that are not saved yet
  */
-defineProps<{
+const props = defineProps<{
     webshop: Webshop;
+    device?: 'laptop' | 'smartphone';
 }>();
+
+const device = ref(props.device ?? (useIsMobile() ? 'smartphone' : 'laptop'));
+const dismiss = useDismiss();
 </script>
 
 <style lang="scss">
+@use "@stamhoofd/scss/base/variables.scss" as *;
+
 .webshop-full-preview-view {
-    --st-popup-width: 1200px;
+    --color-current-background: #{$color-background-shade};
+    --color-current-background-shade: #{$color-background-shade-darker};
 
-    > main {
-        display: flex;
-        flex-direction: column;
+    > .webshop-device-preview {
         flex-grow: 1;
-        // Below the navigation bar, which floats over main
-        padding: var(--st-navigation-bar-correction, 50px) 0 0 0;
+        min-height: 0;
+        padding: var(--st-safe-area-top, 0px) max(10px, var(--st-safe-area-right, 0px)) calc(10px + var(--st-safe-area-bottom, 0px)) max(10px, var(--st-safe-area-left, 0px));
 
-        > .webshop-preview-frame {
-            flex-grow: 1;
+        > header {
+            padding: 0 10px;
         }
     }
 }

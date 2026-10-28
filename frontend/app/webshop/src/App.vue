@@ -34,7 +34,7 @@ import { Language } from '@stamhoofd/types/Language';
 import { GoogleTranslateHelper, isReservedWebshopPathSegment } from '@stamhoofd/utility';
 import { ref, watch } from 'vue';
 import { getWebshopRootView } from './getRootView';
-import { webshopPreviewParameter } from '@stamhoofd/components/webshops/webshopPreview.ts';
+import { getWebshopPreviewLanguage, webshopPreviewParameter } from '@stamhoofd/components/webshops/webshopPreview.ts';
 
 const owner = {};
 
@@ -97,7 +97,10 @@ const root = new ComponentWithProperties(PromiseView, {
                 }
             }
 
-            const webshopLanguage = response.data.webshop?.meta.defaultLanguage ?? response.data.organization.language ?? Language.Dutch;
+            // A preview uses the language of the dashboard, which might not be saved yet
+            const savedLanguage = response.data.webshop?.meta.defaultLanguage ?? null;
+            const defaultLanguage = preview ? getWebshopPreviewLanguage(UrlHelper.initial.getSearchParams(), savedLanguage) : savedLanguage;
+            const webshopLanguage = defaultLanguage ?? response.data.organization.language ?? Language.Dutch;
 
             I18nController.skipUrlPrefixForLocale = webshopLanguage + '-' + response.data.organization.address.country;
 
@@ -113,7 +116,7 @@ const root = new ComponentWithProperties(PromiseView, {
                 defaultCountry: response.data.organization.address.country,
                 defaultLanguage: webshopLanguage,
                 country: response.data.organization.address.country,
-                locales: (response.data.webshop?.meta.defaultLanguage ?? response.data.organization.language)
+                locales: (defaultLanguage ?? response.data.organization.language)
                     ? {
                             // For now always force the webshop's default language
                             // if we add translations to webshops, we should add all the setup languages here
@@ -202,6 +205,9 @@ function created() {
     // An iframe shares the browser history with the dashboard: going back in either one could navigate the other
     if (!preview) {
         HistoryManager.activate();
+    } else {
+        // Scrolling past the top or bottom continues in the dashboard around the preview
+        document.documentElement.classList.add('webshop-preview');
     }
 }
 
@@ -244,5 +250,11 @@ watch(modalStack, (modalStack: InstanceType<typeof ModalStackComponent> | null) 
 
 body {
     --st-sheet-width: 450px;
+}
+
+html.webshop-preview {
+    &, body, .st-view > main {
+        overscroll-behavior: auto;
+    }
 }
 </style>

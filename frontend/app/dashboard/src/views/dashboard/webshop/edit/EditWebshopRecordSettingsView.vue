@@ -1,6 +1,6 @@
 <template>
     <SaveView :loading="saving" :disabled="!hasChanges" :title="title" @save="save">
-        <template #buttons>
+        <template #navigation-buttons>
             <button v-if="customerSettingsBox?.canAdd" class="button text only-icon-smartphone" type="button" data-testid="customer-settings-add-button" @click="customerSettingsBox?.showAddMenu($event)">
                 <span class="icon add" />
                 <span>{{ $t('%SN') }}</span>

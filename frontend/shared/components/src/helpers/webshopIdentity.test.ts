@@ -41,11 +41,11 @@ describe('getWebshopSquareLogo', () => {
         expect(getWebshopSquareLogo(createOrganization(), webshop)).toBeNull();
     });
 
-    test('Uses the square logo of the organization when the webshop has no logo', () => {
+    test('Never uses the organization logo when the webshop disabled it', () => {
         const webshop = Webshop.create({});
         webshop.meta.useLogo = true;
 
-        expect(getWebshopSquareLogo(createOrganization(), webshop)?.logo.id).toBe('image-organization.png');
+        expect(getWebshopSquareLogo(createOrganization(), webshop)).toBeNull();
     });
 
     test('Ignores the logos a webshop kept after switching back to the organization logo', () => {
