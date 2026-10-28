@@ -353,7 +353,7 @@ test.describe('Webshop bulk ordering @webshop-bulk', () => {
 
         // With two seated products, the seats steps are named after the product
         const progress = page.getByTestId('checkout-progress');
-        await expect(progress.locator('.titles .title')).toHaveText(['Keuze', 'Voorstelling', 'Nabespreking', 'Tickets', 'Gegevens', 'Betalen']);
+        await expect(progress.locator('.titles .title')).toHaveText(['Keuze', 'Voorstelling', 'Nabespreking', 'Tickets', 'Contactgegevens', 'Betalen']);
         await flow.chooseBulkSeats('Voorstelling', 1);
         await flow.chooseBulkSeats('Nabespreking', 1);
         await expect(flow.detailsStep()).toBeVisible();

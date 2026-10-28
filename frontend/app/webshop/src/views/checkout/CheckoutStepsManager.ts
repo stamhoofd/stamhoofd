@@ -135,13 +135,15 @@ export class CheckoutStepsManager {
 
         // Named after what the items are when they are all the same kind, e.g. "Deelnemers"
         const detailsUnitNames = new Set(checkout.cart.items.filter(i => cartItemNeedsDetails(i)).map(i => getUnitName(webshop, i.product).plural));
+        const detailsTitle = detailsUnitNames.size === 1 ? Formatter.capitalizeFirstLetter([...detailsUnitNames][0]) : $t('%ZyY');
 
         steps.push(new CheckoutStep({
             id: CheckoutStepType.Details,
-            title: detailsUnitNames.size === 1 ? Formatter.capitalizeFirstLetter([...detailsUnitNames][0]) : $t('%ZyY'),
+            title: detailsTitle,
             url: '/checkout/' + CheckoutStepType.Details.toLowerCase(),
             active: bulk && detailsUnitNames.size > 0,
             getComponent: () => import(/* webpackChunkName: "Checkout", webpackPrefetch: true */ './BulkItemDetailsView.vue').then(m => new ComponentWithProperties(m.default, {
+                title: detailsTitle,
                 continueCheckout: (navigate: NavigationActions) => this.goNext(CheckoutStepType.Details, navigate),
             })),
             validate: () => {
@@ -231,7 +233,7 @@ export class CheckoutStepsManager {
 
         steps.push(new CheckoutStep({
             id: CheckoutStepType.Customer,
-            title: $t('%zM'),
+            title: $t('%ZlW'),
             url: '/checkout/' + CheckoutStepType.Customer.toLowerCase(),
             active: loggedIn
                 ? (asks(customerSettings.phone) || asks(customerSettings.birthDay) || asks(customerSettings.gender) || (asks(customerSettings.address) && !hasDeliveryAddress) || !user?.firstName || !user?.lastName || asksCustomerQuestions)

@@ -71,6 +71,8 @@ interface ItemErrors {
 }
 
 const props = defineProps<{
+    // Same as the step in the checkout progress
+    title: string;
     continueCheckout: (navigate: NavigationActions) => Promise<void>;
 }>();
 
@@ -83,7 +85,6 @@ const navigationActions = useNavigationActions();
 
 const webshop = computed(() => webshopManager.webshop);
 const cart = computed(() => checkoutManager.cart);
-const title = $t('%a0J');
 
 // One error box + validator per item, keyed on the item id so they survive cart changes
 const itemErrors = reactive(new Map<string, ItemErrors>());
