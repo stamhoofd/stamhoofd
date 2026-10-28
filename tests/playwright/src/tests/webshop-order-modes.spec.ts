@@ -9,7 +9,7 @@ import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { User } from '@stamhoofd/models';
 import { Order, Organization, OrganizationFactory, UserFactory, Webshop } from '@stamhoofd/models';
-import { PaymentMethod, Permissions, Product, ProductDateRange, ProductPrice, ProductType, STPackageBundle, Token as TokenStruct, Version, WebshopOrderMode, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
+import { File as StructFile, Image, PaymentMethod, Permissions, Product, ProductDateRange, ProductPrice, ProductType, Resolution, RichText, STPackageBundle, Token as TokenStruct, Version, WebshopLayout, WebshopOrderMode, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { WebshopOrderFlow } from '../flows/WebshopOrderFlow.js';
 import { DashboardPage, DashboardTab, WorkerData } from '../helpers/index.js';
@@ -312,6 +312,62 @@ test.describe('Webshop order modes @webshop-order-modes', () => {
         await expect(page.locator('textarea')).toHaveValue('Oude beschrijving');
         await expect(page.locator('.st-input-box').filter({ hasText: 'Naam' }).locator('input')).toHaveValue('Eigen naam');
         await expect(page.getByText('Keuze voor aantal stuks verbergen')).toBeVisible();
+    });
+
+    test('An older form keeps its own name and photo, and explains the separate step on the webshop', async ({ page }) => {
+        const organization = await createOrganization();
+        // The settings show the photo, so it needs a resolution
+        const photoFile = new StructFile({ id: 'product-photo', server: 'https://files.example.com', path: 'product-photo.jpg', size: 1000 });
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Kamp ${WorkerData.id}`,
+            orderMode: WebshopOrderMode.Single,
+            buildProducts: () => [
+                Product.create({
+                    name: 'Inschrijving',
+                    description: 'Over het kamp',
+                    allowMultiple: true,
+                    prices: [ProductPrice.create({ price: 10_0000 })],
+                    images: [Image.create({
+                        source: photoFile,
+                        resolutions: [new Resolution({ file: photoFile, width: 300, height: 200 })],
+                    })],
+                }),
+            ],
+        });
+        webshop.meta.description = RichText.create({ text: 'Alle info over het kamp', html: '<p>Alle info over het kamp</p>' });
+        webshop.meta.layout = WebshopLayout.Split;
+        await webshop.save();
+
+        await openProductOffer(page, organization, webshop);
+        const box = page.locator('.edit-product-box');
+        const nameInput = box.locator('.st-input-box').filter({ hasText: 'Naam' }).locator('input');
+        await expect(nameInput).toHaveValue('Inschrijving');
+        await expect(box.locator('textarea')).toHaveValue('Over het kamp');
+        await expect(box.getByRole('heading', { name: 'Omslagfoto' })).toBeVisible();
+        const info = box.getByTestId('single-form-step-info');
+        await expect(info).toContainText('eigen foto\'s heeft');
+        // The split layout shows the form next to the content on large screens
+        await expect(info).toContainText('Op brede schermen');
+
+        // The own name can be replaced by the name of the webshop, the input stays to change it again
+        await box.getByTestId('use-webshop-name-button').click();
+        await expect(nameInput).toHaveValue(webshop.meta.name);
+        await expect(box.getByTestId('use-webshop-name-button')).toHaveCount(0);
+
+        // Without the photo, the description below the webshop description still needs the step
+        await box.getByRole('button', { name: 'Allemaal verwijderen' }).click();
+        await expect(box.getByRole('heading', { name: 'Omslagfoto' })).toHaveCount(0);
+        await expect(info).toContainText('een eigen beschrijving heeft');
+
+        await box.locator('textarea').fill('');
+        await expect(info).toHaveCount(0);
+
+        await page.locator('.st-view').last().getByTestId('save-button').click();
+        await expect.poll(async () => (await Webshop.getByID(webshop.id))!.products[0].images.length).toBe(0);
+        const saved = (await Webshop.getByID(webshop.id))!;
+        expect(saved.products[0].description).toBe('');
+        expect(saved.products[0].name).toBe(webshop.meta.name);
     });
 
     test('Renaming the webshop renames its form', async ({ page }) => {
