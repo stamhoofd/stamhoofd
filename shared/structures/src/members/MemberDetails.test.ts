@@ -1038,7 +1038,7 @@ describe('getMatchingError', () => {
 
         expect(tooYoung?.message).toBe($t('%qX'));
         expect(tooOld?.message).toBe($t('%qY'));
-        expect(tooOld?.description).toContain('te oud');
+        expect(tooOld?.description).toBe($t('%a0A'));
         expect(tooOld?.description).not.toBe(tooYoung?.description);
     });
 
