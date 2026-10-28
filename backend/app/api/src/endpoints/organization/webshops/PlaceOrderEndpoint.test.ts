@@ -768,6 +768,103 @@ describe('Endpoint.PlaceOrderEndpoint', () => {
         });
     });
 
+    describe('Client-supplied reservations', () => {
+        function buildOrderData(item: CartItem) {
+            return OrderData.create({
+                paymentMethod: PaymentMethod.PointOfSale,
+                checkoutMethod: onSiteMethod,
+                timeSlot: slot4,
+                cart: Cart.create({ items: [item] }),
+                customer,
+            });
+        }
+
+        function seatA1() {
+            return CartReservedSeat.create({
+                section: seatingPlan.sections[0].id,
+                row: 'A',
+                seat: '1',
+            });
+        }
+
+        test('reservedAmount does not bypass the product stock', async () => {
+            product.stock = 1;
+            await saveChanges();
+
+            const item = CartItem.create({ product, productPrice: freeProductPrice, amount: 5 });
+            item.reservedAmount = 5;
+            item.reservedPrices.set(freeProductPrice.id, 5);
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData(item));
+            await expect(testServer.test(endpoint, r)).rejects.toThrow();
+
+            await refreshAll();
+            expect(product.usedStock).toBe(0);
+        });
+
+        test('reservedAmount does not reduce the stock that is reserved for a new order', async () => {
+            const item = CartItem.create({ product, productPrice: freeProductPrice, amount: 2 });
+            item.reservedAmount = 2;
+            item.reservedPrices.set(freeProductPrice.id, 2);
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData(item));
+            const response: Response<OrderResponse> = await testServer.test(endpoint, r);
+            expect(response.body.order.data.cart.items[0].reservedAmount).toBe(2);
+
+            await refreshAll();
+            expect(product.usedStock).toBe(2);
+            expect(freeProductPrice.usedStock).toBe(2);
+        });
+
+        test('reservedSeats does not allow taking a seat of another order', async () => {
+            const first = CartItem.create({ product: seatProduct, productPrice: seatProductPrice, amount: 1, seats: [seatA1()] });
+            const r1 = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData(first));
+            await testServer.test(endpoint, r1);
+
+            const second = CartItem.create({ product: seatProduct, productPrice: seatProductPrice, amount: 1, seats: [seatA1()] });
+            second.reservedSeats = [seatA1()];
+            const r2 = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), buildOrderData(second));
+            await expect(testServer.test(endpoint, r2)).rejects.toThrow();
+
+            await refreshAll();
+            expect(seatProduct.reservedSeats).toHaveLength(1);
+        });
+
+        test('reservedOrder and reservedPersons do not skip the time slot capacity', async () => {
+            const item = CartItem.create({ product: personProduct, productPrice: personProductPrice, amount: 1 });
+            const orderData = buildOrderData(item);
+            orderData.reservedOrder = true;
+            orderData.reservedPersons = 1;
+
+            const r = Request.buildJson('POST', `/webshop/${webshop.id}/order`, organization.getApiHost(), orderData);
+            await testServer.test(endpoint, r);
+
+            await refreshAll();
+            expect(slot4.usedOrders).toBe(1);
+            expect(slot4.usedPersons).toBe(1);
+        });
+
+        test('reservedAmount is not trusted for manually created orders', async () => {
+            const item = CartItem.create({ product, productPrice: freeProductPrice, amount: 5 });
+            item.reservedAmount = 5;
+            item.reservedPrices.set(freeProductPrice.id, 5);
+
+            const patchArray: PatchableArrayAutoEncoder<PrivateOrder> = new PatchableArray();
+            patchArray.addPut(PrivateOrder.create({
+                id: uuidv4(),
+                data: buildOrderData(item),
+                webshopId: webshop.id,
+            }));
+
+            const r = Request.buildJson('PATCH', `/webshop/${webshop.id}/orders`, organization.getApiHost(), patchArray);
+            r.headers.authorization = 'Bearer ' + token.accessToken;
+            await testServer.test(patchWebshopOrdersEndpoint, r);
+
+            await refreshAll();
+            expect(product.usedStock).toBe(5);
+        });
+    });
+
     describe('Order modes', () => {
         async function setOrderMode(orderMode: WebshopOrderMode) {
             webshop.meta.orderMode = orderMode;
