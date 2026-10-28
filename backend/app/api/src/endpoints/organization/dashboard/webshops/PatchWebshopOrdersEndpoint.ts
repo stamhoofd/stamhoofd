@@ -9,6 +9,7 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PrivateOrder, TranslatedString, Webshop as WebshopStruct, WebshopTicketType } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
+import { clearOrderReservations } from '../../../../helpers/clearOrderReservations.js';
 import { ServiceFeeHelper } from '../../../../helpers/ServiceFeeHelper.js';
 import { AuditLogService } from '../../../../services/AuditLogService.js';
 import { BalanceItemService } from '../../../../services/BalanceItemService.js';
@@ -141,6 +142,8 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                 }
 
                 const order = model.setRelation(Order.webshop, webshop.setRelation(Webshop.organization, organization));
+
+                clearOrderReservations(order.data);
 
                 // TODO: validate before updating stock
                 order.data.validate(webshopGetter.struct, organization.meta, request.i18n, true);

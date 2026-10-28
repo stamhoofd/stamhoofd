@@ -11,6 +11,7 @@ import { Formatter } from '@stamhoofd/utility';
 
 import { BuckarooHelper } from '../../../helpers/BuckarooHelper.js';
 import { Context } from '../../../helpers/Context.js';
+import { clearOrderReservations } from '../../../helpers/clearOrderReservations.js';
 import { ServiceFeeHelper } from '../../../helpers/ServiceFeeHelper.js';
 import { StripeHelper } from '../../../helpers/StripeHelper.js';
 import { AuditLogService } from '../../../services/AuditLogService.js';
@@ -127,6 +128,7 @@ export class PlaceOrderEndpoint extends Endpoint<Params, Query, Body, ResponseBo
                 request.body.discountCodes = codeModels.map(c => c.getStructure());
             }
 
+            clearOrderReservations(request.body);
             request.body.validate(webshopStruct, organization.meta, request.i18n, false, Context.user?.getStructure());
             request.body.update(webshopStruct);
 
