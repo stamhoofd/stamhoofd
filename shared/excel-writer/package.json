@@ -37,8 +37,7 @@
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
         "@types/archiver": "6.0.4",
-        "@types/luxon": "3.7.6",
-        "@types/uuid": "8.3.4"
+        "@types/luxon": "3.7.6"
     },
     "peerDependencies": {
         "@stamhoofd/utility": "workspace:*",
