@@ -84,14 +84,18 @@ export async function checkMollieRefundsFor(service: MollieService, checkAll = f
             const metadata = refund.metadata as { refundPaymentId?: string } | null;
             if (metadata?.refundPaymentId) {
                 const localRefund = await Payment.getByID(metadata.refundPaymentId);
-                if (localRefund && localRefund.type === PaymentType.Refund) {
+                if (localRefund && localRefund.type === PaymentType.Refund && localRefund.organizationId === service.sellingOrganization.id) {
                     console.error('Restoring missing link for Mollie refund ' + refund.id + ' to payment ' + localRefund.id);
-                    const link = new MolliePayment();
-                    link.paymentId = localRefund.id;
-                    link.mollieId = refund.id;
-                    await link.save();
+                    try {
+                        const link = new MolliePayment();
+                        link.paymentId = localRefund.id;
+                        link.mollieId = refund.id;
+                        await link.save();
 
-                    await reconcileRefundStatus(localRefund.id, refund.status, createdAt);
+                        await reconcileRefundStatus(localRefund.id, refund.status, createdAt);
+                    } catch (e) {
+                        console.error('Failed to restore link for Mollie refund ' + refund.id, e);
+                    }
                     continue;
                 }
             }
