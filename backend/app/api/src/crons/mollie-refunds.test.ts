@@ -203,6 +203,76 @@ describe('Cron.mollie-refunds', () => {
         expect(updatedRefund!.status).toBe(PaymentStatus.Succeeded);
     });
 
+    test('Refund metadata pointing to a refund of another organization is not linked', async () => {
+        const victim = await init();
+        const victimRefund = new Payment();
+        victimRefund.organizationId = victim.organization.id;
+        victimRefund.method = PaymentMethod.Transfer;
+        victimRefund.provider = null;
+        victimRefund.status = PaymentStatus.Pending;
+        victimRefund.type = PaymentType.Refund;
+        victimRefund.price = -10_0000;
+        victimRefund.reversingPaymentId = victim.payment.id;
+        await victimRefund.save();
+
+        const { organization, payment, mockPayment } = await init();
+        const mockRefund = mollieMocker.createRefund(mockPayment, {
+            value: '10.00',
+            status: 'refunded',
+            metadata: { refundPaymentId: victimRefund.id },
+        });
+
+        await runCron(organization);
+
+        expect(await MolliePayment.select().where('paymentId', victimRefund.id).first(false)).toBeNull();
+        expect((await Payment.getByID(victimRefund.id))!.status).toBe(PaymentStatus.Pending);
+
+        // Registered as a normal refund of the organization's own payment instead
+        const link = await MolliePayment.select().where('mollieId', mockRefund.id).first(false);
+        expect(link).not.toBeNull();
+        const refunds = await getRefundPayments(payment);
+        expect(refunds).toHaveLength(1);
+        expect(link!.paymentId).toBe(refunds[0].id);
+    });
+
+    test('A refund whose metadata points to an already linked refund does not stop the other refunds', async () => {
+        const { organization, payment, mockPayment } = await init();
+
+        // An older refund created in the Mollie dashboard (unhandled)
+        mollieMocker.createRefund(mockPayment, {
+            value: '10.00',
+            createdAt: new Date(Date.now() - 1000 * 60 * 60),
+        });
+
+        // A local refund that is already linked to another Mollie refund
+        const linkedRefund = new Payment();
+        linkedRefund.organizationId = organization.id;
+        linkedRefund.method = PaymentMethod.Bancontact;
+        linkedRefund.provider = PaymentProvider.Mollie;
+        linkedRefund.status = PaymentStatus.Pending;
+        linkedRefund.type = PaymentType.Refund;
+        linkedRefund.price = -5_0000;
+        await linkedRefund.save();
+
+        const existingLink = new MolliePayment();
+        existingLink.paymentId = linkedRefund.id;
+        existingLink.mollieId = mollieMocker.createId('re');
+        await existingLink.save();
+
+        // A newer Mollie refund that reuses the metadata of that local refund
+        mollieMocker.createRefund(mockPayment, {
+            value: '5.00',
+            metadata: { refundPaymentId: linkedRefund.id },
+        });
+
+        await runCron(organization);
+
+        // The older refund was still registered
+        const refunds = await getRefundPayments(payment);
+        expect(refunds).toHaveLength(1);
+        expect(refunds[0].price).toBe(-10_0000);
+    });
+
     test('A partial refund is allocated across the balance items of the payment', async () => {
         const { organization, balanceItems, payment, mockPayment } = await init({ prices: [30_0000, 20_0000] });
 
