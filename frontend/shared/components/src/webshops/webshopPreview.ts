@@ -1,6 +1,6 @@
 import type { Decoder } from '@common/encoding';
 import { ObjectData } from '@common/encoding';
-import { Version, Webshop } from '@stamhoofd/structures';
+import { Version, Webshop, WebshopStatus } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 
 /**
@@ -46,6 +46,22 @@ export function getWebshopPreviewLanguage(search: URLSearchParams, savedLanguage
  */
 export function getWebshopPreviewDashboardOrigin() {
     return 'https://' + STAMHOOFD.domains.dashboard;
+}
+
+/**
+ * The preview shows the webshop as if it is open: the administrator also wants to see a webshop that is closed (manually
+ * or by its end date) or that only opens later. A closed webshop shows no products and cannot be followed through its
+ * checkout.
+ */
+export function forceWebshopOpenForPreview(webshop: Webshop): Webshop {
+    const open = webshop.clone();
+    open.meta.status = WebshopStatus.Open;
+    open.meta.openAt = null;
+    // Only an end date that passed still closes it: one in the future keeps its warning that the webshop closes soon
+    if (open.isClosed()) {
+        open.meta.availableUntil = null;
+    }
+    return open;
 }
 
 export function createWebshopPreviewReadyMessage() {

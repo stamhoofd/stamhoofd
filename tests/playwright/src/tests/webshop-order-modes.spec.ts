@@ -9,7 +9,7 @@ import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { User } from '@stamhoofd/models';
 import { Order, Organization, OrganizationFactory, UserFactory, Webshop } from '@stamhoofd/models';
-import { PaymentMethod, Permissions, Product, ProductDateRange, ProductPrice, ProductType, STPackageBundle, Token as TokenStruct, Version, WebshopOrderMode, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
+import { PaymentMethod, Permissions, Product, ProductDateRange, ProductPrice, ProductType, STPackageBundle, Token as TokenStruct, Version, WebshopOrderMode, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { WebshopOrderFlow } from '../flows/WebshopOrderFlow.js';
 import { DashboardPage, DashboardTab, WorkerData } from '../helpers/index.js';
@@ -251,6 +251,27 @@ test.describe('Webshop order modes @webshop-order-modes', () => {
 
         expect((await Webshop.getByID(webshop.id))!.meta.orderMode).toBe(WebshopOrderMode.Cart);
         expect(await Order.select().where('webshopId', webshop.id).fetch()).toHaveLength(0);
+    });
+
+    test('The preview shows a closed webshop as open', async ({ page }) => {
+        const organization = await createOrganization();
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Preview gesloten ${WorkerData.id}`,
+            productCount: 2,
+        });
+        webshop.meta.status = WebshopStatus.Closed;
+        await webshop.save();
+
+        await openProductOffer(page, organization, webshop);
+
+        const preview = page.frameLocator('.webshop-preview-card iframe');
+        await expect(preview.getByTestId('product-box')).toHaveCount(2, { timeout: 20000 });
+        await expect(preview.getByText('Bestellingen zijn gesloten')).toBeHidden();
+
+        // The webshop the dashboard sends after a change is still closed, and still shown as open
+        await page.getByTestId('order-mode-bulk').click();
+        await expect(preview.getByTestId('bulk-product-row')).toHaveCount(2);
     });
 
     test('Without room next to the settings, the preview opens from the navigation bar', async ({ page }) => {

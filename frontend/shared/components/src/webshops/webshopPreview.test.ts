@@ -1,7 +1,7 @@
-import { PrivateWebshop, WebshopMetaData, WebshopPrivateMetaData } from '@stamhoofd/structures';
+import { PrivateWebshop, WebshopMetaData, WebshopPrivateMetaData, WebshopStatus } from '@stamhoofd/structures';
 import { describe, expect, test } from 'vitest';
 
-import { createWebshopPreviewReadyMessage, createWebshopPreviewUpdateMessage, decodeWebshopPreviewUpdateMessage, isWebshopPreviewReadyMessage } from './webshopPreview.ts';
+import { createWebshopPreviewReadyMessage, createWebshopPreviewUpdateMessage, decodeWebshopPreviewUpdateMessage, forceWebshopOpenForPreview, isWebshopPreviewReadyMessage } from './webshopPreview.ts';
 
 function createWebshop() {
     return PrivateWebshop.create({
@@ -41,5 +41,39 @@ describe('webshopPreview', () => {
         expect(isWebshopPreviewReadyMessage(createWebshopPreviewUpdateMessage(createWebshop()))).toBe(false);
         expect(isWebshopPreviewReadyMessage(null)).toBe(false);
         expect(isWebshopPreviewReadyMessage('stamhoofd-webshop-preview-ready')).toBe(false);
+    });
+
+    test('Shows a closed webshop as open', () => {
+        const webshop = createWebshop();
+        webshop.meta.status = WebshopStatus.Closed;
+
+        const open = forceWebshopOpenForPreview(webshop);
+
+        expect(open.isClosed()).toBe(false);
+        expect(open.meta.title).toBe('Nog niet opgeslagen');
+        // The settings in the dashboard stay closed
+        expect(webshop.meta.status).toBe(WebshopStatus.Closed);
+    });
+
+    test('Shows a webshop that opens later as open', () => {
+        const webshop = createWebshop();
+        webshop.meta.openAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+
+        expect(forceWebshopOpenForPreview(webshop).isClosed()).toBe(false);
+    });
+
+    test('Shows a webshop that closed on its end date as open', () => {
+        const webshop = createWebshop();
+        webshop.meta.availableUntil = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+        expect(forceWebshopOpenForPreview(webshop).isClosed()).toBe(false);
+    });
+
+    test('Keeps an end date in the future', () => {
+        const webshop = createWebshop();
+        const availableUntil = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        webshop.meta.availableUntil = availableUntil;
+
+        expect(forceWebshopOpenForPreview(webshop).meta.availableUntil).toEqual(availableUntil);
     });
 });
