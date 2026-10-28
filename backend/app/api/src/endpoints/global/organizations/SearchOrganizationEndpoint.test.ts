@@ -241,4 +241,56 @@ describe('Endpoint.SearchOrganization', () => {
         expect(response.body[0].name).toEqual(targetOrganization.name);
         expect(response.body[0].id).toEqual(targetOrganization.id);
     });
+
+    test('Search does not return inactive organizations whose name starts with the query if limit reached', async () => {
+        const query = 'Kortrijk';
+
+        for (let i = 0; i < 15; i++) {
+            await new OrganizationFactory({
+                name: 'Some organization ' + (i + 1),
+                city: query,
+            }).create();
+        }
+
+        const inactiveOrganization = await new OrganizationFactory({
+            name: 'Kortrijk inactive',
+        }).create();
+        inactiveOrganization.active = false;
+        await inactiveOrganization.save();
+
+        const r = Request.buildJson('GET', '/v1/organizations/search');
+        r.query = {
+            query,
+        };
+
+        const response = await testServer.test(endpoint, r);
+        expect(response.status).toEqual(200);
+        expect(response.body).toHaveLength(15);
+        expect(response.body.map(o => o.id)).not.toContain(inactiveOrganization.id);
+    });
+
+    test('Search escapes LIKE wildcards in the query if limit reached', async () => {
+        for (let i = 0; i < 15; i++) {
+            await new OrganizationFactory({
+                name: 'Some organization ' + (i + 1),
+                city: 'Tervuren',
+            }).create();
+        }
+
+        // Only matches the name LIKE pattern when % is treated as a wildcard
+        const wildcardOrganization = await new OrganizationFactory({
+            name: 'Club XTervurenX',
+            city: 'Leuven',
+        }).create();
+
+        const r = Request.buildJson('GET', '/v1/organizations/search');
+        r.query = {
+            query: '%Tervuren',
+        };
+
+        const response = await testServer.test(endpoint, r);
+        expect(response.status).toEqual(200);
+        expect(response.body).toHaveLength(15);
+        expect(response.body.map(o => o.id)).not.toContain(wildcardOrganization.id);
+    });
 });
