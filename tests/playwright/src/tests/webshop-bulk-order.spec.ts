@@ -545,6 +545,54 @@ test.describe('Webshop bulk ordering @webshop-bulk', () => {
         expect(orders[0].data.totalPrice).toBe(15_0000 - 5_0000);
     });
 
+    test('The order button sticks to the bottom of a small screen once a unit is chosen', async ({ page }) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        const organization = await createOrganization({ modernWebshop: true });
+        const { webshop } = await TestWebshops.create({
+            organization,
+            name: `Bulk sticky ${WorkerData.id}`,
+            orderMode: WebshopOrderMode.Bulk,
+            productCount: 15,
+            paymentMethods: [PaymentMethod.PointOfSale],
+        });
+
+        const flow = new WebshopOrderFlow(page, { orderMode: WebshopOrderMode.Bulk });
+        await flow.goto(WorkerData.urls.webshopUri(webshop.uri));
+        const orderButton = page.getByTestId('bulk-order-button');
+        const footer = page.locator('.webshop-platform-footer');
+        // Position of the platform footer relative to the top of the products: independent of the scroll position
+        const footerTop = () => footer.evaluate(el => el.getBoundingClientRect().top - document.querySelector('.webshop-products')!.getBoundingClientRect().top);
+
+        // Without units the button stays below the long list
+        await expect(flow.bulkAmount('Product 1')).toBeInViewport();
+        await expect(orderButton).not.toBeInViewport();
+        const footerTopWithoutUnits = await footerTop();
+
+        // The first unit brings the button within reach, like the cart button of a webshop with a cart
+        await flow.setBulkAmount('Product 1', 1);
+        await expect(flow.bulkAmount('Product 1')).toBeInViewport();
+        await expect(orderButton).toBeInViewport();
+        // The products that scroll below the stuck button are hidden up to the bottom of the screen
+        const coveredAtBottom = await page.evaluate(() => !!document.elementFromPoint(window.innerWidth / 2, window.innerHeight - 1)?.closest('.bulk-order-bar'));
+        expect(coveredAtBottom).toBe(true);
+        // Sticking keeps the spacing below the button, so the footer does not move
+        expect(await footerTop()).toBe(footerTopWithoutUnits);
+
+        // At the end of the page, the space below the button covers nothing after the products, also with a safe area at the bottom of the screen (iPhone)
+        await page.evaluate(() => document.body.classList.add('debug-safe-area'));
+        await footer.evaluate(el => el.closest('main')!.scrollTo({ top: el.closest('main')!.scrollHeight }));
+        const coverage = await footer.evaluate((el) => {
+            const rect = el.getBoundingClientRect();
+            const covered = (y: number) => !!document.elementFromPoint(rect.left + rect.width / 2, y)?.closest('.bulk-order-bar');
+            return { footer: covered(rect.top + rect.height / 2), belowFooter: covered(rect.bottom + 5), belowFooterVisible: rect.bottom + 5 < window.innerHeight };
+        });
+        expect(coverage).toEqual({ footer: false, belowFooter: false, belowFooterVisible: true });
+
+        await flow.typeBulkAmount('Product 1', 0);
+        await expect(flow.bulkAmount('Product 1')).toHaveValue('');
+        await expect(orderButton).not.toBeInViewport();
+    });
+
     test('The order mode can be changed in the dashboard', async ({ page }) => {
         const organization = await createOrganization({ modernWebshop: true });
         const { webshop } = await TestWebshops.create({

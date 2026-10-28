@@ -1,7 +1,7 @@
 <template>
     <!-- eslint-disable-next-line vue/no-v-html -> cleaned in backend -->
-    <div v-if="STAMHOOFD.platformName !== 'stamhoofd'" class="style-wysiwyg gray no-underline-links" v-html="platform.config.shopFooterText.html" />
-    <div v-else class="stamhoofd-badge">
+    <div v-if="STAMHOOFD.platformName !== 'stamhoofd'" class="webshop-platform-footer style-wysiwyg gray no-underline-links" v-html="platform.config.shopFooterText.html" />
+    <div v-else class="webshop-platform-footer stamhoofd-badge">
         <a :href="'https://'+ LocalizedDomains.marketing +'?utm_medium=webshop'">{{ $t('%Zkw') }} <Logo /></a>
     </div>
 </template>
@@ -19,6 +19,12 @@ const platform = usePlatform();
 
 <style lang="scss">
 @use "@stamhoofd/scss/base/variables.scss" as *;
+
+// Above the space below a stuck order button (WebshopProducts), which can reach a few pixels below the products at the end of the page
+.webshop-platform-footer {
+    position: relative;
+    z-index: 1;
+}
 
 .stamhoofd-badge {
     padding-top: 15px;
