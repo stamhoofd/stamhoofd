@@ -80,7 +80,6 @@ minimumReleaseAgeExclude:
   - libphonenumber-js@1.13.14
   - puppeteer-core@25.12.0
   - puppeteer@25.12.0
-  - sass@1.105.0
   - typescript-eslint@8.70.1
 strictDepBuilds: true
 allowBuilds:
