@@ -6,6 +6,8 @@ import { QueueHandler } from '@stamhoofd/queues';
 import formidable from 'formidable';
 import { firstValues } from 'formidable/src/helpers/firstValues.js';
 import { promises as fs } from 'fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import type { Browser } from 'puppeteer';
 import puppeteer from 'puppeteer';
 
@@ -34,8 +36,15 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
         return [false];
     }
 
+    /**
+     * Reads multipart HTML into memory and removes the request's upload directory
+     * whether parsing succeeds or fails, before signature verification or rendering.
+     * Returns PDF bytes after rendering and caching the signed resource version.
+     */
     async handle(request: DecodedRequest<Params, Query, Body>) {
+        const uploadDir = await fs.mkdtemp(join(tmpdir(), 'stamhoofd-renderer-'));
         const form = formidable({
+            uploadDir,
             maxTotalFileSize: 20 * 1024 * 1024,
             keepExtensions: false,
             maxFiles: 1,
@@ -113,6 +122,9 @@ export class HtmlToPdfEndpoint extends Endpoint<Params, Query, Body, ResponseBod
                 });
                 return;
             });
+        }).finally(async () => {
+            // A private directory also covers partial files omitted from failed parse results.
+            await fs.rm(uploadDir, { recursive: true, force: true });
         });
 
         // Verify signature first
