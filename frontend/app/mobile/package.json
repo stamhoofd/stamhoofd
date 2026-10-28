@@ -33,7 +33,7 @@
         "@capacitor/preferences": "8.0.1",
         "@capacitor/share": "8.0.3",
         "@capacitor/status-bar": "8.0.4",
-        "@capgo/capacitor-updater": "8.53.0",
+        "@capgo/capacitor-updater": "8.53.1",
         "@common/encoding": "workspace:*",
         "@common/networking": "workspace:*",
         "@browser/navigation": "workspace:*",
@@ -58,12 +58,12 @@
         "@capacitor/cli": "8.5.3",
         "@stamhoofd/types": "workspace:*",
         "@stamhoofd/vite-config": "workspace:*",
-        "@trapezedev/configure": "7.1.10",
+        "@trapezedev/configure": "7.1.11",
         "eslint-plugin-stamhoofd": "workspace:*",
         "sharp": "0.35.5",
         "vite": "8.3.4"
     },
     "resolutions": {
-        "@trapezedev/project": "7.1.10"
+        "@trapezedev/project": "7.1.11"
     }
 }
