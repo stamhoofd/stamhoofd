@@ -682,6 +682,7 @@ defineRoute({
         }).patch({
             meta: WebshopMetaData.patch({
                 status: WebshopStatus.Open,
+                noServiceFees: false,
             }),
         });
 

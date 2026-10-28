@@ -53,6 +53,11 @@ export class CreateWebshopEndpoint extends Endpoint<Params, Query, Body, Respons
         webshop.id = uuidv4();
         webshop.meta = request.body.meta;
         webshop.meta.domainActive = false;
+
+        // Only Stamhoofd staff can disable service fees (also prevents copying the setting when duplicating a webshop)
+        if (webshop.meta.noServiceFees && !(user.email.endsWith('@stamhoofd.be') || user.email.endsWith('@stamhoofd.nl'))) {
+            webshop.meta.noServiceFees = false;
+        }
         webshop.privateMeta = request.body.privateMeta;
         webshop.products = request.body.products;
         webshop.categories = request.body.categories;
