@@ -27,16 +27,15 @@
         "lint": "eslint --quiet"
     },
     "dependencies": {
+        "@node/endpoints": "workspace:*",
         "@node/logging": "workspace:*"
     },
     "devDependencies": {
-        "@node/endpoints": "workspace:*",
         "@stamhoofd/locales": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*"
     },
     "peerDependencies": {
-        "@node/endpoints": "workspace:*",
         "@stamhoofd/locales": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*"
