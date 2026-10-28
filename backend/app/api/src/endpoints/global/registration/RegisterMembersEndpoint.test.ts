@@ -372,6 +372,61 @@ describe('Endpoint.RegisterMembers', () => {
                 .toThrow(STExpect.simpleError({ code: 'changed_price' }));
         });
 
+        test('Should fail if balance item belongs to another member', async () => {
+            const { member, user, organization, token } = await initData();
+            const otherUser = await new UserFactory({ organization }).create();
+            const otherMember = await new MemberFactory({ organization, user: otherUser }).create();
+
+            const ownItem = await new BalanceItemFactory({
+                organizationId: organization.id,
+                memberId: member.id,
+                userId: user.id,
+                type: BalanceItemType.Registration,
+                amount: 1,
+                unitPrice: 2000,
+            }).create();
+
+            // Credit of another member in the same organization
+            const otherItem = await new BalanceItemFactory({
+                organizationId: organization.id,
+                memberId: otherMember.id,
+                userId: otherUser.id,
+                type: BalanceItemType.Other,
+                amount: 1,
+                unitPrice: -1000,
+            }).create();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [],
+                    balanceItems: [
+                        BalanceItemCartItem.create({
+                            item: ownItem.getStructure(),
+                            price: 2000,
+                        }),
+                        BalanceItemCartItem.create({
+                            item: otherItem.getStructure(),
+                            price: -1000,
+                        }),
+                    ],
+                    deleteRegistrationIds: [],
+                }),
+                administrationFee: 0,
+                freeContribution: 0,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 1000,
+                customer: null,
+            });
+
+            await expect(post(body, organization, token))
+                .rejects
+                .toThrow(STExpect.simpleError({ code: 'invalid_data' }));
+
+            await otherItem.refresh();
+            expect(otherItem.pricePending).toBe(0);
+            expect(otherItem.pricePaid).toBe(0);
+        });
+
         test('Should fail if has no write access for member', async () => {
             // #region arrange
             const { organization, group, groupPrice, token } = await initData();

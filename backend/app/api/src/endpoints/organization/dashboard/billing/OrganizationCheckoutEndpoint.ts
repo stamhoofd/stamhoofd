@@ -162,7 +162,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
         const balanceItemIds = [...request.body.balances.keys()];
 
         if (balanceItemIds.length > 0) {
-            const balanceItemsModels = await BalanceItem.select().where('id', balanceItemIds).andWhere('organizationId', sellingOrganization.id).limit(balanceItemIds.length).fetch();
+            const balanceItemsModels = await BalanceItem.select().where('id', balanceItemIds).andWhere('organizationId', sellingOrganization.id).andWhere('payingOrganizationId', organization.id).limit(balanceItemIds.length).fetch();
 
             if (balanceItemsModels.length !== balanceItemIds.length) {
                 throw new SimpleError({
