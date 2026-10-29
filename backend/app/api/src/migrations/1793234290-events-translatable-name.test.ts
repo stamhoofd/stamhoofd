@@ -3,25 +3,20 @@ import { Database } from '@node/database';
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, compileToSQLFilter, createColumnFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 import { TranslatedString, TranslatedStringDecoder } from '@stamhoofd/structures';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { convertEventNameToJson } from '@stamhoofd/models/migrations/1793234290-events-translatable-name.js';
 import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 
-const migrationFile = path.resolve(import.meta.dirname, '../../../../shared/models/src/migrations/1793234290-events-translatable-name.sql');
+// The test database already migrated the `events` table, so the migration runs against a copy of the old table layout
+const runMigrationOn = convertEventNameToJson;
 
-/**
- * The migration is written against the `events` table, which the test database already migrated.
- * Run the same statements against a copy of the old table layout instead.
- */
-async function runMigrationOn(tableName: string) {
-    const sql = await fs.readFile(migrationFile, { encoding: 'utf-8' });
-    const statements = sql.replaceAll('`events`', '`' + tableName + '`').split(';').map(s => s.trim()).filter(s => s.length > 0);
-    expect(statements.length).toBeGreaterThan(1);
-
-    for (const statement of statements) {
-        await Database.statement(statement);
-    }
-}
+const nameFilters: SQLFilterDefinitions = {
+    ...baseSQLFilterCompilers,
+    name: createColumnFilter({
+        expression: new SQLTranslatedString(SQL.column('name'), '$.value'),
+        type: SQLValueType.String,
+        nullable: false,
+    }),
+};
 
 describe('migration.events-translatable-name', () => {
     const legacyNames = [
@@ -96,17 +91,8 @@ describe('migration.events-translatable-name', () => {
     it('keeps the migrated names filterable and sortable with the translated string expression', async () => {
         await runMigrationOn(tableName);
 
-        const filters: SQLFilterDefinitions = {
-            ...baseSQLFilterCompilers,
-            name: createColumnFilter({
-                expression: new SQLTranslatedString(SQL.column('name'), '$.value'),
-                type: SQLValueType.String,
-                nullable: false,
-            }),
-        };
-
         for (const [index, name] of legacyNames.entries()) {
-            const results = await SQL.select().from(tableName).where(await compileToSQLFilter({ name }, filters)).fetch();
+            const results = await SQL.select().from(tableName).where(await compileToSQLFilter({ name }, nameFilters)).fetch();
             expect(results.map(r => r[tableName]!.id), name).toEqual(['event-' + index]);
         }
 
@@ -130,16 +116,20 @@ describe('migration.events-translatable-name', () => {
             meta: JSON.stringify({ value: {}, version: 426 }),
         }]);
 
-        const filters: SQLFilterDefinitions = {
-            ...baseSQLFilterCompilers,
-            name: createColumnFilter({
-                expression: new SQLTranslatedString(SQL.column('name'), '$.value'),
-                type: SQLValueType.String,
-                nullable: false,
-            }),
-        };
-
-        const results = await SQL.select().from(tableName).where(await compileToSQLFilter({ name: { $in: ['Bosspel', 'Forest game'] } }, filters)).fetch();
+        const results = await SQL.select().from(tableName).where(await compileToSQLFilter({ name: { $in: ['Bosspel', 'Forest game'] } }, nameFilters)).fetch();
         expect(results.map(r => r[tableName]!.id)).toEqual(['event-new']);
+    });
+
+    it('can be retried after a failure halfway and skips a table that is already converted', async () => {
+        // Simulate a run that stopped after the temporary column was added and partially filled
+        await Database.statement(`ALTER TABLE \`${tableName}\` ADD COLUMN \`nameJson\` json NULL AFTER \`typeId\``);
+        await Database.statement(`UPDATE \`${tableName}\` SET \`nameJson\` = JSON_OBJECT('value', \`name\`, 'version', 0) WHERE \`id\` = 'event-0'`);
+
+        await runMigrationOn(tableName);
+        await runMigrationOn(tableName);
+
+        const [result] = await Database.select('SELECT `id`, `name` FROM `' + tableName + '` ORDER BY `id`', [], { nestTables: false });
+        const rows = result as unknown as { id: string; name: string }[];
+        expect(rows.map(r => [r.id, JSON.parse(r.name)])).toEqual(legacyNames.map((name, index) => ['event-' + index, { value: name, version: 0 }]));
     });
 });
