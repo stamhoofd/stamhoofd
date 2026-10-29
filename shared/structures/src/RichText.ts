@@ -1,4 +1,5 @@
 import { AnyDecoder, AutoEncoder, field, StringDecoder } from '@common/encoding';
+import { Formatter } from '@stamhoofd/utility';
 
 /**
  * json is the source; html and text are derived from it, the same way as in EmailContent. It is the
@@ -18,6 +19,22 @@ export class RichText extends AutoEncoder {
      */
     @field({ decoder: AnyDecoder, ...NextVersion })
     json: any = {};
+
+    /**
+     * Every line becomes a paragraph
+     */
+    static fromText(text: string): RichText {
+        const lines = text.split('\n');
+        const html = lines.map(line => `<p>${Formatter.escapeHtml(line)}</p>`).join('');
+        const json = {
+            type: 'doc',
+            // A paragraph without text is an empty paragraph: TipTap does not accept an empty text node
+            content: lines.map(line => line.length === 0
+                ? { type: 'paragraph' }
+                : { type: 'paragraph', content: [{ type: 'text', text: line }] }),
+        };
+        return RichText.create({ text, html, json });
+    }
 
     toString() {
         return this.text;

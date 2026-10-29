@@ -61,6 +61,21 @@ export class TranslatedRichText implements Encodeable, Patchable<TranslatedRichT
         return new TranslatedRichText(translations);
     }
 
+    /**
+     * Converts every language of a translated string into a rich text, keeping an untranslated value untranslated
+     */
+    static fromTranslatedString(value: TranslatedString): TranslatedRichText {
+        if (value.isDefault || value.languages.length === 0) {
+            return TranslatedRichText.create(RichText.fromText(value.toString()));
+        }
+
+        const translations: RichTextLanguageMap = {};
+        for (const language of value.languages) {
+            translations[language] = RichText.fromText(value.get(language));
+        }
+        return TranslatedRichText.create(translations);
+    }
+
     get isDefault(): boolean {
         return this.translations instanceof RichText;
     }
