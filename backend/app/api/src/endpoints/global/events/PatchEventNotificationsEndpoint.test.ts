@@ -5,8 +5,9 @@ import { EmailMocker } from '@stamhoofd/email';
 import type { User } from '@stamhoofd/models';
 import { AuditLog, EmailTemplateFactory, EventFactory, EventNotification, EventNotificationFactory, EventNotificationTypeFactory, Organization, OrganizationFactory, Platform, RecordAnswerFactory, RecordCategoryFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
+import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { AuditLogReplacementType, AuditLogType, BaseOrganization, EmailTemplateType, Event, EventNotification as EventNotificationStruct, EventNotificationStatus, Permissions, PermissionsResourceKey, RecordType, ResourcePermissions } from '@stamhoofd/structures';
+import { AuditLogReplacementType, AuditLogType, BaseOrganization, EmailTemplateType, Event, EventNotification as EventNotificationStruct, EventNotificationStatus, PermissionRoleDetailed, Permissions, PermissionsResourceKey, RecordType, ResourcePermissions } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import '../../../audit-logs/init.js';
@@ -333,6 +334,164 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             id: 'EventNotificationStatus',
             value: EventNotificationStatus.Pending,
             type: AuditLogReplacementType.Enum,
+        });
+    });
+
+    describe('Reviewer emails for full platform admins', () => {
+        // Users and the platform are not reset between tests, so the full admins and roles created here are removed again
+        const createdAdmins: User[] = [];
+        const createdRoleIds: string[] = [];
+
+        afterEach(async () => {
+            for (const user of createdAdmins) {
+                await user.delete();
+            }
+            createdAdmins.length = 0;
+
+            const platform = await Platform.getForEditing();
+            platform.privateConfig.roles = platform.privateConfig.roles.filter(r => !createdRoleIds.includes(r.id));
+            platform.config.featureFlags = platform.config.featureFlags.filter(f => f !== 'event-notification-explicit-reviewers');
+            await platform.save();
+            createdRoleIds.length = 0;
+        });
+
+        async function createPlatformRole(role: PermissionRoleDetailed) {
+            const platform = await Platform.getForEditing();
+            platform.privateConfig.roles.push(role);
+            await platform.save();
+            createdRoleIds.push(role.id);
+            return role;
+        }
+
+        async function createFullAdmin(globalPermissions: Permissions) {
+            const user = await new UserFactory({ globalPermissions }).create();
+            createdAdmins.push(user);
+            return user;
+        }
+
+        async function submitNotification() {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: minimumUserPermissions,
+            }).create();
+            const event = await new EventFactory({ organization }).create();
+            const eventNotification = await new EventNotificationFactory({ organization, events: [event] }).create();
+
+            const body: Body = new PatchableArray();
+            body.addPatch(
+                EventNotificationStruct.patch({
+                    id: eventNotification.id,
+                    status: EventNotificationStatus.Pending,
+                }),
+            );
+
+            const result = await TestRequest.patch({ body, user, organization });
+            expect(result.status).toBe(200);
+            return { user };
+        }
+
+        async function setExplicitReviewersFlag(enabled: boolean) {
+            const platform = await Platform.getForEditing();
+            platform.config.featureFlags = platform.config.featureFlags.filter(f => f !== 'event-notification-explicit-reviewers');
+            if (enabled) {
+                platform.config.featureFlags.push('event-notification-explicit-reviewers');
+            }
+            await platform.save();
+        }
+
+        test('A full platform admin receives the reviewer email without the feature flag', async () => {
+            await setExplicitReviewersFlag(false);
+            const fullAdmin = await createFullAdmin(Permissions.create({ level: PermissionLevel.Full }));
+
+            const { user } = await submitNotification();
+
+            expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+                expect.objectContaining({ to: 'event-notification-reviewer@example.com', subject: EmailTemplateType.EventNotificationSubmittedReviewer }),
+                expect.objectContaining({ to: fullAdmin.email, subject: EmailTemplateType.EventNotificationSubmittedReviewer }),
+                expect.objectContaining({ to: user.email, subject: EmailTemplateType.EventNotificationSubmittedCopy }),
+            ]);
+        });
+
+        test('A full platform admin without the explicit reviewer right does not receive the reviewer email with the feature flag', async () => {
+            await setExplicitReviewersFlag(true);
+            await createFullAdmin(Permissions.create({ level: PermissionLevel.Full }));
+
+            const { user } = await submitNotification();
+
+            expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+                expect.objectContaining({ to: 'event-notification-reviewer@example.com', subject: EmailTemplateType.EventNotificationSubmittedReviewer }),
+                expect.objectContaining({ to: user.email, subject: EmailTemplateType.EventNotificationSubmittedCopy }),
+            ]);
+        });
+
+        test('A full platform admin with an explicit reviewer right for other organizations does not receive the reviewer email with the feature flag', async () => {
+            await setExplicitReviewersFlag(true);
+            await createFullAdmin(Permissions.create({
+                level: PermissionLevel.Full,
+                resources: new Map([
+                    [PermissionsResourceType.OrganizationTags, new Map([
+                        ['some-other-tag', ResourcePermissions.create({
+                            accessRights: [AccessRight.OrganizationEventNotificationReviewer],
+                        })],
+                    ])],
+                ]),
+            }));
+
+            const { user } = await submitNotification();
+
+            expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+                expect.objectContaining({ to: 'event-notification-reviewer@example.com', subject: EmailTemplateType.EventNotificationSubmittedReviewer }),
+                expect.objectContaining({ to: user.email, subject: EmailTemplateType.EventNotificationSubmittedCopy }),
+            ]);
+        });
+
+        test('A full platform admin with an explicit reviewer right receives the reviewer email with the feature flag', async () => {
+            await setExplicitReviewersFlag(true);
+            const fullAdmin = await createFullAdmin(Permissions.create({
+                level: PermissionLevel.Full,
+                resources: new Map([
+                    [PermissionsResourceType.OrganizationTags, new Map([
+                        [PermissionsResourceKey.All, ResourcePermissions.create({
+                            accessRights: [AccessRight.OrganizationEventNotificationReviewer],
+                        })],
+                    ])],
+                ]),
+            }));
+
+            const { user } = await submitNotification();
+
+            expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+                expect.objectContaining({ to: 'event-notification-reviewer@example.com', subject: EmailTemplateType.EventNotificationSubmittedReviewer }),
+                expect.objectContaining({ to: fullAdmin.email, subject: EmailTemplateType.EventNotificationSubmittedReviewer }),
+                expect.objectContaining({ to: user.email, subject: EmailTemplateType.EventNotificationSubmittedCopy }),
+            ]);
+        });
+
+        test('A full platform admin with a platform role granting the reviewer right receives the reviewer email with the feature flag', async () => {
+            await setExplicitReviewersFlag(true);
+            const role = await createPlatformRole(PermissionRoleDetailed.create({
+                name: 'Event notification reviewer',
+                resources: new Map([
+                    [PermissionsResourceType.OrganizationTags, new Map([
+                        [PermissionsResourceKey.All, ResourcePermissions.create({
+                            accessRights: [AccessRight.OrganizationEventNotificationReviewer],
+                        })],
+                    ])],
+                ]),
+            }));
+            const fullAdmin = await createFullAdmin(Permissions.create({
+                level: PermissionLevel.Full,
+                roles: [role],
+            }));
+
+            const { user } = await submitNotification();
+
+            expect(await EmailMocker.transactional.getSucceededEmails()).toIncludeSameMembers([
+                expect.objectContaining({ to: 'event-notification-reviewer@example.com', subject: EmailTemplateType.EventNotificationSubmittedReviewer }),
+                expect.objectContaining({ to: fullAdmin.email, subject: EmailTemplateType.EventNotificationSubmittedReviewer }),
+                expect.objectContaining({ to: user.email, subject: EmailTemplateType.EventNotificationSubmittedCopy }),
+            ]);
         });
     });
 
