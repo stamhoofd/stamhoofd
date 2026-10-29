@@ -11,8 +11,8 @@ const french = RichText.create({ html: '<p>Bonjour</p>', text: 'Bonjour' });
 const english = RichText.create({ html: '<p>Hello</p>', text: 'Hello' });
 
 /**
- * The description became translatable at NextVersion (= Version until the release bump),
- * so Version - 1 behaves as an older client.
+ * The description became translatable in the current Version, bumped manually because
+ * NextVersion does not support upgrade/downgrade, so Version - 1 behaves as an older client.
  */
 describe('EventMeta description versioning', () => {
     const originalGetLanguage = (globalThis as any).$getLanguage;

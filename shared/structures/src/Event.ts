@@ -38,7 +38,7 @@ export class EventMeta extends AutoEncoder {
     organizationCache: NamedObject | null = null;
 
     @field({ decoder: RichText })
-    @field(TranslatedRichText.field({ ...NextVersion }))
+    @field(TranslatedRichText.field({ version: 426 }))
     description = TranslatedRichText.create();
 
     @field({ decoder: BooleanDecoder })
