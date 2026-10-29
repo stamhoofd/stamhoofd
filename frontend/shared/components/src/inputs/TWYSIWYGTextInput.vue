@@ -8,6 +8,7 @@
                 <WYSIWYGTextInput
                     :model-value="getForLanguage(language)"
                     :placeholder="typeof placeholder === 'string' ? placeholder : (language ? placeholder.get(language) : placeholder.toString()) ?? ''"
+                    :editor-class="editorClass"
                     @update:model-value="setForLanguage($event, language)"
                 />
                 <span v-if="language">
@@ -41,11 +42,13 @@ registerTranslateableComponent(value);
 
 withDefaults(
     defineProps<{
-        title: string;
+        title?: string;
         placeholder?: string | TranslatedString;
+        editorClass?: string;
     }>(), {
         title: '',
         placeholder: '',
+        editorClass: '',
     },
 );
 
