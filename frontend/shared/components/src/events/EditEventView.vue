@@ -10,7 +10,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <TInput v-model="name" :title="$t('%1Os')" :placeholder="$t('%1Os')" error-fields="name" :error-box="errors.errorBox" :autofocus="isNew ? true : undefined" />
+            <TInput v-model="name" :title="$t('%1Os')" :placeholder="$t('%1Os')" error-fields="name" :error-box="errors.errorBox" :autofocus="isNew" enterkeyhint="next" />
 
             <STInputBox v-if="eventTypes.length > 1" error-fields="type" :error-box="errors.errorBox" :title="$t(`%1B`)">
                 <Dropdown v-model="typeId">
@@ -788,7 +788,7 @@ async function deleteMe() {
         return;
     }
 
-    const confirmationCode = name.value;
+    const confirmationCode = name.value.toString();
 
     await present({
         components: [

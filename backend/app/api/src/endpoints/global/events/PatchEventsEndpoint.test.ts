@@ -1126,6 +1126,27 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             expect(groupModel!.settings.name).toEqual(name);
         });
 
+        test('A name with one translation that is too short is rejected', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: minimumUserPermissions,
+            }).create();
+
+            const body: Body = new PatchableArray();
+            body.addPut(Event.create({
+                organizationId: organization.id,
+                typeId: (await new PlatformEventTypeFactory({}).create()).id,
+                name: new TranslatedString({ nl: 'Zomerkamp', en: 'C' }),
+                startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            }));
+
+            await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+                STExpect.simpleError({ code: 'invalid_field', field: 'name' }),
+            );
+        });
+
         test('A translated name that is too short is rejected', async () => {
             const organization = await new OrganizationFactory({}).create();
             const user = await new UserFactory({
