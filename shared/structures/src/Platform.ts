@@ -33,6 +33,7 @@ import { PlatformMembershipTypeBehaviour } from './PlatformMembershipTypeBehavio
 import { ReduceablePrice } from './ReduceablePrice.js';
 import { RegistrationPeriod } from './RegistrationPeriod.js';
 import { RichText } from './RichText.js';
+import { TranslatedRichText } from './TranslatedRichText.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 /**
@@ -508,10 +509,12 @@ export class PlatformConfig extends AutoEncoder {
     coverBottomLeftOverlayWidth = 150;
 
     @field({ decoder: RichText, version: 332 })
-    footerText = RichText.create({});
+    @field(TranslatedRichText.field({ ...NextVersion }))
+    footerText = TranslatedRichText.create();
 
     @field({ decoder: RichText, version: 342 })
-    shopFooterText = RichText.create({});
+    @field(TranslatedRichText.field({ ...NextVersion }))
+    shopFooterText = TranslatedRichText.create();
 
     @field({ decoder: StringDecoder, nullable: true, version: 310 })
     color: string | null = null;
