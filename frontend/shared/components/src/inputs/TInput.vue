@@ -77,6 +77,13 @@ function setForLanguage(val: string, lang: Language | null) {
         return;
     }
 
+    if (!val && value.value.languages.length <= 1) {
+        // Clearing the last language leaves nothing to translate: back to an untranslated value, like TInputButton does
+        value.value = value.value.patch('');
+        return;
+    }
+
+    // A cleared language is removed so readers fall back to another language
     value.value = value.value.patch({
         [lang]: val || null,
     });
