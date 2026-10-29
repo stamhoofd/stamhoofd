@@ -201,9 +201,12 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = new Map([
             [
                 'name',
                 createColumnFilter({
-                    expression: SQL.jsonExtract(SQL.column('groups', 'settings'), '$.value.name'),
-                    type: SQLValueType.JSONString,
-                    nullable: false,
+                    expression: new SQLTranslatedString(
+                        SQL.column('groups', 'settings'),
+                        '$.value.name',
+                    ),
+                    type: SQLValueType.String,
+                    nullable: true,
                 }),
             ],
             [
