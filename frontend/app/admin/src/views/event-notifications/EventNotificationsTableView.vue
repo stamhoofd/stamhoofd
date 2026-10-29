@@ -131,7 +131,7 @@ const allColumns: Column<ObjectType, any>[] = [
     new Column<ObjectType, string>({
         id: 'event.name',
         name: $t('%w9'),
-        getValue: e => e.events.map(e => e.name).join(', '),
+        getValue: e => e.events.map(e => e.name.toString()).join(', '),
         minimumWidth: 200,
         recommendedWidth: 100,
         index: 0,

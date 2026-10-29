@@ -151,7 +151,7 @@ export class EventNotificationService {
         return [
             Replacement.create({
                 token: 'eventName',
-                value: events.map(e => e.name).join(', '),
+                value: events.map(e => e.name.toString()).join(', '),
             }),
             Replacement.create({
                 token: 'organizationName',

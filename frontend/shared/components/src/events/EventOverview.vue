@@ -145,7 +145,7 @@
                                     <template #left>
                                         <img src="@stamhoofd/assets/images/illustrations/cart.svg">
                                     </template>
-                                    <h2 v-if="!webshop || webshop.meta.name === event.name" class="style-title-list">
+                                    <h2 v-if="!webshop || webshop.meta.name === event.name.toString()" class="style-title-list">
                                         {{ $t('%1Ag') }}
                                     </h2>
                                     <h2 v-else class="style-title-list">
@@ -293,7 +293,7 @@ import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { DarkMode, EmailTemplate, EmailTemplateType, Event, getAppHost, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import { DarkMode, EmailTemplate, EmailTemplateType, Event, getAppHost, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PrivateWebshop, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
@@ -337,7 +337,7 @@ const props = defineProps<{
 
 const webshopViewLoaders = useEventWebshopViewLoaders();
 
-const title = computed(() => props.event.name);
+const title = computed(() => props.event.name.toString());
 const $navigate = useNavigate();
 const organization = useOrganization();
 const context = useContext();
@@ -708,7 +708,7 @@ async function createWebshop() {
                 {
                     initialWebshop: PrivateWebshop.create({
                         meta: WebshopMetaData.create({
-                            name: props.event.name,
+                            name: props.event.name.toString(),
                             description: props.event.meta.description,
                             coverPhoto: props.event.meta.coverPhoto,
                             darkMode: DarkMode.Auto,
@@ -946,7 +946,7 @@ function duplicateEvent() {
                     ...clonedGroup.settings,
                     eventId: event.id,
                     period: undefined,
-                    name: TranslatedString.create(event.name),
+                    name: event.name,
                 }),
                 createdAt: undefined,
                 status: GroupStatus.Closed,

@@ -25,7 +25,7 @@ const getSheet = (platform: PlatformStruct): XlsxTransformerSheet<EventNotificat
             name: $t(`%w9`),
             width: 40,
             getValue: (notification: EventNotification) => ({
-                value: notification.events.map(e => e.name).join(', '),
+                value: notification.events.map(e => e.name.toString()).join(', '),
             }),
         },
         {

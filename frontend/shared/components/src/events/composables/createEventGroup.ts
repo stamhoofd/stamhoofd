@@ -1,5 +1,5 @@
 import type { Event, Organization} from '@stamhoofd/structures';
-import { Group, GroupSettings, GroupStatus, GroupType, TranslatedString } from '@stamhoofd/structures';
+import { Group, GroupSettings, GroupStatus, GroupType } from '@stamhoofd/structures';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { ComponentWithProperties, NavigationController, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
@@ -21,7 +21,7 @@ export function useCreateEventGroup() {
             periodId: organization.value?.period.period.id,
             type: GroupType.EventRegistration,
             settings: GroupSettings.create({
-                name: TranslatedString.create(event.name),
+                name: event.name,
             }),
             status: GroupStatus.Closed,
         });

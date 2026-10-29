@@ -760,7 +760,7 @@ async function createEventFromGroup(group: Group, organization: Organization) {
 
     return Event.create({
         organizationId: organization.id,
-        name,
+        name: group.settings.name,
         typeId: getEventTypeId(name),
         startDate: group.settings.startDate,
         endDate: group.settings.endDate,

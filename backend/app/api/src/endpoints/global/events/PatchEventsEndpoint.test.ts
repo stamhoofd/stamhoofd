@@ -79,7 +79,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
         const newEvent = Event.create({
             organizationId: organization.id,
             typeId: (await new PlatformEventTypeFactory({}).create()).id,
-            name: 'test event',
+            name: TranslatedString.create('test event'),
             startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
             endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         });
@@ -119,14 +119,14 @@ describe('Endpoint.PatchEventsEndpoint', () => {
         const withoutGroups = Event.create({
             organizationId: organization.id,
             typeId,
-            name: 'without groups',
+            name: TranslatedString.create('without groups'),
             startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
             endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         });
         const withGroups = Event.create({
             organizationId: organization.id,
             typeId,
-            name: 'with groups',
+            name: TranslatedString.create('with groups'),
             startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
             endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             meta: EventMeta.create({
@@ -168,7 +168,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
         body.addPut(Event.create({
             organizationId: organization.id,
             typeId: (await new PlatformEventTypeFactory({}).create()).id,
-            name: 'outside period',
+            name: TranslatedString.create('outside period'),
             startDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
             endDate: new Date(Date.now() + 61 * 24 * 60 * 60 * 1000),
         }));
@@ -201,7 +201,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             id: deletedEvent.id,
             organizationId: organization.id,
             typeId: (await new PlatformEventTypeFactory({}).create()).id,
-            name: 'test event',
+            name: TranslatedString.create('test event'),
             startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
             endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         }));
@@ -234,7 +234,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             body.addPut(Event.create({
                 organizationId: organization.id,
                 typeId,
-                name: 'test event',
+                name: TranslatedString.create('test event'),
                 startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
                 endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
                 meta: EventMeta.create({
@@ -282,7 +282,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             body.addPut(Event.create({
                 organizationId: organization.id,
                 typeId: (await new PlatformEventTypeFactory({}).create()).id,
-                name: 'test event',
+                name: TranslatedString.create('test event'),
                 startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
                 endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             }));
@@ -309,7 +309,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             body.addPut(Event.create({
                 organizationId: organization.id,
                 typeId: (await new PlatformEventTypeFactory({}).create()).id,
-                name: 'test event',
+                name: TranslatedString.create('test event'),
                 startDate: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000),
                 endDate: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
             }));
@@ -333,7 +333,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
         const newEvent = Event.create({
             organizationId: null,
             typeId: (await new PlatformEventTypeFactory({}).create()).id,
-            name: 'test event',
+            name: TranslatedString.create('test event'),
             startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
             endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         });
@@ -385,7 +385,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
         const newEvent = Event.create({
             organizationId: null,
             typeId: (await new PlatformEventTypeFactory({}).create()).id,
-            name: 'test event',
+            name: TranslatedString.create('test event'),
             startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
             endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         });
@@ -430,7 +430,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 body.addPut(Event.create({
                     organizationId: null,
                     typeId,
-                    name: 'global event',
+                    name: TranslatedString.create('global event'),
                     startDate,
                     endDate: new Date(startDate.getTime() + 2 * 24 * 60 * 60 * 1000),
                 }));
@@ -973,7 +973,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             const newEvent = Event.create({
                 organizationId: null,
                 typeId: OrganizationEventType.DEFAULT_ID,
-                name: 'test event',
+                name: TranslatedString.create('test event'),
                 startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
                 endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             });
@@ -1015,6 +1015,156 @@ describe('Endpoint.PatchEventsEndpoint', () => {
 
             await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
                 STExpect.simpleError({ code: 'permission_denied' }),
+            );
+        });
+    });
+
+    describe('Translated names', () => {
+        test('A put stores every translation of the name', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: minimumUserPermissions,
+            }).create();
+
+            const name = new TranslatedString({ nl: 'Zomerkamp', en: 'Summer camp' });
+            const body: Body = new PatchableArray();
+            const newEvent = Event.create({
+                organizationId: organization.id,
+                typeId: (await new PlatformEventTypeFactory({}).create()).id,
+                name,
+                startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            });
+            body.addPut(newEvent);
+
+            const result = await TestRequest.patch({ body, user, organization });
+            expect(result.status).toBe(200);
+            expect(result.body).toHaveLength(1);
+            expect(result.body[0].name).toEqual(name);
+
+            const model = await EventModel.getByID(newEvent.id);
+            expect(model!.name).toEqual(name);
+        });
+
+        test('A patch with a translation keeps the other languages', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: minimumUserPermissions,
+            }).create();
+
+            const event = await new EventFactory({
+                organization,
+                name: new TranslatedString({ nl: 'Zomerkamp', en: 'Summer camp' }),
+            }).create();
+
+            const body: Body = new PatchableArray();
+            body.addPatch(Event.patch({
+                id: event.id,
+                name: TranslatedString.patch({ en: 'Camp', fr: 'Camp d\'été' }),
+            }));
+
+            const result = await TestRequest.patch({ body, user, organization });
+            expect(result.status).toBe(200);
+            expect(result.body[0].name).toEqual(new TranslatedString({ nl: 'Zomerkamp', en: 'Camp', fr: 'Camp d\'été' }));
+
+            const model = await EventModel.getByID(event.id);
+            expect(model!.name).toEqual(new TranslatedString({ nl: 'Zomerkamp', en: 'Camp', fr: 'Camp d\'été' }));
+        });
+
+        test('A patch with a plain string replaces the translations', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: minimumUserPermissions,
+            }).create();
+
+            const event = await new EventFactory({
+                organization,
+                name: new TranslatedString({ nl: 'Zomerkamp', en: 'Summer camp' }),
+            }).create();
+
+            const body: Body = new PatchableArray();
+            body.addPatch(Event.patch({
+                id: event.id,
+                name: TranslatedString.create('Kamp'),
+            }));
+
+            const result = await TestRequest.patch({ body, user, organization });
+            expect(result.status).toBe(200);
+            expect(result.body[0].name).toEqual(TranslatedString.create('Kamp'));
+        });
+
+        test('The translated name is synced to the registration group', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const period = await new RegistrationPeriodFactory({
+                startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+            }).create();
+            await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
+            const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
+            const event = await new EventFactory({ organization, group }).create();
+
+            const name = new TranslatedString({ nl: 'Zomerkamp', en: 'Summer camp' });
+            const body: Body = new PatchableArray();
+            body.addPatch(Event.patch({
+                id: event.id,
+                name,
+            }));
+
+            const result = await TestRequest.patch({ body, user, organization });
+            expect(result.status).toBe(200);
+            expect(result.body[0].group!.settings.name).toEqual(name);
+
+            const groupModel = await GroupModel.getByID(group.id);
+            expect(groupModel!.settings.name).toEqual(name);
+        });
+
+        test('A name with one translation that is too short is rejected', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: minimumUserPermissions,
+            }).create();
+
+            const body: Body = new PatchableArray();
+            body.addPut(Event.create({
+                organizationId: organization.id,
+                typeId: (await new PlatformEventTypeFactory({}).create()).id,
+                name: new TranslatedString({ nl: 'Zomerkamp', en: 'C' }),
+                startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            }));
+
+            await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+                STExpect.simpleError({ code: 'invalid_field', field: 'name' }),
+            );
+        });
+
+        test('A translated name that is too short is rejected', async () => {
+            const organization = await new OrganizationFactory({}).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: minimumUserPermissions,
+            }).create();
+
+            const body: Body = new PatchableArray();
+            body.addPut(Event.create({
+                organizationId: organization.id,
+                typeId: (await new PlatformEventTypeFactory({}).create()).id,
+                name: new TranslatedString({ nl: 'K', en: 'C' }),
+                startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            }));
+
+            await expect(TestRequest.patch({ body, user, organization })).rejects.toThrow(
+                STExpect.simpleError({ code: 'invalid_field', field: 'name' }),
             );
         });
     });

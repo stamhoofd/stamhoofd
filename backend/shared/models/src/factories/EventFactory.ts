@@ -1,5 +1,5 @@
 import { Factory } from '@node/database';
-import { EventMeta } from '@stamhoofd/structures';
+import { EventMeta, TranslatedString } from '@stamhoofd/structures';
 
 import { Event } from '../models/Event.js';
 import type { Organization } from '../models/Organization.js';
@@ -8,7 +8,7 @@ import type { Group } from '../models/Group.js';
 
 class Options {
     organization?: Organization;
-    name?: string;
+    name?: string | TranslatedString;
     meta?: EventMeta;
     startDate?: Date;
     endDate?: Date;
@@ -24,7 +24,8 @@ export class EventFactory extends Factory<Options, Event> {
         event.typeId = this.options.typeId ?? (await new PlatformEventTypeFactory({}).create()).id;
         event.startDate = this.options.startDate ?? new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
         event.endDate = this.options.endDate ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-        event.name = this.options.name ?? 'Event ' + (new Date().getTime() + Math.floor(Math.random() * 999999));
+        const name = this.options.name ?? 'Event ' + (new Date().getTime() + Math.floor(Math.random() * 999999));
+        event.name = name instanceof TranslatedString ? name : TranslatedString.create(name);
         event.meta = this.options.meta ?? EventMeta.create({});
         event.groupId = this.options.group?.id ?? null;
 

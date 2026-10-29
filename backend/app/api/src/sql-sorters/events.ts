@@ -2,6 +2,7 @@ import type { Event } from '@stamhoofd/models';
 import type { SQLOrderByDirection, SQLSortDefinitions } from '@stamhoofd/sql';
 import { SQL, SQLOrderBy } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
+import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 
 export const eventSorters: SQLSortDefinitions<Event> = {
     // WARNING! TEST NEW SORTERS THOROUGHLY!
@@ -25,11 +26,11 @@ export const eventSorters: SQLSortDefinitions<Event> = {
     },
     name: {
         getValue(a) {
-            return a.name;
+            return a.name.toString();
         },
         toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
             return new SQLOrderBy({
-                column: SQL.column('name'),
+                column: new SQLTranslatedString(SQL.column('name'), '$.value'),
                 direction,
             });
         },
