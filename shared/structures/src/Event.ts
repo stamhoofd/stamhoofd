@@ -6,6 +6,7 @@ import { Image } from './files/Image.js';
 import { Group } from './Group.js';
 import { Platform } from './Platform.js';
 import { RichText } from './RichText.js';
+import { TranslatedRichText } from './TranslatedRichText.js';
 
 export class EventLocation extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -37,7 +38,8 @@ export class EventMeta extends AutoEncoder {
     organizationCache: NamedObject | null = null;
 
     @field({ decoder: RichText })
-    description = RichText.create({});
+    @field(TranslatedRichText.field({ version: 426 }))
+    description = TranslatedRichText.create();
 
     @field({ decoder: BooleanDecoder })
     visible = true;

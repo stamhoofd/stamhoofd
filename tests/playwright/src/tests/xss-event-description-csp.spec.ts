@@ -17,6 +17,7 @@ import {
     EventMeta,
     Permissions,
     RichText,
+    TranslatedRichText,
 } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { DashboardTab, WorkerData } from '../helpers/index.js';
@@ -93,10 +94,10 @@ test.describe('Stored XSS in event description is blocked by CSP @xss', () => {
             endDate,
             meta: EventMeta.create({
                 visible: true,
-                description: RichText.create({
+                description: TranslatedRichText.create(RichText.create({
                     html: descriptionHtml,
                     text: descriptionText,
-                }),
+                })),
             }),
         }).create();
 
