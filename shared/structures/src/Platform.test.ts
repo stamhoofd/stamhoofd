@@ -1,6 +1,9 @@
 import { ObjectData } from '@common/encoding';
+import { Language } from '@stamhoofd/types/Language';
 import { Formatter } from '@stamhoofd/utility';
-import { Platform, PlatformConfig, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig } from './Platform.js';
+import { Platform, PlatformConfig, PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, PlatformPolicy } from './Platform.js';
+import { RichText } from './RichText.js';
+import { TranslatedRichText, TranslatedRichTextPatch } from './TranslatedRichText.js';
 import { Version } from './Version.js';
 
 describe('PlatformMembershipTypeConfig', () => {
@@ -129,5 +132,116 @@ describe('PlatformConfig.canInheritPlatformResponsibilityPermissions', () => {
         expect(config.canInheritPlatformResponsibilityPermissions('john@ksa.be')).toBe(true);
         expect(config.canInheritPlatformResponsibilityPermissions('john@gent.ksa.be')).toBe(true);
         expect(config.canInheritPlatformResponsibilityPermissions('john@brugge.ksa.be')).toBe(false);
+    });
+});
+
+const dutch = RichText.create({ html: '<p>Hallo</p>', text: 'Hallo' });
+const french = RichText.create({ html: '<p>Bonjour</p>', text: 'Bonjour' });
+const english = RichText.create({ html: '<p>Hello</p>', text: 'Hello' });
+
+/**
+ * The footer and policy texts became translatable in the current Version, bumped manually because
+ * NextVersion does not support upgrade/downgrade, so Version - 1 behaves as an older client.
+ */
+describe('Platform rich text versioning', () => {
+    const originalGetLanguage = (globalThis as any).$getLanguage;
+
+    afterEach(() => {
+        (globalThis as any).$getLanguage = originalGetLanguage;
+    });
+
+    function setLanguage(language: Language) {
+        (globalThis as any).$getLanguage = () => language;
+    }
+
+    const cases = [
+        ['PlatformConfig.footerText', PlatformConfig, 'footerText'],
+        ['PlatformConfig.shopFooterText', PlatformConfig, 'shopFooterText'],
+        ['PlatformPolicy.richText', PlatformPolicy, 'richText'],
+    ] as const;
+
+    describe.each(cases)('%s', (_name, Struct, field) => {
+        function get<T>(object: object): T {
+            return (object as Record<string, T>)[field];
+        }
+
+        it('upgrades a RichText from an older version', () => {
+            const encoded = Struct.create({}).encode({ version: Version - 1 }) as Record<string, unknown>;
+            encoded[field] = dutch.encode({ version: Version - 1 });
+
+            const decoded = new ObjectData(encoded, { version: Version - 1 }).decode(Struct);
+            expect(get<TranslatedRichText>(decoded)).toBeInstanceOf(TranslatedRichText);
+            expect(get<TranslatedRichText>(decoded).isDefault).toBe(true);
+            expect(get<TranslatedRichText>(decoded).html).toBe('<p>Hallo</p>');
+        });
+
+        it('downgrades to a RichText in the request language for older clients', () => {
+            const config = Struct.create({
+                [field]: TranslatedRichText.create({ [Language.Dutch]: dutch, [Language.French]: french }),
+            });
+
+            setLanguage(Language.French);
+            const encoded = config.encode({ version: Version - 1 }) as Record<string, unknown>;
+            const richText = new ObjectData(encoded[field], { version: Version - 1 }).decode(RichText);
+            expect(richText.text).toBe('Bonjour');
+        });
+
+        it('keeps all translations when encoding and decoding the latest version', () => {
+            const config = Struct.create({
+                [field]: TranslatedRichText.create({ [Language.Dutch]: dutch, [Language.French]: french }),
+            });
+
+            const decoded = new ObjectData(config.encode({ version: Version }), { version: Version }).decode(Struct);
+            expect(get<TranslatedRichText>(decoded).get(Language.Dutch).text).toBe('Hallo');
+            expect(get<TranslatedRichText>(decoded).get(Language.French).text).toBe('Bonjour');
+        });
+
+        it('upgrades a RichText patch from an older client', () => {
+            const encoded = Struct.patch({}).encode({ version: Version - 1 }) as Record<string, unknown>;
+            encoded[field] = dutch.encode({ version: Version - 1 });
+
+            const decoded = new ObjectData(encoded, { version: Version - 1 }).decode(Struct.patchType());
+            const patched = Struct.create({}).patch(decoded);
+            expect(get<TranslatedRichText>(patched)).toBeInstanceOf(TranslatedRichText);
+            expect(get<TranslatedRichText>(patched).html).toBe('<p>Hallo</p>');
+        });
+
+        it('only changes the Dutch text for a patch from an older client', () => {
+            const config = Struct.create({
+                [field]: TranslatedRichText.create({ [Language.Dutch]: dutch, [Language.French]: french }),
+            });
+
+            const encoded = Struct.patch({}).encode({ version: Version - 1 }) as Record<string, unknown>;
+            encoded[field] = english.encode({ version: Version - 1 });
+
+            const decoded = new ObjectData(encoded, { version: Version - 1 }).decode(Struct.patchType());
+            const patched = config.patch(decoded);
+            expect(get<TranslatedRichText>(patched).get(Language.Dutch).text).toBe('Hello');
+            expect(get<TranslatedRichText>(patched).get(Language.French).text).toBe('Bonjour');
+        });
+
+        it('encodes and decodes a language patch', () => {
+            const config = Struct.create({
+                [field]: TranslatedRichText.create({ [Language.Dutch]: dutch, [Language.French]: french }),
+            });
+            const patch = Struct.patch({
+                [field]: new TranslatedRichTextPatch({ [Language.English]: english, [Language.French]: null }),
+            });
+
+            const decoded = new ObjectData(patch.encode({ version: Version }), { version: Version }).decode(Struct.patchType());
+            expect(get<TranslatedRichTextPatch>(decoded)).toBeInstanceOf(TranslatedRichTextPatch);
+
+            const patched = config.patch(decoded);
+            expect(get<TranslatedRichText>(patched).languages.sort()).toEqual([Language.Dutch, Language.English].sort());
+        });
+
+        it('downgrades a language patch to a RichText for older clients', () => {
+            const patch = Struct.patch({
+                [field]: new TranslatedRichTextPatch({ [Language.Dutch]: dutch }),
+            });
+
+            const encoded = patch.encode({ version: Version - 1 }) as Record<string, unknown>;
+            expect(new ObjectData(encoded[field], { version: Version - 1 }).decode(RichText).text).toBe('Hallo');
+        });
     });
 });

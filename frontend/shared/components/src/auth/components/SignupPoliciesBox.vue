@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { SimpleError } from '@common/errors';
-import { PlatformPolicy, RichText } from '@stamhoofd/structures';
+import { PlatformPolicy, RichText, TranslatedRichText } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, ref } from 'vue';
 import { ErrorBox } from '../../errors/ErrorBox';
@@ -51,9 +51,9 @@ const policies = computed(() => {
                 name: $t(`%v3`),
                 url,
                 checkbox: true,
-                richText: RichText.create({
+                richText: TranslatedRichText.create(RichText.create({
                     html: $t(`%v4`) + ' <a href="' + Formatter.escapeHtml(url) + `" target="_blank">` + $t(`%Jh`) + `</a>.`,
-                }),
+                })),
             }),
         ];
     }

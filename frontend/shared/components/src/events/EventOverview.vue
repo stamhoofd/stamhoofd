@@ -709,7 +709,7 @@ async function createWebshop() {
                     initialWebshop: PrivateWebshop.create({
                         meta: WebshopMetaData.create({
                             name: props.event.name,
-                            description: props.event.meta.description,
+                            description: props.event.meta.description.toRichText(),
                             coverPhoto: props.event.meta.coverPhoto,
                             darkMode: DarkMode.Auto,
                         }),
