@@ -244,7 +244,10 @@ describe('Platform rich text versioning', () => {
         }
 
         it('upgrades a RichText from an older version', () => {
-            const encoded = Struct.create({}).encode({ version: Version - 1 }) as Record<string, unknown>;
+            const encoded = Struct.create({}).encode({ version: Version - 1 }) as Record<
+                string,
+                unknown
+            >;
             encoded[field] = dutch.encode({ version: Version - 1 });
 
             const decoded = new ObjectData(encoded, { version: Version - 1 }).decode(Struct);
@@ -255,30 +258,45 @@ describe('Platform rich text versioning', () => {
 
         it('downgrades to a RichText in the request language for older clients', () => {
             const config = Struct.create({
-                [field]: TranslatedRichText.create({ [Language.Dutch]: dutch, [Language.French]: french }),
+                [field]: TranslatedRichText.create({
+                    [Language.Dutch]: dutch,
+                    [Language.French]: french,
+                }),
             });
 
             setLanguage(Language.French);
             const encoded = config.encode({ version: Version - 1 }) as Record<string, unknown>;
-            const richText = new ObjectData(encoded[field], { version: Version - 1 }).decode(RichText);
+            const richText = new ObjectData(encoded[field], { version: Version - 1 }).decode(
+                RichText,
+            );
             expect(richText.text).toBe('Bonjour');
         });
 
         it('keeps all translations when encoding and decoding the latest version', () => {
             const config = Struct.create({
-                [field]: TranslatedRichText.create({ [Language.Dutch]: dutch, [Language.French]: french }),
+                [field]: TranslatedRichText.create({
+                    [Language.Dutch]: dutch,
+                    [Language.French]: french,
+                }),
             });
 
-            const decoded = new ObjectData(config.encode({ version: Version }), { version: Version }).decode(Struct);
+            const decoded = new ObjectData(config.encode({ version: Version }), {
+                version: Version,
+            }).decode(Struct);
             expect(get<TranslatedRichText>(decoded).get(Language.Dutch).text).toBe('Hallo');
             expect(get<TranslatedRichText>(decoded).get(Language.French).text).toBe('Bonjour');
         });
 
         it('upgrades a RichText patch from an older client', () => {
-            const encoded = Struct.patch({}).encode({ version: Version - 1 }) as Record<string, unknown>;
+            const encoded = Struct.patch({}).encode({ version: Version - 1 }) as Record<
+                string,
+                unknown
+            >;
             encoded[field] = dutch.encode({ version: Version - 1 });
 
-            const decoded = new ObjectData(encoded, { version: Version - 1 }).decode(Struct.patchType());
+            const decoded = new ObjectData(encoded, { version: Version - 1 }).decode(
+                Struct.patchType(),
+            );
             const patched = Struct.create({}).patch(decoded);
             expect(get<TranslatedRichText>(patched)).toBeInstanceOf(TranslatedRichText);
             expect(get<TranslatedRichText>(patched).html).toBe('<p>Hallo</p>');
@@ -286,13 +304,21 @@ describe('Platform rich text versioning', () => {
 
         it('only changes the Dutch text for a patch from an older client', () => {
             const config = Struct.create({
-                [field]: TranslatedRichText.create({ [Language.Dutch]: dutch, [Language.French]: french }),
+                [field]: TranslatedRichText.create({
+                    [Language.Dutch]: dutch,
+                    [Language.French]: french,
+                }),
             });
 
-            const encoded = Struct.patch({}).encode({ version: Version - 1 }) as Record<string, unknown>;
+            const encoded = Struct.patch({}).encode({ version: Version - 1 }) as Record<
+                string,
+                unknown
+            >;
             encoded[field] = english.encode({ version: Version - 1 });
 
-            const decoded = new ObjectData(encoded, { version: Version - 1 }).decode(Struct.patchType());
+            const decoded = new ObjectData(encoded, { version: Version - 1 }).decode(
+                Struct.patchType(),
+            );
             const patched = config.patch(decoded);
             expect(get<TranslatedRichText>(patched).get(Language.Dutch).text).toBe('Hello');
             expect(get<TranslatedRichText>(patched).get(Language.French).text).toBe('Bonjour');
@@ -300,17 +326,27 @@ describe('Platform rich text versioning', () => {
 
         it('encodes and decodes a language patch', () => {
             const config = Struct.create({
-                [field]: TranslatedRichText.create({ [Language.Dutch]: dutch, [Language.French]: french }),
+                [field]: TranslatedRichText.create({
+                    [Language.Dutch]: dutch,
+                    [Language.French]: french,
+                }),
             });
             const patch = Struct.patch({
-                [field]: new TranslatedRichTextPatch({ [Language.English]: english, [Language.French]: null }),
+                [field]: new TranslatedRichTextPatch({
+                    [Language.English]: english,
+                    [Language.French]: null,
+                }),
             });
 
-            const decoded = new ObjectData(patch.encode({ version: Version }), { version: Version }).decode(Struct.patchType());
+            const decoded = new ObjectData(patch.encode({ version: Version }), {
+                version: Version,
+            }).decode(Struct.patchType());
             expect(get<TranslatedRichTextPatch>(decoded)).toBeInstanceOf(TranslatedRichTextPatch);
 
             const patched = config.patch(decoded);
-            expect(get<TranslatedRichText>(patched).languages.sort()).toEqual([Language.Dutch, Language.English].sort());
+            expect(get<TranslatedRichText>(patched).languages.sort()).toEqual(
+                [Language.Dutch, Language.English].sort(),
+            );
         });
 
         it('downgrades a language patch to a RichText for older clients', () => {
@@ -319,7 +355,9 @@ describe('Platform rich text versioning', () => {
             });
 
             const encoded = patch.encode({ version: Version - 1 }) as Record<string, unknown>;
-            expect(new ObjectData(encoded[field], { version: Version - 1 }).decode(RichText).text).toBe('Hallo');
+            expect(
+                new ObjectData(encoded[field], { version: Version - 1 }).decode(RichText).text,
+            ).toBe('Hallo');
         });
     });
 });
