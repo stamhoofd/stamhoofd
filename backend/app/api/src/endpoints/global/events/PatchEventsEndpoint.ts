@@ -211,7 +211,7 @@ export class PatchEventsEndpoint extends Endpoint<Params, Query, Body, ResponseB
                 event.meta.organizationCache = null;
             }
 
-            event.name = patch.name ?? event.name;
+            event.name = patchObject(event.name, patch.name);
             event.startDate = patch.startDate ?? event.startDate;
             event.endDate = patch.endDate ?? event.endDate;
 

@@ -28,7 +28,7 @@ export function useEventGroupsRelationFetcher() {
         return new RelationFetcher({
             fetcher,
             filter,
-            getName: event => event.name,
+            getName: event => event.name.toString(),
             getValue: event => getGroup(event).id,
             getDescription: (event) => {
                 if (!organization.value) {

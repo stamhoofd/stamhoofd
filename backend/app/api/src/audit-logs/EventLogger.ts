@@ -13,7 +13,7 @@ export const EventLogger = new ModelLogger(Event, {
         return new Map([
             ['e', AuditLogReplacement.create({
                 id: model.id,
-                value: model.name,
+                value: model.name.toString(),
                 type: AuditLogReplacementType.Event,
             })],
         ]);
