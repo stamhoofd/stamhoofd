@@ -411,7 +411,8 @@ export class PlatformPolicy extends AutoEncoder {
     checkbox = true;
 
     @field({ decoder: RichText, version: 327 })
-    richText = RichText.create({});
+    @field(TranslatedRichText.field({ ...NextVersion }))
+    richText = TranslatedRichText.create();
 }
 
 export class PrivacySettings extends AutoEncoder {
