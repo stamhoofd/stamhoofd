@@ -28,9 +28,7 @@
                 {{ $t('%II') }}
             </p>
 
-            <STInputBox error-fields="meta.description" :error-box="errors.errorBox" class="max" :title="$t(`%IM`)">
-                <WYSIWYGTextInput v-model="richText" :placeholder="$t(`%IN`)" />
-            </STInputBox>
+            <TWYSIWYGTextInput v-model="richText" :title="$t(`%IM`)" :placeholder="$t(`%IN`)" error-fields="richText" :error-box="errors.errorBox" class="max" />
             <p class="style-description-small">
                 {{ $t('%IJ') }}
             </p>
@@ -47,10 +45,11 @@ import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import Checkbox from '@stamhoofd/components/inputs/Checkbox.vue';
 import UploadFileButton from '@stamhoofd/components/inputs/UploadFileButton.vue';
-import WYSIWYGTextInput from '@stamhoofd/components/inputs/WYSIWYGTextInput.vue';
+import TWYSIWYGTextInput from '@stamhoofd/components/inputs/TWYSIWYGTextInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import type { PlatformPolicy } from '@stamhoofd/structures';
+import { TranslatedRichText } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const errors = useErrors();
@@ -133,7 +132,7 @@ const url = computed({
 
 const richText = computed({
     get: () => patched.value.richText,
-    set: richText => addPatch({ richText }),
+    set: richText => addPatch({ richText: TranslatedRichText.createPatch(patched.value.richText, richText) }),
 });
 
 const checkbox = computed({
