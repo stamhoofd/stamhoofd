@@ -5,26 +5,30 @@
 </template>
 
 <script setup lang="ts">
-import { LanguageHelper, TranslatedString } from '@stamhoofd/structures';
-import { computed } from 'vue';
-import { useEditorLanguage } from './hooks/useEditorLanguage';
+import { LanguageHelper, RichText, TranslatedRichText, TranslatedString } from '@stamhoofd/structures';
+import type { Language } from '@stamhoofd/types/Language';
+import type { TranslateableValue } from './hooks/useEditorContext';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { useSwitchLanguage } from '../views/hooks/useSwitchLanguage';
 
-const value = defineModel<TranslatedString>({ required: true });
-const editorLanguage = useEditorLanguage();
+const value = defineModel<TranslateableValue>({ required: true });
 const { hasLanguages } = useSwitchLanguage();
-const isDefault = computed(() => {
-    return typeof value.value.translations === 'string';
-});
 
-const isMissing = computed(() => {
-    return editorLanguage.value && (!value.value.getIfExists(editorLanguage.value) && value.value.get(editorLanguage.value));
-});
+function untranslated(): TranslateableValue {
+    if (value.value instanceof TranslatedRichText) {
+        return new TranslatedRichText(value.value.toRichText());
+    }
+    return new TranslatedString(value.value.toString());
+}
 
-async function showAll() {
-    editorLanguage.value = null;
+function withLanguage(lang: Language): TranslateableValue {
+    // On an untranslated value, getIfExists returns the untranslated content and patch converts it into a language map
+    const v = value.value;
+    if (v instanceof TranslatedRichText) {
+        return v.patch({ [lang]: v.getIfExists(lang) ?? RichText.create({}) });
+    }
+    return v.patch({ [lang]: v.getIfExists(lang) ?? '' });
 }
 
 async function showMenu(event: MouseEvent) {
@@ -34,7 +38,7 @@ async function showMenu(event: MouseEvent) {
                 name: $t('%14n'),
                 selected: value.value.isDefault,
                 action: () => {
-                    value.value = value.value.patch(value.value.toString());
+                    value.value = untranslated();
                 },
             }),
         ],
@@ -44,15 +48,7 @@ async function showMenu(event: MouseEvent) {
             action: () => {
                 const included = value.value.languages.includes(lang);
                 if (!included) {
-                    if (value.value.isDefault) {
-                        value.value = new TranslatedString({
-                            [lang]: value.value.toString(),
-                        });
-                    } else {
-                        value.value = value.value.patch({
-                            [lang]: value.value.getIfExists(lang) ?? '',
-                        });
-                    }
+                    value.value = withLanguage(lang);
                 } else {
                     if (value.value.languages.length > 1) {
                         // Remove the language
@@ -61,7 +57,7 @@ async function showMenu(event: MouseEvent) {
                         });
                     } else {
                         // Set as untranslated
-                        value.value = new TranslatedString(value.value.toString());
+                        value.value = untranslated();
                     }
                 }
                 return false; // Do not close
