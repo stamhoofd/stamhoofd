@@ -107,6 +107,10 @@
         <Checkbox :model-value="getFeatureFlag('event-notifications')" :disabled="STAMHOOFD.userMode !== 'platform'" @update:model-value="setFeatureFlag('event-notifications', !!$event)">
             {{ $t('%CV') }}
         </Checkbox>
+
+        <STList v-if="getFeatureFlag('event-notifications')">
+            <CheckboxListItem :model-value="getFeatureFlag('event-notification-explicit-reviewers')" :label="$t('Kampmeldingen enkel melden aan beheerders met expliciet toegangsrecht')" :description="$t('E-mails over ingediende kampmeldingen worden enkel verstuurd naar beheerders met het expliciete toegangsrecht om kampmeldingen na te kijken. Platformbeheerders met volledige toegang hebben een extra rol nodig om alsnog een melding te ontvangen.')" @update:model-value="setFeatureFlag('event-notification-explicit-reviewers', !!$event)" />
+        </STList>
         <Checkbox :model-value="!!STAMHOOFD.domains.webshop" :disabled="true">
             {{ $t('%1Pd') }}
         </Checkbox>
