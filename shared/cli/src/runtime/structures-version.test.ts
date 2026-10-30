@@ -20,7 +20,7 @@ describe('increaseStructuresVersion', () => {
         vi.mocked(detectVcs).mockResolvedValue(Vcs.Git);
         cwd = await fs.mkdtemp(path.join(os.tmpdir(), 'structures-version-'));
         await fs.mkdir(path.join(cwd, versionFile, '..'), { recursive: true });
-        await fs.writeFile(path.join(cwd, versionFile), 'export const Version = 12;\n');
+        await fs.writeFile(path.join(cwd, versionFile), 'export const ReleasedVersion = 12;\n');
     });
 
     afterEach(async () => {
@@ -39,7 +39,7 @@ describe('increaseStructuresVersion', () => {
         await increaseStructuresVersion({ cwd, force: true });
 
         expect(await fs.readFile(filePath, 'utf8')).toContain('version: 13');
-        expect(await fs.readFile(path.join(cwd, versionFile), 'utf8')).toContain('Version = 13');
+        expect(await fs.readFile(path.join(cwd, versionFile), 'utf8')).toContain('ReleasedVersion = 13');
         expect(vi.mocked(run).mock.calls.map(([command, args]) => [command, ...args])).toEqual([
             ['git', 'add', '.'],
             ['git', 'commit', '-m', 'Increased structures to version 13'],
@@ -59,7 +59,7 @@ describe('increaseStructuresVersion', () => {
     it('does nothing when no pending fields are used', async () => {
         await increaseStructuresVersion({ cwd, force: true });
 
-        expect(await fs.readFile(path.join(cwd, versionFile), 'utf8')).toContain('Version = 12');
+        expect(await fs.readFile(path.join(cwd, versionFile), 'utf8')).toContain('ReleasedVersion = 12');
         expect(run).not.toHaveBeenCalled();
         expect(detectVcs).not.toHaveBeenCalled();
     });
@@ -71,7 +71,7 @@ describe('increaseStructuresVersion', () => {
         await increaseStructuresVersion({ cwd, dryRun: true });
 
         expect(await fs.readFile(filePath, 'utf8')).toBe(before);
-        expect(await fs.readFile(path.join(cwd, versionFile), 'utf8')).toContain('Version = 12');
+        expect(await fs.readFile(path.join(cwd, versionFile), 'utf8')).toContain('ReleasedVersion = 12');
         expect(run).not.toHaveBeenCalled();
     });
 });

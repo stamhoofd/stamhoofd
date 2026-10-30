@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { readStructuresVersion, replaceNextVersion, writeStructuresVersion } from './next-version-scanner.js';
+import { readFile } from 'node:fs/promises';
+import { getProjectPath } from '../context/project-path.js';
+import { readReleasedVersion, replaceNextVersion, writeReleasedVersion } from './next-version-scanner.js';
 
 const replaceBy = 'version: 426';
 
@@ -51,11 +53,30 @@ class Example extends AutoEncoder {
             expect(result.content).toBe(source.replace('    @field({ decoder: StringDecoder, ...NextVersion })', `    @field({ decoder: StringDecoder, ${replaceBy} })`));
         });
 
-        it('only matches the options object passed directly to @field', () => {
-            const source = '@field(TranslatedString.field({ ...NextVersion }))';
+        it('rewrites the spread form', () => {
+            const source = `
+class Example extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    @field({ ...TranslatedString.field({}), ...NextVersion })
+    name = new TranslatedString();
+}
+`;
             const result = replaceNextVersion(source, replaceBy);
-            expect(result.replaced).toBe(0);
-            expect(result.content).toBe(source);
+            expect(result.replaced).toBe(1);
+            expect(result.content).toBe(source.replace('...NextVersion', replaceBy));
+        });
+
+        it('rewrites the helper-call form', () => {
+            const source = `
+class Example extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    @field(TranslatedString.field({ ...NextVersion }))
+    name = new TranslatedString();
+}
+`;
+            const result = replaceNextVersion(source, replaceBy);
+            expect(result.replaced).toBe(1);
+            expect(result.content).toBe(source.replace('...NextVersion', replaceBy));
         });
 
         it('leaves files without NextVersion untouched', () => {
@@ -67,18 +88,20 @@ class Example extends AutoEncoder {
     });
 
     describe('Version.ts', () => {
-        it('reads and bumps the version', () => {
-            const content = 'export const Version = 425;\n';
-            expect(readStructuresVersion(content)).toBe(425);
+        it('reads and bumps ReleasedVersion of the real file', async () => {
+            const content = await readFile(`${getProjectPath()}shared/structures/src/Version.ts`, 'utf8');
+            const released = readReleasedVersion(content);
+            expect(released).toBeGreaterThan(0);
 
-            const bumped = writeStructuresVersion(content, 425, 426);
-            expect(readStructuresVersion(bumped)).toBe(426);
+            const bumped = writeReleasedVersion(content, released, released + 1);
+            expect(readReleasedVersion(bumped)).toBe(released + 1);
+            expect(bumped).not.toContain(`Version = ${released};`);
         });
 
         it('fails when the version cannot be found', () => {
-            expect(() => readStructuresVersion('export const Something = 425;')).toThrow();
-            expect(() => readStructuresVersion('export const Version = 0;')).toThrow();
-            expect(() => writeStructuresVersion('export const Version = 425;', 424, 425)).toThrow();
+            expect(() => readReleasedVersion('export const Version = 425;')).toThrow();
+            expect(() => readReleasedVersion('export const ReleasedVersion = 0;')).toThrow();
+            expect(() => writeReleasedVersion('export const ReleasedVersion = 425;', 424, 425)).toThrow();
         });
     });
 });

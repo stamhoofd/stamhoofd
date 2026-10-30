@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { run, RunVerbosity } from './command-runner.js';
-import { readStructuresVersion, replaceNextVersion, writeStructuresVersion } from './next-version-scanner.js';
+import { readReleasedVersion, replaceNextVersion, writeReleasedVersion } from './next-version-scanner.js';
 import { info, success, warning } from './ux.js';
 import { detectVcs, Vcs } from './vcs.js';
 
@@ -21,14 +21,15 @@ export type IncreaseStructuresVersionOptions = {
 };
 
 /**
- * Replaces every `...NextVersion` in the repository by the next structures version, bumps `Version.ts` and
- * commits the result. Does nothing when no `...NextVersion` is used. Pushing is left to the caller.
+ * Replaces every `...NextVersion` in the repository by `ReleasedVersion + 1`, bumps `ReleasedVersion` in
+ * `Version.ts` and commits the result. Does nothing when no `...NextVersion` is used. Pushing is left
+ * to the caller.
  */
 export async function increaseStructuresVersion(options: IncreaseStructuresVersionOptions): Promise<void> {
     const { cwd, force = false, dryRun = false, verbosity = RunVerbosity.Quiet } = options;
     const versionPath = path.join(cwd, versionFile);
 
-    const currentVersion = readStructuresVersion(await fs.readFile(versionPath, 'utf8'));
+    const currentVersion = readReleasedVersion(await fs.readFile(versionPath, 'utf8'));
     const nextVersion = currentVersion + 1;
     const replaceBy = 'version: ' + nextVersion;
 
@@ -71,7 +72,7 @@ export async function increaseStructuresVersion(options: IncreaseStructuresVersi
     const currentContent = await fs.readFile(versionPath, 'utf8');
     let newContent: string;
     try {
-        newContent = writeStructuresVersion(currentContent, currentVersion, nextVersion);
+        newContent = writeReleasedVersion(currentContent, currentVersion, nextVersion);
     }
     catch {
         throw new Error('Failed to update version in Version.ts. Please revert changes using Git.');
