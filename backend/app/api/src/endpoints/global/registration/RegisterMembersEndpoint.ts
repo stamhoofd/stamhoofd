@@ -816,7 +816,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const balanceItem = new BalanceItem();
             balanceItem.type = BalanceItemType.FreeContribution;
             balanceItem.unitPrice = checkout.freeContribution;
-            balanceItem.name = `Vrije bijdrage`;
+            balanceItem.name = $t('%Ot');
             balanceItem.pricePaid = 0;
             balanceItem.userId = user.id;
             balanceItem.organizationId = organization.id;
@@ -836,7 +836,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const balanceItem = new BalanceItem();
             balanceItem.type = BalanceItemType.AdministrationFee;
             balanceItem.unitPrice = checkout.administrationFee;
-            balanceItem.name = `Administratiekosten`;
+            balanceItem.name = $t('%xK');
             balanceItem.pricePaid = 0;
             balanceItem.organizationId = organization.id;
 

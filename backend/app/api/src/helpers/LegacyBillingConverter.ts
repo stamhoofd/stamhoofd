@@ -568,7 +568,7 @@ export async function convertRemainingCredit(organization: Organization, balance
     balanceItem.organizationId = ctx.membershipOrganization.id;
     balanceItem.payingOrganizationId = organization.id;
     balanceItem.type = BalanceItemType.ReferralDiscount;
-    balanceItem.name = 'Tegoed';
+    balanceItem.name = $t('%1Xl');
     balanceItem.amount = 1;
     balanceItem.unitPrice = -balance;
     balanceItem.VATPercentage = 21;
