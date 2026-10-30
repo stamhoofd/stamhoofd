@@ -1662,8 +1662,8 @@ importers:
         specifier: workspace:*
         version: link:../../shared/vite-config
       '@trapezedev/configure':
-        specifier: 7.1.10
-        version: 7.1.10(supports-color@10.2.2)
+        specifier: 7.1.11
+        version: 7.1.11(supports-color@10.2.2)
       eslint-plugin-stamhoofd:
         specifier: workspace:*
         version: link:../../../shared/eslint
@@ -7207,8 +7207,8 @@ packages:
       y-protocols: ^1.0.1
       yjs: ^13.5.38
 
-  '@trapezedev/configure@7.1.10':
-    resolution: {integrity: sha512-VKeQItOO7pPWO5XCLgVlcaguz98ZlBra1DmT9bCr34/JfjjgSvmi07sPwqc3gVZI1t5NYIH85cpWXl41CtetEQ==}
+  '@trapezedev/configure@7.1.11':
+    resolution: {integrity: sha512-xfGIisoAnVSv/3hJn8uCCCn59s8gyR+5Frpp3HXOkqPJ+3mixslWNe1fKmM4She4ih94GGgRjAdg0wRslAfwSA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -19698,7 +19698,7 @@ snapshots:
       y-protocols: 1.0.7(yjs@13.6.32)
       yjs: 13.6.32
 
-  '@trapezedev/configure@7.1.10(supports-color@10.2.2)':
+  '@trapezedev/configure@7.1.11(supports-color@10.2.2)':
     dependencies:
       '@ionic/cli-framework-output': 2.2.8(supports-color@10.2.2)
       '@ionic/utils-fs': 3.1.7(supports-color@10.2.2)
