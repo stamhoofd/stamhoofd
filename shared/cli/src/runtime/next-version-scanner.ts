@@ -1,6 +1,9 @@
 /**
- * Finds every `...NextVersion` inside the options object of a `@field(...)` decorator and replaces it by an
- * explicit version. Line comments are ignored.
+ * Finds every `...NextVersion` inside a field decorator and replaces it by an explicit version.
+ *
+ * Any object literal inside the decorator counts, no matter how deeply it is nested in calls: both spreading
+ * NextVersion directly into the decorator's options object and spreading it into the options object of a
+ * helper call (such as `TranslatedString.field`) are rewritten. Line comments are ignored.
  */
 export const needle = '...NextVersion';
 
@@ -11,7 +14,7 @@ export function replaceNextVersion(content: string, replaceBy: string): ReplaceR
         atStack: '', // contains @, @f, @fi, @fie, @field
         parenthesisDepth: 0, // 0 when atStack is not @field, then 1 once first ( is found, 2 if second ( is found, etc.
         curlyBracketsDepth: 0, // 0 when atStack is not @field, then 1 once first { is found, 2 if second { is found, etc.
-        contentStack: '', // contents inside @field({ (so atStack is @field, parenthesisDepth is 1 and curlyBracketsDepth is 1)
+        contentStack: '', // contents inside an object literal of @field( (so atStack is @field, parenthesisDepth >= 1 and curlyBracketsDepth >= 1)
         commentLineStack: '',
     };
 
@@ -63,7 +66,7 @@ export function replaceNextVersion(content: string, replaceBy: string): ReplaceR
                     state.contentStack = '';
                     break;
                 default: {
-                    if (state.parenthesisDepth === 1 && state.curlyBracketsDepth === 1) {
+                    if (state.parenthesisDepth >= 1 && state.curlyBracketsDepth >= 1) {
                         state.contentStack += char;
 
                         if (state.contentStack.endsWith(needle)) {
@@ -128,10 +131,10 @@ export function replaceNextVersion(content: string, replaceBy: string): ReplaceR
 }
 
 /**
- * Reads the structures version from the contents of shared/structures/src/Version.ts
+ * Reads `ReleasedVersion` from the contents of shared/structures/src/Version.ts
  */
-export function readStructuresVersion(content: string): number {
-    const match = content.match(/Version = (\d+)/);
+export function readReleasedVersion(content: string): number {
+    const match = content.match(/ReleasedVersion = (\d+)/);
     if (!match) {
         throw new Error('Failed to read current version');
     }
@@ -143,10 +146,10 @@ export function readStructuresVersion(content: string): number {
 }
 
 /**
- * Writes a new structures version into the contents of shared/structures/src/Version.ts
+ * Writes a new `ReleasedVersion` into the contents of shared/structures/src/Version.ts
  */
-export function writeStructuresVersion(content: string, currentVersion: number, nextVersion: number): string {
-    const newContent = content.replace('Version = ' + currentVersion, 'Version = ' + nextVersion);
+export function writeReleasedVersion(content: string, currentVersion: number, nextVersion: number): string {
+    const newContent = content.replace('ReleasedVersion = ' + currentVersion, 'ReleasedVersion = ' + nextVersion);
     if (newContent === content) {
         throw new Error('Failed to update version in Version.ts');
     }
