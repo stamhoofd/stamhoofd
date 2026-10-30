@@ -1,3 +1,6 @@
+// Defines STAMHOOFD before @stamhoofd/structures is evaluated, so Version runs at ReleasedVersion + 1
+import '@stamhoofd/test-utils/environment';
+
 import { Column, Database } from '@node/database';
 import { endStatisticsConnection } from '../src/database.js';
 import { Version } from '@stamhoofd/structures';
