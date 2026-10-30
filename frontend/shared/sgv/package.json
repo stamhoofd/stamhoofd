@@ -42,7 +42,7 @@
         "@stamhoofd/vite-config": "workspace:*",
         "@vue/test-utils": "2.5.1",
         "eslint-plugin-stamhoofd": "workspace:*",
-        "vite": "8.3.4",
+        "vite": "8.3.5",
         "vitest": "4.1.12",
         "vitest-browser-vue": "2.1.0"
     }
