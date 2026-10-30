@@ -5,12 +5,20 @@
     "main": "./dist/index.js",
     "module": "./dist/index.js",
     "types": "./dist-types/index.d.ts",
-    "sideEffects": false,
+    "sideEffects": [
+        "./src/environment.ts",
+        "./dist/environment.js"
+    ],
     "exports": {
         ".": {
             "types": "./dist-types/index.d.ts",
             "import": "./dist/index.js",
             "require": "./dist/index.js"
+        },
+        "./environment": {
+            "types": "./dist-types/environment.d.ts",
+            "import": "./dist/environment.js",
+            "require": "./dist/environment.js"
         }
     },
     "files": [

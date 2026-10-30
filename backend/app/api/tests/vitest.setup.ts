@@ -1,3 +1,6 @@
+// Defines STAMHOOFD before @stamhoofd/structures is evaluated, so Version runs at ReleasedVersion + 1
+import '@stamhoofd/test-utils/environment';
+
 import path from 'node:path';
 import { expect } from 'vitest';
 
