@@ -1,7 +1,7 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { logger, StyledText } from '@node/logging';
 import { countries, languages } from '@stamhoofd/locales';
-import { appToUri } from '@stamhoofd/structures';
+import { appToUri, TranslatedString } from '@stamhoofd/structures';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { Country } from '@stamhoofd/types/Country';
@@ -35,6 +35,53 @@ export class I18n {
      */
     static runWithLocale<T>(i18n: I18n, handler: () => T): T {
         return this.overrideStorage.run(i18n, handler);
+    }
+
+    /**
+     * Every language the platform supports, in the order of the locales list, across all its countries.
+     */
+    static get languages(): Language[] {
+        const supported = new Set(Object.values(this.validLocales).flat());
+        return languages.filter(language => supported.has(language));
+    }
+
+    /**
+     * The country the platform serves a language for, so the i18n for that language does not fall back
+     * to another language (see correctLanguageCountryCombination).
+     */
+    private static countryForLanguage(language: Language): Country {
+        const validLocales = this.validLocales;
+        if (STAMHOOFD.fixedCountry && validLocales[STAMHOOFD.fixedCountry]?.includes(language)) {
+            return STAMHOOFD.fixedCountry;
+        }
+        return countries.find(country => validLocales[country]?.includes(language)) ?? this.defaultCountry;
+    }
+
+    /**
+     * Builds a text in every platform language. The builder runs with that language as the current
+     * locale, so $t, $getLanguage and date formatting inside it resolve to that language. Use this for
+     * text that is stored and shown to other users later (e.g. the name of a balance item), when the
+     * language of the request or cron that creates it is not the language of the reader.
+     *
+     * Only builds a TranslatedString. Other translated values (e.g. TranslatedRichText) share the same
+     * language map shape; when one of those is needed here, let this return the map and wrap it in
+     * the caller instead of duplicating the per-language loop.
+     */
+    static mapLanguages(builder: (language: Language, i18n: I18n) => string): TranslatedString {
+        const translations: Partial<Record<Language, string>> = {};
+        for (const language of this.languages) {
+            const i18n = new I18n(language, this.countryForLanguage(language));
+            translations[language] = this.runWithLocale(i18n, () => builder(language, i18n));
+        }
+        return new TranslatedString(translations);
+    }
+
+    /**
+     * Translates a key in every platform language. Replacements are resolved per language, so a
+     * TranslatedString replacement is inserted in the matching language.
+     */
+    static translateAll(key: string, replace?: Record<string, string | { toString(): string }>): TranslatedString {
+        return this.mapLanguages((_, i18n) => i18n.$t(key, replace));
     }
 
     static async load() {
@@ -239,11 +286,11 @@ export class I18n {
         return i18n;
     }
 
-    t(key: string, replace?: Record<string, string>) {
+    t(key: string, replace?: Record<string, string | { toString(): string }>) {
         return this.$t(key, replace);
     }
 
-    $t(key: string, replace?: Record<string, string>) {
+    $t(key: string, replace?: Record<string, string | { toString(): string }>) {
         return this.replace(this.messages.get(key) ?? key, replace);
     }
 
