@@ -5,7 +5,7 @@ import type { BalanceItemWithPayments, StamhoofdFilter } from '@stamhoofd/struct
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { ChargeRequest, LimitedFilteredRequest, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, VATExcemptReason, Version } from '@stamhoofd/structures';
+import { ChargeRequest, LimitedFilteredRequest, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, TranslatedString, VATExcemptReason, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { ChargeMembersEndpoint } from '../../src/endpoints/admin/members/ChargeMembersEndpoint.js';
 import { testServer } from '../helpers/TestServer.js';
@@ -112,7 +112,7 @@ describe('E2E.ChargeMembers', () => {
         };
 
         const body = ChargeRequest.create({
-            name: 'test name',
+            name: new TranslatedString('test name'),
             price: 3_00,
             amount: 4,
             dueAt: new Date(2023, 0, 10),
@@ -176,8 +176,8 @@ describe('E2E.ChargeMembers', () => {
         };
 
         const body = ChargeRequest.create({
-            name: 'test name',
-            description: 'test description',
+            name: new TranslatedString('test name'),
+            description: new TranslatedString('test description'),
             price: 3_00,
             amount: 4,
             dueAt: new Date(2023, 0, 10),
@@ -196,8 +196,8 @@ describe('E2E.ChargeMembers', () => {
             expect(balanceItem1.unitPrice).toEqual(3_00);
             expect(balanceItem1.priceWithVAT).toEqual(12_00);
             expect(balanceItem1.amount).toEqual(body.amount);
-            expect(balanceItem1.name.toString()).toEqual(body.name);
-            expect(balanceItem1.description.toString()).toEqual('test description');
+            expect(balanceItem1.name.toString()).toEqual(body.name.toString());
+            expect(balanceItem1.description?.toString()).toEqual('test description');
             expect(balanceItem1.organizationId).toEqual(organization.id);
             // const dueAt = balanceItem1.dueAt!;
             expect(balanceItem1.dueAt).toEqual(body.dueAt);
@@ -217,7 +217,7 @@ describe('E2E.ChargeMembers', () => {
         };
 
         const body = ChargeRequest.create({
-            name: 'test name',
+            name: new TranslatedString('test name'),
             price: 10_00,
             amount: 2,
             VATPercentage: 21,
@@ -273,7 +273,7 @@ describe('E2E.ChargeMembers', () => {
         const otherFinancialDirectorToken = await SessionService.createSession(otherFinancialDirector);
 
         const body = ChargeRequest.create({
-            name: 'test name',
+            name: new TranslatedString('test name'),
             price: 3_00,
             amount: 4,
             dueAt: new Date(2023, 0, 10),
@@ -312,7 +312,7 @@ describe('E2E.ChargeMembers', () => {
         const testCases: [body: ChargeRequest, expectedErrorMessage: string][] = [
             // empty name
             [ChargeRequest.create({
-                name: ' ',
+                name: new TranslatedString(' '),
                 price: 3_00,
                 amount: 4,
                 dueAt: new Date(2023, 0, 10),
@@ -321,7 +321,7 @@ describe('E2E.ChargeMembers', () => {
 
             // price 0
             [ChargeRequest.create({
-                name: 'test name',
+                name: new TranslatedString('test name'),
                 price: 0,
                 amount: 4,
                 dueAt: new Date(2023, 0, 10),
@@ -330,7 +330,7 @@ describe('E2E.ChargeMembers', () => {
 
             // amount 0
             [ChargeRequest.create({
-                name: 'test name',
+                name: new TranslatedString('test name'),
                 price: 3_00,
                 amount: 0,
                 dueAt: new Date(2023, 0, 10),
@@ -388,7 +388,7 @@ describe('E2E.ChargeMembers', () => {
             };
 
             const body = ChargeRequest.create({
-                name: 'test name',
+                name: new TranslatedString('test name'),
                 price: 3_00,
                 amount: 4,
                 dueAt: new Date(2023, 0, 10),
@@ -458,7 +458,7 @@ describe('E2E.ChargeMembers', () => {
             };
 
             const body = ChargeRequest.create({
-                name: 'test name',
+                name: new TranslatedString('test name'),
                 price: 3_00,
                 amount: 4,
                 dueAt: new Date(2023, 0, 10),

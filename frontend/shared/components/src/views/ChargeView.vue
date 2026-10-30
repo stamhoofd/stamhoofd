@@ -16,14 +16,10 @@
                 <OrganizationSelect v-model="selectedOrganization" />
             </STInputBox>
 
-            <STInputBox :title="$t('%1Os')" error-fields="name" :error-box="errors.errorBox">
-                <input v-model="name" class="input" type="text" :placeholder="$t('%ZqX')" autocomplete="off">
-            </STInputBox>
+            <TInput v-model="name" :title="$t('%1Os')" :placeholder="$t('%ZqX')" error-fields="name" :error-box="errors.errorBox" />
         </div>
 
-        <STInputBox error-fields="description" :error-box="errors.errorBox" :title="$t('%6o')" class="max">
-            <textarea v-model="description" class="input" :placeholder="$t('%14p')" />
-        </STInputBox>
+        <TTextarea v-model="description" :title="$t('%6o')" :placeholder="$t('%14p')" error-fields="description" :error-box="errors.errorBox" class="max" />
 
         <div class="split-inputs">
             <div>
@@ -68,6 +64,8 @@ import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import DateSelection from '#inputs/DateSelection.vue';
 import PriceInput from '#inputs/PriceInput.vue';
+import TInput from '#inputs/TInput.vue';
+import TTextarea from '#inputs/TTextarea.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
 import VATIncludedToggle from '#payments/components/VATIncludedToggle.vue';
@@ -77,7 +75,7 @@ import { SimpleError, SimpleErrors } from '@common/errors';
 import { usePop } from '@browser/navigation';
 import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Organization, StamhoofdFilter, VATExcemptReason } from '@stamhoofd/structures';
-import { BalanceItem, ChargeRequest } from '@stamhoofd/structures';
+import { BalanceItem, ChargeRequest, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref, watch } from 'vue';
@@ -114,15 +112,15 @@ count(props.filter)
 const selectionCount = ref<number | null>(null);
 const organization = useOrganization();
 const selectedOrganization = ref<Organization | null>(organization.value) as Ref<Organization | null>;
-const name = ref('');
-const description = ref('');
+const name = ref(new TranslatedString()) as Ref<TranslatedString>;
+const description = ref(new TranslatedString()) as Ref<TranslatedString>;
 const price = ref(0);
 const amount = ref(1);
 const VATPercentage = ref<number | null>(null);
 const VATIncluded = ref(true);
 const VATExcempt = ref<VATExcemptReason | null>(null);
 const invoicesEnabled = computed(() => selectedOrganization.value?.meta.invoicesEnabled ?? false);
-const hasChanges = computed(() => name.value !== '' || description.value !== '' || price.value !== 0);
+const hasChanges = computed(() => name.value.length !== 0 || description.value.length !== 0 || price.value !== 0);
 
 const createdAt = ref(new Date());
 const dueAt = ref(null);
@@ -218,7 +216,7 @@ async function save() {
         const body = ChargeRequest.create({
             price: price.value,
             name: name.value,
-            description: description.value.trim() || null,
+            description: description.value,
             amount: amount.value,
             VATPercentage: VATPercentage.value,
             VATIncluded: VATIncluded.value,

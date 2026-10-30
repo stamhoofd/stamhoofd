@@ -4,7 +4,7 @@ import { BalanceItem, MemberFactory, OrganizationFactory, RegistrationFactory, R
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { ChargeRequest, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, VATExcemptReason, Version } from '@stamhoofd/structures';
+import { ChargeRequest, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, TranslatedString, VATExcemptReason, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { ChargeRegistrationsEndpoint } from '../../src/endpoints/admin/registrations/ChargeRegistrationsEndpoint.js';
 import { SessionService } from '../../src/services/SessionService.js';
@@ -68,8 +68,8 @@ describe('E2E.ChargeRegistrations', () => {
         await new RegistrationFactory({ member: otherMember, organization }).create();
 
         const body = ChargeRequest.create({
-            name: 'test name',
-            description: 'test description',
+            name: new TranslatedString('test name'),
+            description: new TranslatedString('test description'),
             price: 10_00,
             amount: 2,
             VATPercentage: 21,
@@ -86,7 +86,7 @@ describe('E2E.ChargeRegistrations', () => {
             const item = items[0];
             expect(item.organizationId).toBe(organization.id);
             expect(item.name.toString()).toBe('test name');
-            expect(item.description.toString()).toBe('test description');
+            expect(item.description?.toString()).toBe('test description');
             expect(item.unitPrice).toBe(10_00);
             expect(item.amount).toBe(2);
             expect(item.VATPercentage).toBe(21);

@@ -1,15 +1,18 @@
 import { AutoEncoder, BooleanDecoder, DateDecoder, EnumDecoder, field, IntegerDecoder, NumberDecoder, StringDecoder } from '@common/encoding';
 import { VATExcemptReason } from '../BalanceItem.js';
 import { StamhoofdFilterDecoder } from '../filters/FilteredRequest.js';
+import { TranslatedString } from '../TranslatedString.js';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 
 export class ChargeRequest extends AutoEncoder {
     @field({ decoder: StringDecoder, field: 'description' })
     @field({ decoder: StringDecoder, field: 'name', version: 416 })
-    name: string;
+    @field(TranslatedString.field({ version: 426 }))
+    name: TranslatedString;
 
     @field({ decoder: StringDecoder, nullable: true, version: 416 })
-    description: string | null = null;
+    @field(TranslatedString.field({ version: 426 }))
+    description = new TranslatedString();
 
     @field({ decoder: NumberDecoder })
     price: number;

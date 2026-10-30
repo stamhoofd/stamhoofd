@@ -1,7 +1,7 @@
 import { Request } from '@node/endpoints';
 import type { Organization } from '@stamhoofd/models';
 import { BalanceItem, OrganizationFactory } from '@stamhoofd/models';
-import { BalanceItemType, ChargeRequest, VATExcemptReason, Version } from '@stamhoofd/structures';
+import { BalanceItemType, ChargeRequest, TranslatedString, VATExcemptReason, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { ChargeOrganizationsEndpoint } from '../../src/endpoints/admin/organizations/ChargeOrganizationsEndpoint.js';
 import { testServer } from '../helpers/TestServer.js';
@@ -40,8 +40,8 @@ describe('E2E.ChargeOrganizations', () => {
         const otherOrganization = await new OrganizationFactory({}).create();
 
         const body = ChargeRequest.create({
-            name: 'test name',
-            description: 'test description',
+            name: new TranslatedString('test name'),
+            description: new TranslatedString('test description'),
             price: 10_00,
             amount: 2,
             VATPercentage: 21,
@@ -61,7 +61,7 @@ describe('E2E.ChargeOrganizations', () => {
             expect(item.organizationId).toBe(chargingOrganization.id);
             expect(item.type).toBe(BalanceItemType.Other);
             expect(item.name.toString()).toBe('test name');
-            expect(item.description.toString()).toBe('test description');
+            expect(item.description?.toString()).toBe('test description');
             expect(item.unitPrice).toBe(10_00);
             expect(item.amount).toBe(2);
             expect(item.VATPercentage).toBe(21);
@@ -80,7 +80,7 @@ describe('E2E.ChargeOrganizations', () => {
         const organization = await new OrganizationFactory({}).create();
 
         const body = ChargeRequest.create({
-            name: 'test name',
+            name: new TranslatedString('test name'),
             price: 10_00,
             amount: 1,
             filter: { id: organization.id },
