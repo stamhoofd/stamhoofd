@@ -2,6 +2,7 @@ import type { Model } from '@node/database';
 import { BalanceItem, BalanceItemPayment, CachedBalance, Invoice, InvoicedBalanceItem, Organization, Payment, Platform, STCredit, STInvoice, STPendingInvoice, StripeAccount, UsedRegisterCode, User } from '@stamhoofd/models';
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
 import { QueryableModel } from '@stamhoofd/sql';
+import { I18n } from '@stamhoofd/backend-i18n';
 import type { STInvoiceItem, STInvoiceMeta } from '@stamhoofd/structures';
 import {
     BalanceItemRelation,
@@ -568,7 +569,7 @@ export async function convertRemainingCredit(organization: Organization, balance
     balanceItem.organizationId = ctx.membershipOrganization.id;
     balanceItem.payingOrganizationId = organization.id;
     balanceItem.type = BalanceItemType.ReferralDiscount;
-    balanceItem.name = TranslatedString.create($t('%1Xl'));
+    balanceItem.name = I18n.translateAll('%1Xl');
     balanceItem.amount = 1;
     balanceItem.unitPrice = -balance;
     balanceItem.VATPercentage = 21;

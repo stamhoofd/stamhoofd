@@ -3,6 +3,7 @@ import { SimpleError } from '@common/errors';
 import type { EmailInterfaceBase } from '@stamhoofd/email';
 import { Email } from '@stamhoofd/email';
 import { BalanceItem, Organization, Platform, RegisterCode, UsedRegisterCode } from '@stamhoofd/models';
+import { I18n } from '@stamhoofd/backend-i18n';
 import { BalanceItemStatus, BalanceItemType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { VATService } from './VATService.js';
@@ -53,7 +54,7 @@ export class ReferralService {
         if (code.value > 0) {
             credit = new BalanceItem();
             credit.type = BalanceItemType.ReferralDiscount;
-            credit.name = TranslatedString.create(otherOrganization ? $t('Tegoed gekregen van {name}', { name: otherOrganization.name }) : code.description);
+            credit.name = otherOrganization ? I18n.translateAll('Tegoed gekregen van {name}', { name: otherOrganization.name }) : TranslatedString.create(code.description);
             credit.payingOrganizationId = organization.id;
             credit.organizationId = membershipOrganization.id;
             credit.VATPercentage = 21;
@@ -151,7 +152,7 @@ export class ReferralService {
 
         const credit = new BalanceItem();
         credit.type = BalanceItemType.ReferralDiscount;
-        credit.name = TranslatedString.create($t('%1ZE', { 'organization-name': organization.name }));
+        credit.name = I18n.translateAll('%1ZE', { 'organization-name': organization.name });
         credit.payingOrganizationId = code.organizationId;
         credit.organizationId = (await Platform.getShared()).membershipOrganizationId!; // where do we get this discount from
         credit.VATPercentage = 21;
@@ -180,7 +181,7 @@ export class ReferralService {
             // The receiving organization is invoiced instead of the organization for the usage of Stamhoofd.
             const item = new BalanceItem();
             item.type = BalanceItemType.Other;
-            item.name = TranslatedString.create($t('Aankoop Stamhoofd voor {name}', { name: organization.name }));
+            item.name = I18n.translateAll('Aankoop Stamhoofd voor {name}', { name: organization.name });
             item.payingOrganizationId = receivingOrganization.id;
             item.organizationId = membershipOrganizationId;
             item.VATPercentage = 21;

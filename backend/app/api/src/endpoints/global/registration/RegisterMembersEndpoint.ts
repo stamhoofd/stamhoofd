@@ -6,6 +6,7 @@ import { SimpleError } from '@common/errors';
 import { Email } from '@stamhoofd/email';
 import type { MemberWithUsersRegistrationsAndGroups, Organization, Payment, User } from '@stamhoofd/models';
 import { BalanceItem, CachedBalance, Group, Member, Platform, RateLimiter, Registration, RegistrationPeriod } from '@stamhoofd/models';
+import { I18n } from '@stamhoofd/backend-i18n';
 import { QueueHandler } from '@stamhoofd/queues';
 import type { BalanceItem as BalanceItemStruct, PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
@@ -679,7 +680,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 unitPrice: item.groupPrice.price.forMember(item.member),
                 type: BalanceItemType.Registration,
                 skipZero: false, // Always create at least one balance item for each registration - even when the price is zero
-                name: TranslatedString.create(`${item.member.patchedMember.name} bij ${item.group.settings.name.toString()}`),
+                name: I18n.translateAll('%1Mt', { name: item.member.patchedMember.name, group: item.group.settings.name }),
                 relations: new Map([
                     ...sharedRelations,
                 ]),
@@ -816,7 +817,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const balanceItem = new BalanceItem();
             balanceItem.type = BalanceItemType.FreeContribution;
             balanceItem.unitPrice = checkout.freeContribution;
-            balanceItem.name = TranslatedString.create($t('%Ot'));
+            balanceItem.name = I18n.translateAll('%Ot');
             balanceItem.pricePaid = 0;
             balanceItem.userId = user.id;
             balanceItem.organizationId = organization.id;
@@ -836,7 +837,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const balanceItem = new BalanceItem();
             balanceItem.type = BalanceItemType.AdministrationFee;
             balanceItem.unitPrice = checkout.administrationFee;
-            balanceItem.name = TranslatedString.create($t('%xK'));
+            balanceItem.name = I18n.translateAll('%xK');
             balanceItem.pricePaid = 0;
             balanceItem.organizationId = organization.id;
 

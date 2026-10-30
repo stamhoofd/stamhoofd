@@ -1,6 +1,9 @@
 import { Request } from '@node/endpoints';
 import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
-import { BalanceItemFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import { BalanceItem, BalanceItemFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import { I18n } from '@stamhoofd/backend-i18n';
+import { Country } from '@stamhoofd/types/Country';
+import { Language } from '@stamhoofd/types/Language';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { AdministrationFeeSettings, BalanceItemCartItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, DefaultAgeGroup, FreeContributionSettings, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, Permissions, PlatformMembershipType, PlatformMembershipTypeConfig, ReceivableBalanceType, ReduceablePrice, RegisterItemOption, TranslatedString, Version } from '@stamhoofd/structures';
 import { IDDeleteRegisterItem } from '@stamhoofd/structures/members/checkout/DeleteRegisterItem.js';
@@ -410,6 +413,74 @@ describe('E2E.Register', () => {
                     pricePaid: 0,
                 }),
             ]));
+        });
+
+        test('Balance items created during registration carry every platform language', async () => {
+            TestUtils.setEnvironment('locales', { BE: [Language.Dutch, Language.English, Language.French] });
+            const { organization, group, groupPrice, token, member, user } = await initData();
+
+            organization.meta.recordsConfiguration.freeContribution = FreeContributionSettings.create({
+                description: 'free contribution settings',
+                amounts: [3000],
+            });
+            organization.meta.registrationPaymentConfiguration.administrationFee = AdministrationFeeSettings.create({
+                fixed: 3300,
+            });
+            await organization.save();
+
+            const body = IDRegisterCheckout.create({
+                cart: IDRegisterCart.create({
+                    items: [
+                        IDRegisterItem.create({
+                            id: uuidv4(),
+                            replaceRegistrationIds: [],
+                            options: [],
+                            groupPrice,
+                            organizationId: organization.id,
+                            groupId: group.id,
+                            memberId: member.id,
+                        }),
+                    ],
+                    balanceItems: [],
+                    deleteRegistrations: [],
+                }),
+                administrationFee: 3300,
+                freeContribution: 3000,
+                paymentMethod: PaymentMethod.PointOfSale,
+                totalPrice: 8800,
+            });
+
+            // The request is made in Dutch; the names have to be readable in every other language too
+            await register(body, organization, token);
+
+            const receivableBalance = await getReceivableBalance(ReceivableBalanceType.user, user.id, organization, token);
+            const balanceItems = receivableBalance.body.balanceItems;
+            expect(balanceItems).toHaveLength(3);
+
+            const english = new I18n(Language.English, Country.Belgium);
+            const french = new I18n(Language.French, Country.Belgium);
+
+            const freeContribution = balanceItems.find(i => i.type === BalanceItemType.FreeContribution)!;
+            expect(freeContribution.name.languages.sort()).toEqual([Language.Dutch, Language.English, Language.French].sort());
+            expect(freeContribution.name.get(Language.Dutch)).toBe('Vrije bijdrage');
+            expect(freeContribution.name.get(Language.English)).toBe(english.$t('%Ot'));
+            expect(freeContribution.name.get(Language.French)).toBe(french.$t('%Ot'));
+
+            const administrationFee = balanceItems.find(i => i.type === BalanceItemType.AdministrationFee)!;
+            expect(administrationFee.name.get(Language.Dutch)).toBe('Administratiekosten');
+            expect(administrationFee.name.get(Language.English)).toBe(english.$t('%xK'));
+            expect(administrationFee.name.get(Language.French)).toBe(french.$t('%xK'));
+
+            // The registration itself is named after the member and the group, in every language
+            const registration = balanceItems.find(i => i.type === BalanceItemType.Registration)!;
+            expect(registration.name.languages.sort()).toEqual([Language.Dutch, Language.English, Language.French].sort());
+            expect(registration.name.get(Language.Dutch)).toBe(new I18n(Language.Dutch, Country.Belgium).$t('%1Mt', { name: member.details.name, group: group.settings.name.get(Language.Dutch) }));
+            expect(registration.name.get(Language.English)).toBe(english.$t('%1Mt', { name: member.details.name, group: group.settings.name.get(Language.English) }));
+
+            // Stored as a language map, so the model resolves it for any reader
+            const model = await BalanceItem.getByID(freeContribution.id);
+            expect(model!.name.isDefault).toBe(false);
+            expect(model!.name.get(Language.English)).toBe(english.$t('%Ot'));
         });
 
         test('Should create balance item for free administration fee if register by member', async () => {

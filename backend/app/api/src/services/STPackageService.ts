@@ -1,5 +1,6 @@
 import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
+import { I18n } from '@stamhoofd/backend-i18n';
 import { SQL } from '@stamhoofd/sql';
 import type { Company } from '@stamhoofd/structures';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, getPricingTypeName, Recipient, Replacement, STPackageStatus, STPackageType, STPackageTypeHelper, STPricingType, TranslatedString } from '@stamhoofd/structures';
@@ -162,7 +163,7 @@ export class STPackageService {
 
         const item = new BalanceItem();
         item.type = BalanceItemType.STPackage;
-        item.name = TranslatedString.create(pack.meta.name + ' ' + (
+        item.name = I18n.mapLanguages(() => pack.meta.name + ' ' + (
             pack.endDate
                 ? $t('%1LM', { startDate: Formatter.startDate(now, false, true), endDate: Formatter.endDate(pack.endDate, false, true) })
                 : $t('%1LN', { startDate: Formatter.startDate(pack.meta.startDate, false, true) })

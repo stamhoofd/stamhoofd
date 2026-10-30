@@ -1,5 +1,6 @@
 import { SimpleError } from '@common/errors';
 import { BalanceItem, Member, MemberPlatformMembership, Platform, RegistrationPeriod } from '@stamhoofd/models';
+import { I18n } from '@stamhoofd/backend-i18n';
 import { SQL, SQLOrderBy, SQLWhereSign } from '@stamhoofd/sql';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, sleep } from '@stamhoofd/utility';
@@ -105,7 +106,7 @@ export const MembershipCharger = {
                 const balanceItem = new BalanceItem();
                 balanceItem.unitPrice = membership.price;
                 balanceItem.amount = 1;
-                balanceItem.name = TranslatedString.create(Formatter.dateNumber(membership.startDate, true) + ' ' + $t(`%10C`) + ' ' + Formatter.dateNumber(membership.expireDate ?? membership.endDate, true));
+                balanceItem.name = I18n.mapLanguages(() => Formatter.dateNumber(membership.startDate, true) + ' ' + $t(`%10C`) + ' ' + Formatter.dateNumber(membership.expireDate ?? membership.endDate, true));
                 balanceItem.relations = new Map([
                     [
                         BalanceItemRelationType.Member,

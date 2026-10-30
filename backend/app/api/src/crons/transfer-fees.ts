@@ -1,5 +1,6 @@
 import { registerRootTenantCron } from './helpers/registerTenantCron.js';
 import { BalanceItem, Organization, Payment, Platform } from '@stamhoofd/models';
+import { I18n } from '@stamhoofd/backend-i18n';
 import { SQL } from '@stamhoofd/sql';
 import type { PaymentProvider } from '@stamhoofd/structures';
 import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPaymentProviderName, PaymentMethod, PaymentStatus, TranslatedString } from '@stamhoofd/structures';
@@ -114,7 +115,7 @@ async function chargeTransferFees() {
 
                     const item = new BalanceItem();
                     item.type = BalanceItemType.TransferFee;
-                    item.name = TranslatedString.create($t('%1Yq', { date: day }));
+                    item.name = I18n.translateAll('%1Yq', { date: day });
 
                     if (provider) {
                         item.relations.set(BalanceItemRelationType.PaymentProvider, BalanceItemRelation.create({
