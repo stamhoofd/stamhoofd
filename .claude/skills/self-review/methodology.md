@@ -8,8 +8,9 @@ Create the following checklist in your memory and review the code changes in sco
 
 1. **Correctness & bugs** — logic errors, off-by-one, null/undefined, unhandled errors, missed edge cases, race conditions, incorrect types. Trace the actual data flow; don't assume the code does what its names imply.
 2. **Project rules**
-   - `@stamhoofd/structures` changed without respecting versioning — new fields must be
-     additive via `...NextVersion`, never edit `Version.ts`. Flag any change that could break old clients.
+   - `@stamhoofd/structures` changed without respecting versioning — new fields and type changes
+     (with `upgrade`/`downgrade`) use `...NextVersion`; never edit `Version.ts` or commit an explicit
+     `version: N`. Flag any change that could break old clients.
    - User-facing strings must be Dutch and wrapped in `$t(...)`. `SimpleError.message` stays
      plain English; `SimpleError.human` uses `$t`.
    - Import style: modern `#`/package exports, no barrel files.
