@@ -53,7 +53,7 @@ const dismiss = useDismiss();
 const formatDate = Formatter.date.bind(Formatter);
 
 async function shouldNavigateAway() {
-    return await CenteredMessage.confirm('Heb je jouw key opgeslagen?', 'Ja, opgeslagen', 'Je kan jouw API-key hierna nooit meer bekijken.');
+    return await CenteredMessage.confirm($t('Heb je jouw key opgeslagen?'), $t('Ja, opgeslagen'), $t('Je kan jouw API-key hierna nooit meer bekijken.'));
 }
 
 defineExpose({ shouldNavigateAway });

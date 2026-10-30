@@ -200,7 +200,7 @@ async function shouldNavigateAway() {
     if (message.value.length === 0) {
         return true;
     }
-    return await CenteredMessage.confirm('Ben je zeker dat je dit scherm wilt sluiten?', 'Sluiten');
+    return await CenteredMessage.confirm($t('Ben je zeker dat je dit scherm wilt sluiten?'), $t('Sluiten'));
 }
 
 defineExpose({

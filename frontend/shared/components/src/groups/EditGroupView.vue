@@ -98,7 +98,7 @@
                 </p>
 
                 <STList>
-                    <STListItem v-if="externalOrganization" :selectable="isNew" @click="isNew ? chooseOrganizer('Kies een organisator') : undefined">
+                    <STListItem v-if="externalOrganization" :selectable="isNew" @click="isNew ? chooseOrganizer($t('Kies een organisator')) : undefined">
                         <template #left>
                             <OrganizationAvatar :organization="externalOrganization" />
                         </template>
