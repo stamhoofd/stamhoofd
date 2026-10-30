@@ -6,6 +6,7 @@ import { BalanceItemRelationType } from '../BalanceItem.js';
 import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
 import { BaseOrganization } from '../Organization.js';
 import { PrivatePayment } from './Payment.js';
+import type { TranslatedString } from '../TranslatedString.js';
 
 export class PaymentGeneral extends PrivatePayment {
     @field({ decoder: new ArrayDecoder(BalanceItemPaymentDetailed) })
@@ -164,12 +165,12 @@ export class PaymentGeneral extends PrivatePayment {
     }
 }
 
-export type BalanceItemPaymentsHtmlTableItem = { price: number; itemDescription: string | null; balanceItem: { name: string }; itemTitle: string; quantity: number; unitPrice: number };
+export type BalanceItemPaymentsHtmlTableItem = { price: number; itemDescription: string | null; balanceItem: { name: string | TranslatedString }; itemTitle: string; quantity: number; unitPrice: number };
 export function getBalanceItemPaymentsHtmlTable(balanceItemPayments: BalanceItemPaymentsHtmlTableItem[]) {
     const payments = balanceItemPayments.slice().sort((a, b) => {
         return Sorter.stack(
             Sorter.byNumberValue(a.price, b.price),
-            Sorter.byStringValue(a.itemDescription ?? a.balanceItem.name, b.itemDescription ?? b.balanceItem.name),
+            Sorter.byStringValue(a.itemDescription ?? a.balanceItem.name.toString(), b.itemDescription ?? b.balanceItem.name.toString()),
         );
     });
 

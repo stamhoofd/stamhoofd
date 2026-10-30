@@ -9,6 +9,6 @@ export function sortBalanceItemPayments(items: BalanceItemPaymentDetailed[]): Ba
         Sorter.byDateValue(b.balanceItem.dueAt ?? new Date(0), a.balanceItem.dueAt ?? new Date(0)),
         Sorter.byDateValue(b.balanceItem.createdAt, a.balanceItem.createdAt),
         Sorter.byNumberValue(a.price, b.price),
-        Sorter.byStringValue(a.itemDescription ?? a.balanceItem.name, b.itemDescription ?? b.balanceItem.name),
+        Sorter.byStringValue(a.itemDescription ?? a.balanceItem.name.toString(), b.itemDescription ?? b.balanceItem.name.toString()),
     ));
 }

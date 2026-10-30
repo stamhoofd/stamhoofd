@@ -458,7 +458,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<PaymentWithItem>[] {
             name: $t(`%6o`),
             width: 50,
             getValue: (object: PaymentWithItem) => ({
-                value: object.balanceItemPayment.balanceItem.itemDescription || object.balanceItemPayment.balanceItem.name,
+                value: object.balanceItemPayment.balanceItem.itemDescription || object.balanceItemPayment.balanceItem.name.toString(),
                 style: {
                     alignment: {
                         wrapText: true,

@@ -77,7 +77,7 @@ export const BalanceItemLogger = new ModelLogger(BalanceItem, {
         return new Map([
             ['b', AuditLogReplacement.create({
                 id: model.id,
-                value: model.name || getBalanceItemTypeName(model.type),
+                value: model.name.toString() || getBalanceItemTypeName(model.type),
                 type: AuditLogReplacementType.BalanceItem,
             })],
             ['payer', options.data.payer],

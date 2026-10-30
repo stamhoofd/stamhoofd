@@ -302,7 +302,7 @@ export class InvoiceService {
 
                 invoiced.totalWithoutVAT = item.totalWithoutVAT;
 
-                invoiced.name = item.name || balanceItem.name;
+                invoiced.name = item.name || balanceItem.name.toString();
                 invoiced.description = item.description;
                 invoiced.type = item.type;
                 invoiced.relations = new Map(item.relations);

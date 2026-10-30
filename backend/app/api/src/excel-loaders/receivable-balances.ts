@@ -89,7 +89,7 @@ function getBalanceItemColumns(): XlsxTransformerColumn<ReceivableBalanceWithIte
             name: $t('%1Os'),
             width: 40,
             getValue: (object: ReceivableBalanceWithItem) => ({
-                value: object.balanceItem.name,
+                value: object.balanceItem.name.toString(),
             }),
         },
         {
