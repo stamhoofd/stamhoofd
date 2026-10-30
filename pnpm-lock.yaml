@@ -193,7 +193,7 @@ overrides:
   cookie: 2.0.1
   fast-xml-parser: 5.11.2
   node-forge: 1.4.1
-  nodemailer: 10.1.7
+  nodemailer: 10.2.1
   pacote: 21.5.1
   postcss: 8.5.28
   semver: 7.8.5
@@ -586,8 +586,8 @@ importers:
         specifier: 3.7.2
         version: 3.7.2
       mailparser:
-        specifier: 3.10.0
-        version: 3.10.0
+        specifier: 3.12.4
+        version: 3.12.4
       mockdate:
         specifier: 3.0.5
         version: 3.0.5
@@ -943,8 +943,8 @@ importers:
         specifier: 3.24.6
         version: 3.24.6(@types/node@22.20.4)
       nodemailer:
-        specifier: 10.1.7
-        version: 10.1.7
+        specifier: 10.2.1
+        version: 10.2.1
       uuid:
         specifier: 14.0.3
         version: 14.0.3
@@ -8016,8 +8016,8 @@ packages:
     resolution: {integrity: sha512-nrUSn7hzt7J6JWgWGz78ZYI8wj+gdIJdk0Ynjpp8l+trkn58Uqsf6RYrYkEK+3X18EX+TNdtJI0WxAtc+L84SQ==}
     hasBin: true
 
-  '@zone-eu/mailsplit@5.4.27':
-    resolution: {integrity: sha512-9008ddFqqKk7lMF2S1sLU7ExfJZP9zPw5tkZy24EVt45Ryme2x85f/5vJZZqQ+vCJkKcCY78dJ5yuEVG3ZrVZA==}
+  '@zone-eu/mailsplit@5.4.29':
+    resolution: {integrity: sha512-CCUNycmUjrV5M0wNf23waWAt9eOHczhjLbUQS7k0FNJvR0py9VSqHFt+tSl/D0+XI73VLG0U+PwYtq9R0zsm9Q==}
     engines: {node: '>=20.0.0'}
 
   '@zxcvbn-ts/core@0.3.0':
@@ -11047,8 +11047,8 @@ packages:
     resolution: {integrity: sha512-Nyh3H90B3gRtrcxIe56Ayy7635J0jmh6AbxbQgQae8wrSPQMH5wFqJChiMTB13yKG512L3YspbA5DzumhFTITA==}
     engines: {node: '>=20.0.0'}
 
-  libmime@5.5.2:
-    resolution: {integrity: sha512-Byw3CchK4eSqbgzpttsUoC4hx2VPP+hnveAuYAYZNipEc+0WlDFjVb1ISNscjq/idvyDP/Xjg8mnBcdgbsgvzg==}
+  libmime@5.6.3:
+    resolution: {integrity: sha512-cuTUW/Jybvh5O4/U9p61gyutHOjDtZyGQYuY99+bfnaFwqcDf2Nb+R6hMHY6DDen2H9wLKQSMpofWUgn2TI5JQ==}
     engines: {node: '>=20.0.0'}
 
   libnpmaccess@10.0.3:
@@ -11378,8 +11378,8 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  mailparser@3.10.0:
-    resolution: {integrity: sha512-kgJPwOde5VrPp4zwh+bfRw82+5AlgJ9rnzoPTyb9Hyn0iAZEfRcbRr/LFn7yRFCE02LKjdVUgSAb+Gk7k8aQ4Q==}
+  mailparser@3.12.4:
+    resolution: {integrity: sha512-FdoMF+S89/AQaJHY7StwTfABPHZ8Vey+CDyUno5j+TO0jF0UxM+la4Pe9MeqKqBO4Y9ZMB2eomdyg5i+jzpfZw==}
     engines: {node: '>=20.0.0'}
 
   make-dir@4.0.0:
@@ -11923,8 +11923,8 @@ packages:
     resolution: {integrity: sha512-7yfzccmBd5rm7pALJf709tPwLL987WvdT7LC/QK5Oxa5S2aabdBPjxRDxhWKkbfCc9/FiC82lwSc+ulGZHH44g==}
     engines: {node: '>=20'}
 
-  nodemailer@10.1.7:
-    resolution: {integrity: sha512-OQa6FDln5fLttmqSbjDiRYvFDOFNrBqfiOwHPlEbURil3b+vPB1v8xpi+Sp46drzNDlsTnNsS502vthmz56r4w==}
+  nodemailer@10.2.1:
+    resolution: {integrity: sha512-ZrDNsPFoDMwefNs7sJwrYiEJ/CG4ClJWDZv05iNJsEBWa8GRDry1QJHTJxsuTAY9eDDKjX4k+q3SxslXJOao7w==}
     engines: {node: '>=20.0.0'}
 
   nodemon@3.1.14:
@@ -20667,10 +20667,10 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
-  '@zone-eu/mailsplit@5.4.27':
+  '@zone-eu/mailsplit@5.4.29':
     dependencies:
       libbase64: 1.4.1
-      libmime: 5.5.2
+      libmime: 5.6.3
       libqp: 3.0.1
 
   '@zxcvbn-ts/core@0.3.0': {}
@@ -24434,7 +24434,7 @@ snapshots:
 
   libbase64@1.4.1: {}
 
-  libmime@5.5.2:
+  libmime@5.6.3:
     dependencies:
       encoding-japanese: 2.4.0
       iconv-lite: 0.7.3
@@ -24760,7 +24760,7 @@ snapshots:
       iconv-lite: 0.5.0
       jsdom: 24.1.3(supports-color@5.5.0)
       mime: 2.4.4
-      nodemailer: 10.1.7
+      nodemailer: 10.2.1
       smtp-server: 3.19.9
       socket.io: 4.8.3(supports-color@5.5.0)
       uue: 3.1.2
@@ -24771,16 +24771,14 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  mailparser@3.10.0:
+  mailparser@3.12.4:
     dependencies:
-      '@zone-eu/mailsplit': 5.4.27
-      encoding-japanese: 2.4.0
+      '@zone-eu/mailsplit': 5.4.29
       he: 1.2.0
       html-to-text: 10.0.1
-      iconv-lite: 0.7.3
-      libmime: 5.5.2
+      libmime: 5.6.3
       linkify-it: 5.0.2
-      nodemailer: 10.1.7
+      nodemailer: 10.2.1
       punycode.js: 2.3.1
       tlds: 1.261.0
 
@@ -25637,7 +25635,7 @@ snapshots:
     dependencies:
       '@noble/hashes': 2.4.0
 
-  nodemailer@10.1.7: {}
+  nodemailer@10.2.1: {}
 
   nodemon@3.1.14:
     dependencies:
@@ -28179,7 +28177,7 @@ snapshots:
   smtp-server@3.19.9:
     dependencies:
       ipv6-normalize: 1.0.1
-      nodemailer: 10.1.7
+      nodemailer: 10.2.1
       punycode.js: 2.3.1
 
   socket.io-adapter@2.5.8(supports-color@5.5.0):
