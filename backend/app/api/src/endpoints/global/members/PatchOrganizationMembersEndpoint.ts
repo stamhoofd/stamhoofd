@@ -903,7 +903,6 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
 
     static async deleteMembers(ids: string[]) {
         const updateGroups = new Set<string>();
-        const updateRegistrations = new Map<string, Registration>();
         const updateSteps = new Set<string>();
 
         // Loop all members one by one
@@ -916,18 +915,17 @@ export class PatchOrganizationMembersEndpoint extends Endpoint<Params, Query, Bo
             await MemberUserSyncer.onDeleteMember(member);
             await User.deleteForDeletedMember(member.id);
             await BalanceItem.deleteForDeletedMember(member.id);
+
+            for (const registration of member.registrations) {
+                await RegistrationService.freeStockBeforeDelete(registration.id);
+            }
+
             await member.delete();
 
             for (const registration of member.registrations) {
-                const groupId = registration.groupId;
-                updateRegistrations.set(registration.id, registration);
-                updateGroups.add(groupId);
+                updateGroups.add(registration.groupId);
                 updateSteps.add(registration.organizationId);
             }
-        }
-
-        for (const registration of updateRegistrations.values()) {
-            RegistrationService.scheduleStockUpdate(registration.id);
         }
 
         const groups = await Group.getByIDs(...Array.from(updateGroups));
