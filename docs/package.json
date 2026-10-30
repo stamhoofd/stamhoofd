@@ -19,7 +19,7 @@
     },
     "devDependencies": {
         "eslint-plugin-stamhoofd": "workspace:*",
-        "sass": "1.105.2",
+        "sass": "1.106.1",
         "vite-svg-2-webfont": "8.5.0"
     }
 }
