@@ -66,11 +66,11 @@
         "test:reset": "pnpm run build:full && pnpm run test"
     },
     "dependencies": {
-        "@aws-sdk/client-s3": "3.1153.0",
-        "@aws-sdk/client-ses": "3.1153.0",
-        "@aws-sdk/client-sesv2": "3.1153.0",
-        "@aws-sdk/client-sqs": "3.1153.0",
-        "@aws-sdk/s3-request-presigner": "3.1153.0",
+        "@aws-sdk/client-s3": "3.1156.0",
+        "@aws-sdk/client-ses": "3.1156.0",
+        "@aws-sdk/client-sesv2": "3.1156.0",
+        "@aws-sdk/client-sqs": "3.1156.0",
+        "@aws-sdk/s3-request-presigner": "3.1156.0",
         "@bwip-js/node": "4.11.4",
         "@common/encoding": "workspace:*",
         "@common/errors": "workspace:*",
