@@ -2,7 +2,7 @@
     <STErrorsInput :error-fields="'optionMenus.' + optionMenu.id" :error-box="errorBox" class="container">
         <hr>
         <h2>
-            {{ optionMenu.name || 'Maak een keuze' }}
+            {{ optionMenu.name || $t('Maak een keuze') }}
         </h2>
 
         <STList>
