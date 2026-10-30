@@ -1,5 +1,5 @@
 import { column, Database } from '@node/database';
-import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, BalanceItemWithPayments, BalanceItemWithPrivatePayments, Payment as PaymentStruct, PrivatePayment, VATExcemptReason } from '@stamhoofd/structures';
+import { BalanceItemPaymentWithPayment, BalanceItemPaymentWithPrivatePayment, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItem as BalanceItemStruct, BalanceItemType, BalanceItemWithPayments, BalanceItemWithPrivatePayments, Payment as PaymentStruct, PrivatePayment, TranslatedString, TranslatedStringDecoder, VATExcemptReason } from '@stamhoofd/structures';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -69,11 +69,11 @@ export class BalanceItem extends QueryableModel {
     @column({ decoder: new MapDecoder(new EnumDecoder(BalanceItemRelationType), BalanceItemRelation), type: 'json' })
     relations: Map<BalanceItemRelationType, BalanceItemRelation> = new Map();
 
-    @column({ type: 'string' })
-    name = '';
+    @column({ type: 'json', decoder: TranslatedStringDecoder })
+    name = new TranslatedString();
 
-    @column({ type: 'string', nullable: true })
-    description: string | null = null;
+    @column({ type: 'json', decoder: TranslatedStringDecoder })
+    description = new TranslatedString();
 
     /**
      * In case this balance item is associated with an item that was charged for a certain period, the startDate is saved here.

@@ -1,4 +1,4 @@
-import { BalanceItem, BalanceItemPaymentDetailed } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemPaymentDetailed, TranslatedString } from '@stamhoofd/structures';
 import { describe, expect, test } from 'vitest';
 import { sortBalanceItemPayments } from './sortBalanceItemPayments';
 
@@ -6,7 +6,7 @@ function createItem(name: string, options: { createdAt: Date; dueAt?: Date | nul
     return BalanceItemPaymentDetailed.create({
         price: options.price ?? 10_00_00,
         balanceItem: BalanceItem.create({
-            name,
+            name: new TranslatedString(name),
             createdAt: options.createdAt,
             dueAt: options.dueAt ?? null,
         }),
@@ -14,7 +14,7 @@ function createItem(name: string, options: { createdAt: Date; dueAt?: Date | nul
 }
 
 function names(items: BalanceItemPaymentDetailed[]) {
-    return items.map(i => i.balanceItem.name);
+    return items.map(i => i.balanceItem.name.toString());
 }
 
 describe('sortBalanceItemPayments', () => {

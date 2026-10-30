@@ -163,9 +163,9 @@ describe('ApplicationFeeInvoicer', () => {
         expect(payments[0].paidAt).toEqual(paidAt);
         expect(serviceItem.paidAt).toEqual(paidAt);
         expect(transferItem.paidAt).toEqual(paidAt);
-        expect(serviceItem.name).toBe('Servicekosten op 10 juli 2024');
-        expect(serviceItem.description).toBe('Ingehouden via Stripe op 10 juli 2024 (UTC)');
-        expect(transferItem.name).toBe('Transactiekosten op 10 juli 2024');
+        expect(serviceItem.name.toString()).toBe('Servicekosten op 10 juli 2024');
+        expect(serviceItem.description.toString()).toBe('Ingehouden via Stripe op 10 juli 2024 (UTC)');
+        expect(transferItem.name.toString()).toBe('Transactiekosten op 10 juli 2024');
 
         expect((await ApplicationFee.getByID(serviceFee.id))!.balanceItemId).toBe(serviceItem.id);
         expect((await ApplicationFee.getByID(transferFee.id))!.balanceItemId).toBe(transferItem.id);

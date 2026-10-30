@@ -2,6 +2,7 @@ import { Country } from '@stamhoofd/types/Country';
 import { Formatter } from '@stamhoofd/utility';
 import { Address, ValidatedAddress } from '../addresses/Address.js';
 import { BalanceItem } from '../BalanceItem.js';
+import { TranslatedString } from '../TranslatedString.js';
 import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
 import { injectReplacementValues } from '../email/exampleReplacements.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
@@ -124,11 +125,11 @@ function fillReplacements(replacements: Replacement[]) {
     }));
 
     const balance1 = BalanceItem.create({
-        name: $t(`%13U`),
+        name: new TranslatedString($t(`%13U`)),
         unitPrice: 1234_00,
     });
     const balance2 = BalanceItem.create({
-        name: $t(`%13V`),
+        name: new TranslatedString($t(`%13V`)),
         unitPrice: 1234_00,
         amount: 2,
     });

@@ -1,6 +1,6 @@
 import { BalanceItem } from '@stamhoofd/models';
 import type { MemberWithRegistrationsBlob, VATExcemptReason } from '@stamhoofd/structures';
-import { BalanceItemType } from '@stamhoofd/structures';
+import { BalanceItemType, TranslatedString } from '@stamhoofd/structures';
 
 export class MemberCharger {
     static async chargeMany({ chargingOrganizationId, membersToCharge, price, amount, name, description, VATPercentage, VATIncluded, VATExcempt, dueAt, createdAt }: { chargingOrganizationId: string; membersToCharge: MemberWithRegistrationsBlob[]; price: number; amount?: number; name: string; description: string | null; VATPercentage: number | null; VATIncluded: boolean; VATExcempt: VATExcemptReason | null; dueAt: Date | null; createdAt: Date | null }) {
@@ -41,8 +41,8 @@ export class MemberCharger {
         const balanceItem = new BalanceItem();
         balanceItem.unitPrice = price;
         balanceItem.amount = amount ?? 1;
-        balanceItem.name = name;
-        balanceItem.description = description;
+        balanceItem.name = TranslatedString.create(name);
+        balanceItem.description = TranslatedString.create(description ?? '');
         balanceItem.VATPercentage = VATPercentage;
         balanceItem.VATIncluded = VATIncluded;
         balanceItem.VATExcempt = VATExcempt;

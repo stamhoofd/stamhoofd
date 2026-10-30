@@ -6,7 +6,8 @@ import { BalanceItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemS
 import type { InMemoryFilterDefinitions } from './filters/InMemoryFilter.js';
 import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler } from './filters/InMemoryFilter.js';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
-import { TranslatedString } from './TranslatedString.js';
+import { TranslatedString, TranslatedStringPatch } from './TranslatedString.js';
+import { Language } from '@stamhoofd/types/Language';
 import { DetailedPayableBalance } from './endpoints/PayableBalanceCollection.js';
 import { BaseOrganization, Organization } from './Organization.js';
 import { Platform } from './Platform.js';
@@ -19,7 +20,7 @@ import { Version } from './Version.js';
 function createItem(overrides: Partial<{ unitPrice: number; amount: number; VATPercentage: number | null; VATIncluded: boolean; VATExcempt: VATExcemptReason | null; type: BalanceItemType; name: string }> = {}) {
     return BalanceItemWithPayments.create({
         type: overrides.type ?? BalanceItemType.Other,
-        name: overrides.name ?? 'Test item',
+        name: new TranslatedString(overrides.name ?? 'Test item'),
         amount: overrides.amount ?? 1,
         unitPrice: overrides.unitPrice ?? 4_13_00,
         VATPercentage: overrides.VATPercentage === undefined ? 21 : overrides.VATPercentage,
@@ -279,7 +280,7 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
     function createItem(type: BalanceItemType, relations: [BalanceItemRelationType, string][] = [], name = '') {
         return BalanceItem.create({
             type,
-            name,
+            name: new TranslatedString(name),
             relations: new Map(relations.map(([relationType, id]) => [
                 relationType,
                 BalanceItemRelation.create({ id, name: new TranslatedString(id) }),
@@ -294,7 +295,11 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
     const balanceItemFilterCompilers: InMemoryFilterDefinitions = {
         ...baseInMemoryFilterCompilers,
         type: createInMemoryFilterCompiler('type'),
-        name: createInMemoryFilterCompiler('name'),
+        name: (filter, parentCompiler, key) => {
+            // The api compares the name in the current language (see SQLTranslatedString)
+            const runner = createInMemoryFilterCompiler('name')(filter, parentCompiler, key)!;
+            return object => runner({ name: (object as BalanceItem).name.toString() });
+        },
         relations: {
             ...baseInMemoryFilterCompilers,
             ...Object.fromEntries(
@@ -363,7 +368,7 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
     });
 
     test('old clients read and write the name as description', () => {
-        const item = BalanceItem.create({ name: 'Kampgeld', description: 'Weekend aan zee' });
+        const item = BalanceItem.create({ name: new TranslatedString('Kampgeld'), description: new TranslatedString('Weekend aan zee') });
         const oldVersion = 415;
 
         const encoded = JSON.parse(JSON.stringify(item.encode({ version: oldVersion }))) as Record<string, unknown>;
@@ -371,19 +376,78 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
         expect(encoded.name).toBeUndefined();
 
         const decoded = new ObjectData(encoded, { version: oldVersion }).decode(BalanceItem as Decoder<BalanceItem>);
-        expect(decoded.name).toBe('Kampgeld');
-        expect(decoded.description).toBeNull();
+        expect(decoded.name).toEqual(TranslatedString.create('Kampgeld'));
+        expect(decoded.description).toEqual(new TranslatedString());
 
         const patch = new ObjectData({ id: item.id, description: 'Weekendgeld' }, { version: oldVersion }).decode(BalanceItem.patchType() as Decoder<AutoEncoderPatchType<BalanceItem>>);
-        expect(patch.name).toBe('Weekendgeld');
+        expect(patch.name).toEqual(new TranslatedStringPatch({ [Language.Dutch]: 'Weekendgeld' }));
         expect(patch.description).toBeUndefined();
+    });
+
+    describe('name and description v425 → v426', () => {
+        // Released clients run 425 and exchange plain strings; the translated fields start at 426
+        const legacyVersion = 425;
+        const item = BalanceItem.create({
+            id: 'item-1',
+            name: new TranslatedString({ nl: 'Kampgeld', en: 'Camp fee' }),
+            description: new TranslatedString({ nl: 'Weekend aan zee', en: 'Weekend at the seaside' }),
+        });
+
+        test('downgrades translated fields to the string in the current language', () => {
+            const encoded = item.encode({ version: legacyVersion }) as { name: unknown; description: unknown };
+            expect(encoded.name).toBe(item.name.get($getLanguage()));
+            expect(encoded.description).toBe(item.description!.get($getLanguage()));
+        });
+
+        test('downgrades an empty description to an empty string', () => {
+            const encoded = BalanceItem.create({ id: 'item-2', name: new TranslatedString('Kampgeld') }).encode({ version: legacyVersion }) as { description: unknown };
+            expect(encoded.description).toBe('');
+        });
+
+        test('keeps every translation from version 426', () => {
+            const encoded = item.encode({ version: 426 }) as { name: unknown; description: unknown };
+            expect(encoded.name).toEqual({ nl: 'Kampgeld', en: 'Camp fee' });
+            expect(encoded.description).toEqual({ nl: 'Weekend aan zee', en: 'Weekend at the seaside' });
+
+            const decoded = new ObjectData(encoded, { version: 426 }).decode(BalanceItem as Decoder<BalanceItem>);
+            expect(decoded.name).toEqual(item.name);
+            expect(decoded.description).toEqual(item.description);
+        });
+
+        test('upgrades plain strings from an old client to untranslated strings and a null description to an empty one', () => {
+            const decoded = new ObjectData({ id: 'item-1', name: 'Kamp', description: null }, { version: legacyVersion }).decode(BalanceItem as Decoder<BalanceItem>);
+            expect(decoded.name).toEqual(TranslatedString.create('Kamp'));
+            expect(decoded.name.isDefault).toBe(true);
+            expect(decoded.description).toEqual(new TranslatedString());
+            expect(decoded.itemTitle).toBe('Kamp');
+
+            const withDescription = new ObjectData({ id: 'item-1', name: 'Kamp', description: 'Aan zee' }, { version: legacyVersion }).decode(BalanceItem as Decoder<BalanceItem>);
+            expect(withDescription.description).toEqual(TranslatedString.create('Aan zee'));
+        });
+
+        test('upgrades string patches to Dutch translation patches and a null description patch to a clearing patch', () => {
+            const decoded = new ObjectData({ id: 'item-1', name: 'Kamp', description: null }, { version: legacyVersion }).decode(BalanceItem.patchType() as Decoder<AutoEncoderPatchType<BalanceItem>>);
+            expect(decoded.name).toEqual(new TranslatedStringPatch({ [Language.Dutch]: 'Kamp' }));
+            expect(decoded.description).toEqual(new TranslatedStringPatch(''));
+
+            const patched = item.patch(decoded);
+            expect(patched.name).toEqual(new TranslatedString({ nl: 'Kamp', en: 'Camp fee' }));
+            expect(patched.description).toEqual(new TranslatedString());
+        });
+
+        test('downgrades translation patches to the string for the current language', () => {
+            const patch = BalanceItem.patch({ id: 'item-1', name: TranslatedString.patch({ nl: 'Kamp', en: 'Camp' }), description: new TranslatedString() });
+            const encoded = patch.encode({ version: legacyVersion }) as { name: unknown; description: unknown };
+            expect(encoded.name).toBe($getLanguage() === Language.English ? 'Camp' : 'Kamp');
+            expect(encoded.description).toBe('');
+        });
     });
 
     test('NAME_TITLED_BALANCE_ITEM_TYPES lists exactly the types whose itemTitle is their name', () => {
         const name = 'A name no itemTitle would ever build on its own';
 
         for (const type of Object.values(BalanceItemType)) {
-            const usesName = BalanceItem.create({ type, name }).itemTitle === name;
+            const usesName = BalanceItem.create({ type, name: new TranslatedString(name) }).itemTitle === name;
 
             expect([type, NAME_TITLED_BALANCE_ITEM_TYPES.has(type)]).toEqual([type, usesName]);
         }

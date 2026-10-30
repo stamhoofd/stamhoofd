@@ -151,7 +151,7 @@ async function buildBalanceItem(item: STInvoiceItem, options: {
 
                     // Don't copy the name, as in the past we would have put a reason why the credit was used
                     // but that should not be reused
-                    original.name = item.name || item.description || '';
+                    original.name = TranslatedString.create(item.name || item.description || '');
 
                     return original;
                 }
@@ -161,7 +161,7 @@ async function buildBalanceItem(item: STInvoiceItem, options: {
 
     const vatInfo = getVatInfo(legacyMeta);
 
-    balanceItem.name = item.name || item.description || '';
+    balanceItem.name = TranslatedString.create(item.name || item.description || '');
     balanceItem.amount = item.amount;
     balanceItem.unitPrice = item.unitPrice * 100;
     balanceItem.VATPercentage = vatInfo.VATPercentage;
@@ -527,7 +527,7 @@ export async function convertCredit(credit: STCredit, ctx: ConversionContext): P
     balanceItem.organizationId = ctx.membershipOrganization.id;
     balanceItem.payingOrganizationId = credit.organizationId;
     balanceItem.type = BalanceItemType.ReferralDiscount;
-    balanceItem.name = credit.description;
+    balanceItem.name = TranslatedString.create(credit.description);
     balanceItem.amount = 1;
     balanceItem.unitPrice = -credit.change;
     balanceItem.VATPercentage = 21;
@@ -568,7 +568,7 @@ export async function convertRemainingCredit(organization: Organization, balance
     balanceItem.organizationId = ctx.membershipOrganization.id;
     balanceItem.payingOrganizationId = organization.id;
     balanceItem.type = BalanceItemType.ReferralDiscount;
-    balanceItem.name = $t('%1Xl');
+    balanceItem.name = TranslatedString.create($t('%1Xl'));
     balanceItem.amount = 1;
     balanceItem.unitPrice = -balance;
     balanceItem.VATPercentage = 21;

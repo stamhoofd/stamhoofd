@@ -114,7 +114,7 @@ async function chargeTransferFees() {
 
                     const item = new BalanceItem();
                     item.type = BalanceItemType.TransferFee;
-                    item.name = $t('%1Yq', { date: day });
+                    item.name = TranslatedString.create($t('%1Yq', { date: day }));
 
                     if (provider) {
                         item.relations.set(BalanceItemRelationType.PaymentProvider, BalanceItemRelation.create({

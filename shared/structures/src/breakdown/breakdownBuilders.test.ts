@@ -1303,7 +1303,7 @@ describe('Breakdown builders', () => {
         function createCorrection(index: number) {
             return BalanceItem.create({
                 type: BalanceItemType.Other,
-                name: 'Correctie ' + index,
+                name: new TranslatedString('Correctie ' + index),
                 amount: 1,
                 unitPrice: (200 - index) * 100,
             });

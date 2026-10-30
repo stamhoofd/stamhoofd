@@ -1,5 +1,5 @@
 import type { AutoEncoderPatchType, Decoder, PatchableArrayAutoEncoder } from '@common/encoding';
-import { PatchableArrayDecoder, StringDecoder } from '@common/encoding';
+import { PatchableArrayDecoder, patchObject, StringDecoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
@@ -185,8 +185,8 @@ export class PatchBalanceItemsEndpoint extends Endpoint<Params, Query, Body, Res
                     }
                 }
 
-                model.name = patch.name ?? model.name;
-                model.description = patch.description === undefined ? model.description : patch.description;
+                model.name = patchObject(model.name, patch.name);
+                model.description = patchObject(model.description, patch.description);
                 model.unitPrice = patch.unitPrice ?? model.unitPrice;
                 model.amount = patch.amount ?? model.amount;
                 model.dueAt = patch.dueAt === undefined ? model.dueAt : patch.dueAt;

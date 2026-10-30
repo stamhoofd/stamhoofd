@@ -1,4 +1,5 @@
 import { BalanceItem, VATExcemptReason } from '../BalanceItem.js';
+import { TranslatedString } from '../TranslatedString.js';
 import { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
 import { PaymentGeneral } from '../members/PaymentGeneral.js';
 import { PaymentMethod } from '../PaymentMethod.js';
@@ -14,7 +15,7 @@ describe('Invoice', () => {
         {
             const balanceItem = new BalanceItem();
             balanceItem.id = '1';
-            balanceItem.description = 'Test Item 1';
+            balanceItem.description = new TranslatedString('Test Item 1');
             balanceItem.unitPrice = 1_00_00;
             balanceItem.quantity = 815;
             balanceItem.VATPercentage = 21;
@@ -34,7 +35,7 @@ describe('Invoice', () => {
         {
             const balanceItem = new BalanceItem();
             balanceItem.id = '2';
-            balanceItem.description = 'Test Item 2';
+            balanceItem.description = new TranslatedString('Test Item 2');
             balanceItem.unitPrice = 1_00_00;
             balanceItem.quantity = 2;
             balanceItem.VATPercentage = 21;
@@ -53,7 +54,7 @@ describe('Invoice', () => {
         {
             const balanceItem = new BalanceItem();
             balanceItem.id = '3';
-            balanceItem.description = 'Test Item 3';
+            balanceItem.description = new TranslatedString('Test Item 3');
             balanceItem.unitPrice = 1_00_00;
             balanceItem.quantity = 2;
             balanceItem.VATPercentage = 21;
@@ -86,7 +87,7 @@ describe('Invoice', () => {
         {
             const balanceItem = new BalanceItem();
             balanceItem.id = '1';
-            balanceItem.description = 'Test Item 1';
+            balanceItem.description = new TranslatedString('Test Item 1');
             balanceItem.unitPrice = 1_00_00;
             balanceItem.quantity = 815;
             balanceItem.VATPercentage = 21;
@@ -122,7 +123,7 @@ describe('Invoice', () => {
 
         {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Test Item 1';
+            balanceItem.description = new TranslatedString('Test Item 1');
             balanceItem.unitPrice = 20_00; // 0,20 euro, excluding VAT
             balanceItem.quantity = 5;
             balanceItem.VATPercentage = 21;
@@ -135,7 +136,7 @@ describe('Invoice', () => {
 
         {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Test Item 2';
+            balanceItem.description = new TranslatedString('Test Item 2');
             balanceItem.unitPrice = 20_00; // 0,20 euro, excluding VAT
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 21;
@@ -171,7 +172,7 @@ describe('Invoice', () => {
 
         {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Test Item 1';
+            balanceItem.description = new TranslatedString('Test Item 1');
             balanceItem.unitPrice = 20_00; // 0,20 euro, excluding VAT
             balanceItem.quantity = 5;
             balanceItem.VATPercentage = 21;
@@ -184,7 +185,7 @@ describe('Invoice', () => {
 
         {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Tax free item 1';
+            balanceItem.description = new TranslatedString('Tax free item 1');
             balanceItem.unitPrice = 20_00;
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 21;
@@ -198,7 +199,7 @@ describe('Invoice', () => {
 
         {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Tax free item 2';
+            balanceItem.description = new TranslatedString('Tax free item 2');
             balanceItem.unitPrice = 5_23_00;
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 6;
@@ -212,7 +213,7 @@ describe('Invoice', () => {
 
         {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Tax free item 3';
+            balanceItem.description = new TranslatedString('Tax free item 3');
             balanceItem.unitPrice = 5_23_00;
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 21;
@@ -259,7 +260,7 @@ describe('Invoice', () => {
 
         {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Test Item 1';
+            balanceItem.description = new TranslatedString('Test Item 1');
             balanceItem.unitPrice = 20_00; // 0,20 euro, excluding VAT
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 21;
@@ -272,7 +273,7 @@ describe('Invoice', () => {
 
         {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Test Item 1';
+            balanceItem.description = new TranslatedString('Test Item 1');
             balanceItem.unitPrice = 20_00; // 0,20 euro, excluding VAT
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 21;
@@ -285,7 +286,7 @@ describe('Invoice', () => {
 
         {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Another';
+            balanceItem.description = new TranslatedString('Another');
             balanceItem.unitPrice = 20_00;
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 6;
@@ -298,7 +299,7 @@ describe('Invoice', () => {
 
         {
             const balanceItem = new BalanceItem();
-            balanceItem.description = 'Another';
+            balanceItem.description = new TranslatedString('Another');
             balanceItem.unitPrice = 20_00;
             balanceItem.quantity = 1;
             balanceItem.VATPercentage = 6;

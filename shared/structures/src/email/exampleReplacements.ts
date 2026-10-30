@@ -1,5 +1,6 @@
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItem } from '../BalanceItem.js';
+import { TranslatedString } from '../TranslatedString.js';
 import { STPackageType, STPackageTypeHelper } from '../billing/STPackage.js';
 import { Replacement } from '../endpoints/EmailRequest.js';
 
@@ -56,13 +57,13 @@ function getReplacements() {
     const textPlaceholder = $t(`%13X`);
 
     const exampleBalanceItem = BalanceItem.create({
-        name: $t('%Ze8'),
+        name: new TranslatedString($t('%Ze8')),
         amount: 3,
         unitPrice: 80000,
     });
 
     const exampleBalanceItem2 = BalanceItem.create({
-        name: $t('%Ze7'),
+        name: new TranslatedString($t('%Ze7')),
         amount: 1,
         unitPrice: 150000,
     });

@@ -1,7 +1,7 @@
 import { Factory } from '@node/database';
 
 import type { BalanceItemRelation, BalanceItemRelationType, BalanceItemType } from '@stamhoofd/structures';
-import { BalanceItemStatus } from '@stamhoofd/structures';
+import { BalanceItemStatus, TranslatedString } from '@stamhoofd/structures';
 import { BalanceItem } from '../models/index.js';
 
 class Options {
@@ -22,8 +22,8 @@ class Options {
     updatedAt?: Date;
     status?: BalanceItemStatus;
     relations?: Map<BalanceItemRelationType, BalanceItemRelation>;
-    name?: string;
-    description?: string | null;
+    name?: string | TranslatedString;
+    description?: string | TranslatedString | null;
 }
 
 export class BalanceItemFactory extends Factory<Options, BalanceItem> {
@@ -37,8 +37,10 @@ export class BalanceItemFactory extends Factory<Options, BalanceItem> {
         balanceItem.orderId = this.options.orderId ?? null;
         balanceItem.dependingBalanceItemId = this.options.dependingBalanceItemId ?? null;
         balanceItem.relations = this.options.relations ?? new Map();
-        balanceItem.name = this.options.name ?? '';
-        balanceItem.description = this.options.description ?? null;
+        const name = this.options.name ?? '';
+        balanceItem.name = name instanceof TranslatedString ? name : TranslatedString.create(name);
+        const description = this.options.description ?? '';
+        balanceItem.description = description instanceof TranslatedString ? description : TranslatedString.create(description);
 
         if (this.options.type) {
             balanceItem.type = this.options.type;

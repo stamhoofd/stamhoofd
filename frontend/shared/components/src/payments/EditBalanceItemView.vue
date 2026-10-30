@@ -17,9 +17,7 @@
 
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <STInputBox v-if="balanceItem.relations.size === 0 && !balanceItem.startDate" error-fields="name" :error-box="errors.errorBox" :title="$t('%1Os')" class="max">
-            <input ref="firstInput" v-model="name" class="input" type="text" autocomplete="off" :disabled="!!balanceItem.relations.size" :placeholder="$t(`%gp`)">
-        </STInputBox>
+        <TInput v-if="balanceItem.relations.size === 0 && !balanceItem.startDate" v-model="name" error-fields="name" :error-box="errors.errorBox" :title="$t('%1Os')" :placeholder="$t(`%gp`)" :autofocus="true" class="max" />
         <STList v-else>
             <STListItem>
                 <h3 class="style-definition-label">
@@ -56,9 +54,7 @@
             </STListItem>
         </STList>
 
-        <STInputBox v-if="balanceItem.relations.size === 0 && !balanceItem.startDate" error-fields="description" :error-box="errors.errorBox" :title="$t('%6o')" class="max">
-            <textarea v-model="description" class="input" :placeholder="$t('%14p')" />
-        </STInputBox>
+        <TTextarea v-if="balanceItem.relations.size === 0 && !balanceItem.startDate" v-model="description" error-fields="description" :error-box="errors.errorBox" :title="$t('%6o')" :placeholder="$t('%14p')" class="max" />
 
         <div class="split-inputs">
             <div>
@@ -186,6 +182,8 @@ import { usePatch } from '#hooks/usePatch.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import DateSelection from '#inputs/DateSelection.vue';
 import PriceInput from '#inputs/PriceInput.vue';
+import TInput from '#inputs/TInput.vue';
+import TTextarea from '#inputs/TTextarea.vue';
 import { useShowMember } from '#members/hooks/useShowMember.ts';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import { Toast } from '#overlays/Toast.ts';
@@ -274,8 +272,8 @@ const name = computed({
 });
 
 const description = computed({
-    get: () => patchedBalanceItem.value.description ?? '',
-    set: value => addPatch({ description: value ? value : null }),
+    get: () => patchedBalanceItem.value.description,
+    set: value => addPatch({ description: value }),
 });
 
 const unitPrice = computed({

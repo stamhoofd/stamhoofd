@@ -396,13 +396,15 @@ export class BalanceItem extends AutoEncoder {
 
     @field({ decoder: StringDecoder, field: 'description' })
     @field({ decoder: StringDecoder, field: 'name', version: 416 })
-    name = '';
+    @field(TranslatedString.field({ version: 426 }))
+    name = new TranslatedString();
 
     /**
      * Optional extra text for the item, shown below the name (e.g. on invoices)
      */
     @field({ decoder: StringDecoder, nullable: true, version: 416 })
-    description: string | null = null;
+    @field(TranslatedString.field({ version: 426 }))
+    description = new TranslatedString();
 
     /**
      * quantity, should be renamed to quantity in the future

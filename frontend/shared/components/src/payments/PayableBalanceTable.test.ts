@@ -1,4 +1,4 @@
-import { BalanceItemType, BalanceItemWithPayments, BaseOrganization, DetailedPayableBalance } from '@stamhoofd/structures';
+import { BalanceItemType, BalanceItemWithPayments, BaseOrganization, DetailedPayableBalance, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { expect, test, vi } from 'vitest';
 import { render } from 'vitest-browser-vue';
@@ -8,7 +8,7 @@ import PayableBalanceTable from './PayableBalanceTable.vue';
 function createItem(overrides: Partial<{ unitPrice: number; amount: number; VATPercentage: number | null; VATIncluded: boolean; name: string }> = {}) {
     return BalanceItemWithPayments.create({
         type: BalanceItemType.Other,
-        name: overrides.name ?? 'Test item',
+        name: new TranslatedString(overrides.name ?? 'Test item'),
         amount: overrides.amount ?? 1,
         unitPrice: overrides.unitPrice ?? 4_13_00,
         VATPercentage: overrides.VATPercentage === undefined ? 21 : overrides.VATPercentage,

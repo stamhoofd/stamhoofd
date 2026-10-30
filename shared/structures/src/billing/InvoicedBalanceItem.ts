@@ -142,12 +142,12 @@ export class InvoicedBalanceItem extends AutoEncoder {
         item.relations = new Map(balanceItem.relations);
         item.startDate = balanceItem.startDate;
         item.endDate = balanceItem.endDate;
-        if (balanceItem.relations.size > 0 && !balanceItem.description) {
+        if (balanceItem.relations.size > 0 && balanceItem.description.length === 0) {
             item.name = balanceItem.itemTitle;
             item.description = balanceItem.itemDescription ?? '';
         } else {
-            item.name = balanceItem.name || balanceItem.itemTitle;
-            item.description = balanceItem.description ?? '';
+            item.name = balanceItem.name.toString() || balanceItem.itemTitle;
+            item.description = balanceItem.description.toString();
         }
         item.balanceInvoicedAmount = amount;
         item.VATPercentage = balanceItem.VATPercentage;

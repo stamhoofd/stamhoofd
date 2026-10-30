@@ -3,7 +3,7 @@ import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
 import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/models';
-import { BalanceItemStatus, BalanceItemType, CheckoutResponse, OrganizationCheckout, OrganizationPackagesStatus, STPackageStruct } from '@stamhoofd/structures';
+import { BalanceItemStatus, BalanceItemType, CheckoutResponse, OrganizationCheckout, OrganizationPackagesStatus, STPackageStruct, TranslatedString } from '@stamhoofd/structures';
 import { CreateMandateSettings } from '@stamhoofd/structures/checkout/CreateMandateSettings.js';
 import { AuthenticatedStructures } from '../../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../../helpers/Context.js';
@@ -233,7 +233,7 @@ export class OrganizationCheckoutEndpoint extends Endpoint<Params, Query, Body, 
         if (totalPrice < minimumAmount) {
             const item = new BalanceItem();
             item.type = BalanceItemType.AdministrationFee;
-            item.name = $t('%1Q4');
+            item.name = TranslatedString.create($t('%1Q4'));
             item.payingOrganizationId = organization.id;
             item.organizationId = sellingOrganization.id;
             item.VATPercentage = 21;

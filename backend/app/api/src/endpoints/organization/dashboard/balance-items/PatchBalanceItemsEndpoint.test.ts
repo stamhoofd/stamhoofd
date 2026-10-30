@@ -4,7 +4,7 @@ import { Request } from '@node/endpoints';
 import type { Organization, User } from '@stamhoofd/models';
 import { AuditLog, BalanceItem, BalanceItemFactory, MemberFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { AuditLogReplacementType, AuditLogSource, AuditLogType, BalanceItemStatus, BalanceItemWithPayments, Permissions } from '@stamhoofd/structures';
+import { AuditLogReplacementType, AuditLogSource, AuditLogType, BalanceItemStatus, BalanceItemWithPayments, Permissions, TranslatedString } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import '../../../../audit-logs/init.js';
@@ -90,31 +90,31 @@ describe('Endpoint.PatchBalanceItemsEndpoint', () => {
 
             const putBody = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
             putBody.addPut(BalanceItemWithPayments.create({
-                name: 'Kampgeld',
-                description: 'Weekend aan zee',
+                name: new TranslatedString('Kampgeld'),
+                description: new TranslatedString('Weekend aan zee'),
                 unitPrice: 25_00,
                 amount: 1,
                 memberId: member.id,
             }));
 
             const created = (await patchBalanceItems({ body: putBody, organization, user: admin })).body[0];
-            expect(created.name).toBe('Kampgeld');
-            expect(created.description).toBe('Weekend aan zee');
+            expect(created.name.toString()).toBe('Kampgeld');
+            expect(created.description?.toString()).toBe('Weekend aan zee');
 
             const patchBody = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
             patchBody.addPatch(BalanceItemWithPayments.patch({ id: created.id, description: 'Weekend in de Ardennen' }));
             const patched = (await patchBalanceItems({ body: patchBody, organization, user: admin })).body[0];
-            expect(patched.name).toBe('Kampgeld');
-            expect(patched.description).toBe('Weekend in de Ardennen');
+            expect(patched.name.toString()).toBe('Kampgeld');
+            expect(patched.description?.toString()).toBe('Weekend in de Ardennen');
 
             const clearBody = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
-            clearBody.addPatch(BalanceItemWithPayments.patch({ id: created.id, description: null }));
+            clearBody.addPatch(BalanceItemWithPayments.patch({ id: created.id, description: new TranslatedString() }));
             const cleared = (await patchBalanceItems({ body: clearBody, organization, user: admin })).body[0];
-            expect(cleared.description).toBeNull();
+            expect(cleared.description.length).toBe(0);
 
             const model = await BalanceItem.getByID(created.id);
-            expect(model?.name).toBe('Kampgeld');
-            expect(model?.description).toBeNull();
+            expect(model?.name.toString()).toBe('Kampgeld');
+            expect(model?.description.length).toBe(0);
         });
 
         test('a patch without description keeps the existing description', async () => {
@@ -127,8 +127,8 @@ describe('Endpoint.PatchBalanceItemsEndpoint', () => {
             body.addPatch(BalanceItemWithPayments.patch({ id: balanceItem.id, name: 'Weekendgeld' }));
             const patched = (await patchBalanceItems({ body, organization, user: admin })).body[0];
 
-            expect(patched.name).toBe('Weekendgeld');
-            expect(patched.description).toBe('Weekend aan zee');
+            expect(patched.name.toString()).toBe('Weekendgeld');
+            expect(patched.description?.toString()).toBe('Weekend aan zee');
         });
     });
 
@@ -140,7 +140,7 @@ describe('Endpoint.PatchBalanceItemsEndpoint', () => {
 
             const body = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
             body.addPut(BalanceItemWithPayments.create({
-                name: 'Kampgeld',
+                name: new TranslatedString('Kampgeld'),
                 unitPrice: 25_00,
                 amount: 2,
                 memberId: member.id,
@@ -192,7 +192,7 @@ describe('Endpoint.PatchBalanceItemsEndpoint', () => {
             expect(log.replacements.get('b')).toMatchObject({ id: balanceItem.id, value: 'Weekendgeld', type: AuditLogReplacementType.BalanceItem });
 
             const keys = log.patchList.map(p => p.key.toKey());
-            expect(keys).toEqual(expect.arrayContaining(['name', 'unitPrice', 'status']));
+            expect(keys).toEqual(expect.arrayContaining(['name.translations', 'unitPrice', 'status']));
             expect(keys).not.toEqual(expect.arrayContaining(['priceTotal']));
             expect(keys).not.toEqual(expect.arrayContaining(['priceOpen']));
 
@@ -208,7 +208,7 @@ describe('Endpoint.PatchBalanceItemsEndpoint', () => {
 
             const body = new PatchableArray<string, BalanceItemWithPayments, AutoEncoderPatchType<BalanceItemWithPayments>>();
             body.addPut(BalanceItemWithPayments.create({
-                name: 'Lidgeld',
+                name: new TranslatedString('Lidgeld'),
                 unitPrice: 10_00,
                 amount: 1,
                 payingOrganizationId: payingOrganization.id,

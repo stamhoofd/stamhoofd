@@ -60,8 +60,8 @@ describe('E2E.ChargeOrganizations', () => {
             const item = items[0];
             expect(item.organizationId).toBe(chargingOrganization.id);
             expect(item.type).toBe(BalanceItemType.Other);
-            expect(item.name).toBe('test name');
-            expect(item.description).toBe('test description');
+            expect(item.name.toString()).toBe('test name');
+            expect(item.description.toString()).toBe('test description');
             expect(item.unitPrice).toBe(10_00);
             expect(item.amount).toBe(2);
             expect(item.VATPercentage).toBe(21);

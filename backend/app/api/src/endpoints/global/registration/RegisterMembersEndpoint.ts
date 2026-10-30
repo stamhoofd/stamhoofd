@@ -577,7 +577,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             return relation;
         }
 
-        async function createBalanceItem({ registration, periodId, skipZero, amount, unitPrice, name, type, relations }: { amount?: number; skipZero?: boolean; registration: { id: string; payingOrganizationId: string | null; memberId: string; trialUntil: Date | null }; periodId: string; unitPrice: number; name: string; relations: Map<BalanceItemRelationType, BalanceItemRelation>; type: BalanceItemType }) {
+        async function createBalanceItem({ registration, periodId, skipZero, amount, unitPrice, name, type, relations }: { amount?: number; skipZero?: boolean; registration: { id: string; payingOrganizationId: string | null; memberId: string; trialUntil: Date | null }; periodId: string; unitPrice: number; name: TranslatedString; relations: Map<BalanceItemRelationType, BalanceItemRelation>; type: BalanceItemType }) {
             // NOTE: We also need to save zero-price balance items because for online payments, we need to know which registrations to activate after payment
             if (skipZero === true) {
                 if (unitPrice === 0 || amount === 0) {
@@ -679,7 +679,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                 unitPrice: item.groupPrice.price.forMember(item.member),
                 type: BalanceItemType.Registration,
                 skipZero: false, // Always create at least one balance item for each registration - even when the price is zero
-                name: `${item.member.patchedMember.name} bij ${item.group.settings.name.toString()}`,
+                name: TranslatedString.create(`${item.member.patchedMember.name} bij ${item.group.settings.name.toString()}`),
                 relations: new Map([
                     ...sharedRelations,
                 ]),
@@ -694,7 +694,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     unitPrice: option.option.price.forMember(item.member),
                     skipZero: true, // Do not create for zero option prices
                     type: BalanceItemType.Registration,
-                    name: `${option.optionMenu.name}: ${option.option.name}`,
+                    name: TranslatedString.create(`${option.optionMenu.name}: ${option.option.name}`),
                     relations: new Map([
                         ...sharedRelations,
                         [
@@ -726,7 +726,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                         periodId: item.group.periodId,
                         unitPrice: -discountValue,
                         type: BalanceItemType.RegistrationBundleDiscount,
-                        name: discount.name,
+                        name: TranslatedString.create(discount.name),
                         relations: new Map([
                             ...sharedRelations,
                             [
@@ -795,7 +795,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     periodId: registration.group.periodId,
                     unitPrice: -difference,
                     type: BalanceItemType.RegistrationBundleDiscount,
-                    name: discount.name,
+                    name: TranslatedString.create(discount.name),
                     relations: new Map([
                         ...sharedRelations,
                         [
@@ -816,7 +816,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const balanceItem = new BalanceItem();
             balanceItem.type = BalanceItemType.FreeContribution;
             balanceItem.unitPrice = checkout.freeContribution;
-            balanceItem.name = $t('%Ot');
+            balanceItem.name = TranslatedString.create($t('%Ot'));
             balanceItem.pricePaid = 0;
             balanceItem.userId = user.id;
             balanceItem.organizationId = organization.id;
@@ -836,7 +836,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const balanceItem = new BalanceItem();
             balanceItem.type = BalanceItemType.AdministrationFee;
             balanceItem.unitPrice = checkout.administrationFee;
-            balanceItem.name = $t('%xK');
+            balanceItem.name = TranslatedString.create($t('%xK'));
             balanceItem.pricePaid = 0;
             balanceItem.organizationId = organization.id;
 

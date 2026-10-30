@@ -1,6 +1,7 @@
 import type { SQLFilterDefinitions } from '@stamhoofd/sql';
 import { baseSQLFilterCompilers, createColumnFilter, createExistsFilter, SQL, SQLValueType } from '@stamhoofd/sql';
 import { BalanceItemRelationType } from '@stamhoofd/structures';
+import { SQLTranslatedString } from '../helpers/SQLTranslatedString.js';
 import { paymentSettlementFilterCompilers } from './payment-settlement.js';
 
 /**
@@ -131,13 +132,13 @@ export const balanceItemFilterCompilers: SQLFilterDefinitions = {
     }),
 
     name: createColumnFilter({
-        expression: SQL.column('balance_items', 'name'),
+        expression: new SQLTranslatedString(SQL.column('balance_items', 'name'), '$.value'),
         type: SQLValueType.String,
         nullable: false,
     }),
 
     description: createColumnFilter({
-        expression: SQL.column('balance_items', 'description'),
+        expression: new SQLTranslatedString(SQL.column('balance_items', 'description'), '$.value'),
         type: SQLValueType.String,
         nullable: true,
     }),

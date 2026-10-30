@@ -58,7 +58,7 @@ function createPayment(price: number): PaymentGeneral {
                     id: 'balance-item-1',
                     type: BalanceItemType.Order,
                     orderId: 'order-1',
-                    name: 'Bestelling #1',
+                    name: new TranslatedString('Bestelling #1'),
                     amount: 1,
                     unitPrice: price,
                     relations: new Map([
@@ -86,7 +86,7 @@ function createPaymentForOrders(orderIds: (string | null)[]): PaymentGeneral {
                 id: 'balance-item-' + index,
                 type: orderId ? BalanceItemType.Order : BalanceItemType.Other,
                 orderId,
-                description: 'Bestelling',
+                description: new TranslatedString('Bestelling'),
                 amount: 1,
                 unitPrice: 1000,
             }),
@@ -114,12 +114,12 @@ describe('payments excel loader', () => {
 
             expect(rows).toHaveLength(2);
             expect(rows[0].customTitle).toBe('Koffie');
-            expect(rows[0].balanceItem.name).toBe('Groot');
+            expect(rows[0].balanceItem.name.toString()).toBe('Groot');
             expect(rows[0].amount).toBe(2);
             expect(rows[0].unitPrice).toBe(3500);
             expect(rows[0].price).toBe(7000);
             expect(rows[1].customTitle).toBe('Administratiekosten');
-            expect(rows[1].balanceItem.name).toBe('Administratiekosten');
+            expect(rows[1].balanceItem.name.toString()).toBe('Administratiekosten');
             expect(rows[1].amount).toBe(1);
             expect(rows[1].price).toBe(500);
             expectRowsToMatchReplacedPayment(rows, payment);
@@ -141,7 +141,7 @@ describe('payments excel loader', () => {
                 'Korting',
                 'Administratiekosten',
             ]);
-            expect(rows.map(row => row.balanceItem.name)).toEqual([
+            expect(rows.map(row => row.balanceItem.name.toString())).toEqual([
                 'Groot',
                 'Korting (10%)',
                 'Vaste korting',
@@ -171,7 +171,7 @@ describe('payments excel loader', () => {
                 'Korting (100%)',
                 'Administratiekosten',
             ]);
-            expect(rows.map(row => row.balanceItem.name)).toEqual([
+            expect(rows.map(row => row.balanceItem.name.toString())).toEqual([
                 'Groot',
                 'Korting (100%)',
                 'Administratiekosten',
@@ -190,13 +190,13 @@ describe('payments excel loader', () => {
 
             const changedRows = expandPaymentBalanceItemPayments(createPayment(1000), orderMap);
             expect(changedRows).toHaveLength(1);
-            expect(changedRows[0].balanceItem.name).toBe('Gedeeltelijke betaling/terugbetaling voor bestelling #123');
+            expect(changedRows[0].balanceItem.name.toString()).toBe('Gedeeltelijke betaling/terugbetaling voor bestelling #123');
             expect(changedRows[0].amount).toBe(1);
             expect(changedRows[0].price).toBe(1000);
 
             const refundRows = expandPaymentBalanceItemPayments(createPayment(-1000), orderMap);
             expect(refundRows).toHaveLength(1);
-            expect(refundRows[0].balanceItem.name).toBe('Gedeeltelijke betaling/terugbetaling voor bestelling #123');
+            expect(refundRows[0].balanceItem.name.toString()).toBe('Gedeeltelijke betaling/terugbetaling voor bestelling #123');
             expect(refundRows[0].amount).toBe(1);
             expect(refundRows[0].price).toBe(-1000);
         });
@@ -211,7 +211,7 @@ describe('payments excel loader', () => {
 
             expect(firstRows).toHaveLength(2);
             expect(secondRows).toHaveLength(1);
-            expect(secondRows[0].balanceItem.name).toBe('Gedeeltelijke betaling/terugbetaling voor bestelling #123');
+            expect(secondRows[0].balanceItem.name.toString()).toBe('Gedeeltelijke betaling/terugbetaling voor bestelling #123');
             expect(secondRows[0].price).toBe(orderData.totalPrice);
             expectRowsToMatchReplacedPayment(firstRows, createPayment(orderData.totalPrice));
             expectRowsToMatchReplacedPayment(secondRows, createPayment(orderData.totalPrice));
@@ -266,7 +266,7 @@ describe('payments excel loader', () => {
             const rows = expandPaymentBalanceItemPayments(createPayment(1000), orderMap);
 
             expect(rows).toHaveLength(1);
-            expect(rows[0].balanceItem.name).toBe('Gedeeltelijke betaling/terugbetaling voor bestelling');
+            expect(rows[0].balanceItem.name.toString()).toBe('Gedeeltelijke betaling/terugbetaling voor bestelling');
             expect(rows[0].price).toBe(1000);
             expect(rows[0].order?.isDeleted).toBe(true);
         });

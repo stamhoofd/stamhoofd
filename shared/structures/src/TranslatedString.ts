@@ -226,15 +226,34 @@ export class TranslatedString implements Encodeable, Patchable<TranslatedStringP
         return {
             ...options,
             decoder: TranslatedStringDecoder,
-            upgrade: TranslatedString.upgrade,
+            upgrade: (data: unknown): TranslatedString => {
+                // A nullable string before this version: no text is an empty translated string
+                if (data === null) {
+                    return new TranslatedString();
+                }
+                return TranslatedString.upgrade(data);
+            },
             downgrade: TranslatedString.downgrade,
-            upgradePatch: (str: PatchType<string>): PatchType<TranslatedString> => {
+            upgradePatch: (str: PatchType<string> | null | undefined): PatchType<TranslatedString> | undefined => {
+                if (str === undefined) {
+                    return undefined;
+                }
+                if (str === null) {
+                    // Clearing a nullable string before this version clears every translation
+                    return new TranslatedStringPatch('');
+                }
                 if (!str || typeof str !== 'string') {
                     return new TranslatedStringPatch({});
                 }
                 return new TranslatedStringPatch({ [Language.Dutch]: str }); // Note: before the version we expect the string to be in Dutch
             },
-            downgradePatch: (name: TranslatedStringPatch): PatchType<string> => {
+            downgradePatch: (name: TranslatedStringPatch | undefined): PatchType<string> => {
+                if (!name) {
+                    return undefined;
+                }
+                if (typeof name.translations === 'string') {
+                    return name.translations;
+                }
                 return name.translations[$getLanguage()] ?? name.translations[Language.English] ?? name.translations[Language.Dutch] ?? undefined;
             },
             defaultValue: options.defaultValue, // ?? (() => new TranslatedString()),

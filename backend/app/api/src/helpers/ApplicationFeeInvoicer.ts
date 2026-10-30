@@ -346,10 +346,10 @@ export class ApplicationFeeInvoicer {
         const item = new BalanceItem();
         item.type = type === ApplicationFeeType.Service ? BalanceItemType.ServiceFee : BalanceItemType.TransferFee;
         const date = Formatter.date(periodStart, true, { timezone: 'UTC' });
-        item.name = type === ApplicationFeeType.Service
+        item.name = TranslatedString.create(type === ApplicationFeeType.Service
             ? $t('%1cJ', { date })
-            : $t('%1Yq', { date });
-        item.description = $t('%ZqV', { date });
+            : $t('%1Yq', { date }));
+        item.description = TranslatedString.create($t('%ZqV', { date }));
         item.relations.set(BalanceItemRelationType.PaymentProvider, BalanceItemRelation.create({
             id: PaymentProvider.Stripe,
             name: TranslatedString.create(getPaymentProviderName(PaymentProvider.Stripe)),

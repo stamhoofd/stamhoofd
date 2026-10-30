@@ -3,7 +3,7 @@ import type { CellValue, XlsxTransformerColumn, XlsxTransformerConcreteColumn } 
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Order, StripeAccount } from '@stamhoofd/models';
 import type { OrderData } from '@stamhoofd/structures';
-import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelationType, BalanceItemType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, OrderStatus, PaginatedResponse, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelationType, BalanceItemType, ExcelExportType, getBalanceItemRelationTypeName, getBalanceItemTypeName, OrderStatus, PaginatedResponse, PaymentGeneral, PaymentMethod, PaymentMethodHelper, PaymentStatusHelper, StripeAccount as StripeAccountStruct, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetPaymentsEndpoint } from '../endpoints/organization/dashboard/payments/GetPaymentsEndpoint.js';
@@ -372,7 +372,7 @@ function createSyntheticBalanceItemPayment({
             ...source.balanceItem,
             type: BalanceItemType.Order,
             relations: new Map(source.balanceItem.relations),
-            name: description,
+            name: TranslatedString.create(description),
             amount,
             unitPrice: amount === 0 ? 0 : price / amount,
         }),

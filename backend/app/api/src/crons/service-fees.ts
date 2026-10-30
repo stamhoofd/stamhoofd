@@ -1,7 +1,7 @@
 import { registerRootTenantCron } from './helpers/registerTenantCron.js';
 import { BalanceItem, Organization, Payment, Platform } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentStatus } from '@stamhoofd/structures';
+import { BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentStatus, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItemService } from '../services/BalanceItemService.js';
 import { PaymentService } from '../services/PaymentService.js';
@@ -100,7 +100,7 @@ async function chargeServiceFees() {
 
                 const item = new BalanceItem();
                 item.type = BalanceItemType.ServiceFee;
-                item.name = $t('%1cJ', { date: day });
+                item.name = TranslatedString.create($t('%1cJ', { date: day }));
                 item.payingOrganizationId = organization.id;
                 item.organizationId = membershipOrganizationId;
                 item.VATPercentage = 21;

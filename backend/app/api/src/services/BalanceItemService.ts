@@ -3,7 +3,7 @@ import type { Organization } from '@stamhoofd/models';
 import { BalanceItem, CachedBalance, MemberUser, Order, Payment, Platform, Webshop } from '@stamhoofd/models';
 import { DocumentService } from './DocumentService.js';
 import { SQL } from '@stamhoofd/sql';
-import { AuditLogSource, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentStatus, PaymentType, ReceivableBalanceType } from '@stamhoofd/structures';
+import { AuditLogSource, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentStatus, PaymentType, ReceivableBalanceType, TranslatedString } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { GroupedThrottledQueue } from '../helpers/GroupedThrottledQueue.js';
 import { ThrottledQueue } from '../helpers/ThrottledQueue.js';
@@ -249,7 +249,7 @@ export class BalanceItemService {
                     const webshop = await Webshop.getByID(order.webshopId);
 
                     if (webshop) {
-                        balanceItem.name = order.generateBalanceDescription(webshop);
+                        balanceItem.name = TranslatedString.create(order.generateBalanceDescription(webshop));
                         await balanceItem.save();
                     }
                 }
