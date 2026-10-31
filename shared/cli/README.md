@@ -68,6 +68,7 @@ The CLI build clears its own compiled output before compiling so commands remove
 | Checks      | `pnpm stam check lint`                 | Run ESLint across the monorepo.                                            |
 | Checks      | `pnpm stam check typecheck`            | Run TypeScript checks across the monorepo.                                 |
 | Checks      | `pnpm stam check all`                  | Run build, lint, typecheck, unit tests, and E2E tests.                     |
+| Release     | `pnpm stam release bump-structures`    | Replace `...NextVersion` by the next structures version and bump `Version.ts`. |
 | Translations | `pnpm stam translate`             | Show translation help; never modify files without a subcommand.           |
 | Translations | `pnpm stam translate auto`        | Replace keys, clean up translations, and machine-translate.                |
 | Translations | `pnpm stam translate manual keys` | Replace translation keys.                                                  |
