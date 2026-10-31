@@ -79,6 +79,32 @@ class Example extends AutoEncoder {
             expect(result.content).toBe(source.replace('...NextVersion', replaceBy));
         });
 
+        it('ignores block comments', () => {
+            const source = `
+/**
+ * Use @field({ decoder: StringDecoder, ...NextVersion }) for new fields.
+ */
+class Example extends AutoEncoder {
+    /* @field({ decoder: StringDecoder, ...NextVersion }) */
+    @field({ decoder: StringDecoder, /* ...NextVersion */ ...NextVersion })
+    name = '';
+}
+`;
+            const result = replaceNextVersion(source, replaceBy);
+            expect(result.replaced).toBe(1);
+            expect(result.content).toBe(source.replace('/* ...NextVersion */ ...NextVersion', `/* ...NextVersion */ ${replaceBy}`));
+        });
+
+        it('does not close a block comment on the opening /*/', () => {
+            const source = `
+/*/ @field({ decoder: StringDecoder, ...NextVersion }) */
+@field({ decoder: StringDecoder, ...NextVersion })
+`;
+            const result = replaceNextVersion(source, replaceBy);
+            expect(result.replaced).toBe(1);
+            expect(result.content).toBe(source.replace('\n@field({ decoder: StringDecoder, ...NextVersion })', `\n@field({ decoder: StringDecoder, ${replaceBy} })`));
+        });
+
         it('leaves files without NextVersion untouched', () => {
             const source = '@field({ decoder: StringDecoder, version: 12 })';
             const result = replaceNextVersion(source, replaceBy);
