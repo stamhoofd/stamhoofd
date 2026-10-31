@@ -16,8 +16,9 @@ export const ReleasedVersion = 425;
  * with `...NextVersion` are already active there (including their `upgrade` and `downgrade` hooks).
  * Production and staging run at `ReleasedVersion`, where those fields are still omitted.
  *
- * `STAMHOOFD` must be defined before this module is evaluated. When it is missing (e.g. the package is
- * used outside of Stamhoofd), the released version is used.
+ * `STAMHOOFD` must be defined before this module is evaluated. Evaluating it without `STAMHOOFD` throws,
+ * because silently falling back to `ReleasedVersion` would drop every `...NextVersion` field without any
+ * signal.
  *
  * Caveat for the development database: rows written locally at `ReleasedVersion + 1` before you pulled
  * a type-changing `...NextVersion` field are not upgraded. Reset or reseed the development database
@@ -27,7 +28,7 @@ export const Version = isRunningAhead() ? ReleasedVersion + 1 : ReleasedVersion;
 
 function isRunningAhead(): boolean {
     if (typeof STAMHOOFD === 'undefined') {
-        return false;
+        throw new Error('STAMHOOFD is not defined. Load the environment before importing @stamhoofd/structures');
     }
     return STAMHOOFD.environment === 'development' || STAMHOOFD.environment === 'test';
 }
