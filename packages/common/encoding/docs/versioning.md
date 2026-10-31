@@ -135,33 +135,48 @@ const pablo = Dog.decode(data);
 
 **Increasing the version**
 
-We increase the version only during Stamhoofd releases to avoid conflicts when multiple people make changes simultaneously or switch between branches. For adding new properties to data structures during development, use the `...NextVersion` helper.
+The version is only increased during a Stamhoofd release, to avoid conflicts when multiple people make changes at the same time or switch between branches. Never edit `shared/structures/src/Version.ts` yourself and never commit an explicit `version: N` for an unreleased change: use the `...NextVersion` helper instead, both for new fields and for type changes of existing fields with `upgrade` / `downgrade` hooks.
 
-> The …NextVersion helper doesn’t support upgrade/downgrade methods yet. So you cannot use it when making changes to existing properties. In that case, manually bump the version, but don’t commit your version change yet until it has been reviewed.
+`Version.ts` exports two numbers:
+
+- `ReleasedVersion`: the version of the latest release. Only the release command (`stam release bump-structures`) changes it.
+- `Version`: the version the code runs at. In `development` and `test` (`STAMHOOFD.environment`) this is `ReleasedVersion + 1`, so `...NextVersion` fields are active and their hooks run. In `production` and `staging` it equals `ReleasedVersion`, where those fields are still omitted, exactly like after the release.
 
 ```typescript
 export class User extends AutoEncoder {
-		...
+    ...
 
     @field({ decoder: StringDecoder, ...NextVersion })
     myNewProperty = ""
 
+    @field({ decoder: StringDecoder })
+    @field({ ...TranslatedString.field({}), ...NextVersion })
+    name = new TranslatedString()
+
+    @field({ decoder: StringDecoder })
+    @field(TranslatedString.field({ ...NextVersion }))
+    description = new TranslatedString()
+
     ...
-  }
+}
 ```
 
-After release, it will look like this:
+On release, `stam release bump-structures` replaces every `...NextVersion` inside a `@field(...)` decorator by `version: ReleasedVersion + 1` and bumps `ReleasedVersion`. Spreading `...NextVersion` into the options object of a helper call (such as `TranslatedString.field({ ...NextVersion })`) is supported; `...NextVersion` is only recognised inside a `@field(` decorator, and test files (`*.test.ts`, `*.spec.ts`) are skipped so they keep testing the unreleased version. Run `pnpm stam release bump-structures --dry-run` to see which files would change.
+
+After release, the example above looks like this:
 
 ```typescript
 export class User extends AutoEncoder {
-		...
+    ...
 
     @field({ decoder: StringDecoder, version: 508 })
     myNewProperty = ""
 
     ...
-  }
+}
 ```
+
+> **Development database**: the development API encodes at `ReleasedVersion + 1`. Rows that were written locally before you pulled a type-changing `...NextVersion` field were stored at that same version, so decoding them does not run the `upgrade` hook. Reset or reseed the development database when decoding errors appear.
 
 ---
 
