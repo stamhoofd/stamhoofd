@@ -5,7 +5,7 @@
             <h2 v-if="group.name" class="larger">
                 {{ group.name }}
             </h2>
-            <p v-if="group.description" class="style-description-small" v-text="group.description" />
+            <p v-if="group.description" class="style-description-small pre-wrap" v-text="group.description" />
 
             <div class="boxed">
                 <STList>
