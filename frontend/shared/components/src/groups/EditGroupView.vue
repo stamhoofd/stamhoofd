@@ -30,20 +30,22 @@
                     <div class="split-inputs">
                         <TInput v-model="name" :placeholder="$t(`%d8`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%1Os`)" :autofocus="isNew ? true : undefined" />
 
-                        <STInputBox v-if="defaultAgeGroupsFiltered.length" :title="$t('%2')" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
-                            <Dropdown v-model="defaultAgeGroupId">
-                                <option :value="null">
-                                    {{ $t('%cJ') }}
-                                </option>
-                                <option v-for="ageGroup of defaultAgeGroupsFiltered" :key="ageGroup.id" :value="ageGroup.id">
-                                    {{ getAgeGroupSelectionText(ageGroup) }}
-                                </option>
-                            </Dropdown>
-                        </STInputBox>
+                        <div v-if="defaultAgeGroupsFiltered.length">
+                            <STInputBox :title="defaultAgeGroupsTitle" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
+                                <template #right>
+                                    <span v-tooltip="defaultAgeGroupsDescription" class="style-tooltip"><span class="icon small gray help" /></span>
+                                </template>
+                                <div class="input-icon-container right icon arrow-down-small gray">
+                                    <div class="input selectable" @click="openDefaultAgeGroupSheet">
+                                        {{ defaultAgeGroup ? defaultAgeGroup.name : $t('Geen aansluiting of verzekering') }}
+                                    </div>
+                                </div>
+                            </STInputBox>
+                            <p v-if="selectedAgeGroupDescriptionLines.length" class="style-description-small pre-wrap">
+                                {{ selectedAgeGroupDescriptionLines.join('\n') }}
+                            </p>
+                        </div>
                     </div>
-                    <p v-if="defaultAgeGroups.length" class="style-description-small">
-                        {{ $t('%3') }}
-                    </p>
                 </template>
 
                 <template v-if="type === GroupType.WaitingList">
@@ -771,15 +773,15 @@ import { usePatchableArray } from '#hooks/usePatchableArray.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
 import AgeInput from '#inputs/AgeInput.vue';
 import DateSelection from '#inputs/DateSelection.vue';
-import Dropdown from '#inputs/Dropdown.vue';
 import GroupIdsInput from '#inputs/GroupIdsInput.vue';
 import TimeInput from '#inputs/TimeInput.vue';
+import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
 import EditRecordCategoriesBox from '#records/components/EditRecordCategoriesBox.vue';
 import InheritedRecordsConfigurationBox from '#records/components/InheritedRecordsConfigurationBox.vue';
 import { RecordEditorSettings, RecordEditorType } from '#records/RecordEditorSettings.ts';
 import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEncoder } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { useNavigate, usePop, usePresent } from '@browser/navigation';
+import { ComponentWithProperties, NavigationController, useNavigate, usePop, usePresent } from '@browser/navigation';
 import type { DefaultAgeGroup, Image, MemberProperty, RecordCategory } from '@stamhoofd/structures';
 import { BooleanStatus, getGroupStatusName, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, LimitedFilteredRequest, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, PlatformFamily, PlatformMember, RegisterItem, ResolutionFit, ResolutionRequest, TranslatedString, WaitingListType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
@@ -1654,7 +1656,7 @@ async function addWaitingList() {
         eventId: patchedGroup.value.eventId,
         type: GroupType.WaitingList,
         settings: GroupSettings.create({
-            name: TranslatedString.create($t(`%yh`) + ' ' + patchedGroup.value.settings.name.toString()),
+            name: TranslatedString.create($t('%yh') + ' ' + patchedGroup.value.settings.name.toString()),
             registrationStartDate: patchedGroup.value.settings.registrationStartDate ? new Date(patchedGroup.value.settings.registrationStartDate) : null,
             registrationEndDate: patchedGroup.value.settings.registrationEndDate ? new Date(patchedGroup.value.settings.registrationEndDate) : null,
         }),
@@ -1732,15 +1734,15 @@ async function editWaitingList(waitingList: Group) {
 const genderTypes = [
     {
         value: GroupGenderType.Mixed,
-        name: $t(`%yi`),
+        name: $t('%yi'),
     },
     {
         value: GroupGenderType.OnlyFemale,
-        name: $t(`%yj`),
+        name: $t('%yj'),
     },
     {
         value: GroupGenderType.OnlyMale,
-        name: $t(`%yk`),
+        name: $t('%yk'),
     },
 ];
 
@@ -1772,19 +1774,67 @@ function getAgeGroupAgeString(ageGroup: DefaultAgeGroup): string {
     return '';
 }
 
-function getAgeGroupSelectionText(ageGroup: DefaultAgeGroup) {
-    let text = ageGroup.name;
-    const ageGroupAgeString = getAgeGroupAgeString(ageGroup);
-
-    if (ageGroupAgeString) {
-        text = text + ': ' + ageGroupAgeString;
+function getAgeGroupDescriptionLines(ageGroup: DefaultAgeGroup): string[] {
+    const firstLine: string[] = [];
+    const ageString = getAgeGroupAgeString(ageGroup);
+    if (ageString) {
+        firstLine.push(ageString);
     }
 
-    if (!ageGroup.defaultMembershipTypeId) {
-        text = text + ' ' + $t(`%yl`);
+    const membershipNote = ageGroup.defaultMembershipTypeId ? null : $t('Geen automatische aansluiting');
+    if (membershipNote) {
+        firstLine.push(membershipNote);
     }
 
-    return text;
+    // The description shares the first line unless the membership note is already on it
+    const lines: string[] = [];
+    if (ageGroup.description && !membershipNote) {
+        firstLine.push(ageGroup.description);
+    }
+    if (firstLine.length) {
+        lines.push(firstLine.join(' · '));
+    }
+    if (ageGroup.description && membershipNote) {
+        lines.push(ageGroup.description);
+    }
+    return lines;
+}
+
+const { presentPositionableSheet } = usePositionableSheet();
+
+const noDefaultAgeGroupDescription = $t('Deze groep wordt niet aangesloten bij #koepel');
+const selectedAgeGroupDescriptionLines = computed(() => defaultAgeGroup.value ? getAgeGroupDescriptionLines(defaultAgeGroup.value) : [noDefaultAgeGroupDescription]);
+
+const defaultAgeGroupsTitle = $t('Aansluiting/verzekering Keeo');
+const defaultAgeGroupsDescription = $t('Kies een standaard leeftijdsgroepen, zodat de benaming van jouw #groep gekoppeld kan worden aan de benaming die #koepel hanteert.');
+
+async function openDefaultAgeGroupSheet(event: MouseEvent) {
+    await presentPositionableSheet(event, {
+        components: [
+            new ComponentWithProperties(NavigationController, {
+                root: AsyncComponent(() => import('#inputs/ChooseOneSheet.vue'), {
+                    title: defaultAgeGroupsTitle,
+                    description: defaultAgeGroupsDescription,
+                    items: [
+                        ...defaultAgeGroupsFiltered.value.map(ageGroup => ({
+                            value: ageGroup.id,
+                            name: ageGroup.name,
+                            description: getAgeGroupDescriptionLines(ageGroup),
+                        })),
+                        {
+                            value: null,
+                            name: $t('Geen aansluiting of verzekering'),
+                            description: [noDefaultAgeGroupDescription],
+                        },
+                    ],
+                    modelValue: defaultAgeGroupId.value,
+                    onSelect: (value: string | null) => {
+                        defaultAgeGroupId.value = value;
+                    },
+                }),
+            }),
+        ],
+    }, { width: 450 });
 }
 
 const getRegisterItemFilterBuilders = useRegisterItemFilterBuilders();
@@ -1798,8 +1848,8 @@ const recordEditorSettings = computed(() => {
     const exampleMember = new PlatformMember({
         member: MemberWithRegistrationsBlob.create({
             details: MemberDetails.create({
-                firstName: $t(`%ID`),
-                lastName: $t(`%1PM`),
+                firstName: $t('%ID'),
+                lastName: $t('%1PM'),
                 dataPermissions: BooleanStatus.create({ value: true }),
                 birthDay: new Date('2020-01-01'),
             }),
