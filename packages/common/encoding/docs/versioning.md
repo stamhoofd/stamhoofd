@@ -161,7 +161,7 @@ export class User extends AutoEncoder {
 }
 ```
 
-On release, `stam release bump-structures` replaces every `...NextVersion` inside a `@field(...)` decorator by `version: ReleasedVersion + 1` and bumps `ReleasedVersion`. Spreading `...NextVersion` into the options object of a helper call (such as `TranslatedString.field({ ...NextVersion })`) is supported; `...NextVersion` is only recognised inside a `@field(` decorator, and test files (`*.test.ts`, `*.spec.ts`) are skipped so they keep testing the unreleased version. Run `pnpm stam release bump-structures --dry-run` to see which files would change.
+On release, `stam release bump-structures` replaces every `...NextVersion` inside a `@field(...)` decorator by `version: ReleasedVersion + 1` and bumps `ReleasedVersion`. Spreading `...NextVersion` into the options object of a helper call (such as `TranslatedString.field({ ...NextVersion })`) is supported; `...NextVersion` is only recognised inside a `@field(` decorator (comments and string literals are ignored), and test files (`*.test.ts`, `*.spec.ts`) are skipped so they keep testing the unreleased version. Run `pnpm stam release bump-structures --dry-run` to see which files would change.
 
 After release, the example above looks like this:
 
