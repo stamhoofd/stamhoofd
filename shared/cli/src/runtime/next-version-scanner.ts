@@ -3,7 +3,7 @@
  *
  * Any object literal inside the decorator counts, no matter how deeply it is nested in calls: both spreading
  * NextVersion directly into the decorator's options object and spreading it into the options object of a
- * helper call (such as `TranslatedString.field`) are rewritten. Line comments are ignored.
+ * helper call (such as `TranslatedString.field`) are rewritten. Line and block comments are ignored.
  */
 export const needle = '...NextVersion';
 
@@ -16,6 +16,7 @@ export function replaceNextVersion(content: string, replaceBy: string): ReplaceR
         curlyBracketsDepth: 0, // 0 when atStack is not @field, then 1 once first { is found, 2 if second { is found, etc.
         contentStack: '', // contents inside an object literal of @field( (so atStack is @field, parenthesisDepth >= 1 and curlyBracketsDepth >= 1)
         commentLineStack: '',
+        blockCommentStart: -1, // index of the opening /* while inside a block comment, -1 otherwise
     };
 
     let newContent = content;
@@ -26,11 +27,25 @@ export function replaceNextVersion(content: string, replaceBy: string): ReplaceR
     for (let i = 0; i < content.length; i++) {
         const char = content[i];
 
+        if (state.blockCommentStart !== -1) {
+            // Ignore until the closing */ (which may not overlap the opening /*)
+            if (char === '/' && content[i - 1] === '*' && i - 1 > state.blockCommentStart + 1) {
+                state.blockCommentStart = -1;
+            }
+            continue;
+        }
+
         if (state.commentLineStack === '//') {
             // Ignore until next line
             if (char === '\n') {
                 state.commentLineStack = '';
             }
+            continue;
+        }
+
+        if (char === '*' && state.commentLineStack === '/') {
+            state.blockCommentStart = i - 1;
+            state.commentLineStack = '';
             continue;
         }
 
