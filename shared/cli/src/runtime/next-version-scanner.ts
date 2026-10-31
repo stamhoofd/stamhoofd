@@ -3,7 +3,9 @@
  *
  * Any object literal inside the decorator counts, no matter how deeply it is nested in calls: both spreading
  * NextVersion directly into the decorator's options object and spreading it into the options object of a
- * helper call (such as `TranslatedString.field`) are rewritten. Line and block comments are ignored.
+ * helper call (such as `TranslatedString.field`) are rewritten. Line and block comments are ignored, and so are
+ * string literals (single quoted, double quoted and template literals), so a `//` or `/*` inside a string does not
+ * start a comment.
  */
 export const needle = '...NextVersion';
 
@@ -17,6 +19,7 @@ export function replaceNextVersion(content: string, replaceBy: string): ReplaceR
         contentStack: '', // contents inside an object literal of @field( (so atStack is @field, parenthesisDepth >= 1 and curlyBracketsDepth >= 1)
         commentLineStack: '',
         blockCommentStart: -1, // index of the opening /* while inside a block comment, -1 otherwise
+        stringQuote: '', // the quote that opened the string literal we are in (', " or `), empty otherwise
     };
 
     let newContent = content;
@@ -31,6 +34,17 @@ export function replaceNextVersion(content: string, replaceBy: string): ReplaceR
             // Ignore until the closing */ (which may not overlap the opening /*)
             if (char === '/' && content[i - 1] === '*' && i - 1 > state.blockCommentStart + 1) {
                 state.blockCommentStart = -1;
+            }
+            continue;
+        }
+
+        if (state.stringQuote !== '') {
+            // Ignore until the closing quote, skipping escaped characters
+            if (char === '\\') {
+                i++;
+            }
+            else if (char === state.stringQuote) {
+                state.stringQuote = '';
             }
             continue;
         }
@@ -54,6 +68,12 @@ export function replaceNextVersion(content: string, replaceBy: string): ReplaceR
         }
         else {
             state.commentLineStack = '';
+        }
+
+        if (char === '\'' || char === '"' || char === '`') {
+            state.stringQuote = char;
+            state.contentStack = '';
+            continue;
         }
 
         if (state.atStack === '@field') {
