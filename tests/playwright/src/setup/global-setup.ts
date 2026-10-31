@@ -1,3 +1,6 @@
+// Defines STAMHOOFD before any hoisted import evaluates @stamhoofd/structures
+import '@stamhoofd/test-utils/environment';
+
 import { shouldClearPlaywrightDatabases } from '@stamhoofd/cli';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { CaddyHelper } from './helpers/CaddyHelper.js';
