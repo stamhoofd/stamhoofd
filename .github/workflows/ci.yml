@@ -608,8 +608,10 @@ jobs:
                   sudo systemctl stop systemd-resolved
                   sudo rm /etc/resolv.conf
                   echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf
+            # The Corefile reads SERVER_IP. Ubuntu 26.04 runners ship sudo-rs, which ignores `-E`
+            # ("preserving the entire environment is not supported"), so pass the variable explicitly.
             - name: Run coredns
-              run: export SERVER_IP=127.0.0.1 && . .development/loadenv.sh && sudo -E ./.coredns/coredns -conf .development/Corefile &
+              run: export SERVER_IP=127.0.0.1 && . .development/loadenv.sh && sudo --preserve-env=SERVER_IP ./.coredns/coredns -conf .development/Corefile &
             - name: Use local DNS
               run: sudo sed -i '1inameserver 127.0.0.1' /etc/resolv.conf
             - name: Log coredns corefile path
