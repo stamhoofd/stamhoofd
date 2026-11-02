@@ -7,7 +7,7 @@ import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { Order, Organization, OrganizationFactory } from '@stamhoofd/models';
-import { File, Image, PaymentMethod, Product, ProductPrice, RichText, STPackageBundle, WebshopLayout, WebshopTicketType } from '@stamhoofd/structures';
+import { File, Image, PaymentMethod, Product, ProductPrice, RichText, STPackageBundle, TranslatedRichText, WebshopLayout, WebshopTicketType } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { WebshopOrderFlow } from '../flows/WebshopOrderFlow.js';
@@ -339,7 +339,7 @@ test.describe('Modern webshop view @webshop-modern', () => {
             })],
         });
         // A description that was cleared in the editor leaves empty html behind
-        webshop.meta.description = RichText.create({ text: '\n', html: '<p></p><p></p>' });
+        webshop.meta.description = TranslatedRichText.create(RichText.create({ text: '\n', html: '<p></p><p></p>' }));
         await webshop.save();
 
         const flow = new WebshopOrderFlow(page, { cartEnabled: false });
@@ -421,7 +421,7 @@ test.describe('Modern webshop view @webshop-modern', () => {
             cartEnabled: false,
             paymentMethods: [PaymentMethod.PointOfSale],
         });
-        webshop.meta.description = RichText.create({ text: 'Alle info over deze actie', html: '<p>Alle info over deze actie</p>' });
+        webshop.meta.description = TranslatedRichText.create(RichText.create({ text: 'Alle info over deze actie', html: '<p>Alle info over deze actie</p>' }));
         webshop.products[0].description = 'Info over het product';
         await webshop.save();
 
@@ -466,7 +466,7 @@ test.describe('Modern webshop view @webshop-modern', () => {
             withSeatingPlan: true,
             paymentMethods: [PaymentMethod.PointOfSale],
         });
-        webshop.meta.description = RichText.create({ text: 'Alle info over deze voorstelling', html: '<p>Alle info over deze voorstelling</p>' });
+        webshop.meta.description = TranslatedRichText.create(RichText.create({ text: 'Alle info over deze voorstelling', html: '<p>Alle info over deze voorstelling</p>' }));
         webshop.products[0].description = 'Info over de voorstelling';
         await webshop.save();
 
@@ -502,7 +502,7 @@ test.describe('Modern webshop view @webshop-modern', () => {
             paymentMethods: [PaymentMethod.PointOfSale],
         });
         webshop.meta.layout = WebshopLayout.Split;
-        webshop.meta.description = RichText.create({ text: 'Alle info over deze actie', html: '<p>Alle info over deze actie</p>' });
+        webshop.meta.description = TranslatedRichText.create(RichText.create({ text: 'Alle info over deze actie', html: '<p>Alle info over deze actie</p>' }));
         await webshop.save();
 
         await page.goto(WorkerData.urls.webshopUri(webshop.uri));
@@ -531,7 +531,7 @@ test.describe('Modern webshop view @webshop-modern', () => {
         });
         webshop.meta.layout = WebshopLayout.Split;
         webshop.meta.orderTitle = 'Koop hier je ticket';
-        webshop.meta.description = RichText.create({ text: 'Alle info over deze actie', html: '<p>Alle info over deze actie</p>' });
+        webshop.meta.description = TranslatedRichText.create(RichText.create({ text: 'Alle info over deze actie', html: '<p>Alle info over deze actie</p>' }));
         await webshop.save();
 
         await page.goto(WorkerData.urls.webshopUri(webshop.uri));
@@ -556,7 +556,7 @@ test.describe('Modern webshop view @webshop-modern', () => {
             cartEnabled: false,
             paymentMethods: [PaymentMethod.PointOfSale],
         });
-        webshop.meta.description = RichText.create({ text: 'Alle info over deze actie', html: '<p>Alle info over deze actie</p>' });
+        webshop.meta.description = TranslatedRichText.create(RichText.create({ text: 'Alle info over deze actie', html: '<p>Alle info over deze actie</p>' }));
         webshop.products[0].description = 'Info over het product';
         await webshop.save();
 
@@ -575,7 +575,7 @@ test.describe('Modern webshop view @webshop-modern', () => {
             cartEnabled: false,
             paymentMethods: [PaymentMethod.PointOfSale],
         });
-        webshop.meta.description = RichText.create({ text: 'Alle info over deze actie', html: '<p>Alle info over deze actie</p>' });
+        webshop.meta.description = TranslatedRichText.create(RichText.create({ text: 'Alle info over deze actie', html: '<p>Alle info over deze actie</p>' }));
         await webshop.save();
 
         await page.goto(WorkerData.urls.webshopUri(webshop.uri));

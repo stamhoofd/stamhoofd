@@ -12,9 +12,7 @@
                 <input v-model="title" class="input" type="text" autocomplete="off" :placeholder="webshop.meta.name">
             </STInputBox>
 
-            <STInputBox error-fields="meta.description" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)">
-                <WYSIWYGTextInput v-model="description" :color="color || defaultColor" :placeholder="$t(`%Rc`)" />
-            </STInputBox>
+            <TWYSIWYGTextInput v-model="description" :color="color || defaultColor" :placeholder="$t(`%Rc`)" error-fields="meta.description" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)" />
 
             <template v-if="showCrowdfunding">
                 <hr>
@@ -217,7 +215,7 @@ import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
 import Radio from '@stamhoofd/components/inputs/Radio.vue';
 import RadioGroup from '@stamhoofd/components/inputs/RadioGroup.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
-import WYSIWYGTextInput from '@stamhoofd/components/inputs/WYSIWYGTextInput.vue';
+import TWYSIWYGTextInput from '@stamhoofd/components/inputs/TWYSIWYGTextInput.vue';
 import PreviewPanel from '@stamhoofd/components/layout/PreviewPanel.vue';
 import STList from '@stamhoofd/components/layout/STList.vue';
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
@@ -227,8 +225,8 @@ import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/Con
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 
 import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
-import type { DarkMode, Image, RichText, SponsorConfig } from '@stamhoofd/structures';
-import { Cart, CartItem, CartReservedSeat, LanguageHelper, Policy, PrivateWebshop, ProductType, ResolutionRequest, TicketPublic, WebshopCrowdfunding, WebshopLayout, WebshopMetaData, WebshopOrderMode, WebshopType } from '@stamhoofd/structures';
+import type { DarkMode, Image, SponsorConfig } from '@stamhoofd/structures';
+import { Cart, CartItem, CartReservedSeat, LanguageHelper, Policy, PrivateWebshop, ProductType, ResolutionRequest, TicketPublic, TranslatedRichText, WebshopCrowdfunding, WebshopLayout, WebshopMetaData, WebshopOrderMode, WebshopType } from '@stamhoofd/structures';
 import { Language } from '@stamhoofd/types/Language';
 
 import { computed, ref } from 'vue';
@@ -427,8 +425,8 @@ const title = computed({
 
 const description = computed({
     get: () => webshop.value.meta.description,
-    set: (description: RichText) => {
-        const patch = WebshopMetaData.patch({ description });
+    set: (description: TranslatedRichText) => {
+        const patch = WebshopMetaData.patch({ description: TranslatedRichText.createPatch(webshop.value.meta.description, description) });
         addPatch(PrivateWebshop.patch({ meta: patch }));
     },
 });

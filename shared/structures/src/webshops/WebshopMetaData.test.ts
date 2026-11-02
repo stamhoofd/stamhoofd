@@ -1,10 +1,17 @@
 import { ObjectData } from '@common/encoding';
-import { describe, expect, it } from 'vitest';
+import { Language } from '@stamhoofd/types/Language';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
 import { CustomerSettings } from './CustomerSettings.js';
+import { RichText } from '../RichText.js';
+import { TranslatedRichText, TranslatedRichTextPatch } from '../TranslatedRichText.js';
 import { Version } from '../Version.js';
 import { WebshopMetaData, WebshopOrderMode } from './WebshopMetaData.js';
+
+const dutch = RichText.create({ html: '<p>Hallo</p>', text: 'Hallo' });
+const french = RichText.create({ html: '<p>Bonjour</p>', text: 'Bonjour' });
+const english = RichText.create({ html: '<p>Hello</p>', text: 'Hello' });
 
 const { Required, Optional, Disabled } = CustomerFieldRequirement;
 
@@ -258,5 +265,83 @@ describe('WebshopMetaData.orderMode <-> cartEnabled', () => {
         expect(encodePatch(WebshopMetaData.patch({ orderMode: WebshopOrderMode.Single }), oldVersion)).toMatchObject({ cartEnabled: false });
         expect(encodePatch(WebshopMetaData.patch({ orderMode: WebshopOrderMode.Bulk }), oldVersion)).toMatchObject({ cartEnabled: true });
         expect(encodePatch(WebshopMetaData.patch({ name: 'Nieuwe naam' }), oldVersion).cartEnabled).toBeUndefined();
+    });
+});
+
+/**
+ * The description became translatable in the current Version, bumped manually because
+ * NextVersion does not support upgrade/downgrade, so Version - 1 behaves as an older client.
+ */
+describe('WebshopMetaData.description translations', () => {
+    const originalGetLanguage = (globalThis as any).$getLanguage;
+
+    afterEach(() => {
+        (globalThis as any).$getLanguage = originalGetLanguage;
+    });
+
+    function setLanguage(language: Language) {
+        (globalThis as any).$getLanguage = () => language;
+    }
+
+    it('upgrades a RichText description of an older client', () => {
+        const encoded = encode(WebshopMetaData.create({}), Version - 1);
+        encoded.description = dutch.encode({ version: Version - 1 });
+
+        const meta = decode(encoded, Version - 1);
+        expect(meta.description).toBeInstanceOf(TranslatedRichText);
+        expect(meta.description.isDefault).toBe(true);
+        expect(meta.description.html).toBe('<p>Hallo</p>');
+    });
+
+    it('upgrades the plain text description stored before 181', () => {
+        const meta = decode({ description: 'Hallo' }, 180);
+
+        expect(meta.description).toBeInstanceOf(TranslatedRichText);
+        expect(meta.description.text).toBe('Hallo');
+    });
+
+    it('downgrades a translated description to the request language for older clients', () => {
+        const meta = WebshopMetaData.create({
+            description: TranslatedRichText.create({ [Language.Dutch]: dutch, [Language.French]: french }),
+        });
+
+        setLanguage(Language.French);
+        const encoded = encode(meta, Version - 1);
+        expect(new ObjectData(encoded.description, { version: Version - 1 }).decode(RichText).text).toBe('Bonjour');
+    });
+
+    it('keeps every translation in the latest version', () => {
+        const meta = WebshopMetaData.create({
+            description: TranslatedRichText.create({ [Language.Dutch]: dutch, [Language.French]: french }),
+        });
+
+        const decoded = decode(encode(meta, Version), Version);
+        expect(decoded.description.get(Language.Dutch).text).toBe('Hallo');
+        expect(decoded.description.get(Language.French).text).toBe('Bonjour');
+    });
+
+    it('only changes the Dutch description for a patch of an older client', () => {
+        const meta = WebshopMetaData.create({
+            description: TranslatedRichText.create({ [Language.Dutch]: dutch, [Language.French]: french }),
+        });
+
+        const encoded = encodePatch(WebshopMetaData.patch({}), Version - 1);
+        encoded.description = english.encode({ version: Version - 1 });
+
+        const patched = meta.patch(decodePatch(encoded, Version - 1));
+        expect(patched.description.get(Language.Dutch).text).toBe('Hello');
+        expect(patched.description.get(Language.French).text).toBe('Bonjour');
+    });
+
+    it('applies a language patch', () => {
+        const meta = WebshopMetaData.create({
+            description: TranslatedRichText.create({ [Language.Dutch]: dutch, [Language.French]: french }),
+        });
+        const patch = WebshopMetaData.patch({
+            description: new TranslatedRichTextPatch({ [Language.French]: null }),
+        });
+
+        const patched = meta.patch(decodePatch(encodePatch(patch, Version), Version));
+        expect(patched.description.languages).toEqual([Language.Dutch]);
     });
 });

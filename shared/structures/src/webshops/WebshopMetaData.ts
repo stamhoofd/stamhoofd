@@ -21,6 +21,7 @@ import { Policy } from '../Policy.js';
 import { RichText } from '../RichText.js';
 import { SeatingPlan } from '../SeatingPlan.js';
 import { SponsorConfig } from '../SponsorConfig.js';
+import { TranslatedRichText } from '../TranslatedRichText.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../upgradePriceFrom2To4DecimalPlaces.js';
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
 import { CustomerSettings } from './CustomerSettings.js';
@@ -502,7 +503,8 @@ export class WebshopMetaData extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     @field({ decoder: RichText, version: 181, upgrade: data => RichText.create({ text: data }), downgrade: data => data.text, upgradePatch: data => RichText.patch({ text: data }), downgradePatch: data => data.text })
-    description = RichText.create({});
+    @field(TranslatedRichText.field({ version: 426 }))
+    description = TranslatedRichText.create();
 
     /**
      * Serves as a hint in the UI for better suggestions and UX.
