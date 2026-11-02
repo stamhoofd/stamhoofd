@@ -283,13 +283,59 @@ export class TranslatedRichText implements Encodeable, Patchable<TranslatedRichT
                 if (value instanceof TranslatedRichText) {
                     return value.toRichText();
                 }
-                for (const language of TranslatedRichText.fallbackLanguages($getLanguage())) {
-                    const richText = value.translations[language];
-                    if (richText) {
-                        return richText;
-                    }
+                return TranslatedRichText.downgradeLanguagePatch(value);
+            },
+        };
+    }
+
+    /**
+     * Undefined when the patch touches no language an old client can display: it then keeps its previous text.
+     */
+    private static downgradeLanguagePatch(value: TranslatedRichTextPatch): RichText | undefined {
+        for (const language of TranslatedRichText.fallbackLanguages($getLanguage())) {
+            const richText = value.translations[language];
+            if (richText) {
+                return richText;
+            }
+        }
+        return undefined;
+    }
+
+    /**
+     * A stored line break becomes a paragraph, so text that was typed with Enter keeps its layout
+     * instead of depending on the pre-wrap of each individual reader.
+     */
+    static stringField(options: { version: number; nullable?: boolean; optional?: boolean; defaultValue?: () => TranslatedRichText | null }) {
+        return {
+            ...options,
+            decoder: TranslatedRichTextDecoder,
+            upgrade: (old: string | null | undefined): TranslatedRichText | null | undefined => {
+                if (old === null || old === undefined) {
+                    return old;
                 }
-                return undefined;
+                return new TranslatedRichText(RichText.fromText(old));
+            },
+            downgrade: (value: TranslatedRichText | null | undefined): string | null | undefined => {
+                if (value === null || value === undefined) {
+                    return value;
+                }
+                return value.text;
+            },
+            upgradePatch: (old: string | null | undefined): TranslatedRichTextPatch | null | undefined => {
+                if (old === null || old === undefined) {
+                    return old;
+                }
+                // Note: before the version we expect the text to be in Dutch
+                return new TranslatedRichTextPatch({ [Language.Dutch]: RichText.fromText(old) });
+            },
+            downgradePatch: (value: TranslatedRichTextPatch | TranslatedRichText | null | undefined): string | null | undefined => {
+                if (value === null || value === undefined) {
+                    return value;
+                }
+                if (value instanceof TranslatedRichText) {
+                    return value.text;
+                }
+                return TranslatedRichText.downgradeLanguagePatch(value)?.text;
             },
         };
     }
@@ -328,11 +374,26 @@ export class TranslatedRichTextPatchDecoderStatic implements Decoder<TranslatedR
 export const TranslatedRichTextPatchDecoder = new TranslatedRichTextPatchDecoderStatic();
 
 export class TranslatedRichTextDecoderStatic implements Decoder<TranslatedRichText> {
+    /**
+     * Rows in a json column are decoded at the current version, so they never pass through the upgrade
+     * of a field: a field that used to hold plain text has to stay readable here.
+     */
+    private decodeValue(data: Data): RichText {
+        if (typeof data.value === 'string') {
+            return RichText.fromText(data.value);
+        }
+        return data.decode(RichText as Decoder<RichText>);
+    }
+
     decode(data: Data): TranslatedRichText {
+        if (typeof data.value === 'string') {
+            return new TranslatedRichText(RichText.fromText(data.value));
+        }
+
         if (typeof data.value !== 'object' || data.value === null) {
             throw new SimpleError({
                 code: 'invalid_field',
-                message: 'Expected an object',
+                message: 'Expected an object or string',
                 field: data.currentField,
             });
         }
@@ -344,7 +405,7 @@ export class TranslatedRichTextDecoderStatic implements Decoder<TranslatedRichTe
         const translations: RichTextLanguageMap = {};
         for (const key of Object.keys(data.value as object)) {
             const language = new EnumDecoder(Language).decode(new ObjectData(key, data.context, data.addToCurrentField(key)));
-            translations[language] = data.field(key).decode(RichText as Decoder<RichText>);
+            translations[language] = this.decodeValue(data.field(key));
         }
         if (Object.keys(translations).length === 0) {
             // Stored before patches normalised an emptied language map

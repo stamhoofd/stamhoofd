@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import type { PaymentCustomer } from './PaymentCustomer.js';
 import { PaymentMethod, PaymentMethodHelper } from './PaymentMethod.js';
+import { TranslatedRichText } from './TranslatedRichText.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 import { TransferSettings } from './webshops/TransferSettings.js';
 
@@ -123,7 +124,8 @@ export class PaymentMethodSettings extends AutoEncoder {
     warningAmount: number | null = null;
 
     @field({ decoder: StringDecoder })
-    warningText = '';
+    @field(TranslatedRichText.stringField({ version: 426 }))
+    warningText = TranslatedRichText.create();
 
     /**
      * Disable this payment method for private users

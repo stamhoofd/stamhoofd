@@ -16,11 +16,10 @@
                 {{ $t('%kW') }}
             </h1>
 
-            <p v-if="payment.price > 0 && payment.status !== 'Succeeded'">
-                <template v-if="payment.transferSettings?.infoDescription">
-                    {{ payment.transferSettings.infoDescription }}
-                </template>
-                <template v-else-if="created">
+            <div v-if="payment.price > 0 && payment.status !== 'Succeeded' && payment.transferSettings?.infoDescription.text" class="style-wysiwyg" v-html="payment.transferSettings.infoDescription.html" />
+
+            <p v-else-if="payment.price > 0 && payment.status !== 'Succeeded'">
+                <template v-if="created">
                     {{ $t('%kX', {description: formattedTransferDescription ?? ''}) }}
                 </template>
                 <template v-else>

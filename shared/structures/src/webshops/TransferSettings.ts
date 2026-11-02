@@ -1,6 +1,7 @@
 import { AutoEncoder, EnumDecoder, StringDecoder, field } from '@common/encoding';
 
 import { Country } from '@stamhoofd/types/Country';
+import { TranslatedRichText } from '../TranslatedRichText.js';
 
 export enum TransferDescriptionType {
     Structured = 'Structured', // Random structured transfer
@@ -29,7 +30,8 @@ export class TransferSettings extends AutoEncoder {
     creditor: string | null = null;
 
     @field({ decoder: StringDecoder, version: 340 })
-    infoDescription = '';
+    @field(TranslatedRichText.stringField({ version: 426 }))
+    infoDescription = TranslatedRichText.create();
 
     fillMissing(settings: TransferSettings) {
         const duplicate = this.clone();

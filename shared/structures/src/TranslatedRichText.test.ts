@@ -1,4 +1,4 @@
-import { AutoEncoder, field, ObjectData } from '@common/encoding';
+import { AutoEncoder, field, ObjectData, StringDecoder } from '@common/encoding';
 import { Language } from '@stamhoofd/types/Language';
 
 import { RichText } from './RichText.js';
@@ -229,5 +229,90 @@ describe('TranslatedRichText.fromTranslatedString', () => {
         expect(converted.languages.sort()).toEqual([Language.Dutch, Language.French].sort());
         expect(converted.get(Language.Dutch).html).toBe('<p>Hallo</p>');
         expect(converted.get(Language.French).text).toBe('Bonjour');
+    });
+});
+
+class TestStringStruct extends AutoEncoder {
+    @field({ decoder: StringDecoder })
+    @field(TranslatedRichText.stringField({ version: 426 }))
+    description = TranslatedRichText.create();
+}
+
+describe('TranslatedRichText.stringField', () => {
+    const originalGetLanguage = (globalThis as any).$getLanguage;
+
+    afterEach(() => {
+        (globalThis as any).$getLanguage = originalGetLanguage;
+    });
+
+    it('turns the line breaks of an older client into paragraphs', () => {
+        const decoded = new ObjectData({ description: 'Hallo\nWereld' }, { version: 425 }).decode(TestStringStruct);
+        expect(decoded.description.isDefault).toBe(true);
+        expect(decoded.description.html).toBe('<p>Hallo</p><p>Wereld</p>');
+        expect(decoded.description.text).toBe('Hallo\nWereld');
+    });
+
+    it('escapes html in the text of an older client', () => {
+        const decoded = new ObjectData({ description: '<script>alert(1)</script>' }, { version: 425 }).decode(TestStringStruct);
+        expect(decoded.description.html).toBe('<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>');
+    });
+
+    it('downgrades to the plain text of the request language', () => {
+        const struct = TestStringStruct.create({
+            description: TranslatedRichText.create({ [Language.Dutch]: dutch, [Language.French]: french }),
+        });
+
+        (globalThis as any).$getLanguage = () => Language.French;
+        expect((struct.encode({ version: 425 }) as Record<string, unknown>).description).toBe('Bonjour');
+    });
+
+    it('upgrades a string patch of an older client into the Dutch translation', () => {
+        const struct = TestStringStruct.create({
+            description: TranslatedRichText.create({ [Language.Dutch]: dutch, [Language.French]: french }),
+        });
+
+        const patch = new ObjectData({ description: 'Hallo\nWereld' }, { version: 425 }).decode(TestStringStruct.patchType());
+        const patched = struct.patch(patch);
+        expect(patched.description.get(Language.Dutch).html).toBe('<p>Hallo</p><p>Wereld</p>');
+        expect(patched.description.get(Language.French).text).toBe('Bonjour');
+    });
+
+    it('downgrades a language patch to plain text', () => {
+        const patch = TestStringStruct.patch({
+            description: new TranslatedRichTextPatch({ [Language.Dutch]: dutch }),
+        });
+        expect((patch.encode({ version: 425 }) as Record<string, unknown>).description).toBe('Hallo');
+    });
+
+    it('downgrades a patch without a displayable language to no change', () => {
+        const patch = TestStringStruct.patch({
+            description: new TranslatedRichTextPatch({ [Language.Dutch]: null }),
+        });
+        expect((patch.encode({ version: 425 }) as Record<string, unknown>).description).toBeUndefined();
+    });
+});
+
+describe('TranslatedRichTextDecoder for stored plain text', () => {
+    it('reads a plain string that was stored before the field became rich text', () => {
+        const decoded = new ObjectData('Hallo\nWereld', { version: 426 }).decode(TranslatedRichTextDecoder);
+        expect(decoded.isDefault).toBe(true);
+        expect(decoded.html).toBe('<p>Hallo</p><p>Wereld</p>');
+    });
+
+    it('reads a stored language map of plain strings', () => {
+        const decoded = new ObjectData({ [Language.Dutch]: 'Hallo', [Language.French]: 'Bonjour' }, { version: 426 }).decode(TranslatedRichTextDecoder);
+        expect(decoded.languages.sort()).toEqual([Language.Dutch, Language.French].sort());
+        expect(decoded.get(Language.Dutch).html).toBe('<p>Hallo</p>');
+        expect(decoded.get(Language.French).text).toBe('Bonjour');
+    });
+
+    it('reads a language map that mixes stored strings and rich text', () => {
+        const decoded = new ObjectData({ [Language.Dutch]: 'Hallo', [Language.French]: french.encode({ version: 426 }) }, { version: 426 }).decode(TranslatedRichTextDecoder);
+        expect(decoded.get(Language.Dutch).html).toBe('<p>Hallo</p>');
+        expect(decoded.get(Language.French).html).toBe('<p>Bonjour</p>');
+    });
+
+    it('still rejects a value that is neither a string nor an object', () => {
+        expect(() => new ObjectData(5, { version: 426 }).decode(TranslatedRichTextDecoder)).toThrow('Expected an object or string');
     });
 });

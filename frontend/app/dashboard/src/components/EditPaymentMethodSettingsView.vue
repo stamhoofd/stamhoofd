@@ -48,9 +48,7 @@
             <hr><h2>{{ $t('%Iy') }}</h2>
             <p>{{ $t('%Iz') }}</p>
 
-            <STInputBox title="" error-fields="infoDescription" :error-box="errors.errorBox" class="max">
-                <textarea v-model="infoDescription" class="input" type="text" autocomplete="off" :placeholder="$t(`%JC`)" />
-            </STInputBox>
+            <TWYSIWYGTextInput v-model="infoDescription" title="" :placeholder="$t(`%JC`)" error-fields="infoDescription" :error-box="errors.errorBox" class="max" />
 
             <hr><h2>{{ $t('%HQ') }}</h2>
         </template>
@@ -90,9 +88,7 @@
                 </h3>
 
                 <div v-if="useWarning" class="split-inputs option" @click.stop.prevent>
-                    <STInputBox title="" error-fields="warningText" :error-box="errors.errorBox" class="max">
-                        <textarea v-model="warningText" class="input" type="text" autocomplete="off" :placeholder="$t(`%JE`)" />
-                    </STInputBox>
+                    <TWYSIWYGTextInput v-model="warningText" title="" :placeholder="$t(`%JE`)" error-fields="warningText" :error-box="errors.errorBox" class="max" />
                 </div>
             </STListItem>
 
@@ -122,9 +118,10 @@ import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganiza
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import IBANInput from '@stamhoofd/components/inputs/IBANInput.vue';
 import PriceInputBox from '@stamhoofd/components/inputs/PriceInputBox.vue';
+import TWYSIWYGTextInput from '@stamhoofd/components/inputs/TWYSIWYGTextInput.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
-import { PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentMethodSettings, TransferDescriptionType, TransferSettings } from '@stamhoofd/structures';
+import { PaymentConfiguration, PaymentMethod, PaymentMethodHelper, PaymentMethodSettings, TransferDescriptionType, TransferSettings, TranslatedRichText } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const props = withDefaults(
@@ -185,7 +182,7 @@ const companiesOnly = computed({
 
 const warningText = computed({
     get: () => settings.value.warningText,
-    set: warningText => addPatchSettings({ warningText }),
+    set: warningText => addPatchSettings({ warningText: TranslatedRichText.createPatch(settings.value.warningText, warningText) }),
 });
 
 const warningAmount = computed({
@@ -196,11 +193,11 @@ const warningAmount = computed({
 const cachedUseWarning = ref(false);
 
 const useWarning = computed({
-    get: () => !!settings.value.warningText || cachedUseWarning.value,
+    get: () => settings.value.warningText.text.length > 0 || cachedUseWarning.value,
     set: (useWarning) => {
         cachedUseWarning.value = useWarning;
         if (!useWarning) {
-            warningText.value = '';
+            warningText.value = TranslatedRichText.create();
         }
     },
 });
@@ -302,7 +299,7 @@ const infoDescription = computed({
     set: (infoDescription) => {
         addPatch(PaymentConfiguration.patch({
             transferSettings: TransferSettings.patch({
-                infoDescription,
+                infoDescription: TranslatedRichText.createPatch(patched.value.transferSettings.infoDescription, infoDescription),
             }),
         }));
     },

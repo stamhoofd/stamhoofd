@@ -1,8 +1,8 @@
 <template>
     <div>
-        <p v-if="selectedPaymentMethod && getWarning(selectedPaymentMethod)" class="warning-box">
-            {{ getWarning(selectedPaymentMethod) }}
-        </p>
+        <div v-if="warning" class="warning-box">
+            <div class="style-wysiwyg" v-html="warning.html" />
+        </div>
 
         <p v-if="sortedPaymentMethods.length === 0" class="error-box">
             {{ $t('%1Zj') }}
@@ -156,17 +156,19 @@ function getDescription(paymentMethod: PaymentMethod): string {
     }
 }
 
-function getWarning(paymentMethod: PaymentMethod): string {
-    const settings = props.paymentConfiguration.paymentMethodSettings.get(paymentMethod);
-    if (settings) {
-        if (settings.warningText) {
-            if (settings.warningAmount === null || settings.warningAmount <= props.amount) {
-                return settings.warningText;
-            }
-        }
+const warning = computed(() => {
+    if (!selectedPaymentMethod.value) {
+        return null;
     }
-    return '';
-}
+    const settings = props.paymentConfiguration.paymentMethodSettings.get(selectedPaymentMethod.value);
+    if (!settings || settings.warningText.text.length === 0) {
+        return null;
+    }
+    if (settings.warningAmount !== null && settings.warningAmount > props.amount) {
+        return null;
+    }
+    return settings.warningText;
+});
 
 </script>
 

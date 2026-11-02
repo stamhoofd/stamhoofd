@@ -386,7 +386,7 @@ function getSettingsDescription(paymentMethod: PaymentMethod): string {
             texts.push($t(`%JR`) + ' ' + Formatter.price(settings.minimumAmount));
         }
 
-        if (settings.warningText) {
+        if (settings.warningText.text.length > 0) {
             if (settings.warningAmount !== null) {
                 texts.push($t(`%JS`) + ' ' + Formatter.price(settings.warningAmount));
             } else {
