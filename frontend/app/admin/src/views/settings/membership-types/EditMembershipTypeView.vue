@@ -22,9 +22,7 @@
             </STInputBox>
         </div>
 
-        <STInputBox :title="$t('%6o')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
-            <textarea v-model="description" class="input" type="text" :placeholder="$t('%14p')" autocomplete="off" />
-        </STInputBox>
+        <TWYSIWYGTextInput v-model="description" :title="$t('%6o')" :placeholder="$t('%14p')" error-fields="settings.description" :error-box="errors.errorBox" class="max" />
 
         <hr><h2>{{ $t('%8I') }}</h2>
         <p>{{ $t('%8J') }}</p>
@@ -104,6 +102,7 @@ import Dropdown from '@stamhoofd/components/inputs/Dropdown.vue';
 import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import JumpToContainer from '@stamhoofd/components/containers/JumpToContainer.vue';
 import MultipleChoiceInput from '@stamhoofd/components/inputs/MultipleChoiceInput.vue';
+import TWYSIWYGTextInput from '@stamhoofd/components/inputs/TWYSIWYGTextInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import TagIdsInput from '@stamhoofd/components/inputs/TagIdsInput.vue';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
@@ -112,7 +111,7 @@ import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import { useFetchAllRegistrationPeriods } from '@stamhoofd/components/hooks/networking/useFetchRegistrationPeriods';
 import type { PlatformMembershipType, RegistrationPeriod } from '@stamhoofd/structures';
-import { PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig } from '@stamhoofd/structures';
+import { PlatformMembershipTypeBehaviour, PlatformMembershipTypeConfig, TranslatedRichText } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
@@ -222,7 +221,7 @@ const name = computed({
 
 const description = computed({
     get: () => patched.value.description,
-    set: description => addPatch({ description }),
+    set: description => addPatch({ description: TranslatedRichText.createPatch(patched.value.description, description) }),
 });
 
 const behaviour = computed({

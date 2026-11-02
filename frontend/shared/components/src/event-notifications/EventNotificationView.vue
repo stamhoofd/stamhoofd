@@ -10,7 +10,7 @@
             <h1>
                 {{ title }}
             </h1>
-            <p>{{ type.description }}</p>
+            <div v-if="type.description.text" class="style-wysiwyg" v-html="type.description.html" />
 
             <STErrorsDefault :error-box="errors.errorBox" />
 

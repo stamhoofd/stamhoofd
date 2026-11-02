@@ -4,9 +4,7 @@
             {{ type.name }}
         </h2>
 
-        <p v-if="type.description" class="style-description">
-            {{ type.description }}
-        </p>
+        <div v-if="type.description.text" class="style-description style-wysiwyg" v-html="type.description.html" />
 
         <template #right>
             <span class="button icon drag gray" @click.stop @contextmenu.stop />

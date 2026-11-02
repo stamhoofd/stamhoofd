@@ -6,9 +6,7 @@
         <h2 class="style-title-list">
             {{ type.title }}
         </h2>
-        <p class="style-description-small style-limit-lines pre-wrap">
-            {{ type.description }}
-        </p>
+        <div v-if="type.description.text" class="style-description-small style-limit-lines style-wysiwyg" v-html="type.description.html" />
         <template #right>
             <span v-if="notification" :class="'style-tag ' + EventNotificationStatusHelper.getColor(notification.status)">
                 <span v-if="notification.status === EventNotificationStatus.Pending" class="icon clock tiny " />

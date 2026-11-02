@@ -59,9 +59,7 @@
                         {{ getTypeDateDescription(type) }}
                     </p>
 
-                    <p class="style-description-small">
-                        {{ type.description }}
-                    </p>
+                    <div v-if="type.description.text" class="style-description-small style-wysiwyg" v-html="type.description.html" />
 
                     <div v-if="selectedMembershipType.id === type.id && type.behaviour === PlatformMembershipTypeBehaviour.Days" class="split-inputs">
                         <STInputBox

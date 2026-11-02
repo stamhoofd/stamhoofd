@@ -4,7 +4,7 @@ import { EventFactory, GroupFactory, OrganizationFactory, OrganizationRegistrati
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { Address, BuckarooSettings, Company, MemberResponsibility, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PeppolEndointId, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceKey, ResourcePermissions, Version } from '@stamhoofd/structures';
+import { Address, BuckarooSettings, Company, MemberResponsibility, OrganizationMetaData, OrganizationPrivateMetaData, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PeppolEndointId, PermissionRoleDetailed, PermissionRoleForResponsibility, Permissions, PermissionsResourceKey, ResourcePermissions, RichText, TranslatedRichText, Version } from '@stamhoofd/structures';
 import { SessionService } from '../../../../services/SessionService.js';
 
 import type { AutoEncoderPatchType, PatchableArrayAutoEncoder } from '@common/encoding';
@@ -619,7 +619,7 @@ describe('Endpoint.PatchOrganization', () => {
 
                 const memberResponsibility = MemberResponsibility.create({
                     name: 'memberResponsibility1',
-                    description: 'description1',
+                    description: TranslatedRichText.create(RichText.fromText('description1')),
                     permissions: inheritedResponsibilityRole,
                 });
 
@@ -632,7 +632,7 @@ describe('Endpoint.PatchOrganization', () => {
                 responsibilitiesPatch.addPatch(MemberResponsibility.patch({
                     id: memberResponsibility.id,
                     name: 'new name',
-                    description: 'new description',
+                    description: RichText.fromText('new description'),
                     permissions: PermissionRoleForResponsibility.patch({
                         name: 'new name',
                         level: PermissionLevel.Full,
@@ -675,7 +675,7 @@ describe('Endpoint.PatchOrganization', () => {
 
                 // other fields should not have changed
                 expect(response.body.privateMeta!.responsibilities[0].name).toBe('memberResponsibility1');
-                expect(response.body.privateMeta!.responsibilities[0].description).toBe('description1');
+                expect(response.body.privateMeta!.responsibilities[0].description.text).toBe('description1');
                 expect(response.body.privateMeta!.responsibilities[0].permissions?.name).toBe('name1');
                 expect(response.body.privateMeta!.responsibilities[0].permissions?.level).toBe(PermissionLevel.None);
             });

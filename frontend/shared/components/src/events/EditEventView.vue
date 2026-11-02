@@ -22,9 +22,7 @@
                 </Dropdown>
             </STInputBox>
         </div>
-        <p v-if="type" class="style-description-block">
-            {{ type.description }}
-        </p>
+        <div v-if="type && type.description.text" class="style-description-block style-wysiwyg" v-html="type.description.html" />
 
         <TWYSIWYGTextInput v-model="description" :title="$t('%6o')" :placeholder="$t('%7Q')" error-fields="meta.description" :error-box="errors.errorBox" class="max" />
 

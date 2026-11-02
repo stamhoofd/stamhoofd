@@ -24,9 +24,7 @@
             {{ defaultAgeGroupIdsDescription }}
         </p>
 
-        <p v-if="responsibility.description" class="style-description">
-            {{ responsibility.description }}
-        </p>
+        <div v-if="responsibility.description.text" class="style-description style-wysiwyg" v-html="responsibility.description.html" />
 
         <p v-if="responsibility.minimumMembers" class="style-description">
             {{ $t('%ja', {min: responsibility.minimumMembers.toString()}) }}

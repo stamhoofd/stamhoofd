@@ -12,9 +12,7 @@
             </STInputBox>
         </div>
 
-        <STInputBox :title="$t('%6o')" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea v-model="description" class="input" type="text" :placeholder="$t('%8g')" autocomplete="off" />
-        </STInputBox>
+        <TWYSIWYGTextInput v-model="description" :title="$t('%6o')" :placeholder="$t('%8g')" error-fields="description" :error-box="errors.errorBox" class="max" />
 
         <STInputBox :title="$t('%8h')" error-fields="eventTypeIds" :error-box="errors.errorBox" class="max">
             <EventTypeIdsInput v-model="eventTypeIds" />
@@ -68,12 +66,13 @@ import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import { usePlatform } from '@stamhoofd/components/hooks/usePlatform.ts';
 import EventTypeIdsInput from '@stamhoofd/components/inputs/EventTypeIdsInput.vue';
 import MultipleChoiceInput from '@stamhoofd/components/inputs/MultipleChoiceInput.vue';
+import TWYSIWYGTextInput from '@stamhoofd/components/inputs/TWYSIWYGTextInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import EditRecordCategoriesBox from '@stamhoofd/components/records/components/EditRecordCategoriesBox.vue';
 import { RecordEditorSettings, RecordEditorType } from '@stamhoofd/components/records/RecordEditorSettings.ts';
 import type { EventNotificationType, RecordCategory } from '@stamhoofd/structures';
-import { Address, BaseOrganization, EventNotification, EventNotificationDeadline } from '@stamhoofd/structures';
+import { Address, BaseOrganization, EventNotification, EventNotificationDeadline, TranslatedRichText } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 import EventNotificationDeadlineRow from './components/EventNotificationDeadlineRow.vue';
 
@@ -151,7 +150,7 @@ const title = computed({
 
 const description = computed({
     get: () => patched.value.description,
-    set: description => addPatch({ description }),
+    set: description => addPatch({ description: TranslatedRichText.createPatch(patched.value.description, description) }),
 });
 
 const eventTypeIds = computed({

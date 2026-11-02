@@ -3,9 +3,7 @@
         <h2 class="style-title-list">
             {{ type.name }}
         </h2>
-        <p class="style-description-small">
-            {{ type.description }}
-        </p>
+        <div v-if="type.description.text" class="style-description-small style-wysiwyg" v-html="type.description.html" />
 
         <p v-if="type.maximum !== null" class="style-description-small">
             {{ $t('%6W', { aantal: type.maximum.toFixed() }) }}

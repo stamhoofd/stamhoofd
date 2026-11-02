@@ -17,9 +17,7 @@
                 {{ $t('%wR') }} {{ group.settings.name }}
             </template>
         </h2>
-        <p class="style-description-small">
-            {{ responsibility.description }}
-        </p>
+        <div v-if="responsibility.description.text" class="style-description-small style-wysiwyg" v-html="responsibility.description.html" />
 
         <p class="style-description-small">
             {{ $t('%fW') }}: {{ capitalizeFirstLetter(roleDescription) }}

@@ -17,6 +17,7 @@ import type { OrganizationPrivateMetaData } from './OrganizationPrivateMetaData.
 import { OrganizationType } from './OrganizationType.js';
 import { PaymentConfiguration } from './PaymentConfiguration.js';
 import { PaymentMethod } from './PaymentMethod.js';
+import { TranslatedRichText } from './TranslatedRichText.js';
 import { UitpasClientCredentialsStatus } from './UitpasClientCredentialsStatus.js';
 import { UmbrellaOrganization } from './UmbrellaOrganization.js';
 import { TransferSettings } from './webshops/TransferSettings.js';
@@ -182,7 +183,8 @@ export class OrganizationEventType extends AutoEncoder {
     name = '';
 
     @field({ decoder: StringDecoder })
-    description = '';
+    @field(TranslatedRichText.stringField({ version: 426 }))
+    description = TranslatedRichText.create();
 
     /**
      * Temporary default id for every organization default event type. The event types should later be replaced by types that are created by the organization.

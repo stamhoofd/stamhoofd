@@ -2,6 +2,7 @@ import { ArrayDecoder, AutoEncoder, BooleanDecoder, EnumDecoder, IntegerDecoder,
 import { v4 as uuidv4 } from 'uuid';
 import { PermissionRoleForResponsibility } from './PermissionRole.js';
 import { ResourcePermissions } from './ResourcePermissions.js';
+import { TranslatedRichText } from './TranslatedRichText.js';
 
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
@@ -14,7 +15,8 @@ export class MemberResponsibility extends AutoEncoder {
     name = '';
 
     @field({ decoder: StringDecoder })
-    description = '';
+    @field(TranslatedRichText.stringField({ version: 426 }))
+    description = TranslatedRichText.create();
 
     @field({ decoder: IntegerDecoder, nullable: true })
     minimumMembers: null | number = null;

@@ -3,7 +3,7 @@
         <h1>
             {{ viewModel.type.title }}
         </h1>
-        <p class="pre-wrap style-description-block" v-text="viewModel.type.description" />
+        <div v-if="viewModel.type.description.text" class="style-description-block style-wysiwyg" v-html="viewModel.type.description.html" />
 
         <STErrorsDefault :error-box="errors.errorBox" />
 

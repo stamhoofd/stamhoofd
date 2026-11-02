@@ -1,6 +1,7 @@
 import { ArrayDecoder, AutoEncoder, DateDecoder, field, StringDecoder } from '@common/encoding';
 import { v4 as uuidv4 } from 'uuid';
 import { RecordCategory } from './members/records/RecordCategory.js';
+import { TranslatedRichText } from './TranslatedRichText.js';
 
 export class EventNotificationDeadline extends AutoEncoder {
     @field({ decoder: StringDecoder, optional: true, defaultValue: () => uuidv4() })
@@ -52,7 +53,8 @@ export class EventNotificationType extends AutoEncoder {
      * Explanation about what this is.
      */
     @field({ decoder: StringDecoder })
-    description: string = '';
+    @field(TranslatedRichText.stringField({ version: 426 }))
+    description = TranslatedRichText.create();
 
     /**
      * Button text to fill in this form. E.g. "Kampmelding indienen"

@@ -26,9 +26,7 @@
                             <h2 class="style-title-list">
                                 {{ premiseType.name }}
                             </h2>
-                            <p v-if="premiseType.description" class="style-description-small">
-                                {{ premiseType.description }}
-                            </p>
+                            <div v-if="premiseType.description.text" class="style-description-small style-wysiwyg" v-html="premiseType.description.html" />
                         </div>
 
                         <template #right>

@@ -10,9 +10,7 @@
             <input v-model="name" class="input" type="text" :placeholder="$t('%1Os') ">
         </STInputBox>
 
-        <STInputBox :title="$t('%6o')" error-fields="settings.description" :error-box="errors.errorBox" class="max">
-            <textarea v-model="description" class="input" type="text" :placeholder="$t('%14p')" autocomplete="off" />
-        </STInputBox>
+        <TWYSIWYGTextInput v-model="description" :title="$t('%6o')" :placeholder="$t('%14p')" error-fields="settings.description" :error-box="errors.errorBox" class="max" />
 
         <Checkbox v-if="app === 'admin'" v-model="notOrganizationBased">
             {{ $t('%jK') }}
@@ -167,6 +165,7 @@ import { useErrors } from '#errors/useErrors.ts';
 import { usePatch } from '#hooks/usePatch.ts';
 import DefaultAgeGroupIdsInput from '#inputs/DefaultAgeGroupIdsInput.vue';
 import TagIdsInput from '#inputs/TagIdsInput.vue';
+import TWYSIWYGTextInput from '#inputs/TWYSIWYGTextInput.vue';
 import SaveView from '#navigation/SaveView.vue';
 import { CenteredMessage } from '#overlays/CenteredMessage.ts';
 import type { AutoEncoderPatchType } from '@common/encoding';
@@ -175,7 +174,7 @@ import { ComponentWithProperties, usePop, usePresent } from '@browser/navigation
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { MemberResponsibility } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { PermissionRoleForResponsibility } from '@stamhoofd/structures';
+import { PermissionRoleForResponsibility, TranslatedRichText } from '@stamhoofd/structures';
 import { computed, ref, watchEffect } from 'vue';
 import NumberInputBox from '../inputs/NumberInputBox.vue';
 
@@ -270,7 +269,7 @@ const name = computed({
 
 const description = computed({
     get: () => patched.value.description,
-    set: description => addPatch({ description }),
+    set: description => addPatch({ description: TranslatedRichText.createPatch(patched.value.description, description) }),
 });
 
 const minimumMembers = computed({

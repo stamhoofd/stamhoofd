@@ -134,7 +134,8 @@ export class PlatformPremiseType extends AutoEncoder {
     name = '';
 
     @field({ decoder: StringDecoder, version: 319 })
-    description = '';
+    @field(TranslatedRichText.stringField({ version: 426 }))
+    description = TranslatedRichText.create();
 
     /**
      * Maximum number of premises allowed for this premise type
@@ -276,7 +277,8 @@ export class PlatformMembershipType extends AutoEncoder {
     name = '';
 
     @field({ decoder: StringDecoder })
-    description = '';
+    @field(TranslatedRichText.stringField({ version: 426 }))
+    description = TranslatedRichText.create();
 
     @field({ decoder: new EnumDecoder(PlatformMembershipTypeBehaviour) })
     behaviour = PlatformMembershipTypeBehaviour.Period;
@@ -346,7 +348,8 @@ export class PlatformEventType extends AutoEncoder {
     name = '';
 
     @field({ decoder: StringDecoder })
-    description = '';
+    @field(TranslatedRichText.stringField({ version: 426 }))
+    description = TranslatedRichText.create();
 
     /**
      * Maximum amount that each organization can have this type

@@ -12,9 +12,7 @@
             </STInputBox>
         </div>
 
-        <STInputBox :title="$t('%6o')" error-fields="description" :error-box="errors.errorBox" class="max">
-            <textarea v-model="description" class="input" type="text" :placeholder="$t('%5r')" autocomplete="off" />
-        </STInputBox>
+        <TWYSIWYGTextInput v-model="description" :title="$t('%6o')" :placeholder="$t('%5r')" error-fields="description" :error-box="errors.errorBox" class="max" />
 
         <hr><h2>{{ $t('%4R') }}</h2>
 
@@ -37,9 +35,11 @@ import { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import { useErrors } from '@stamhoofd/components/errors/useErrors.ts';
 import { usePatch } from '@stamhoofd/components/hooks/usePatch.ts';
 import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
+import TWYSIWYGTextInput from '@stamhoofd/components/inputs/TWYSIWYGTextInput.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import type { PlatformPremiseType } from '@stamhoofd/structures';
+import { TranslatedRichText } from '@stamhoofd/structures';
 import { computed, ref } from 'vue';
 
 const errors = useErrors();
@@ -113,7 +113,7 @@ const name = computed({
 
 const description = computed({
     get: () => patched.value.description,
-    set: description => addPatch({ description }),
+    set: description => addPatch({ description: TranslatedRichText.createPatch(patched.value.description, description) }),
 });
 
 const min = computed({

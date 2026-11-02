@@ -41,9 +41,7 @@
                     <p v-if="getResponsibilityEnabledDescription(responsibility, group?.id)" class="style-description-small">
                         {{ getResponsibilityEnabledDescription(responsibility, group?.id) }}
                     </p>
-                    <p class="style-description-small">
-                        {{ responsibility.description }}
-                    </p>
+                    <div v-if="responsibility.description.text" class="style-description-small style-wysiwyg" v-html="responsibility.description.html" />
 
                     <template #right>
                         <ResponsibilityIcon :responsibility="responsibility" :group="group" :organization="selectedOrganization" />
