@@ -3,6 +3,7 @@ import { expect, test } from 'vitest';
 import { render } from 'vitest-browser-vue';
 import { nextTick } from 'vue';
 
+import '@stamhoofd/scss/components/inline-input.scss';
 import FloatInlineInput from './FloatInlineInput.vue';
 import PermyriadInlineInput from './PermyriadInlineInput.vue';
 
@@ -14,7 +15,6 @@ type Props = {
     suffixSingular?: string | null;
     fractionDigits?: number;
     roundFractionDigits?: number | null;
-    autoFix?: boolean;
     selectOnFocus?: boolean;
     label?: string | null;
 };
@@ -49,6 +49,10 @@ function input(): HTMLInputElement {
     return document.querySelector('.st-inline-input input')!;
 }
 
+function field(): HTMLElement {
+    return document.querySelector('.st-inline-input .field')!;
+}
+
 /**
  * Types text in the input, without leaving it: the value is only committed on change.
  */
@@ -80,6 +84,21 @@ test('Uses the singular suffix for a value of one', async () => {
 
     expect(state.value).toBe(1);
     expect(container()).toHaveTextContent('1dag');
+});
+
+test('Corrects a value out of range on the first render, so the text never contradicts the model', async () => {
+    const { state } = renderInput(500, { min: 0, max: 100, suffix: '%' });
+
+    expect(state.value).toBe(100);
+    expect(input()).toHaveValue('100');
+    expect(container()).toHaveTextContent('100%');
+});
+
+test('Falls back to the minimum when there is no value on the first render', async () => {
+    const { state } = renderInput(null, { min: 0, max: 100 });
+
+    expect(state.value).toBe(0);
+    expect(input()).toHaveValue('0');
 });
 
 test('Updates the model value while typing, so a linked value can follow along', async () => {
@@ -157,6 +176,22 @@ test('Steps the value with the arrow keys', async () => {
     await userEvent.keyboard('{ArrowDown}{ArrowDown}');
 
     expect(state.value).toBe(29);
+    expect(input()).toHaveValue('29');
+});
+
+test('Steps by one displayed unit when fraction digits are used', async () => {
+    const { state } = renderInput(30_00, { min: 0, max: 100_00, fractionDigits: 2 });
+
+    await userEvent.click(input());
+    await userEvent.keyboard('{ArrowUp}');
+
+    // One step is one percent, not one hundredth of a percent
+    expect(state.value).toBe(31_00);
+    expect(input()).toHaveValue('31');
+
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+
+    expect(state.value).toBe(29_00);
     expect(input()).toHaveValue('29');
 });
 
@@ -248,6 +283,17 @@ test('Keeps the suffix while the input is empty', async () => {
 
     expect(state.value).toBe(0);
     expect(container()).toHaveTextContent('0%');
+});
+
+test('Stays clickable while the input is empty', async () => {
+    renderInput(30, { min: 0, max: 100, suffix: '%' });
+
+    await userEvent.click(input());
+    await userEvent.clear(input());
+    await nextTick();
+
+    // Room for about one character, so the caret stays visible and there is still something to click
+    expect(field().offsetWidth).toBeGreaterThan(4);
 });
 
 test('PermyriadInlineInput edits a permyriad value as a percentage', async () => {
