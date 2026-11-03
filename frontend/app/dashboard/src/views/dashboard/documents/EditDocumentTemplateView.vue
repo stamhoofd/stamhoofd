@@ -151,7 +151,7 @@ import type { NavigationActions } from '@stamhoofd/components/types/NavigationAc
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { useRequestOwner } from '@stamhoofd/components/hooks/networking/useRequestOwner';
 import type { DocumentTemplateGroup, PatchAnswers, RecordAnswer } from '@stamhoofd/structures';
-import { CountFilteredRequest, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplatePrivate, RecordAddressAnswer, RecordAnswerDecoder, RecordCategory, RecordChoice, RecordChooseOneAnswer, RecordSettings, RecordTextAnswer, RecordType, TranslatedRichText, TranslatedString } from '@stamhoofd/structures';
+import { CountFilteredRequest, DocumentPrivateSettings, DocumentSettings, DocumentTemplateDefinition, DocumentTemplatePrivate, RecordAddressAnswer, RecordAnswerDecoder, RecordCategory, RecordChoice, RecordChooseOneAnswer, RecordSettings, RecordTextAnswer, RecordType, TranslatedRichText, TranslatedString, TranslatedText } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { FiscalDocumentYearHelper, Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, onMounted, ref, watch } from 'vue';
@@ -830,7 +830,7 @@ function getDefaultGlobalData(): Record<string, RecordAnswer> {
             settings: RecordSettings.create({}), // settings will be overwritten
             selectedChoice: RecordChoice.create({
                 id: 'authorities',
-                name: TranslatedString.create('Gemeenten, gemeenschappen of gewesten'),
+                name: TranslatedText.create('Gemeenten, gemeenschappen of gewesten'),
                 description: TranslatedRichText.fromText('is vergund, erkend, gesubsidieerd of gecontroleerd door de lokale openbare besturen of openbare besturen van de gemeenschappen of gewesten'),
             }),
         });

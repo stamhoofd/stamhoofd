@@ -14,6 +14,7 @@ import { ContinuousMembershipStatus } from './MembershipStatus.js';
 import { OrganizationRecordsConfiguration } from './OrganizationRecordsConfiguration.js';
 import { RecordCategory } from './records/RecordCategory.js';
 import { TranslatedString } from '../TranslatedString.js';
+import { TranslatedText } from '../TranslatedText.js';
 import {
     PlatformFamily,
     PlatformMember,
@@ -264,8 +265,8 @@ describe('PlatformMember', () => {
 
     describe('getAllRecordCategories', () => {
         test('does not return the same record category twice when the member belongs to the scoped organization', () => {
-            const categoryA = RecordCategory.create({ name: new TranslatedString('Category A') });
-            const categoryB = RecordCategory.create({ name: new TranslatedString('Category B') });
+            const categoryA = RecordCategory.create({ name: new TranslatedText('Category A') });
+            const categoryB = RecordCategory.create({ name: new TranslatedText('Category B') });
 
             const organization = Organization.create({
                 meta: OrganizationMetaData.create({

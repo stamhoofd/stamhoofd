@@ -9,7 +9,7 @@ import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { User } from '@stamhoofd/models';
 import { Order, OrderFactory, Organization, OrganizationFactory, UserFactory, Webshop } from '@stamhoofd/models';
-import { Cart, CartItem, Customer, OrderData, PaymentMethod, Permissions, Product, ProductPrice, ProductType, RecordCategory, RecordSettings, RecordType, STPackageBundle, Token as TokenStruct, TranslatedString, Version, WebshopOrderMode, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
+import { Cart, CartItem, Customer, OrderData, PaymentMethod, Permissions, Product, ProductPrice, ProductType, RecordCategory, RecordSettings, RecordType, STPackageBundle, Token as TokenStruct, TranslatedText, Version, WebshopOrderMode, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
@@ -274,8 +274,8 @@ test.describe('Webshop per-item customers @webshop-item-customer', () => {
                 }),
             ],
         });
-        const allergies = RecordSettings.create({ name: TranslatedString.create('Allergieën'), type: RecordType.Text, required: false });
-        webshop.meta.customerSettings.recordCategory = RecordCategory.create({ name: TranslatedString.create('Extra vragen'), records: [allergies] });
+        const allergies = RecordSettings.create({ name: TranslatedText.create('Allergieën'), type: RecordType.Text, required: false });
+        webshop.meta.customerSettings.recordCategory = RecordCategory.create({ name: TranslatedText.create('Extra vragen'), records: [allergies] });
         await webshop.save();
 
         const admin = await new UserFactory({
@@ -676,11 +676,11 @@ test.describe('Webshop per-item customers @webshop-item-customer', () => {
                     customerSettings: CustomerSettings.create({
                         email: CustomerFieldRequirement.Required,
                         recordCategory: RecordCategory.create({
-                            name: TranslatedString.create('Extra vragen'),
-                            records: [RecordSettings.create({ name: TranslatedString.create('Allergieën'), type: RecordType.Text, required: false })],
+                            name: TranslatedText.create('Extra vragen'),
+                            records: [RecordSettings.create({ name: TranslatedText.create('Allergieën'), type: RecordType.Text, required: false })],
                             childCategories: [RecordCategory.create({
-                                name: TranslatedString.create('Noodcontact'),
-                                records: [RecordSettings.create({ name: TranslatedString.create('Naam noodcontact'), type: RecordType.Text })],
+                                name: TranslatedText.create('Noodcontact'),
+                                records: [RecordSettings.create({ name: TranslatedText.create('Naam noodcontact'), type: RecordType.Text })],
                             })],
                         }),
                     }),

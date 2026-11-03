@@ -3,7 +3,7 @@ import { PatchableArray } from '@common/encoding';
 import { Request } from '@node/endpoints';
 import { OrganizationFactory, UserFactory, Webshop, WebshopFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Permissions, PrivateWebshop, Product, RecordCategory, RecordSettings, RecordType, TranslatedString, WebshopMetaData } from '@stamhoofd/structures';
+import { Permissions, PrivateWebshop, Product, RecordCategory, RecordSettings, RecordType, TranslatedString, TranslatedText, WebshopMetaData } from '@stamhoofd/structures';
 import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { Language } from '@stamhoofd/types/Language';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
@@ -102,8 +102,8 @@ describe('Endpoint.PatchWebshop', () => {
     describe('meta.customerSettings.recordCategory', () => {
         async function createWebshopWithCustomerQuestion() {
             const { organization, token } = await createAdminContext();
-            const question = RecordSettings.create({ name: TranslatedString.create('Opmerking'), type: RecordType.Text });
-            const category = RecordCategory.create({ name: TranslatedString.create('Extra vragen'), records: [question] });
+            const question = RecordSettings.create({ name: TranslatedText.create('Opmerking'), type: RecordType.Text });
+            const category = RecordCategory.create({ name: TranslatedText.create('Extra vragen'), records: [question] });
             const webshop = await new WebshopFactory({
                 organizationId: organization.id,
                 meta: WebshopMetaData.patch({
@@ -165,8 +165,8 @@ describe('Endpoint.PatchWebshop', () => {
 
         test('rejects an incompatible type change of a saved question of a product', async () => {
             const { organization, token } = await createAdminContext();
-            const question = RecordSettings.create({ name: TranslatedString.create('Allergieën'), type: RecordType.Text });
-            const category = RecordCategory.create({ name: TranslatedString.create('Extra vragen'), records: [question] });
+            const question = RecordSettings.create({ name: TranslatedText.create('Allergieën'), type: RecordType.Text });
+            const category = RecordCategory.create({ name: TranslatedText.create('Extra vragen'), records: [question] });
             const product = Product.create({ name: 'Deelname', enableCustomer: true, customerSettings: CustomerSettings.create({ recordCategory: category }) });
             const webshop = await new WebshopFactory({ organizationId: organization.id, products: [product] }).create();
 
@@ -189,8 +189,8 @@ describe('Endpoint.PatchWebshop', () => {
         test('allows creating the category when the webshop has none yet', async () => {
             const { organization, token } = await createAdminContext();
             const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
-            const question = RecordSettings.create({ name: TranslatedString.create('Opmerking'), type: RecordType.Checkbox });
-            const category = RecordCategory.create({ name: TranslatedString.create('Extra vragen'), records: [question] });
+            const question = RecordSettings.create({ name: TranslatedText.create('Opmerking'), type: RecordType.Checkbox });
+            const category = RecordCategory.create({ name: TranslatedText.create('Extra vragen'), records: [question] });
 
             const response = await patchCustomerSettings({ organization, token, webshop }, CustomerSettings.patch({ recordCategory: category }));
             expect(response.body.meta.customerSettings.recordCategory?.records.map(r => r.id)).toEqual([question.id]);

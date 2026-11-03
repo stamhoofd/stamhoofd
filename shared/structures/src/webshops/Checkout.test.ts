@@ -8,6 +8,7 @@ import { RecordTextAnswer } from '../members/records/RecordAnswer.js';
 import { RecordCategory } from '../members/records/RecordCategory.js';
 import { RecordSettings, RecordType } from '../members/records/RecordSettings.js';
 import { TranslatedString } from '../TranslatedString.js';
+import { TranslatedText } from '../TranslatedText.js';
 import { User } from '../User.js';
 import { OrganizationMetaData } from '../OrganizationMetaData.js';
 import { Cart } from './Cart.js';
@@ -133,7 +134,7 @@ describe('Checkout.validateCustomer', () => {
 
 describe('Checkout customer questions', () => {
     const question = RecordSettings.create({
-        name: TranslatedString.create('T-shirtmaat'),
+        name: TranslatedText.create('T-shirtmaat'),
         type: RecordType.Text,
         required: true,
     });
@@ -141,7 +142,7 @@ describe('Checkout customer questions', () => {
     function createWebshopWithQuestion() {
         const webshop = createWebshop({});
         webshop.meta.customerSettings.recordCategory = RecordCategory.create({
-            name: TranslatedString.create('Extra vragen'),
+            name: TranslatedText.create('Extra vragen'),
             records: [question],
         });
         return webshop;
@@ -160,8 +161,8 @@ describe('Checkout customer questions', () => {
     it('lets an admin save an order without answers to the current questions', () => {
         const webshop = createWebshopWithQuestion();
         webshop.meta.recordCategories = [RecordCategory.create({
-            name: TranslatedString.create('Stap'),
-            records: [RecordSettings.create({ name: TranslatedString.create('Opmerking'), type: RecordType.Text, required: true })],
+            name: TranslatedText.create('Stap'),
+            records: [RecordSettings.create({ name: TranslatedText.create('Opmerking'), type: RecordType.Text, required: true })],
         })];
         const checkout = Checkout.create({ customer: createValidCustomer() });
 
@@ -175,7 +176,7 @@ describe('Checkout customer questions', () => {
         const checkout = Checkout.create({ customer: createValidCustomer() });
         checkout.recordAnswers.set(question.id, RecordTextAnswer.create({ settings: question, value: 'M' }));
 
-        const unknown = RecordSettings.create({ name: TranslatedString.create('Oud'), type: RecordType.Text });
+        const unknown = RecordSettings.create({ name: TranslatedText.create('Oud'), type: RecordType.Text });
         checkout.recordAnswers.set(unknown.id, RecordTextAnswer.create({ settings: unknown, value: 'x' }));
 
         checkout.validateRecordAnswers(webshop);

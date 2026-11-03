@@ -8,6 +8,8 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { getPermissionLevelNumber } from '../../PermissionLevel.js';
 import type { Filterable } from '../../filters/Filterable.js';
 import { TranslatedRichText } from '../../TranslatedRichText.js';
+import { TranslatedLongText } from '../../TranslatedLongText.js';
+import { TranslatedText } from '../../TranslatedText.js';
 import { TranslatedString } from '../../TranslatedString.js';
 
 export type RecordFilterOptions = { level?: PermissionLevel; additionalFilter?: (record: RecordSettings) => boolean };
@@ -166,7 +168,8 @@ export class RecordChoice extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     @field(TranslatedString.field({ version: 370 }))
-    name = TranslatedString.create();
+    @field(TranslatedText.field({ version: 426 }))
+    name = TranslatedText.create();
 
     @field({ decoder: StringDecoder, version: 118 })
     @field(TranslatedString.field({ version: 370 }))
@@ -189,7 +192,8 @@ export class BaseRecordSettings extends AutoEncoder {
      */
     @field({ decoder: StringDecoder })
     @field(TranslatedString.field({ version: 370 }))
-    name = TranslatedString.create();
+    @field(TranslatedText.field({ version: 426 }))
+    name = TranslatedText.create();
 }
 
 export class RecordSettings extends BaseRecordSettings {
@@ -230,7 +234,8 @@ export class RecordSettings extends BaseRecordSettings {
      */
     @field({ decoder: StringDecoder, defaultValue: () => '' })
     @field(TranslatedString.field({ version: 370, defaultValue: () => TranslatedString.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
-    label: TranslatedString;
+    @field(TranslatedText.field({ version: 426, defaultValue: () => TranslatedText.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
+    label: TranslatedText;
 
     /**
      * Text underneath the label in case of a checkbox.
@@ -238,17 +243,20 @@ export class RecordSettings extends BaseRecordSettings {
      */
     @field({ decoder: StringDecoder, defaultValue: () => '' })
     @field(TranslatedString.field({ version: 370, defaultValue: () => TranslatedString.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
-    description = TranslatedString.create();
+    @field(TranslatedLongText.field({ version: 426, defaultValue: () => TranslatedLongText.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
+    description = TranslatedLongText.create();
 
     /// In case of textboxes or comments for checked checkboxes
     @field({ decoder: StringDecoder, defaultValue: () => '' })
     @field(TranslatedString.field({ version: 370, defaultValue: () => TranslatedString.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
-    inputPlaceholder = TranslatedString.create();
+    @field(TranslatedText.field({ version: 426, defaultValue: () => TranslatedText.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
+    inputPlaceholder = TranslatedText.create();
 
     /// Text below the input field for comments (if any)
     @field({ decoder: StringDecoder, version: 120, defaultValue: () => '' })
     @field(TranslatedString.field({ version: 370, defaultValue: () => TranslatedString.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
-    commentsDescription = TranslatedString.create();
+    @field(TranslatedLongText.field({ version: 426, defaultValue: () => TranslatedLongText.create(), isDefaultValue: v => !!v && v.toString().length === 0 }))
+    commentsDescription = TranslatedLongText.create();
 
     /**
      * Show a warning if selected / entered (or not selected/entered if inverted)

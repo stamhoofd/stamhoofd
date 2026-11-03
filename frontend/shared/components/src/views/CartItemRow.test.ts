@@ -1,5 +1,5 @@
 import type { RecordAnswer } from '@stamhoofd/structures';
-import { Cart, CartItem, Checkout, Customer, Product, ProductPrice, RecordCategory, RecordChooseOneAnswer, RecordChoice, RecordSettings, RecordTextAnswer, RecordType, TranslatedString, Webshop } from '@stamhoofd/structures';
+import { Cart, CartItem, Checkout, Customer, Product, ProductPrice, RecordCategory, RecordChooseOneAnswer, RecordChoice, RecordSettings, RecordTextAnswer, RecordType, TranslatedText, Webshop } from '@stamhoofd/structures';
 import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { Formatter } from '@stamhoofd/utility';
 import { expect, test, vi } from 'vitest';
@@ -40,13 +40,13 @@ function renderFirstItem(products: Product[]) {
 }
 
 test('lists the answers of a participant in the order of the questions', async () => {
-    const choice = RecordChoice.create({ name: TranslatedString.create('Zwemt zonder hulp') });
-    const swimming = RecordSettings.create({ name: TranslatedString.create('Zwemniveau'), type: RecordType.ChooseOne, choices: [choice] });
-    const allergies = RecordSettings.create({ name: TranslatedString.create('Allergieën'), type: RecordType.Textarea, required: false });
+    const choice = RecordChoice.create({ name: TranslatedText.create('Zwemt zonder hulp') });
+    const swimming = RecordSettings.create({ name: TranslatedText.create('Zwemniveau'), type: RecordType.ChooseOne, choices: [choice] });
+    const allergies = RecordSettings.create({ name: TranslatedText.create('Allergieën'), type: RecordType.Textarea, required: false });
     const product = Product.create({
         name: 'Sportkamp',
         enableCustomer: true,
-        customerSettings: CustomerSettings.create({ recordCategory: RecordCategory.create({ name: TranslatedString.create('Extra vragen'), records: [swimming, allergies] }) }),
+        customerSettings: CustomerSettings.create({ recordCategory: RecordCategory.create({ name: TranslatedText.create('Extra vragen'), records: [swimming, allergies] }) }),
     });
     const webshop = Webshop.create({ products: [product] });
 

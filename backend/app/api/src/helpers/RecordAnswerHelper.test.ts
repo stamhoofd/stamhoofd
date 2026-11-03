@@ -1,72 +1,72 @@
 import type { AutoEncoderPatchType } from '@common/encoding';
 import { PatchableArray } from '@common/encoding';
-import { FileType, RecordCategory, RecordChoice, RecordSettings, RecordType, TranslatedString } from '@stamhoofd/structures';
+import { FileType, RecordCategory, RecordChoice, RecordSettings, RecordType, TranslatedString, TranslatedText } from '@stamhoofd/structures';
 import { RecordAnswerHelper } from './RecordAnswerHelper.js';
 
 describe('RecordAnswerHelper', () => {
     const record1 = RecordSettings.create({
-        name: TranslatedString.create('vraag 1'),
+        name: TranslatedText.create('vraag 1'),
         type: RecordType.Text,
     });
 
     const record2 = RecordSettings.create({
-        name: TranslatedString.create('vraag 2'),
+        name: TranslatedText.create('vraag 2'),
         type: RecordType.Integer,
     });
 
     const record3 = RecordSettings.create({
-        name: TranslatedString.create('vraag 3'),
+        name: TranslatedText.create('vraag 3'),
         type: RecordType.Text,
     });
 
     const record4 = RecordSettings.create({
-        name: TranslatedString.create('vraag 4'),
+        name: TranslatedText.create('vraag 4'),
         type: RecordType.Date,
     });
 
     const record5 = RecordSettings.create({
-        name: TranslatedString.create('vraag 5'),
+        name: TranslatedText.create('vraag 5'),
         type: RecordType.MultipleChoice,
         choices: [
-            RecordChoice.create({ name: TranslatedString.create('keuze 1') }),
-            RecordChoice.create({ name: TranslatedString.create('keuze 2') }),
+            RecordChoice.create({ name: TranslatedText.create('keuze 1') }),
+            RecordChoice.create({ name: TranslatedText.create('keuze 2') }),
         ],
     });
 
     const record6 = RecordSettings.create({
-        name: TranslatedString.create('vraag 6'),
+        name: TranslatedText.create('vraag 6'),
         type: RecordType.Email,
     });
 
     const record7 = RecordSettings.create({
-        name: TranslatedString.create('vraag 7'),
+        name: TranslatedText.create('vraag 7'),
         type: RecordType.Price,
     });
 
     const record8 = RecordSettings.create({
-        name: TranslatedString.create('vraag 8'),
+        name: TranslatedText.create('vraag 8'),
         type: RecordType.File,
         fileType: FileType.PDF,
     });
 
     const childCategory1 = RecordCategory.create({
-        name: TranslatedString.create('subcategorie 1'),
+        name: TranslatedText.create('subcategorie 1'),
         records: [record3, record4],
     });
 
     const childCategory2 = RecordCategory.create({
-        name: TranslatedString.create('subcategorie 2'),
+        name: TranslatedText.create('subcategorie 2'),
         records: [record5],
     });
 
     const recordCategory1 = RecordCategory.create({
-        name: TranslatedString.create('categorie 1'),
+        name: TranslatedText.create('categorie 1'),
         records: [record1, record2],
         childCategories: [childCategory1, childCategory2],
     });
 
     const recordCategory2 = RecordCategory.create({
-        name: TranslatedString.create('categorie 2'),
+        name: TranslatedText.create('categorie 2'),
         records: [record6, record7, record8],
     });
 
@@ -79,13 +79,13 @@ describe('RecordAnswerHelper', () => {
 
             const recordPatch1 = RecordSettings.patch({
                 id: record1.id,
-                name: TranslatedString.create('vraag 1 - updated'),
+                name: TranslatedText.create('vraag 1 - updated'),
                 type: RecordType.Textarea,
             });
 
             const recordPatch2 = RecordSettings.patch({
                 id: record2.id,
-                name: TranslatedString.create('vraag 2 - updated'),
+                name: TranslatedText.create('vraag 2 - updated'),
                 type: RecordType.Integer,
             });
 
@@ -96,13 +96,13 @@ describe('RecordAnswerHelper', () => {
 
             const recordPatch3 = RecordSettings.patch({
                 id: record3.id,
-                name: TranslatedString.create('vraag 3 - updated'),
+                name: TranslatedText.create('vraag 3 - updated'),
                 type: RecordType.Email,
             });
 
             const recordPatch4 = RecordSettings.patch({
                 id: record4.id,
-                name: TranslatedString.create('vraag 4 - updated'),
+                name: TranslatedText.create('vraag 4 - updated'),
             });
 
             recordPatches2.addPatch(recordPatch3);
@@ -112,7 +112,7 @@ describe('RecordAnswerHelper', () => {
 
             const recordPatch5 = RecordSettings.patch({
                 id: record5.id,
-                name: TranslatedString.create('vraag 5 - updated'),
+                name: TranslatedText.create('vraag 5 - updated'),
             });
 
             recordPatches3.addPatch(recordPatch5);
@@ -121,7 +121,7 @@ describe('RecordAnswerHelper', () => {
 
             const recordPatch7 = RecordSettings.patch({
                 id: record7.id,
-                name: TranslatedString.create('vraag 7 - updated'),
+                name: TranslatedText.create('vraag 7 - updated'),
             });
 
             recordPatches4.addPatch(recordPatch7);
@@ -163,13 +163,13 @@ describe('RecordAnswerHelper', () => {
 
                 const recordPatch1 = RecordSettings.patch({
                     id: record1.id,
-                    name: TranslatedString.create('vraag 1 - updated'),
+                    name: TranslatedText.create('vraag 1 - updated'),
                     type: RecordType.Textarea,
                 });
 
                 const recordPatch2 = RecordSettings.patch({
                     id: record2.id,
-                    name: TranslatedString.create('vraag 2 - updated'),
+                    name: TranslatedText.create('vraag 2 - updated'),
                     // type changed -> should throw
                     type: RecordType.Email,
                 });
@@ -194,13 +194,13 @@ describe('RecordAnswerHelper', () => {
 
                 const recordPatch1 = RecordSettings.patch({
                     id: record1.id,
-                    name: TranslatedString.create('vraag 1 - updated'),
+                    name: TranslatedText.create('vraag 1 - updated'),
                     type: RecordType.Textarea,
                 });
 
                 const recordPatch2 = RecordSettings.patch({
                     id: record2.id,
-                    name: TranslatedString.create('vraag 2 - updated'),
+                    name: TranslatedText.create('vraag 2 - updated'),
                     type: RecordType.Integer,
                 });
 
@@ -211,13 +211,13 @@ describe('RecordAnswerHelper', () => {
 
                 const recordPatch3 = RecordSettings.patch({
                     id: record3.id,
-                    name: TranslatedString.create('vraag 3 - updated'),
+                    name: TranslatedText.create('vraag 3 - updated'),
                     type: RecordType.Email,
                 });
 
                 const recordPatch4 = RecordSettings.patch({
                     id: record4.id,
-                    name: TranslatedString.create('vraag 4 - updated'),
+                    name: TranslatedText.create('vraag 4 - updated'),
                     // changes from date to text -> should throw
                     type: RecordType.Text,
                 });
@@ -229,7 +229,7 @@ describe('RecordAnswerHelper', () => {
 
                 const recordPatch5 = RecordSettings.patch({
                     id: record5.id,
-                    name: TranslatedString.create('vraag 5 - updated'),
+                    name: TranslatedText.create('vraag 5 - updated'),
                 });
 
                 recordPatches3.addPatch(recordPatch5);
@@ -265,7 +265,7 @@ describe('RecordAnswerHelper', () => {
 
             recordPatches1.addPatch(RecordSettings.patch({
                 id: record8.id,
-                name: TranslatedString.create('vraag 8 - updated'),
+                name: TranslatedText.create('vraag 8 - updated'),
                 type: RecordType.File,
                 fileType: FileType.Word,
             }));
@@ -282,80 +282,80 @@ describe('RecordAnswerHelper', () => {
         test('put - happy path should not throw', () => {
             const newRecord1 = RecordSettings.create({
                 id: record1.id,
-                name: TranslatedString.create('vraag 1'),
+                name: TranslatedText.create('vraag 1'),
                 // type changed but same class -> should not throw
                 type: RecordType.Text,
             });
 
             const newRecord2 = RecordSettings.create({
                 id: record2.id,
-                name: TranslatedString.create('vraag 2'),
+                name: TranslatedText.create('vraag 2'),
                 type: RecordType.Integer,
             });
 
             const newRecord3 = RecordSettings.create({
                 id: record3.id,
-                name: TranslatedString.create('vraag 3'),
+                name: TranslatedText.create('vraag 3'),
                 type: RecordType.Text,
             });
 
             const newRecord4 = RecordSettings.create({
                 id: record4.id,
-                name: TranslatedString.create('vraag 4'),
+                name: TranslatedText.create('vraag 4'),
                 type: RecordType.Date,
             });
 
             const newRecord5 = RecordSettings.create({
                 id: record5.id,
-                name: TranslatedString.create('vraag 5'),
+                name: TranslatedText.create('vraag 5'),
                 type: RecordType.MultipleChoice,
                 choices: [
-                    RecordChoice.create({ name: TranslatedString.create('keuze 1') }),
-                    RecordChoice.create({ name: TranslatedString.create('keuze 2') }),
+                    RecordChoice.create({ name: TranslatedText.create('keuze 1') }),
+                    RecordChoice.create({ name: TranslatedText.create('keuze 2') }),
                 ],
             });
 
             const newRecord6 = RecordSettings.create({
                 id: record6.id,
-                name: TranslatedString.create('vraag 6'),
+                name: TranslatedText.create('vraag 6'),
                 type: RecordType.Email,
             });
 
             const newRecord7 = RecordSettings.create({
                 id: record7.id,
-                name: TranslatedString.create('vraag 7'),
+                name: TranslatedText.create('vraag 7'),
                 type: RecordType.Price,
             });
 
             const newRecord8 = RecordSettings.create({
                 id: record8.id,
-                name: TranslatedString.create('vraag 8'),
+                name: TranslatedText.create('vraag 8'),
                 type: RecordType.File,
                 fileType: FileType.PDF,
             });
 
             const newChildCategory1 = RecordCategory.create({
                 id: childCategory1.id,
-                name: TranslatedString.create('subcategorie 1'),
+                name: TranslatedText.create('subcategorie 1'),
                 records: [newRecord3, newRecord4],
             });
 
             const newChildCategory2 = RecordCategory.create({
                 id: childCategory2.id,
-                name: TranslatedString.create('subcategorie 2'),
+                name: TranslatedText.create('subcategorie 2'),
                 records: [newRecord5],
             });
 
             const newRecordCategory1 = RecordCategory.create({
                 id: recordCategory1.id,
-                name: TranslatedString.create('categorie 1'),
+                name: TranslatedText.create('categorie 1'),
                 records: [newRecord1, newRecord2],
                 childCategories: [newChildCategory1, newChildCategory2],
             });
 
             const newRecordCategory2 = RecordCategory.create({
                 id: recordCategory2.id,
-                name: TranslatedString.create('categorie 2'),
+                name: TranslatedText.create('categorie 2'),
                 records: [newRecord6, newRecord7, newRecord8],
             });
 
@@ -369,81 +369,81 @@ describe('RecordAnswerHelper', () => {
             test('case 1 - error in root category', () => {
                 const newRecord1 = RecordSettings.create({
                     id: record1.id,
-                    name: TranslatedString.create('vraag 1'),
+                    name: TranslatedText.create('vraag 1'),
                     // type changed but same class -> should not throw
                     type: RecordType.Text,
                 });
 
                 const newRecord2 = RecordSettings.create({
                     id: record2.id,
-                    name: TranslatedString.create('vraag 2'),
+                    name: TranslatedText.create('vraag 2'),
                     // type changed from Integer to Email -> should throw
                     type: RecordType.Email,
                 });
 
                 const newRecord3 = RecordSettings.create({
                     id: record3.id,
-                    name: TranslatedString.create('vraag 3'),
+                    name: TranslatedText.create('vraag 3'),
                     type: RecordType.Text,
                 });
 
                 const newRecord4 = RecordSettings.create({
                     id: record4.id,
-                    name: TranslatedString.create('vraag 4'),
+                    name: TranslatedText.create('vraag 4'),
                     type: RecordType.Date,
                 });
 
                 const newRecord5 = RecordSettings.create({
                     id: record5.id,
-                    name: TranslatedString.create('vraag 5'),
+                    name: TranslatedText.create('vraag 5'),
                     type: RecordType.MultipleChoice,
                     choices: [
-                        RecordChoice.create({ name: TranslatedString.create('keuze 1') }),
-                        RecordChoice.create({ name: TranslatedString.create('keuze 2') }),
+                        RecordChoice.create({ name: TranslatedText.create('keuze 1') }),
+                        RecordChoice.create({ name: TranslatedText.create('keuze 2') }),
                     ],
                 });
 
                 const newRecord6 = RecordSettings.create({
                     id: record6.id,
-                    name: TranslatedString.create('vraag 6'),
+                    name: TranslatedText.create('vraag 6'),
                     type: RecordType.Email,
                 });
 
                 const newRecord7 = RecordSettings.create({
                     id: record7.id,
-                    name: TranslatedString.create('vraag 7'),
+                    name: TranslatedText.create('vraag 7'),
                     type: RecordType.Price,
                 });
 
                 const newRecord8 = RecordSettings.create({
                     id: record8.id,
-                    name: TranslatedString.create('vraag 8'),
+                    name: TranslatedText.create('vraag 8'),
                     type: RecordType.File,
                     fileType: FileType.PDF,
                 });
 
                 const newChildCategory1 = RecordCategory.create({
                     id: childCategory1.id,
-                    name: TranslatedString.create('subcategorie 1'),
+                    name: TranslatedText.create('subcategorie 1'),
                     records: [newRecord3, newRecord4],
                 });
 
                 const newChildCategory2 = RecordCategory.create({
                     id: childCategory2.id,
-                    name: TranslatedString.create('subcategorie 2'),
+                    name: TranslatedText.create('subcategorie 2'),
                     records: [newRecord5],
                 });
 
                 const newRecordCategory1 = RecordCategory.create({
                     id: recordCategory1.id,
-                    name: TranslatedString.create('categorie 1'),
+                    name: TranslatedText.create('categorie 1'),
                     records: [newRecord1, newRecord2],
                     childCategories: [newChildCategory1, newChildCategory2],
                 });
 
                 const newRecordCategory2 = RecordCategory.create({
                     id: recordCategory2.id,
-                    name: TranslatedString.create('categorie 2'),
+                    name: TranslatedText.create('categorie 2'),
                     records: [newRecord6, newRecord7, newRecord8],
                 });
 
@@ -456,81 +456,81 @@ describe('RecordAnswerHelper', () => {
             test('case 2 - error in child category', () => {
                 const newRecord1 = RecordSettings.create({
                     id: record1.id,
-                    name: TranslatedString.create('vraag 1'),
+                    name: TranslatedText.create('vraag 1'),
                     // type changed but same class -> should not throw
                     type: RecordType.Text,
                 });
 
                 const newRecord2 = RecordSettings.create({
                     id: record2.id,
-                    name: TranslatedString.create('vraag 2'),
+                    name: TranslatedText.create('vraag 2'),
                     type: RecordType.Integer,
                 });
 
                 const newRecord3 = RecordSettings.create({
                     id: record3.id,
-                    name: TranslatedString.create('vraag 3'),
+                    name: TranslatedText.create('vraag 3'),
                     type: RecordType.Text,
                 });
 
                 const newRecord4 = RecordSettings.create({
                     id: record4.id,
-                    name: TranslatedString.create('vraag 4'),
+                    name: TranslatedText.create('vraag 4'),
                     // type changed from date to text -> should throw
                     type: RecordType.Text,
                 });
 
                 const newRecord5 = RecordSettings.create({
                     id: record5.id,
-                    name: TranslatedString.create('vraag 5'),
+                    name: TranslatedText.create('vraag 5'),
                     type: RecordType.MultipleChoice,
                     choices: [
-                        RecordChoice.create({ name: TranslatedString.create('keuze 1') }),
-                        RecordChoice.create({ name: TranslatedString.create('keuze 2') }),
+                        RecordChoice.create({ name: TranslatedText.create('keuze 1') }),
+                        RecordChoice.create({ name: TranslatedText.create('keuze 2') }),
                     ],
                 });
 
                 const newRecord6 = RecordSettings.create({
                     id: record6.id,
-                    name: TranslatedString.create('vraag 6'),
+                    name: TranslatedText.create('vraag 6'),
                     type: RecordType.Email,
                 });
 
                 const newRecord7 = RecordSettings.create({
                     id: record7.id,
-                    name: TranslatedString.create('vraag 7'),
+                    name: TranslatedText.create('vraag 7'),
                     type: RecordType.Price,
                 });
 
                 const newRecord8 = RecordSettings.create({
                     id: record8.id,
-                    name: TranslatedString.create('vraag 8'),
+                    name: TranslatedText.create('vraag 8'),
                     type: RecordType.File,
                     fileType: FileType.PDF,
                 });
 
                 const newChildCategory1 = RecordCategory.create({
                     id: childCategory1.id,
-                    name: TranslatedString.create('subcategorie 1'),
+                    name: TranslatedText.create('subcategorie 1'),
                     records: [newRecord3, newRecord4],
                 });
 
                 const newChildCategory2 = RecordCategory.create({
                     id: childCategory2.id,
-                    name: TranslatedString.create('subcategorie 2'),
+                    name: TranslatedText.create('subcategorie 2'),
                     records: [newRecord5],
                 });
 
                 const newRecordCategory1 = RecordCategory.create({
                     id: recordCategory1.id,
-                    name: TranslatedString.create('categorie 1'),
+                    name: TranslatedText.create('categorie 1'),
                     records: [newRecord1, newRecord2],
                     childCategories: [newChildCategory1, newChildCategory2],
                 });
 
                 const newRecordCategory2 = RecordCategory.create({
                     id: recordCategory2.id,
-                    name: TranslatedString.create('categorie 2'),
+                    name: TranslatedText.create('categorie 2'),
                     records: [newRecord6, newRecord7, newRecord8],
                 });
 
@@ -547,13 +547,13 @@ describe('RecordAnswerHelper', () => {
 
             const recordPatch1 = RecordSettings.patch({
                 id: record1.id,
-                name: TranslatedString.create('vraag 1 - updated'),
+                name: TranslatedText.create('vraag 1 - updated'),
                 type: RecordType.Textarea,
             });
 
             const recordPatch2 = RecordSettings.patch({
                 id: record2.id,
-                name: TranslatedString.create('vraag 2 - updated'),
+                name: TranslatedText.create('vraag 2 - updated'),
                 type: RecordType.Integer,
             });
 
@@ -564,13 +564,13 @@ describe('RecordAnswerHelper', () => {
 
             const recordPatch3 = RecordSettings.patch({
                 id: record3.id,
-                name: TranslatedString.create('vraag 3 - updated'),
+                name: TranslatedText.create('vraag 3 - updated'),
                 type: RecordType.Email,
             });
 
             const recordPatch4 = RecordSettings.patch({
                 id: record4.id,
-                name: TranslatedString.create('vraag 4 - updated'),
+                name: TranslatedText.create('vraag 4 - updated'),
             });
 
             recordPatches2.addPatch(recordPatch3);
@@ -580,7 +580,7 @@ describe('RecordAnswerHelper', () => {
 
             const recordPatch5 = RecordSettings.patch({
                 id: record5.id,
-                name: TranslatedString.create('vraag 5 - updated'),
+                name: TranslatedText.create('vraag 5 - updated'),
             });
 
             recordPatches3.addPatch(recordPatch5);
@@ -589,7 +589,7 @@ describe('RecordAnswerHelper', () => {
 
             const recordPatch7 = RecordSettings.patch({
                 id: record7.id,
-                name: TranslatedString.create('vraag 7 - updated'),
+                name: TranslatedText.create('vraag 7 - updated'),
             });
 
             recordPatches4.addPatch(recordPatch7);
@@ -598,19 +598,19 @@ describe('RecordAnswerHelper', () => {
 
             const newRecord3 = RecordSettings.create({
                 id: record3.id,
-                name: TranslatedString.create('vraag 3'),
+                name: TranslatedText.create('vraag 3'),
                 type: RecordType.Text,
             });
 
             const newRecord4 = RecordSettings.create({
                 id: record4.id,
-                name: TranslatedString.create('vraag 4'),
+                name: TranslatedText.create('vraag 4'),
                 type: RecordType.Date,
             });
 
             const newChildCategory1 = RecordCategory.create({
                 id: childCategory1.id,
-                name: TranslatedString.create('subcategorie 1'),
+                name: TranslatedText.create('subcategorie 1'),
                 records: [newRecord3, newRecord4],
             });
 
@@ -645,13 +645,13 @@ describe('RecordAnswerHelper', () => {
 
             const recordPatch1 = RecordSettings.patch({
                 id: record1.id,
-                name: TranslatedString.create('vraag 1 - updated'),
+                name: TranslatedText.create('vraag 1 - updated'),
                 type: RecordType.Textarea,
             });
 
             const recordPatch2 = RecordSettings.patch({
                 id: record2.id,
-                name: TranslatedString.create('vraag 2 - updated'),
+                name: TranslatedText.create('vraag 2 - updated'),
                 type: RecordType.Integer,
             });
 
@@ -662,13 +662,13 @@ describe('RecordAnswerHelper', () => {
 
             const recordPatch3 = RecordSettings.patch({
                 id: record3.id,
-                name: TranslatedString.create('vraag 3 - updated'),
+                name: TranslatedText.create('vraag 3 - updated'),
                 type: RecordType.Email,
             });
 
             const recordPatch4 = RecordSettings.patch({
                 id: record4.id,
-                name: TranslatedString.create('vraag 4 - updated'),
+                name: TranslatedText.create('vraag 4 - updated'),
             });
 
             recordPatches2.addPatch(recordPatch3);
@@ -678,7 +678,7 @@ describe('RecordAnswerHelper', () => {
 
             const recordPatch5 = RecordSettings.patch({
                 id: record5.id,
-                name: TranslatedString.create('vraag 5 - updated'),
+                name: TranslatedText.create('vraag 5 - updated'),
             });
 
             recordPatches3.addPatch(recordPatch5);
@@ -687,7 +687,7 @@ describe('RecordAnswerHelper', () => {
 
             const recordPatch7 = RecordSettings.patch({
                 id: record7.id,
-                name: TranslatedString.create('vraag 7 - updated'),
+                name: TranslatedText.create('vraag 7 - updated'),
             });
 
             recordPatches4.addPatch(recordPatch7);
@@ -696,20 +696,20 @@ describe('RecordAnswerHelper', () => {
 
             const newRecord3 = RecordSettings.create({
                 id: record3.id,
-                name: TranslatedString.create('vraag 3'),
+                name: TranslatedText.create('vraag 3'),
                 type: RecordType.Text,
             });
 
             const newRecord4 = RecordSettings.create({
                 id: record4.id,
-                name: TranslatedString.create('vraag 4'),
+                name: TranslatedText.create('vraag 4'),
                 // type changes from date to text -> should throw
                 type: RecordType.Text,
             });
 
             const newChildCategory1 = RecordCategory.create({
                 id: childCategory1.id,
-                name: TranslatedString.create('subcategorie 1'),
+                name: TranslatedText.create('subcategorie 1'),
                 records: [newRecord3, newRecord4],
             });
 

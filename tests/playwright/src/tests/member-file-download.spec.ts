@@ -8,7 +8,7 @@ import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { MemberFactory, OrganizationFactory, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { File, RecordCategory, RecordFileAnswer, RecordSettings, RecordType, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { File, RecordCategory, RecordFileAnswer, RecordSettings, RecordType, Token as TokenStruct, TranslatedText, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { readFile } from 'node:fs/promises';
 import { WorkerData } from '../helpers/index.js';
@@ -39,14 +39,14 @@ test.describe('Member file downloads @member-file-download', () => {
 
         // A questionnaire with a file the member uploads themselves
         recordSettings = RecordSettings.create({
-            name: TranslatedString.create('Medisch attest'),
+            name: TranslatedText.create('Medisch attest'),
             type: RecordType.File,
             externalPermissionLevel: PermissionLevel.Write,
         });
 
         organization.meta.recordsConfiguration.recordCategories = [
             RecordCategory.create({
-                name: TranslatedString.create('Vragenlijst'),
+                name: TranslatedText.create('Vragenlijst'),
                 records: [recordSettings],
             }),
         ];

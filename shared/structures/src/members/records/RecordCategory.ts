@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { PropertyFilter } from '../../filters/PropertyFilter.js';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { getPermissionLevelNumber } from '../../PermissionLevel.js';
+import { TranslatedLongText } from '../../TranslatedLongText.js';
+import { TranslatedText } from '../../TranslatedText.js';
 import { TranslatedString } from '../../TranslatedString.js';
 import type { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
 import type { RecordAnswer } from './RecordAnswer.js';
@@ -17,11 +19,13 @@ export class RecordCategory extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     @field(TranslatedString.field({ version: 370 }))
-    name = TranslatedString.create();
+    @field(TranslatedText.field({ version: 426 }))
+    name = TranslatedText.create();
 
     @field({ decoder: StringDecoder })
     @field(TranslatedString.field({ version: 370 }))
-    description = TranslatedString.create();
+    @field(TranslatedLongText.field({ version: 426 }))
+    description = TranslatedLongText.create();
 
     /**
      * Sometimes a category needs to be in the list but not enabled.

@@ -1,6 +1,6 @@
 import { EmailAddress } from '@stamhoofd/email';
 import { GroupFactory, MemberFactory, Platform, RegistrationFactory } from '@stamhoofd/models';
-import { MemberDetails, Parent, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType, TranslatedString, Version } from '@stamhoofd/structures';
+import { MemberDetails, Parent, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType, TranslatedString, TranslatedText, Version } from '@stamhoofd/structures';
 import { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';
 import type { MailchimpSyncPreview } from '@stamhoofd/structures/mailchimp/MailchimpSyncPreview.js';
 import { MailchimpSyncRequest } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
@@ -48,8 +48,8 @@ describe('Endpoint.PreviewMailchimpSync', () => {
     test('counts members without consent when a newsletter question is configured', async () => {
         const context = await initMailchimpOrganization();
         const { organization } = context;
-        const newsletter = RecordSettings.create({ name: TranslatedString.create('Nieuwsbrief?'), type: RecordType.Checkbox });
-        organization.meta.recordsConfiguration.recordCategories = [RecordCategory.create({ name: TranslatedString.create('Vragen'), records: [newsletter] })];
+        const newsletter = RecordSettings.create({ name: TranslatedText.create('Nieuwsbrief?'), type: RecordType.Checkbox });
+        organization.meta.recordsConfiguration.recordCategories = [RecordCategory.create({ name: TranslatedText.create('Vragen'), records: [newsletter] })];
         await organization.save();
         await connectMailchimp(mailchimp, context);
         await mailchimpRequest(new PatchMailchimpSettingsEndpoint(), 'PATCH', '/mailchimp/settings', context.host, context.token, MailchimpSettings.patch({ newsletterRecordId: newsletter.id }).encode({ version: Version }));

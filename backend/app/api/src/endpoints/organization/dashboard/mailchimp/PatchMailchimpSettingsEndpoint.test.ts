@@ -1,4 +1,4 @@
-import { RecordCategory, RecordChoice, RecordSettings, RecordType, TranslatedString, Version } from '@stamhoofd/structures';
+import { RecordCategory, RecordChoice, RecordSettings, RecordType, TranslatedString, TranslatedText, Version } from '@stamhoofd/structures';
 import { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import type { MailchimpMocker } from '../../../../../tests/helpers/MailchimpMocker.js';
@@ -36,11 +36,11 @@ describe('Endpoint.PatchMailchimpSettings', () => {
 
     test('only accepts non-sensitive checkbox and choice records of the organization', async () => {
         const context = await initMailchimpOrganization();
-        const yes = RecordChoice.create({ name: TranslatedString.create('Per e-mail') });
-        const newsletter = RecordSettings.create({ name: TranslatedString.create('Hoe wil je de nieuwsbrief ontvangen?'), type: RecordType.ChooseOne, choices: [yes, RecordChoice.create({ name: TranslatedString.create('Niet') })] });
-        const sensitive = RecordSettings.create({ name: TranslatedString.create('Allergieën'), type: RecordType.Checkbox, sensitive: true });
-        const text = RecordSettings.create({ name: TranslatedString.create('Opmerkingen'), type: RecordType.Text });
-        context.organization.meta.recordsConfiguration.recordCategories = [RecordCategory.create({ name: TranslatedString.create('Vragen'), records: [newsletter, sensitive, text] })];
+        const yes = RecordChoice.create({ name: TranslatedText.create('Per e-mail') });
+        const newsletter = RecordSettings.create({ name: TranslatedText.create('Hoe wil je de nieuwsbrief ontvangen?'), type: RecordType.ChooseOne, choices: [yes, RecordChoice.create({ name: TranslatedText.create('Niet') })] });
+        const sensitive = RecordSettings.create({ name: TranslatedText.create('Allergieën'), type: RecordType.Checkbox, sensitive: true });
+        const text = RecordSettings.create({ name: TranslatedText.create('Opmerkingen'), type: RecordType.Text });
+        context.organization.meta.recordsConfiguration.recordCategories = [RecordCategory.create({ name: TranslatedText.create('Vragen'), records: [newsletter, sensitive, text] })];
         await context.organization.save();
         await connectMailchimp(mailchimp, context);
 

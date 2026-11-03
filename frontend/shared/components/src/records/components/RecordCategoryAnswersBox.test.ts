@@ -1,6 +1,6 @@
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import type { ObjectWithRecords, RecordAnswer } from '@stamhoofd/structures';
-import { File as FileStruct, Image, RecordCategory, RecordFileAnswer, RecordImageAnswer, RecordSettings, RecordType, Resolution, TranslatedString } from '@stamhoofd/structures';
+import { File as FileStruct, Image, RecordCategory, RecordFileAnswer, RecordImageAnswer, RecordSettings, RecordType, Resolution, TranslatedText } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { afterEach, expect, test, vi } from 'vitest';
 import { userEvent } from 'vitest/browser';
@@ -9,7 +9,7 @@ import RecordCategoryAnswersBox from './RecordCategoryAnswersBox.vue';
 
 const recordSettings = RecordSettings.create({
     id: 'file-record',
-    name: TranslatedString.create('Attest'),
+    name: TranslatedText.create('Attest'),
     type: RecordType.File,
 });
 
@@ -56,7 +56,7 @@ function renderAnswers(answers: Map<string, RecordAnswer>, request: ReturnType<t
     return render(RecordCategoryAnswersBox, {
         props: {
             value: new RecordsValue(answers),
-            category: RecordCategory.create({ name: TranslatedString.create('Documenten'), records: [...answers.values()].map(a => a.settings) }),
+            category: RecordCategory.create({ name: TranslatedText.create('Documenten'), records: [...answers.values()].map(a => a.settings) }),
             isAdmin: true,
         },
         global: {
@@ -201,7 +201,7 @@ test('It downloads the first resolution of an image answer', async () => {
     const image = Image.create({ source, resolutions: [new Resolution({ file: resized, width: 100, height: 100 })] });
     const imageSettings = RecordSettings.create({
         id: 'image-record',
-        name: TranslatedString.create('Foto'),
+        name: TranslatedText.create('Foto'),
         type: RecordType.Image,
     });
     const answers = new Map<string, RecordAnswer>();

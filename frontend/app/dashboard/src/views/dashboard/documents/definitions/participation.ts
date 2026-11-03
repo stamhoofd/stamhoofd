@@ -1,4 +1,4 @@
-import { DocumentTemplateDefinition, RecordCategory, RecordSettings, RecordType, ResolutionFit, ResolutionRequest, TranslatedString } from '@stamhoofd/structures';
+import { DocumentTemplateDefinition, RecordCategory, RecordSettings, RecordType, ResolutionFit, ResolutionRequest, TranslatedLongText, TranslatedString, TranslatedText } from '@stamhoofd/structures';
 
 export const participation = DocumentTemplateDefinition.create({
     type: 'participation',
@@ -8,24 +8,24 @@ export const participation = DocumentTemplateDefinition.create({
     fieldCategories: [
         RecordCategory.create({
             id: 'organization',
-            name: TranslatedString.create($t(`%1PI`)),
-            description: TranslatedString.create($t(`%yC`)),
+            name: TranslatedText.create($t(`%1PI`)),
+            description: TranslatedLongText.create($t(`%yC`)),
             records: [
                 RecordSettings.create({
                     id: 'organization.name',
-                    name: TranslatedString.create($t(`%1Os`)),
+                    name: TranslatedText.create($t(`%1Os`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'organization.companyNumber',
-                    name: TranslatedString.create($t(`%xZ`)),
+                    name: TranslatedText.create($t(`%xZ`)),
                     required: false,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'organization.address',
-                    name: TranslatedString.create($t(`%Cn`)),
+                    name: TranslatedText.create($t(`%Cn`)),
                     required: true,
                     type: RecordType.Address,
                 }),
@@ -33,21 +33,21 @@ export const participation = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'extra-info',
-            name: TranslatedString.create($t(`%yD`)),
-            description: TranslatedString.create($t(`%yE`)),
+            name: TranslatedText.create($t(`%yD`)),
+            description: TranslatedLongText.create($t(`%yE`)),
             records: [
                 RecordSettings.create({
                     id: 'comments',
-                    name: TranslatedString.create($t(`%yF`)),
-                    description: TranslatedString.create($t(`%yG`)),
+                    name: TranslatedText.create($t(`%yF`)),
+                    description: TranslatedLongText.create($t(`%yG`)),
                     required: false,
                     type: RecordType.Textarea,
                 }),
 
                 RecordSettings.create({
                     id: 'commentsFooter',
-                    name: TranslatedString.create($t(`%yH`)),
-                    description: TranslatedString.create($t(`%yI`)),
+                    name: TranslatedText.create($t(`%yH`)),
+                    description: TranslatedLongText.create($t(`%yI`)),
                     required: false,
                     type: RecordType.Textarea,
                 }),
@@ -55,19 +55,19 @@ export const participation = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'signature',
-            name: TranslatedString.create($t(`%xo`)),
-            description: TranslatedString.create($t(`%yJ`)),
+            name: TranslatedText.create($t(`%xo`)),
+            description: TranslatedLongText.create($t(`%yJ`)),
             records: [
                 RecordSettings.create({
                     id: 'signature.name',
-                    name: TranslatedString.create($t(`%1Os`)),
+                    name: TranslatedText.create($t(`%1Os`)),
                     required: false,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'signature.image',
-                    name: TranslatedString.create($t(`%xr`)),
-                    description: TranslatedString.create($t(`%xs`)),
+                    name: TranslatedText.create($t(`%xr`)),
+                    description: TranslatedLongText.create($t(`%xs`)),
                     required: false,
                     type: RecordType.Image,
                     resolutions: [
@@ -81,61 +81,61 @@ export const participation = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'visible-data',
-            name: TranslatedString.create($t(`%yK`)),
-            description: TranslatedString.create($t(`%yL`)),
+            name: TranslatedText.create($t(`%yK`)),
+            description: TranslatedLongText.create($t(`%yL`)),
             records: [
                 RecordSettings.create({
                     id: 'registration.showGroup',
-                    name: TranslatedString.create($t(`%yM`)),
+                    name: TranslatedText.create($t(`%yM`)),
                     required: false,
                     type: RecordType.Checkbox,
                 }),
                 RecordSettings.create({
                     id: 'registration.showDate',
-                    name: TranslatedString.create($t(`%yN`)),
+                    name: TranslatedText.create($t(`%yN`)),
                     required: false,
                     type: RecordType.Checkbox,
                 }),
                 RecordSettings.create({
                     id: 'enable[registration.price]',
-                    name: TranslatedString.create($t(`%yO`)),
+                    name: TranslatedText.create($t(`%yO`)),
                     required: false,
                     type: RecordType.Checkbox,
                 }),
                 RecordSettings.create({
                     id: 'registration.showDayPrice',
-                    name: TranslatedString.create($t('%Zip')),
-                    description: TranslatedString.create($t('%ZiN')),
+                    name: TranslatedText.create($t('%Zip')),
+                    description: TranslatedLongText.create($t('%ZiN')),
                     required: false,
                     type: RecordType.Checkbox,
                 }),
                 RecordSettings.create({
                     id: 'registration.showPaidAt',
-                    name: TranslatedString.create($t(`%yP`)),
+                    name: TranslatedText.create($t(`%yP`)),
                     required: false,
                     type: RecordType.Checkbox,
                 }),
                 RecordSettings.create({
                     id: 'enable[member.birthDay]',
-                    name: TranslatedString.create($t(`%yQ`)),
+                    name: TranslatedText.create($t(`%yQ`)),
                     required: false,
                     type: RecordType.Checkbox,
                 }),
                 RecordSettings.create({
                     id: 'enable[member.nationalRegisterNumber]',
-                    name: TranslatedString.create($t(`%yR`)),
+                    name: TranslatedText.create($t(`%yR`)),
                     required: false,
                     type: RecordType.Checkbox,
                 }),
                 RecordSettings.create({
                     id: 'enable[member.email]',
-                    name: TranslatedString.create($t(`%yS`)),
+                    name: TranslatedText.create($t(`%yS`)),
                     required: false,
                     type: RecordType.Checkbox,
                 }),
                 RecordSettings.create({
                     id: 'enable[member.address]',
-                    name: TranslatedString.create($t(`%yT`)),
+                    name: TranslatedText.create($t(`%yT`)),
                     required: false,
                     type: RecordType.Checkbox,
                 }),
@@ -146,41 +146,41 @@ export const participation = DocumentTemplateDefinition.create({
     documentFieldCategories: [
         RecordCategory.create({
             id: 'member',
-            name: TranslatedString.create($t(`%xv`)),
+            name: TranslatedText.create($t(`%xv`)),
             records: [
                 RecordSettings.create({
                     id: 'member.firstName',
-                    name: TranslatedString.create($t(`%1MT`)),
+                    name: TranslatedText.create($t(`%1MT`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'member.lastName',
-                    name: TranslatedString.create($t(`%1MU`)),
+                    name: TranslatedText.create($t(`%1MU`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'member.birthDay',
-                    name: TranslatedString.create($t(`%17w`)),
+                    name: TranslatedText.create($t(`%17w`)),
                     required: false,
                     type: RecordType.Date,
                 }),
                 RecordSettings.create({
                     id: 'member.address',
-                    name: TranslatedString.create($t(`%Cn`)),
+                    name: TranslatedText.create($t(`%Cn`)),
                     required: false,
                     type: RecordType.Address,
                 }),
                 RecordSettings.create({
                     id: 'member.nationalRegisterNumber',
-                    name: TranslatedString.create($t(`%wK`)),
+                    name: TranslatedText.create($t(`%wK`)),
                     required: false,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'member.email',
-                    name: TranslatedString.create($t(`%1FK`)),
+                    name: TranslatedText.create($t(`%1FK`)),
                     required: false,
                     type: RecordType.Email,
                 }),
@@ -188,11 +188,11 @@ export const participation = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'price',
-            name: TranslatedString.create($t(`%1IP`)),
+            name: TranslatedText.create($t(`%1IP`)),
             records: [
                 RecordSettings.create({
                     id: 'registration.price',
-                    name: TranslatedString.create($t(`%1IP`)),
+                    name: TranslatedText.create($t(`%1IP`)),
                     required: false,
                     type: RecordType.Price,
                 }),

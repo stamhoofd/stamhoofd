@@ -8,7 +8,7 @@ import { SQL } from '@stamhoofd/sql';
 import type { PatchAnswers } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { Address, EmergencyContact, MemberDetails, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberResponsibility, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, ParentType, PermissionRoleForResponsibility, Permissions, PermissionsResourceKey, PlatformMembershipType, PlatformMembershipTypeConfig, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
+import { Address, EmergencyContact, MemberDetails, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberResponsibility, MemberResponsibilityRecord as MemberResponsibilityRecordStruct, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, ParentType, PermissionRoleForResponsibility, Permissions, PermissionsResourceKey, PlatformMembershipType, PlatformMembershipTypeConfig, RecordCategory, RecordSettings, RecordTextAnswer, ResourcePermissions, ReviewTime, ReviewTimes, TranslatedString, TranslatedText, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, Version } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { Language } from '@stamhoofd/types/Language';
@@ -1906,12 +1906,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
     describe('Record answers', () => {
         test('An admin can set records of its own organization', async () => {
             const commentsRecord = RecordSettings.create({
-                name: TranslatedString.create('Opmerkingen'),
+                name: TranslatedText.create('Opmerkingen'),
                 externalPermissionLevel: PermissionLevel.Read, // this should be ignored since we are an admin
             });
 
             const recordCategory = RecordCategory.create({
-                name: TranslatedString.create('Medische fiche'),
+                name: TranslatedText.create('Medische fiche'),
                 records: [
                     commentsRecord,
                 ],
@@ -1975,12 +1975,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
         test('It is not possible to set a different settings id for a given record', async () => {
             const commentsRecord = RecordSettings.create({
-                name: TranslatedString.create('Opmerkingen'),
+                name: TranslatedText.create('Opmerkingen'),
                 externalPermissionLevel: PermissionLevel.Read, // this should be ignored since we are an admin
             });
 
             const recordCategory = RecordCategory.create({
-                name: TranslatedString.create('Medische fiche'),
+                name: TranslatedText.create('Medische fiche'),
                 records: [
                     commentsRecord,
                 ],
@@ -2018,7 +2018,7 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             recordAnswers.set(commentsRecord.id, RecordTextAnswer.create({
                 settings: RecordSettings.create({
                     id: 'malicious',
-                    name: TranslatedString.create('Opmerkingen'),
+                    name: TranslatedText.create('Opmerkingen'),
                 }),
                 value: 'Some comments',
             }));
@@ -2047,12 +2047,12 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
             // We block this because this coould cause mismatches between the record answer value and record answer settings type
 
             const commentsRecord = RecordSettings.create({
-                name: TranslatedString.create('Opmerkingen'),
+                name: TranslatedText.create('Opmerkingen'),
                 externalPermissionLevel: PermissionLevel.Read, // this should be ignored since we are an admin
             });
 
             const recordCategory = RecordCategory.create({
-                name: TranslatedString.create('Medische fiche'),
+                name: TranslatedText.create('Medische fiche'),
                 records: [
                     commentsRecord,
                 ],
@@ -2112,11 +2112,11 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
         test('An admin with read only record category permission cannot set the records in that category', async () => {
             const commentsRecord = RecordSettings.create({
-                name: TranslatedString.create('Opmerkingen'),
+                name: TranslatedText.create('Opmerkingen'),
             });
 
             const recordCategory = RecordCategory.create({
-                name: TranslatedString.create('Medische fiche'),
+                name: TranslatedText.create('Medische fiche'),
                 records: [
                     commentsRecord,
                 ],
@@ -2184,11 +2184,11 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
         test('An admin without record category permission cannot set the records in that category', async () => {
             const commentsRecord = RecordSettings.create({
-                name: TranslatedString.create('Opmerkingen'),
+                name: TranslatedText.create('Opmerkingen'),
             });
 
             const recordCategory = RecordCategory.create({
-                name: TranslatedString.create('Medische fiche'),
+                name: TranslatedText.create('Medische fiche'),
                 records: [
                     commentsRecord,
                 ],
@@ -2253,11 +2253,11 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
         test('An admin can set records of the platform', async () => {
             const commentsRecord = RecordSettings.create({
-                name: TranslatedString.create('Opmerkingen'),
+                name: TranslatedText.create('Opmerkingen'),
             });
 
             const recordCategory = RecordCategory.create({
-                name: TranslatedString.create('Medische fiche'),
+                name: TranslatedText.create('Medische fiche'),
                 records: [
                     commentsRecord,
                 ],
@@ -2331,11 +2331,11 @@ describe('Endpoint.PatchOrganizationMembersEndpoint', () => {
 
         test('[Regression] A platform admin with tag-access to an organization can change platform records', async () => {
             const commentsRecord = RecordSettings.create({
-                name: TranslatedString.create('Opmerkingen'),
+                name: TranslatedText.create('Opmerkingen'),
             });
 
             const recordCategory = RecordCategory.create({
-                name: TranslatedString.create('Medische fiche'),
+                name: TranslatedText.create('Medische fiche'),
                 records: [
                     commentsRecord,
                 ],

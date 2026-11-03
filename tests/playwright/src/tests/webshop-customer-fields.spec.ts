@@ -11,19 +11,7 @@ import { EmailMocker } from '@stamhoofd/email';
 import type { User } from '@stamhoofd/models';
 import { EmailTemplateFactory, Order, Organization, OrganizationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import {
-    EmailTemplateType,
-    Gender,
-    PaymentMethod,
-    Permissions,
-    RecordCategory,
-    RecordSettings,
-    RecordType,
-    STPackageBundle,
-    Token as TokenStruct,
-    TranslatedString,
-    Version,
-} from '@stamhoofd/structures';
+import { EmailTemplateType, Gender, PaymentMethod, Permissions, RecordCategory, RecordSettings, RecordType, STPackageBundle, Token as TokenStruct, TranslatedString, TranslatedText, Version } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { TestUtils } from '@stamhoofd/test-utils';
 import type { TestAddress, TestBirthDay } from '../flows/WebshopOrderFlow.js';
@@ -259,8 +247,8 @@ test.describe('Webshop customer fields (organization mode) @webshop-customer-fie
         // The confirmation email is only sent when a template exists; the factory fills in every replacement, including the order table
         await new EmailTemplateFactory({ type: EmailTemplateType.OrderConfirmationPOS }).create();
         const question = RecordSettings.create({
-            name: TranslatedString.create('T-shirtmaat'),
-            inputPlaceholder: TranslatedString.create('bv. M'),
+            name: TranslatedText.create('T-shirtmaat'),
+            inputPlaceholder: TranslatedText.create('bv. M'),
             type: RecordType.Text,
             required: true,
         });
@@ -271,7 +259,7 @@ test.describe('Webshop customer fields (organization mode) @webshop-customer-fie
             cartEnabled: false,
             paymentMethods: [PaymentMethod.PointOfSale],
             customerRecordCategory: RecordCategory.create({
-                name: TranslatedString.create('Extra vragen'),
+                name: TranslatedText.create('Extra vragen'),
                 records: [question],
             }),
         });

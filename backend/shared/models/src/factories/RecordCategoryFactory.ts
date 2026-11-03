@@ -1,6 +1,6 @@
 import { Factory } from '@node/database';
 import type { RecordSettings} from '@stamhoofd/structures';
-import { RecordCategory, TranslatedString } from '@stamhoofd/structures';
+import { RecordCategory, TranslatedText } from '@stamhoofd/structures';
 import type { RecordOptions } from './RecordFactory.js';
 import { RecordFactory } from './RecordFactory.js';
 
@@ -18,7 +18,7 @@ export class RecordCategoryFactory extends Factory<Options, RecordCategory> {
         }
 
         return RecordCategory.create({
-            name: TranslatedString.create('Record category ' + Math.floor(Math.random() * 10000)),
+            name: TranslatedText.create('Record category ' + Math.floor(Math.random() * 10000)),
             records,
         });
     }

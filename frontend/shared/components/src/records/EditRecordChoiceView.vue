@@ -6,7 +6,7 @@
 
         <STErrorsDefault :error-box="errorBox" />
 
-        <TInput v-model="name" :placeholder="$t(`%Sk`)" error-fields="name" :error-box="errorBox" :title="$t(`%1Os`)" />
+        <TextInput v-model="name" :placeholder="$t(`%Sk`)" error-fields="name" :error-box="errorBox" :title="$t(`%1Os`)" />
         <TWYSIWYGTextInput v-model="description" :placeholder="$t(`%14p`)" error-fields="description" :error-box="errorBox" class="max" :title="$t(`%6o`)" />
 
         <hr><h2>{{ $t('%zJ') }}</h2>
@@ -103,12 +103,13 @@ import type { ErrorBox } from '#errors/ErrorBox.ts';
 import Radio from '#inputs/Radio.vue';
 import SaveView from '#navigation/SaveView.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
+import TextInput from '#inputs/TextInput.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import TWYSIWYGTextInput from '#inputs/TWYSIWYGTextInput.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import { Validator } from '#errors/Validator.ts';
-import type { RecordSettings, TranslatedString } from '@stamhoofd/structures';
+import type { RecordSettings, TranslatedText } from '@stamhoofd/structures';
 import { RecordChoice, RecordWarning, RecordWarningType, TranslatedRichText, Version } from '@stamhoofd/structures';
 import { computed, ref, shallowRef } from 'vue';
 
@@ -128,7 +129,7 @@ const patchedChoice = computed(() => props.choice.patch(patchChoice.value));
 const title = computed(() => props.isNew ? $t(`%10x`) : $t(`%10y`));
 const name = computed({
     get: () => patchedChoice.value.name,
-    set: (name: TranslatedString) => patchChoice.value = patchChoice.value.patch({ name }),
+    set: (name: TranslatedText) => patchChoice.value = patchChoice.value.patch({ name }),
 });
 const description = computed({
     get: () => patchedChoice.value.description,

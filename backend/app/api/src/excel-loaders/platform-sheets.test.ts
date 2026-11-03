@@ -1,6 +1,6 @@
 import type { XlsxTransformerColumn, XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import { isXlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
-import { EventNotificationType, ExcelExportType, Organization, OrganizationMetaData, OrganizationTag, Platform, PlatformConfig, PlatformMembership, PlatformMembershipMemberDetails, PlatformMembershipOrganizationDetails, PlatformMembershipType, RecordCategory, RecordSettings, RecordType, TranslatedString } from '@stamhoofd/structures';
+import { EventNotificationType, ExcelExportType, Organization, OrganizationMetaData, OrganizationTag, Platform, PlatformConfig, PlatformMembership, PlatformMembershipMemberDetails, PlatformMembershipOrganizationDetails, PlatformMembershipType, RecordCategory, RecordSettings, RecordType, TranslatedString, TranslatedText } from '@stamhoofd/structures';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import './index.js';
 
@@ -88,11 +88,11 @@ describe('Excel loaders platform argument', () => {
                     EventNotificationType.create({
                         recordCategories: [
                             RecordCategory.create({
-                                name: new TranslatedString('Kamp'),
+                                name: TranslatedText.create('Kamp'),
                                 records: [
                                     RecordSettings.create({
                                         id: 'record-1',
-                                        name: new TranslatedString('Aantal deelnemers'),
+                                        name: TranslatedText.create('Aantal deelnemers'),
                                         type: RecordType.Text,
                                     }),
                                 ],

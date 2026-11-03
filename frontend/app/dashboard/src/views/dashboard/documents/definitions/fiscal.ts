@@ -1,4 +1,4 @@
-import { DocumentTemplateDefinition, PropertyFilter, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, ResolutionFit, ResolutionRequest, TranslatedRichText, TranslatedString } from '@stamhoofd/structures';
+import { DocumentTemplateDefinition, PropertyFilter, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, ResolutionFit, ResolutionRequest, TranslatedLongText, TranslatedRichText, TranslatedString, TranslatedText } from '@stamhoofd/structures';
 
 export const fiscal = DocumentTemplateDefinition.create({
     type: 'fiscal',
@@ -9,58 +9,58 @@ export const fiscal = DocumentTemplateDefinition.create({
     fieldCategories: [
         RecordCategory.create({
             id: 'organization',
-            name: TranslatedString.create($t(`%1PI`)),
-            description: TranslatedString.create($t(`%xY`)),
+            name: TranslatedText.create($t(`%1PI`)),
+            description: TranslatedLongText.create($t(`%xY`)),
             records: [
                 RecordSettings.create({
                     id: 'organization.companyName',
-                    name: TranslatedString.create($t(`%1Os`)),
+                    name: TranslatedText.create($t(`%1Os`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'organization.companyNumber',
-                    name: TranslatedString.create($t(`%y8`)),
+                    name: TranslatedText.create($t(`%y8`)),
                     required: false,
                     type: RecordType.Text,
-                    description: TranslatedString.create($t(`%y9`)),
+                    description: TranslatedLongText.create($t(`%y9`)),
                 }),
                 RecordSettings.create({
                     id: 'organization.companyAddress',
-                    name: TranslatedString.create($t(`%Cn`)),
+                    name: TranslatedText.create($t(`%Cn`)),
                     required: true,
                     type: RecordType.Address,
                 }),
                 RecordSettings.create({
                     id: 'certification.type',
-                    name: TranslatedString.create($t(`%xa`)),
-                    description: TranslatedString.create($t(`%xb`)),
+                    name: TranslatedText.create($t(`%xa`)),
+                    description: TranslatedLongText.create($t(`%xb`)),
                     required: true,
                     type: RecordType.ChooseOne,
                     choices: [
                         RecordChoice.create({
                             id: 'exception',
-                            name: TranslatedString.create($t(`%xc`)),
+                            name: TranslatedText.create($t(`%xc`)),
                             description: TranslatedRichText.fromText($t(`%xd`)),
                         }),
                         RecordChoice.create({
                             id: 'kind-en-gezin',
-                            name: TranslatedString.create($t(`%xe`)),
+                            name: TranslatedText.create($t(`%xe`)),
                             description: TranslatedRichText.fromText($t(`%xf`)),
                         }),
                         RecordChoice.create({
                             id: 'authorities',
-                            name: TranslatedString.create($t(`%xg`)),
+                            name: TranslatedText.create($t(`%xg`)),
                             description: TranslatedRichText.fromText($t(`%xh`)),
                         }),
                         RecordChoice.create({
                             id: 'foreign',
-                            name: TranslatedString.create($t(`%xi`)),
+                            name: TranslatedText.create($t(`%xi`)),
                             description: TranslatedRichText.fromText($t(`%xj`)),
                         }),
                         RecordChoice.create({
                             id: 'schools',
-                            name: TranslatedString.create($t(`%xk`)),
+                            name: TranslatedText.create($t(`%xk`)),
                             description: TranslatedRichText.fromText($t(`%xl`)),
                         }),
                     ],
@@ -69,24 +69,24 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'certification',
-            name: TranslatedString.create($t(`%xm`)),
-            description: TranslatedString.create($t(`%xn`)),
+            name: TranslatedText.create($t(`%xm`)),
+            description: TranslatedLongText.create($t(`%xn`)),
             records: [
                 RecordSettings.create({
                     id: 'certification.name',
-                    name: TranslatedString.create($t(`%1Os`)),
+                    name: TranslatedText.create($t(`%1Os`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'certification.companyNumber',
-                    name: TranslatedString.create($t(`%xZ`)),
+                    name: TranslatedText.create($t(`%xZ`)),
                     required: false,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'certification.address',
-                    name: TranslatedString.create($t(`%Cn`)),
+                    name: TranslatedText.create($t(`%Cn`)),
                     required: true,
                     type: RecordType.Address,
                 }),
@@ -101,25 +101,25 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'signature',
-            name: TranslatedString.create($t(`%xo`)),
-            description: TranslatedString.create($t(`%xp`)),
+            name: TranslatedText.create($t(`%xo`)),
+            description: TranslatedLongText.create($t(`%xp`)),
             records: [
                 RecordSettings.create({
                     id: 'signature.name',
-                    name: TranslatedString.create($t(`%1Os`)),
+                    name: TranslatedText.create($t(`%1Os`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'signature.capacity',
-                    name: TranslatedString.create($t(`%xq`)),
+                    name: TranslatedText.create($t(`%xq`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'signature.image',
-                    name: TranslatedString.create($t(`%xr`)),
-                    description: TranslatedString.create($t(`%xs`)),
+                    name: TranslatedText.create($t(`%xr`)),
+                    description: TranslatedLongText.create($t(`%xs`)),
                     required: true,
                     type: RecordType.Image,
                     resolutions: [
@@ -136,24 +136,24 @@ export const fiscal = DocumentTemplateDefinition.create({
     documentFieldCategories: [
         RecordCategory.create({
             id: 'debtor',
-            name: TranslatedString.create($t(`%Mn`)),
-            description: TranslatedString.create($t(`%xt`)),
+            name: TranslatedText.create($t(`%Mn`)),
+            description: TranslatedLongText.create($t(`%xt`)),
             records: [
                 RecordSettings.create({
                     id: 'debtor.firstName',
-                    name: TranslatedString.create($t(`%1MT`)),
+                    name: TranslatedText.create($t(`%1MT`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'debtor.lastName',
-                    name: TranslatedString.create($t(`%1MU`)),
+                    name: TranslatedText.create($t(`%1MU`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'debtor.nationalRegisterNumber',
-                    name: TranslatedString.create($t(`%wK`)),
+                    name: TranslatedText.create($t(`%wK`)),
                     required: false,
                     type: RecordType.Text,
                     warning: RecordWarning.create({
@@ -165,7 +165,7 @@ export const fiscal = DocumentTemplateDefinition.create({
                 }),
                 RecordSettings.create({
                     id: 'debtor.address',
-                    name: TranslatedString.create($t(`%Cn`)),
+                    name: TranslatedText.create($t(`%Cn`)),
                     required: true,
                     type: RecordType.Address,
                 }),
@@ -173,12 +173,12 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'member',
-            name: TranslatedString.create($t(`%xv`)),
-            description: TranslatedString.create($t(`%xw`)),
+            name: TranslatedText.create($t(`%xv`)),
+            description: TranslatedLongText.create($t(`%xw`)),
             records: [
                 RecordSettings.create({
                     id: 'member.nationalRegisterNumber',
-                    name: TranslatedString.create($t(`%wK`)),
+                    name: TranslatedText.create($t(`%wK`)),
                     required: false,
                     type: RecordType.Text,
                     warning: RecordWarning.create({
@@ -190,25 +190,25 @@ export const fiscal = DocumentTemplateDefinition.create({
                 }),
                 RecordSettings.create({
                     id: 'member.firstName',
-                    name: TranslatedString.create($t(`%1MT`)),
+                    name: TranslatedText.create($t(`%1MT`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'member.lastName',
-                    name: TranslatedString.create($t(`%1MU`)),
+                    name: TranslatedText.create($t(`%1MU`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'member.birthDay',
-                    name: TranslatedString.create($t(`%17w`)),
+                    name: TranslatedText.create($t(`%17w`)),
                     required: true,
                     type: RecordType.Date,
                 }),
                 RecordSettings.create({
                     id: 'member.address',
-                    name: TranslatedString.create($t(`%Cn`)),
+                    name: TranslatedText.create($t(`%Cn`)),
                     required: true,
                     type: RecordType.Address,
                 }),
@@ -216,12 +216,12 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'price',
-            name: TranslatedString.create($t(`%1IP`)),
-            description: TranslatedString.create($t(`%xy`)),
+            name: TranslatedText.create($t(`%1IP`)),
+            description: TranslatedLongText.create($t(`%xy`)),
             records: [
                 RecordSettings.create({
                     id: 'registration.price',
-                    name: TranslatedString.create($t(`%1IP`)),
+                    name: TranslatedText.create($t(`%1IP`)),
                     required: true,
                     type: RecordType.Price,
                     warning: RecordWarning.create({
@@ -237,13 +237,13 @@ export const fiscal = DocumentTemplateDefinition.create({
     exportFieldCategories: [
         RecordCategory.create({
             id: 'confirmation',
-            name: TranslatedString.create($t(`%y0`)),
-            description: TranslatedString.create($t(`%y1`)),
+            name: TranslatedText.create($t(`%y0`)),
+            description: TranslatedLongText.create($t(`%y1`)),
             records: [
                 RecordSettings.create({
                     id: 'confirmation',
-                    name: TranslatedString.create($t(`%y2`)),
-                    label: TranslatedString.create($t(`%y3`)),
+                    name: TranslatedText.create($t(`%y2`)),
+                    label: TranslatedText.create($t(`%y3`)),
                     required: true,
                     type: RecordType.Checkbox,
                 }),
@@ -251,34 +251,34 @@ export const fiscal = DocumentTemplateDefinition.create({
         }),
         RecordCategory.create({
             id: 'additional-belcotax',
-            name: TranslatedString.create($t(`%y4`)),
-            description: TranslatedString.create($t(`%y5`)),
+            name: TranslatedText.create($t(`%y4`)),
+            description: TranslatedLongText.create($t(`%y5`)),
             records: [
                 RecordSettings.create({
                     id: 'organization.contactName',
-                    name: TranslatedString.create($t(`%y6`)),
+                    name: TranslatedText.create($t(`%y6`)),
                     required: true,
                     type: RecordType.Text,
                 }),
                 RecordSettings.create({
                     id: 'organization.phone',
-                    name: TranslatedString.create($t(`%wD`)),
+                    name: TranslatedText.create($t(`%wD`)),
                     required: true,
                     type: RecordType.Phone,
                 }),
                 RecordSettings.create({
                     id: 'organization.email',
-                    name: TranslatedString.create($t(`%1FK`)),
+                    name: TranslatedText.create($t(`%1FK`)),
                     required: true,
                     type: RecordType.Email,
-                    description: TranslatedString.create($t(`%y7`)),
+                    description: TranslatedLongText.create($t(`%y7`)),
                 }),
                 RecordSettings.create({
                     id: 'organization.companyNumber',
-                    name: TranslatedString.create($t(`%y8`)),
+                    name: TranslatedText.create($t(`%y8`)),
                     required: true,
                     type: RecordType.Text,
-                    description: TranslatedString.create($t(`%y9`)),
+                    description: TranslatedLongText.create($t(`%y9`)),
                 }),
             ],
         }),

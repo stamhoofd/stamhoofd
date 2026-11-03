@@ -1,6 +1,8 @@
 import { PropertyFilter } from '../../filters/PropertyFilter.js';
 import { TranslatedRichText } from '../../TranslatedRichText.js';
+import { TranslatedLongText } from '../../TranslatedLongText.js';
 import { TranslatedString } from '../../TranslatedString.js';
+import { TranslatedText } from '../../TranslatedText.js';
 import { LegacyRecordType } from './LegacyRecordType.js';
 import { RecordCategory } from './RecordCategory.js';
 import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings.js';
@@ -17,7 +19,7 @@ export class RecordFactory {
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.Privacy',
-                    name: TranslatedString.create($t(`%l`)),
+                    name: TranslatedText.create($t(`%l`)),
                 });
 
             case LegacyRecordType.FoodAllergies:
@@ -27,7 +29,7 @@ export class RecordFactory {
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.Allergies',
-                    name: TranslatedString.create($t(`%qy`)),
+                    name: TranslatedText.create($t(`%qy`)),
                 });
 
             case LegacyRecordType.Vegetarian:
@@ -38,7 +40,7 @@ export class RecordFactory {
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.Diet',
-                    name: TranslatedString.create($t(`%qz`)),
+                    name: TranslatedText.create($t(`%qz`)),
                 });
 
             case LegacyRecordType.CovidHighRisk:
@@ -55,7 +57,7 @@ export class RecordFactory {
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.Health',
-                    name: TranslatedString.create($t(`%r0`)),
+                    name: TranslatedText.create($t(`%r0`)),
                 });
 
             case LegacyRecordType.CanNotSwim:
@@ -65,29 +67,29 @@ export class RecordFactory {
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.Sport',
-                    name: TranslatedString.create($t(`%r1`)),
+                    name: TranslatedText.create($t(`%r1`)),
                 });
 
             case LegacyRecordType.Other:
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.Other',
-                    name: TranslatedString.create($t(`%r2`)),
+                    name: TranslatedText.create($t(`%r2`)),
                 });
 
             case LegacyRecordType.TetanusVaccine:
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.TetanusVaccine',
-                    name: TranslatedString.create($t(`%r3`)),
+                    name: TranslatedText.create($t(`%r3`)),
                 });
 
             case LegacyRecordType.MedicinePermissions: {
                 return RecordCategory.create({
                     // We need to have a predictable id
                     id: 'RecordCategory.MedicinePermissions',
-                    name: TranslatedString.create($t(`%r4`)),
-                    description: TranslatedString.create($t(`%r5`)),
+                    name: TranslatedText.create($t(`%r4`)),
+                    description: TranslatedLongText.create($t(`%r5`)),
 
                     // Only ask if <18y
                     filter: new PropertyFilter(
@@ -149,7 +151,7 @@ export class RecordFactory {
         if (categories.length > 0) {
             categories = [
                 RecordCategory.create({
-                    name: TranslatedString.create($t(`%r6`)),
+                    name: TranslatedText.create($t(`%r6`)),
                     childCategories: categories,
                 }),
             ];
@@ -185,12 +187,12 @@ export class RecordFactory {
                 record.sensitive = false;
                 record.type = RecordType.ChooseOne;
                 record.required = true;
-                record.name = TranslatedString.create($t(`%r7`));
-                record.label = TranslatedString.create($t(`%r8`));
+                record.name = TranslatedText.create($t(`%r7`));
+                record.label = TranslatedText.create($t(`%r8`));
                 record.choices = [
                     RecordChoice.create({
                         id: 'no',
-                        name: TranslatedString.create($t(`%r9`)),
+                        name: TranslatedText.create($t(`%r9`)),
                         warning: RecordWarning.create({
                             id: '',
                             text: TranslatedRichText.fromText($t(`%rA`)),
@@ -199,7 +201,7 @@ export class RecordFactory {
                     }),
                     RecordChoice.create({
                         id: 'yes',
-                        name: TranslatedString.create($t(`%rB`)),
+                        name: TranslatedText.create($t(`%rB`)),
                     }),
 
                 ];
@@ -208,7 +210,7 @@ export class RecordFactory {
                     record.choices.push(
                         RecordChoice.create({
                             id: 'groups_only',
-                            name: TranslatedString.create($t(`%rC`)),
+                            name: TranslatedText.create($t(`%rC`)),
                             warning: RecordWarning.create({
                                 id: '',
                                 text: TranslatedRichText.fromText($t(`%rD`)),
@@ -217,14 +219,14 @@ export class RecordFactory {
                         }),
                     );
                 }
-                record.description = TranslatedString.create($t(`%rE`));
+                record.description = TranslatedLongText.create($t(`%rE`));
                 break;
 
             case LegacyRecordType.FoodAllergies:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rF`));
+                record.name = TranslatedText.create($t(`%rF`));
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`%rG`));
+                record.inputPlaceholder = TranslatedText.create($t(`%rG`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rF`)),
@@ -236,9 +238,9 @@ export class RecordFactory {
 
             case LegacyRecordType.MedicineAllergies:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rH`));
+                record.name = TranslatedText.create($t(`%rH`));
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`%rI`));
+                record.inputPlaceholder = TranslatedText.create($t(`%rI`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rH`)),
@@ -250,7 +252,7 @@ export class RecordFactory {
 
             case LegacyRecordType.HayFever:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rJ`));
+                record.name = TranslatedText.create($t(`%rJ`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rJ`)),
@@ -262,10 +264,10 @@ export class RecordFactory {
 
             case LegacyRecordType.OtherAllergies:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rK`));
+                record.name = TranslatedText.create($t(`%rK`));
                 record.askComments = true;
-                record.description = TranslatedString.create($t(`%rL`));
-                record.inputPlaceholder = TranslatedString.create($t(`%rM`));
+                record.description = TranslatedLongText.create($t(`%rL`));
+                record.inputPlaceholder = TranslatedText.create($t(`%rM`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rK`)),
@@ -277,7 +279,7 @@ export class RecordFactory {
 
             case LegacyRecordType.Vegetarian:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rN`));
+                record.name = TranslatedText.create($t(`%rN`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rO`)),
@@ -289,8 +291,8 @@ export class RecordFactory {
 
             case LegacyRecordType.Vegan:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rP`));
-                record.description = TranslatedString.create($t(`%rQ`));
+                record.name = TranslatedText.create($t(`%rP`));
+                record.description = TranslatedLongText.create($t(`%rQ`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rR`)),
@@ -302,7 +304,7 @@ export class RecordFactory {
 
             case LegacyRecordType.Halal:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rS`));
+                record.name = TranslatedText.create($t(`%rS`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rS`)),
@@ -314,7 +316,7 @@ export class RecordFactory {
 
             case LegacyRecordType.Kosher:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rT`));
+                record.name = TranslatedText.create($t(`%rT`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rT`)),
@@ -326,12 +328,12 @@ export class RecordFactory {
 
             case LegacyRecordType.Diet:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rU`));
+                record.name = TranslatedText.create($t(`%rU`));
 
                 record.askComments = true;
-                record.label = TranslatedString.create($t(`%rV`));
-                record.description = TranslatedString.create($t(`%rW`));
-                record.inputPlaceholder = TranslatedString.create($t(`%rX`));
+                record.label = TranslatedText.create($t(`%rV`));
+                record.description = TranslatedLongText.create($t(`%rW`));
+                record.inputPlaceholder = TranslatedText.create($t(`%rX`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rU`)),
@@ -343,10 +345,10 @@ export class RecordFactory {
 
             case LegacyRecordType.CovidHighRisk:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rY`));
+                record.name = TranslatedText.create($t(`%rY`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`%14p`));
+                record.inputPlaceholder = TranslatedText.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rY`)),
@@ -358,13 +360,13 @@ export class RecordFactory {
 
             case LegacyRecordType.TetanusVaccine:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rZ`));
+                record.name = TranslatedText.create($t(`%rZ`));
 
                 record.askComments = true;
-                record.label = TranslatedString.create($t(`%ra`));
-                record.description = TranslatedString.create($t(`%rb`));
-                record.inputPlaceholder = TranslatedString.create($t(`%rc`));
-                record.commentsDescription = TranslatedString.create($t(`%rd`));
+                record.label = TranslatedText.create($t(`%ra`));
+                record.description = TranslatedLongText.create($t(`%rb`));
+                record.inputPlaceholder = TranslatedText.create($t(`%rc`));
+                record.commentsDescription = TranslatedLongText.create($t(`%rd`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%re`)),
@@ -376,10 +378,10 @@ export class RecordFactory {
 
             case LegacyRecordType.Asthma:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rf`));
+                record.name = TranslatedText.create($t(`%rf`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`%14p`));
+                record.inputPlaceholder = TranslatedText.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rf`)),
@@ -390,10 +392,10 @@ export class RecordFactory {
                 break;
             case LegacyRecordType.BedWaters:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rg`));
+                record.name = TranslatedText.create($t(`%rg`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`%14p`));
+                record.inputPlaceholder = TranslatedText.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rg`)),
@@ -403,10 +405,10 @@ export class RecordFactory {
                 break;
             case LegacyRecordType.Epilepsy:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rh`));
+                record.name = TranslatedText.create($t(`%rh`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`%14p`));
+                record.inputPlaceholder = TranslatedText.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rh`)),
@@ -416,10 +418,10 @@ export class RecordFactory {
                 break;
             case LegacyRecordType.HeartDisease:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%ri`));
+                record.name = TranslatedText.create($t(`%ri`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`%14p`));
+                record.inputPlaceholder = TranslatedText.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%ri`)),
@@ -430,10 +432,10 @@ export class RecordFactory {
                 break;
             case LegacyRecordType.SkinCondition:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rj`));
+                record.name = TranslatedText.create($t(`%rj`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`%14p`));
+                record.inputPlaceholder = TranslatedText.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rj`)),
@@ -443,10 +445,10 @@ export class RecordFactory {
                 break;
             case LegacyRecordType.Rheumatism:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rk`));
+                record.name = TranslatedText.create($t(`%rk`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`%14p`));
+                record.inputPlaceholder = TranslatedText.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rk`)),
@@ -456,10 +458,10 @@ export class RecordFactory {
                 break;
             case LegacyRecordType.SleepWalking:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rl`));
+                record.name = TranslatedText.create($t(`%rl`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`%14p`));
+                record.inputPlaceholder = TranslatedText.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rl`)),
@@ -469,10 +471,10 @@ export class RecordFactory {
                 break;
             case LegacyRecordType.Diabetes:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%s`));
+                record.name = TranslatedText.create($t(`%s`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`%14p`));
+                record.inputPlaceholder = TranslatedText.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%s`)),
@@ -483,12 +485,12 @@ export class RecordFactory {
 
             case LegacyRecordType.Medicines:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rm`));
+                record.name = TranslatedText.create($t(`%rm`));
 
                 record.askComments = true;
-                record.description = TranslatedString.create($t(`%rn`));
-                record.inputPlaceholder = TranslatedString.create($t(`%ro`));
-                record.commentsDescription = TranslatedString.create($t(`%rp`));
+                record.description = TranslatedLongText.create($t(`%rn`));
+                record.inputPlaceholder = TranslatedText.create($t(`%ro`));
+                record.commentsDescription = TranslatedLongText.create($t(`%rp`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rq`)),
@@ -499,10 +501,10 @@ export class RecordFactory {
 
             case LegacyRecordType.SpecialHealthCare:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rr`));
+                record.name = TranslatedText.create($t(`%rr`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`%rs`));
+                record.inputPlaceholder = TranslatedText.create($t(`%rs`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rr`)),
@@ -514,7 +516,7 @@ export class RecordFactory {
 
             case LegacyRecordType.CanNotSwim:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rt`));
+                record.name = TranslatedText.create($t(`%rt`));
                 record.askComments = false;
 
                 record.warning = RecordWarning.create({
@@ -526,10 +528,10 @@ export class RecordFactory {
 
             case LegacyRecordType.TiredQuickly:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%ru`));
+                record.name = TranslatedText.create($t(`%ru`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`%rv`));
+                record.inputPlaceholder = TranslatedText.create($t(`%rv`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%ru`)),
@@ -540,10 +542,10 @@ export class RecordFactory {
 
             case LegacyRecordType.CanNotParticipateInSport:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rw`));
+                record.name = TranslatedText.create($t(`%rw`));
 
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`%rv`));
+                record.inputPlaceholder = TranslatedText.create($t(`%rv`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rw`)),
@@ -554,9 +556,9 @@ export class RecordFactory {
 
             case LegacyRecordType.SpecialSocialCare:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%rx`));
+                record.name = TranslatedText.create($t(`%rx`));
                 record.askComments = true;
-                record.inputPlaceholder = TranslatedString.create($t(`%rv`));
+                record.inputPlaceholder = TranslatedText.create($t(`%rv`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%rx`)),
@@ -566,11 +568,11 @@ export class RecordFactory {
                 break;
 
             case LegacyRecordType.Other:
-                record.name = TranslatedString.create($t(`%ry`));
+                record.name = TranslatedText.create($t(`%ry`));
 
                 record.required = false;
                 record.type = RecordType.Textarea;
-                record.inputPlaceholder = TranslatedString.create($t(`%rz`));
+                record.inputPlaceholder = TranslatedText.create($t(`%rz`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%s0`)),
@@ -581,12 +583,12 @@ export class RecordFactory {
 
             case LegacyRecordType.MedicinePermissions:
                 record.type = RecordType.Checkbox;
-                record.name = TranslatedString.create($t(`%r4`));
+                record.name = TranslatedText.create($t(`%r4`));
 
                 record.sensitive = false;
 
-                record.label = TranslatedString.create($t(`%s1`));
-                record.description = TranslatedString.create($t(`%s2`));
+                record.label = TranslatedText.create($t(`%s1`));
+                record.description = TranslatedLongText.create($t(`%s2`));
 
                 record.warning = RecordWarning.create({
                     text: TranslatedRichText.fromText($t(`%s3`)),
@@ -609,29 +611,29 @@ export class RecordFactory {
     static createDoctorName() {
         return RecordSettings.create({
             id: 'template-doctor-name',
-            name: TranslatedString.create($t(`%s4`)),
-            inputPlaceholder: TranslatedString.create($t(`%s5`)),
+            name: TranslatedText.create($t(`%s4`)),
+            inputPlaceholder: TranslatedText.create($t(`%s5`)),
             type: RecordType.Text,
             required: true,
             sensitive: true,
-            label: TranslatedString.create($t(`%1Os`)),
+            label: TranslatedText.create($t(`%1Os`)),
         });
     }
 
     static createDoctorPhone() {
         return RecordSettings.create({
             id: 'template-doctor-phone',
-            name: TranslatedString.create($t(`%s6`)),
-            inputPlaceholder: TranslatedString.create($t(`%wD`)),
+            name: TranslatedText.create($t(`%s6`)),
+            inputPlaceholder: TranslatedText.create($t(`%wD`)),
             type: RecordType.Phone,
             required: true,
-            label: TranslatedString.create($t(`%wD`)),
+            label: TranslatedText.create($t(`%wD`)),
         });
     }
 
     static createDoctorCategory(required = true) {
         return RecordCategory.create({
-            name: TranslatedString.create($t(`%s7`)),
+            name: TranslatedText.create($t(`%s7`)),
             records: [
                 this.createDoctorName(),
                 this.createDoctorPhone(),

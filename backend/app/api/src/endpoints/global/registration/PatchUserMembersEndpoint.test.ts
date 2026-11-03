@@ -6,7 +6,7 @@ import { Request } from '@node/endpoints';
 import { GroupFactory, Member, MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, RegistrationFactory, UserFactory } from '@stamhoofd/models';
 import type { PatchAnswers } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Address, BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, ParentType, RecordCategory, RecordSettings, RecordTextAnswer, ReviewTime, ReviewTimes, TranslatedString, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import { Address, BooleanStatus, MemberDetails, MemberWithRegistrationsBlob, OrganizationMetaData, OrganizationRecordsConfiguration, Parent, ParentType, RecordCategory, RecordSettings, RecordTextAnswer, ReviewTime, ReviewTimes, TranslatedString, TranslatedText, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { initUitpasApi } from '../../../../tests/init/index.js';
@@ -435,11 +435,11 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
     describe('Record answers', () => {
         test('A user can save answers of records of an organization it has not yet registered for', async () => {
             const commentsRecord = RecordSettings.create({
-                name: TranslatedString.create('Opmerkingen'),
+                name: TranslatedText.create('Opmerkingen'),
             });
 
             const recordCategory = RecordCategory.create({
-                name: TranslatedString.create('Medische fiche'),
+                name: TranslatedText.create('Medische fiche'),
                 records: [
                     commentsRecord,
                 ],
@@ -495,12 +495,12 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
         test('A user cannot save answers to organization read-only records', async () => {
             const commentsRecord = RecordSettings.create({
-                name: TranslatedString.create('Opmerkingen'),
+                name: TranslatedText.create('Opmerkingen'),
                 externalPermissionLevel: PermissionLevel.Read,
             });
 
             const recordCategory = RecordCategory.create({
-                name: TranslatedString.create('Medische fiche'),
+                name: TranslatedText.create('Medische fiche'),
                 records: [
                     commentsRecord,
                 ],
@@ -548,11 +548,11 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
         test('A user can save answers of records of the platform', async () => {
             const commentsRecord = RecordSettings.create({
-                name: TranslatedString.create('Opmerkingen'),
+                name: TranslatedText.create('Opmerkingen'),
             });
 
             const recordCategory = RecordCategory.create({
-                name: TranslatedString.create('Medische fiche'),
+                name: TranslatedText.create('Medische fiche'),
                 records: [
                     commentsRecord,
                 ],
@@ -607,12 +607,12 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
         test('A user cannot save answers to platform read-only records', async () => {
             const commentsRecord = RecordSettings.create({
-                name: TranslatedString.create('Opmerkingen'),
+                name: TranslatedText.create('Opmerkingen'),
                 externalPermissionLevel: PermissionLevel.Read,
             });
 
             const recordCategory = RecordCategory.create({
-                name: TranslatedString.create('Medische fiche'),
+                name: TranslatedText.create('Medische fiche'),
                 records: [
                     commentsRecord,
                 ],
@@ -659,7 +659,7 @@ describe('Endpoint.PatchUserMembersEndpoint', () => {
 
         test('A user can not save anwers to inexisting records', async () => {
             const commentsRecord = RecordSettings.create({
-                name: TranslatedString.create('Opmerkingen'),
+                name: TranslatedText.create('Opmerkingen'),
             });
 
             const organization = await new OrganizationFactory({

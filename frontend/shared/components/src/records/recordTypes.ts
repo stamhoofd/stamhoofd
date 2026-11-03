@@ -1,4 +1,4 @@
-import { RecordChoice, RecordSettings, RecordType, TranslatedString } from '@stamhoofd/structures';
+import { RecordChoice, RecordSettings, RecordType, TranslatedText } from '@stamhoofd/structures';
 import { ContextMenuItem } from '../overlays/ContextMenu';
 
 export function getRecordTypeIcon(type: RecordType): string {
@@ -66,8 +66,8 @@ export function isRecordTypeRequiredByDefault(type: RecordType) {
 
 export function createDefaultRecordChoices() {
     return [
-        RecordChoice.create({ name: TranslatedString.create($t('%11K')) }),
-        RecordChoice.create({ name: TranslatedString.create($t('%11L')) }),
+        RecordChoice.create({ name: TranslatedText.create($t('%11K')) }),
+        RecordChoice.create({ name: TranslatedText.create($t('%11L')) }),
     ];
 }
 

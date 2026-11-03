@@ -11,7 +11,7 @@
 
         <div class="split-inputs">
             <div>
-                <TInput v-model="name" error-fields="name" :placeholder="$t(`%ip`)" :error-box="errors.errorBox" :title="$t(`%Qo`)" />
+                <TextInput v-model="name" error-fields="name" :placeholder="$t(`%ip`)" :error-box="errors.errorBox" :title="$t(`%Qo`)" />
             </div>
 
             <div>
@@ -75,19 +75,19 @@
         </h2>
         <p>{{ $t('%if') }}</p>
 
-        <TInput v-model="label" :title="labelTitle" error-fields="label" :error-box="errors.errorBox" class="max" :placeholder="name" />
+        <TextInput v-model="label" :title="labelTitle" error-fields="label" :error-box="errors.errorBox" class="max" :placeholder="name" />
 
-        <TTextarea v-model="description" :title="descriptionTitle" :placeholder="$t(`%14p`)" error-fields="description" :error-box="errors.errorBox" class="max" />
+        <LongTextInput v-model="description" :title="descriptionTitle" :placeholder="$t(`%14p`)" error-fields="description" :error-box="errors.errorBox" class="max" />
         <p class="style-description-small">
             {{ $t('%ig') }}
         </p>
 
-        <TTextarea v-if="shouldAskInputPlaceholder" v-model="inputPlaceholder" :placeholder="$t(`%is`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`%ir`)" />
+        <TextInput v-if="shouldAskInputPlaceholder" v-model="inputPlaceholder" :placeholder="$t(`%is`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`%ir`)" />
         <p v-if="shouldAskInputPlaceholder" class="style-description-small">
             {{ $t('%ih') }}
         </p>
 
-        <TTextarea v-if="shouldAskCommentsDescription" v-model="commentsDescription" :placeholder="$t(`%14p`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`%it`)" />
+        <LongTextInput v-if="shouldAskCommentsDescription" v-model="commentsDescription" :placeholder="$t(`%14p`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`%it`)" />
         <p v-if="shouldAskCommentsDescription" class="style-description-small">
             {{ $t('%ii') }}
         </p>
@@ -229,6 +229,8 @@ import { usePatch } from '#hooks/usePatch.ts';
 import Checkbox from '#inputs/Checkbox.vue';
 import Dropdown from '#inputs/Dropdown.vue';
 import Radio from '#inputs/Radio.vue';
+import LongTextInput from '#inputs/LongTextInput.vue';
+import TextInput from '#inputs/TextInput.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import TWYSIWYGTextInput from '#inputs/TWYSIWYGTextInput.vue';
 import STList from '#layout/STList.vue';

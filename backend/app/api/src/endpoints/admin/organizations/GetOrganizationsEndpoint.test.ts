@@ -2,7 +2,7 @@ import { Request } from '@node/endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
 import { DocumentTemplateFactory, OrganizationFactory, STPackageFactory, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { DocumentStatus, LimitedFilteredRequest, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationType, Permissions, RecordCategory, RecordSettings, RecordType, STPackageBundle, TranslatedString, UmbrellaOrganization } from '@stamhoofd/structures';
+import { DocumentStatus, LimitedFilteredRequest, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationType, Permissions, RecordCategory, RecordSettings, RecordType, STPackageBundle, TranslatedString, TranslatedText, UmbrellaOrganization } from '@stamhoofd/structures';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { TestUtils } from '@stamhoofd/test-utils';
@@ -249,7 +249,7 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
 
     const createTextRecord = (nameValue: string) => {
         return RecordSettings.create({
-            name: TranslatedString.create(nameValue),
+            name: TranslatedText.create(nameValue),
             type: RecordType.Text,
         });
     };
@@ -258,10 +258,10 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         const { adminToken } = await initPlatformAdmin();
 
         const medicalOrg = await createOrganizationWithRecordCategories('Medical Questionnaire Club', [
-            RecordCategory.create({ name: TranslatedString.create('Medische fiche') }),
+            RecordCategory.create({ name: TranslatedText.create('Medische fiche') }),
         ]);
         const consentOrg = await createOrganizationWithRecordCategories('Consent Questionnaire Club', [
-            RecordCategory.create({ name: TranslatedString.create('Toestemmingen') }),
+            RecordCategory.create({ name: TranslatedText.create('Toestemmingen') }),
         ]);
 
         const results = await filter({ recordCategoryName: { $contains: 'Medische' } }, adminToken);
@@ -275,7 +275,7 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         // A name that is stored as a multi-language object (not a plain string)
         const org = await createOrganizationWithRecordCategories('Multilingual Questionnaire Club', [
             RecordCategory.create({
-                name: TranslatedString.create({ nl: 'Gezondheidsvragen', en: 'Health questions' }),
+                name: TranslatedText.create({ nl: 'Gezondheidsvragen', en: 'Health questions' }),
             }),
         ]);
 
@@ -288,10 +288,10 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
 
         const org = await createOrganizationWithRecordCategories('Precise Questionnaire Club', [
             RecordCategory.create({
-                name: TranslatedString.create('Algemeen'),
+                name: TranslatedText.create('Algemeen'),
                 childCategories: [
                     RecordCategory.create({
-                        name: TranslatedString.create('Subcategorie'),
+                        name: TranslatedText.create('Subcategorie'),
                         records: [createTextRecord('Bloedgroep')],
                     }),
                 ],
@@ -311,13 +311,13 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
 
         const org = await createOrganizationWithRecordCategories('Direct Question Club', [
             RecordCategory.create({
-                name: TranslatedString.create('Algemeen'),
+                name: TranslatedText.create('Algemeen'),
                 records: [createTextRecord('Bloedgroep')],
             }),
         ]);
         const otherOrg = await createOrganizationWithRecordCategories('Other Question Club', [
             RecordCategory.create({
-                name: TranslatedString.create('Algemeen'),
+                name: TranslatedText.create('Algemeen'),
                 records: [createTextRecord('Schoenmaat')],
             }),
         ]);
@@ -333,16 +333,16 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         // Category -> child -> child -> child, with the record at the deepest level
         const org = await createOrganizationWithRecordCategories('Deeply Nested Question Club', [
             RecordCategory.create({
-                name: TranslatedString.create('Niveau 0'),
+                name: TranslatedText.create('Niveau 0'),
                 childCategories: [
                     RecordCategory.create({
-                        name: TranslatedString.create('Niveau 1'),
+                        name: TranslatedText.create('Niveau 1'),
                         childCategories: [
                             RecordCategory.create({
-                                name: TranslatedString.create('Niveau 2'),
+                                name: TranslatedText.create('Niveau 2'),
                                 childCategories: [
                                     RecordCategory.create({
-                                        name: TranslatedString.create('Niveau 3'),
+                                        name: TranslatedText.create('Niveau 3'),
                                         records: [createTextRecord('Diepe vraag')],
                                     }),
                                 ],
@@ -355,7 +355,7 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
 
         const noMatchOrg = await createOrganizationWithRecordCategories('Shallow Question Club', [
             RecordCategory.create({
-                name: TranslatedString.create('Niveau 0'),
+                name: TranslatedText.create('Niveau 0'),
                 records: [createTextRecord('Oppervlakkige vraag')],
             }),
         ]);
@@ -370,10 +370,10 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
 
         const org = await createOrganizationWithRecordCategories('Child Category Club', [
             RecordCategory.create({
-                name: TranslatedString.create('Algemeen'),
+                name: TranslatedText.create('Algemeen'),
                 childCategories: [
                     RecordCategory.create({
-                        name: TranslatedString.create('Medische subcategorie'),
+                        name: TranslatedText.create('Medische subcategorie'),
                         records: [createTextRecord('Bloedgroep')],
                     }),
                 ],
@@ -381,10 +381,10 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         ]);
         const otherOrg = await createOrganizationWithRecordCategories('Other Child Category Club', [
             RecordCategory.create({
-                name: TranslatedString.create('Algemeen'),
+                name: TranslatedText.create('Algemeen'),
                 childCategories: [
                     RecordCategory.create({
-                        name: TranslatedString.create('Sportieve subcategorie'),
+                        name: TranslatedText.create('Sportieve subcategorie'),
                         records: [createTextRecord('Bloedgroep')],
                     }),
                 ],
@@ -401,10 +401,10 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
 
         const org = await createOrganizationWithRecordCategories('Precise Child Category Club', [
             RecordCategory.create({
-                name: TranslatedString.create('Bovenliggende naam'),
+                name: TranslatedText.create('Bovenliggende naam'),
                 childCategories: [
                     RecordCategory.create({
-                        name: TranslatedString.create('Onderliggende naam'),
+                        name: TranslatedText.create('Onderliggende naam'),
                         records: [createTextRecord('Vraagnaam')],
                     }),
                 ],
@@ -425,16 +425,16 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
         // Category -> child -> child -> child, with the matching child category at the deepest level
         const org = await createOrganizationWithRecordCategories('Deeply Nested Child Category Club', [
             RecordCategory.create({
-                name: TranslatedString.create('Niveau 0'),
+                name: TranslatedText.create('Niveau 0'),
                 childCategories: [
                     RecordCategory.create({
-                        name: TranslatedString.create('Niveau 1'),
+                        name: TranslatedText.create('Niveau 1'),
                         childCategories: [
                             RecordCategory.create({
-                                name: TranslatedString.create('Niveau 2'),
+                                name: TranslatedText.create('Niveau 2'),
                                 childCategories: [
                                     RecordCategory.create({
-                                        name: TranslatedString.create('Diepe subcategorie'),
+                                        name: TranslatedText.create('Diepe subcategorie'),
                                         records: [createTextRecord('Diepe vraag')],
                                     }),
                                 ],
@@ -447,10 +447,10 @@ describe('Endpoint.GetOrganizationsEndpoint', () => {
 
         const noMatchOrg = await createOrganizationWithRecordCategories('Shallow Child Category Club', [
             RecordCategory.create({
-                name: TranslatedString.create('Niveau 0'),
+                name: TranslatedText.create('Niveau 0'),
                 childCategories: [
                     RecordCategory.create({
-                        name: TranslatedString.create('Oppervlakkige subcategorie'),
+                        name: TranslatedText.create('Oppervlakkige subcategorie'),
                     }),
                 ],
             }),

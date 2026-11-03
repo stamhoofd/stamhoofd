@@ -1,4 +1,5 @@
 import { TranslatedString } from '../TranslatedString.js';
+import { TranslatedText } from '../TranslatedText.js';
 import { CartReservedSeat } from '../SeatingPlan.js';
 import { RecordTextAnswer } from '../members/records/RecordAnswer.js';
 import { RecordCategory } from '../members/records/RecordCategory.js';
@@ -250,8 +251,8 @@ describe('Structure.CartItem', () => {
         });
 
         it('validates the inline record category', () => {
-            const record = RecordSettings.create({ name: TranslatedString.create('Allergieën'), type: RecordType.Text, required: true });
-            const { webshop, product } = buildWebshop({ recordCategory: RecordCategory.create({ name: TranslatedString.create('Extra'), records: [record] }) });
+            const record = RecordSettings.create({ name: TranslatedText.create('Allergieën'), type: RecordType.Text, required: true });
+            const { webshop, product } = buildWebshop({ recordCategory: RecordCategory.create({ name: TranslatedText.create('Extra'), records: [record] }) });
             const cart = Cart.create({});
             const item = buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' }));
 
@@ -262,8 +263,8 @@ describe('Structure.CartItem', () => {
         });
 
         it('lets an admin save a participant without answers to the current questions', () => {
-            const record = RecordSettings.create({ name: TranslatedString.create('Allergieën'), type: RecordType.Text, required: true });
-            const { webshop, product } = buildWebshop({ recordCategory: RecordCategory.create({ name: TranslatedString.create('Extra'), records: [record] }) });
+            const record = RecordSettings.create({ name: TranslatedText.create('Allergieën'), type: RecordType.Text, required: true });
+            const { webshop, product } = buildWebshop({ recordCategory: RecordCategory.create({ name: TranslatedText.create('Extra'), records: [record] }) });
             const item = buildCartItem(product, Customer.create({ firstName: 'John', lastName: 'Doe' }));
 
             expect(() => item.validate(webshop, Cart.create({}), { admin: true })).not.toThrow();

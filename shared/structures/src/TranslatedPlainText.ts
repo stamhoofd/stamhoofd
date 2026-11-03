@@ -218,6 +218,34 @@ export abstract class TranslatedPlainText implements Encodeable, Patchable<Trans
         return this.build(translations);
     }
 
+    /**
+     * Public for the same reason as build()
+     */
+    _append(str: string | TranslatedPlainText): this {
+        if (typeof str === 'string') {
+            return this._append(this.build(str));
+        }
+
+        const duplicate = this.clone();
+        if (typeof duplicate.translations !== 'string') {
+            for (const key of Object.keys(duplicate.translations) as Language[]) {
+                duplicate.translations[key] = (duplicate.translations[key] ?? '') + str.get(key);
+            }
+            return duplicate;
+        }
+
+        duplicate.translations = duplicate.translations + str.toString();
+        return duplicate;
+    }
+
+    append(...str: (string | TranslatedPlainText)[]): this {
+        let duplicate = this;
+        for (const s of str) {
+            duplicate = duplicate._append(s);
+        }
+        return duplicate;
+    }
+
     clone(): this {
         return this.build(typeof this.translations === 'string' ? this.translations : { ...this.translations });
     }

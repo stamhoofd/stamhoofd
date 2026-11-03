@@ -11,6 +11,7 @@ import { PaymentMethod } from '../PaymentMethod.js';
 import { PaymentStatus } from '../PaymentStatus.js';
 import { PaymentType } from '../PaymentType.js';
 import { TranslatedString } from '../TranslatedString.js';
+import { TranslatedText } from '../TranslatedText.js';
 import { Cart } from './Cart.js';
 import { CartItem } from './CartItem.js';
 import { Customer } from './Customer.js';
@@ -22,17 +23,17 @@ import { WebshopMetaData } from './WebshopMetaData.js';
 
 describe('Order', () => {
     const fileRecordSettings = RecordSettings.create({
-        name: TranslatedString.create('Attest'),
+        name: TranslatedText.create('Attest'),
         type: RecordType.File,
     });
 
     const textRecordSettings = RecordSettings.create({
-        name: TranslatedString.create('Opmerking'),
+        name: TranslatedText.create('Opmerking'),
         type: RecordType.Textarea,
     });
 
     const imageRecordSettings = RecordSettings.create({
-        name: TranslatedString.create('Foto'),
+        name: TranslatedText.create('Foto'),
         type: RecordType.Image,
     });
 
@@ -69,7 +70,7 @@ describe('Order', () => {
             meta: WebshopMetaData.create({
                 recordCategories: [
                     RecordCategory.create({
-                        name: TranslatedString.create('Documenten'),
+                        name: TranslatedText.create('Documenten'),
                         records: [fileRecordSettings, textRecordSettings, imageRecordSettings],
                     }),
                 ],

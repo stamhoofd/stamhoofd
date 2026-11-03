@@ -1,22 +1,4 @@
-import {
-    Address,
-    BalanceItemRelation,
-    BalanceItemRelationType,
-    BooleanStatus,
-    EmergencyContact,
-    Gender,
-    MemberDetails,
-    Parent,
-    ReceivableBalanceType,
-    RecordAnswer,
-    RecordSettings,
-    ReviewTime,
-    ReviewTimes,
-    TranslatedString,
-    UitpasNumberDetails,
-    UitpasSocialTariff,
-    UitpasSocialTariffStatus,
-} from '@stamhoofd/structures';
+import { Address, BalanceItemRelation, BalanceItemRelationType, BooleanStatus, EmergencyContact, Gender, MemberDetails, Parent, ReceivableBalanceType, RecordAnswer, RecordSettings, ReviewTime, ReviewTimes, TranslatedString, TranslatedText, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem, BalanceItemFactory, CachedBalance, Member, MemberFactory, OrganizationFactory } from '@stamhoofd/models';
@@ -54,7 +36,7 @@ describe('member merge', () => {
 
             const recordAnswer = RecordAnswer.create({
                 settings: RecordSettings.create({
-                    name: TranslatedString.create('answer1'),
+                    name: TranslatedText.create('answer1'),
                     required: true,
                     choices: [],
                 }),
@@ -226,7 +208,7 @@ describe('member merge', () => {
 
             const recordAnswer = RecordAnswer.create({
                 settings: RecordSettings.create({
-                    name: TranslatedString.create('answer1'),
+                    name: TranslatedText.create('answer1'),
                     required: true,
                     choices: [],
                 }),
@@ -420,7 +402,7 @@ describe('member merge', () => {
 
             const recordAnswer1 = RecordAnswer.create({
                 settings: RecordSettings.create({
-                    name: TranslatedString.create('answer1'),
+                    name: TranslatedText.create('answer1'),
                     required: true,
                     choices: [],
                 }),
@@ -431,7 +413,7 @@ describe('member merge', () => {
 
             const recordAnswer2 = RecordAnswer.create({
                 settings: RecordSettings.create({
-                    name: TranslatedString.create('answer2'),
+                    name: TranslatedText.create('answer2'),
                     required: true,
                     choices: [],
                 }),

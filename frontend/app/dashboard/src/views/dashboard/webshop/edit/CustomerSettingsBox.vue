@@ -16,7 +16,7 @@ import { ContextMenu, ContextMenuItem } from '@stamhoofd/components/overlays/Con
 import EditRecordCategoryRecordsBox from '@stamhoofd/components/records/components/EditRecordCategoryRecordsBox.vue';
 import type { RecordEditorSettings } from '@stamhoofd/components/records/RecordEditorSettings.ts';
 import { getRecordTypeMenuItems } from '@stamhoofd/components/records/recordTypes.ts';
-import { RecordCategory, TranslatedString } from '@stamhoofd/structures';
+import { RecordCategory, TranslatedText } from '@stamhoofd/structures';
 import { CustomerFieldRequirement } from '@stamhoofd/structures/webshops/CustomerFieldRequirement.js';
 import type { CustomerFieldKey } from '@stamhoofd/structures/webshops/CustomerSettings.js';
 import { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
@@ -103,7 +103,7 @@ async function showAddMenu(event: MouseEvent) {
 }
 
 // The extra questions are stored in a single category that is never shown to the user: it is only saved once it contains questions
-const emptyRecordCategory = RecordCategory.create({ name: TranslatedString.create($t('%ZyW')) });
+const emptyRecordCategory = RecordCategory.create({ name: TranslatedText.create($t('%ZyW')) });
 const recordCategory = computed(() => props.customerSettings.recordCategory ?? emptyRecordCategory);
 const rootCategories = computed(() => [recordCategory.value]);
 

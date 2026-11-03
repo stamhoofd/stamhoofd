@@ -14,10 +14,10 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <TInput v-model="name" enterkeyhint="next" :placeholder="$t(`%vC`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`%vC`)" />
+            <TextInput v-model="name" enterkeyhint="next" :placeholder="$t(`%vC`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`%vC`)" />
         </div>
 
-        <TTextarea v-model="description" error-fields="description" :placeholder="$t(`%14p`)" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)" />
+        <LongTextInput v-model="description" error-fields="description" :placeholder="$t(`%14p`)" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)" />
 
         <STList v-if="(settings.toggleDefaultEnabled && allowChildCategories) || !patchedCategory.defaultEnabled">
             <STListItem :selectable="true" element-name="label">
@@ -79,7 +79,7 @@ import { SimpleError } from '@common/errors';
 import { usePop, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { ObjectWithRecords, PatchAnswers } from '@stamhoofd/structures';
-import { PropertyFilter, RecordCategory, TranslatedString } from '@stamhoofd/structures';
+import { PropertyFilter, RecordCategory, TranslatedText } from '@stamhoofd/structures';
 import { computed, reactive, ref, useTemplateRef } from 'vue';
 import { useAppContext } from '../context/appContext';
 import { ErrorBox } from '../errors/ErrorBox';
@@ -95,6 +95,8 @@ import type { NavigationActions } from '../types/NavigationActions';
 import type { RecordEditorSettings } from './RecordEditorSettings';
 import { RecordEditorType } from './RecordEditorSettings';
 import EditRecordCategoryRecordsBox from './components/EditRecordCategoryRecordsBox.vue';
+import LongTextInput from '#inputs/LongTextInput.vue';
+import TextInput from '#inputs/TextInput.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import STCard from '#layout/STCard.vue';
 
@@ -321,7 +323,7 @@ async function showExample() {
                 category: isRootCategory.value
                     ? category
                     : RecordCategory.create({
-                            name: TranslatedString.create($t('%ID')),
+                            name: TranslatedText.create($t('%ID')),
                             childCategories: [category],
                         }),
                 value: reactiveValue,

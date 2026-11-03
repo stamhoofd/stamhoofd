@@ -3,7 +3,7 @@ import { GroupFactory, MemberFactory, MemberResponsibilityRecordFactory, OrderFa
 import { MailchimpCredential } from '@stamhoofd/models/models/MailchimpCredential.js';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { DefaultAgeGroup, MemberDetails, MemberResponsibility, OrderStatus, Parent, Permissions, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType, TranslatedString, Version } from '@stamhoofd/structures';
+import { DefaultAgeGroup, MemberDetails, MemberResponsibility, OrderStatus, Parent, Permissions, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType, TranslatedString, TranslatedText, Version } from '@stamhoofd/structures';
 import { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';
 import { MailchimpSyncIssueReason, MailchimpSyncStatus } from '@stamhoofd/structures/mailchimp/MailchimpSync.js';
 import { MailchimpSyncRequest, MailchimpSyncType } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
@@ -39,9 +39,9 @@ describe('Endpoint.StartMailchimpSync', () => {
             const context = await initMailchimpOrganization();
             const { organization } = context;
 
-            const newsletter = RecordSettings.create({ name: TranslatedString.create('Wil je de nieuwsbrief ontvangen?'), type: RecordType.Checkbox });
-            const camp = RecordSettings.create({ name: TranslatedString.create('Mee op kamp'), type: RecordType.Checkbox });
-            organization.meta.recordsConfiguration.recordCategories = [RecordCategory.create({ name: TranslatedString.create('Vragen'), records: [newsletter, camp] })];
+            const newsletter = RecordSettings.create({ name: TranslatedText.create('Wil je de nieuwsbrief ontvangen?'), type: RecordType.Checkbox });
+            const camp = RecordSettings.create({ name: TranslatedText.create('Mee op kamp'), type: RecordType.Checkbox });
+            organization.meta.recordsConfiguration.recordCategories = [RecordCategory.create({ name: TranslatedText.create('Vragen'), records: [newsletter, camp] })];
             await organization.save();
 
             const welpen = await new GroupFactory({ organization, name: TranslatedString.create('Welpen') }).create();
