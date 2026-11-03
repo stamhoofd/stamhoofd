@@ -3,7 +3,7 @@
         <h2 class="larger">
             {{ category.name }}
         </h2>
-        <p v-if="category.description.length > 0" class="style-description-small" v-text="category.description" />
+        <p v-if="category.description.length > 0" class="style-description-small pre-wrap" v-text="category.description" />
 
         <ProductGrid :products="products" :webshop="webshop" :checkout="checkout" :save-handler="saveHandler" :admin="admin" />
         <hr v-if="!isLast">
