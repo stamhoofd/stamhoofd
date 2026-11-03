@@ -49,11 +49,6 @@ const props = withDefaults(defineProps<{
     roundFractionDigits?: number | null;
 
     /**
-     * Correct an invalid or out of range value when the input loses focus.
-     */
-    autoFix?: boolean;
-
-    /**
      * Select the value when the input gets focus, so typing replaces it.
      */
     selectOnFocus?: boolean;
@@ -70,7 +65,6 @@ const props = withDefaults(defineProps<{
     suffixSingular: null,
     fractionDigits: 0,
     roundFractionDigits: null,
-    autoFix: true,
     selectOnFocus: true,
     label: null,
 });
@@ -81,12 +75,11 @@ const model = defineModel<number | null>({ default: null });
 const text = ref<string>(numberInput.numberToString(model.value, { valueIfNaN: '' }));
 const inputElement = useTemplateRef<HTMLInputElement>('input');
 
-const isValid = computed(() => props.autoFix ? numberInput.validateText(text.value, { valueIfNaN: null }).isValid : true);
+const isValid = computed(() => numberInput.validateText(text.value, { valueIfNaN: null }).isValid);
 const suffixText = computed(() => (model.value === numberInput.multipier.value && props.suffixSingular !== null ? props.suffixSingular : props.suffix));
 
-if (props.autoFix) {
-    updateModelValue();
-}
+// An out of range or missing value is corrected right away, so the sentence never shows a value the model does not have
+updateModelValue();
 
 watch(numberInput.multipier, () => {
     updateModelValue();
@@ -123,25 +116,19 @@ function onFocus() {
 function setModelValue(value: number | null, { final }: { final: boolean } = { final: true }) {
     if (value !== model.value) {
         model.value = value;
-        return;
     }
-    else if (final) {
+    if (final) {
         updateText(value);
     }
 }
 
 function updateText(value: number | null) {
-    text.value = numberInput.numberToString(value, {
-        valueIfNaN: props.autoFix ? '' : text.value,
-    });
+    text.value = numberInput.numberToString(value, { valueIfNaN: '' });
 }
 
 function step(add: number) {
-    const newValue = numberInput.step(model.value, add);
-    setModelValue(newValue);
-
-    // necessary because input is in focus
-    updateText(newValue);
+    // One step is one displayed unit, so ArrowUp on a percentage adds 1% and not 0,01%
+    setModelValue(numberInput.step(model.value, add * numberInput.multipier.value));
 }
 
 function updateModelValue(options: { final: boolean } = { final: true }) {
@@ -149,18 +136,12 @@ function updateModelValue(options: { final: boolean } = { final: true }) {
 }
 
 function validate(value: string, { final }: { final: boolean } = { final: true }) {
-    let number = numberInput.stringToNumber(value, { valueIfNaN: props.autoFix ? null : NaN });
+    const number = numberInput.stringToNumber(value, { valueIfNaN: null });
 
     if (final) {
-        if (props.autoFix) {
-            number = numberInput.constrain(number);
-        }
-        // The model value should never be null because a patch will not be able to set null as a value on the structure.
-        else if (number === null) {
-            number = props.min ?? 0;
-        }
-
-        setModelValue(number);
+        // constrain falls back to the minimum for a missing value, so the model never becomes
+        // null: a patch cannot set null as a value on the structure.
+        setModelValue(numberInput.constrain(number));
         return;
     }
 

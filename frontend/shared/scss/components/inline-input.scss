@@ -44,7 +44,10 @@
         // The hidden sizer determines the width, the input is layed out on top of it,
         // so the field is always exactly as wide as the text it contains
         position: relative;
-        min-width: 0;
+
+        // Keep room for about one character while the input is empty, so the caret stays
+        // visible and the field stays big enough to click
+        min-width: 1ch;
 
         > .sizer {
             display: block;
