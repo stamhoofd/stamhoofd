@@ -7,7 +7,7 @@
         <STErrorsDefault :error-box="errorBox" />
 
         <TInput v-model="name" :placeholder="$t(`%Sk`)" error-fields="name" :error-box="errorBox" :title="$t(`%1Os`)" />
-        <TTextarea v-model="description" :placeholder="$t(`%14p`)" error-fields="description" :error-box="errorBox" class="max" :title="$t(`%6o`)" />
+        <TWYSIWYGTextInput v-model="description" :placeholder="$t(`%14p`)" error-fields="description" :error-box="errorBox" class="max" :title="$t(`%6o`)" />
 
         <hr><h2>{{ $t('%zJ') }}</h2>
         <p>{{ $t('%iP') }}</p>
@@ -41,7 +41,7 @@
             </STListItem>
         </STList>
 
-        <TInput v-if="warningText !== null" v-model="warningText" :placeholder="$t(`%iZ`)" error-fields="label" :error-box="errorBox" class="max" :title="$t(`%JE`)" />
+        <TWYSIWYGTextInput v-if="warningText !== null" v-model="warningText" :placeholder="$t(`%iZ`)" error-fields="label" :error-box="errorBox" class="max" :title="$t(`%JE`)" />
         <STInputBox v-if="warningType" class="max" :title="$t(`%1B`)">
             <STList>
                 <STListItem :selectable="true" element-name="label">
@@ -104,11 +104,12 @@ import Radio from '#inputs/Radio.vue';
 import SaveView from '#navigation/SaveView.vue';
 import STErrorsDefault from '#errors/STErrorsDefault.vue';
 import STInputBox from '#inputs/STInputBox.vue';
+import TWYSIWYGTextInput from '#inputs/TWYSIWYGTextInput.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import { Validator } from '#errors/Validator.ts';
 import type { RecordSettings, TranslatedString } from '@stamhoofd/structures';
-import { RecordChoice, RecordWarning, RecordWarningType, Version } from '@stamhoofd/structures';
+import { RecordChoice, RecordWarning, RecordWarningType, TranslatedRichText, Version } from '@stamhoofd/structures';
 import { computed, ref, shallowRef } from 'vue';
 
 const props = withDefaults(defineProps<{
@@ -131,7 +132,7 @@ const name = computed({
 });
 const description = computed({
     get: () => patchedChoice.value.description,
-    set: (description: TranslatedString) => patchChoice.value = patchChoice.value.patch({ description }),
+    set: (description: TranslatedRichText) => patchChoice.value = patchChoice.value.patch({ description: TranslatedRichText.createPatch(patchedChoice.value.description, description) }),
 });
 
 const warningInverted = computed({
@@ -151,7 +152,7 @@ const warningInverted = computed({
 
 const warningText = computed({
     get: () => patchedChoice.value.warning?.text ?? null,
-    set: (text: TranslatedString | null) => {
+    set: (text: TranslatedRichText | null) => {
         if (text === null) {
             patchChoice.value = patchChoice.value.patch({ warning: null });
             return;

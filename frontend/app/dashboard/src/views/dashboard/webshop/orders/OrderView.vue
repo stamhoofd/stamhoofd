@@ -16,7 +16,7 @@
                 <ul class="member-records">
                     <li v-for="warning in sortedWarnings" :key="warning.id" :class="{ [warning.type]: true }">
                         <span :class="'icon '+warning.icon" />
-                        <span class="text">{{ warning.text }}</span>
+                        <span class="text style-wysiwyg" v-html="warning.text.html" />
                     </li>
                 </ul>
                 <hr>

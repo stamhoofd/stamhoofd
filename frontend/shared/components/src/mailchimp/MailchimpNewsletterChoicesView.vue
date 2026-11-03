@@ -13,9 +13,7 @@
                 <h3 class="style-title-list">
                     {{ choice.name.toString() }}
                 </h3>
-                <p v-if="choice.description.toString()" class="style-description-small">
-                    {{ choice.description.toString() }}
-                </p>
+                <div v-if="choice.description.text" class="style-description-small style-wysiwyg" v-html="choice.description.html" />
             </STListItem>
         </STList>
     </SaveView>

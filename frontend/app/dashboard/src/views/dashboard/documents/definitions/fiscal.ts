@@ -1,4 +1,4 @@
-import { DocumentTemplateDefinition, PropertyFilter, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, ResolutionFit, ResolutionRequest, TranslatedString } from '@stamhoofd/structures';
+import { DocumentTemplateDefinition, PropertyFilter, RecordCategory, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, ResolutionFit, ResolutionRequest, TranslatedRichText, TranslatedString } from '@stamhoofd/structures';
 
 export const fiscal = DocumentTemplateDefinition.create({
     type: 'fiscal',
@@ -41,27 +41,27 @@ export const fiscal = DocumentTemplateDefinition.create({
                         RecordChoice.create({
                             id: 'exception',
                             name: TranslatedString.create($t(`%xc`)),
-                            description: TranslatedString.create($t(`%xd`)),
+                            description: TranslatedRichText.fromText($t(`%xd`)),
                         }),
                         RecordChoice.create({
                             id: 'kind-en-gezin',
                             name: TranslatedString.create($t(`%xe`)),
-                            description: TranslatedString.create($t(`%xf`)),
+                            description: TranslatedRichText.fromText($t(`%xf`)),
                         }),
                         RecordChoice.create({
                             id: 'authorities',
                             name: TranslatedString.create($t(`%xg`)),
-                            description: TranslatedString.create($t(`%xh`)),
+                            description: TranslatedRichText.fromText($t(`%xh`)),
                         }),
                         RecordChoice.create({
                             id: 'foreign',
                             name: TranslatedString.create($t(`%xi`)),
-                            description: TranslatedString.create($t(`%xj`)),
+                            description: TranslatedRichText.fromText($t(`%xj`)),
                         }),
                         RecordChoice.create({
                             id: 'schools',
                             name: TranslatedString.create($t(`%xk`)),
-                            description: TranslatedString.create($t(`%xl`)),
+                            description: TranslatedRichText.fromText($t(`%xl`)),
                         }),
                     ],
                 }),
@@ -158,7 +158,7 @@ export const fiscal = DocumentTemplateDefinition.create({
                     type: RecordType.Text,
                     warning: RecordWarning.create({
                         id: 'missing.debtor.nationalRegisterNumber',
-                        text: TranslatedString.create($t(`%xu`)),
+                        text: TranslatedRichText.fromText($t(`%xu`)),
                         type: RecordWarningType.Warning,
                         inverted: true,
                     }),
@@ -183,7 +183,7 @@ export const fiscal = DocumentTemplateDefinition.create({
                     type: RecordType.Text,
                     warning: RecordWarning.create({
                         id: 'missing.member.nationalRegisterNumber',
-                        text: TranslatedString.create($t(`%xx`)),
+                        text: TranslatedRichText.fromText($t(`%xx`)),
                         type: RecordWarningType.Warning,
                         inverted: true,
                     }),
@@ -226,7 +226,7 @@ export const fiscal = DocumentTemplateDefinition.create({
                     type: RecordType.Price,
                     warning: RecordWarning.create({
                         id: 'missing.registration.price',
-                        text: TranslatedString.create($t(`%xz`)),
+                        text: TranslatedRichText.fromText($t(`%xz`)),
                         type: RecordWarningType.Error,
                         inverted: true,
                     }),

@@ -10,7 +10,7 @@
             >
                 <span :class="'icon '+warning.icon" />
                 <span class="text">
-                    {{ warning.text }}
+                    <span class="style-wysiwyg" v-html="warning.text.html" />
                     <a v-if="warning.inlineLink" class="inline-link" :href="warning.inlineLink.url" target="_blank" @click.stop>{{ warning.inlineLink.text }}</a>
                 </span>
             </li>
@@ -27,7 +27,7 @@ import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
 import { useSGVSync } from '#members/sgvSync.ts';
 import type { MemberPlatformMembership, PlatformMember } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { MembershipStatus, RecordAnswer, RecordWarning, RecordWarningType, TranslatedString } from '@stamhoofd/structures';
+import { MembershipStatus, RecordAnswer, RecordWarning, RecordWarningType, TranslatedRichText, TranslatedString } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 import { computed } from 'vue';
 import { useIsPropertyEnabled } from '../../hooks/useIsPropertyRequired';
@@ -86,7 +86,7 @@ const warnings = computed(() => {
     if (isPropertyEnabled('financialSupport')) {
         if (props.member.patchedMember.details.shouldApplyReducedPrice) {
             warnings.push(RecordWarning.create({
-                text: TranslatedString.create(financialSupportSettings.value.warningText),
+                text: TranslatedRichText.fromText(financialSupportSettings.value.warningText),
                 type: RecordWarningType.Info,
             }));
         }
@@ -95,7 +95,7 @@ const warnings = computed(() => {
     if (isPropertyEnabled('dataPermission')) {
         if (props.member.patchedMember.details.dataPermissions && !props.member.patchedMember.details.dataPermissions.value) {
             warnings.push(RecordWarning.create({
-                text: TranslatedString.create(dataPermissionSettings.value.warningText),
+                text: TranslatedRichText.fromText(dataPermissionSettings.value.warningText),
                 type: RecordWarningType.Error,
             }));
         }
@@ -104,7 +104,7 @@ const warnings = computed(() => {
     if (isPropertyEnabled('nationalRegisterNumber')) {
         if (props.member.patchedMember.details.severeDisability && props.member.patchedMember.details.age && props.member.needsTaxCertificateIfSevereDisability) {
             warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('%Zpy')),
+                text: TranslatedRichText.fromText($t('%Zpy')),
                 type: RecordWarningType.Info,
             }));
         }
@@ -113,7 +113,7 @@ const warnings = computed(() => {
     if (isPropertyEnabled('taxCertificates')) {
         if (props.member.patchedMember.details.parents.filter(p => p.isMemberTaxDependent).length > 1) {
             warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('%Zt9')),
+                text: TranslatedRichText.fromText($t('%Zt9')),
                 type: RecordWarningType.Info,
             }));
         }
@@ -123,19 +123,19 @@ const warnings = computed(() => {
         if (props.member.patchedMember.details.parentsHaveAccess?.value === true) {
             if (props.member.patchedMember.details.defaultAge < 18) {
                 warnings.push(RecordWarning.create({
-                    text: TranslatedString.create($t('%1Hh')),
+                    text: TranslatedRichText.fromText($t('%1Hh')),
                     type: RecordWarningType.Info,
                 }));
             } else {
                 warnings.push(RecordWarning.create({
-                    text: TranslatedString.create($t('%1Hi')),
+                    text: TranslatedRichText.fromText($t('%1Hi')),
                     type: RecordWarningType.Info,
                 }));
             }
         } else if (props.member.patchedMember.details.parentsHaveAccess?.value === false) {
             if (props.member.patchedMember.details.defaultAge < 18) {
                 warnings.push(RecordWarning.create({
-                    text: TranslatedString.create($t('%1Hj')),
+                    text: TranslatedRichText.fromText($t('%1Hj')),
                     type: RecordWarningType.Info,
                 }));
             }
@@ -145,7 +145,7 @@ const warnings = computed(() => {
     if (STAMHOOFD.userMode === 'platform') {
         if (props.member.membershipStatus === MembershipStatus.Trial) {
             warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('%7z')),
+                text: TranslatedRichText.fromText($t('%7z')),
                 type: RecordWarningType.Info,
             }));
         }
@@ -156,12 +156,12 @@ const warnings = computed(() => {
 
             if (nextMembership) {
                 warnings.push(RecordWarning.create({
-                    text: TranslatedString.create($t('%Bh', { date: Formatter.date(nextMembership.startDate) })),
+                    text: TranslatedRichText.fromText($t('%Bh', { date: Formatter.date(nextMembership.startDate) })),
                     type: RecordWarningType.Warning,
                 }));
             } else {
                 warnings.push(RecordWarning.create({
-                    text: TranslatedString.create($t('%5C')),
+                    text: TranslatedRichText.fromText($t('%5C')),
                     type: RecordWarningType.Error,
                 }));
             }
@@ -169,7 +169,7 @@ const warnings = computed(() => {
 
         if (props.member.membershipStatus === MembershipStatus.Expiring) {
             warnings.push(RecordWarning.create({
-                text: TranslatedString.create($t('%5B')),
+                text: TranslatedRichText.fromText($t('%5B')),
                 type: RecordWarningType.Warning,
             }));
         }
@@ -182,7 +182,7 @@ const warnings = computed(() => {
         && props.member.patchedMember.details.getPhoneNumbersForVerification().length === 0
     ) {
         const warning = RecordWarning.create({
-            text: TranslatedString.create($t('%Zxf', { firstName: props.member.patchedMember.firstName || $t('Dit lid') })),
+            text: TranslatedRichText.fromText($t('%Zxf', { firstName: props.member.patchedMember.firstName || $t('Dit lid') })),
             type: RecordWarningType.Warning,
         }) as MemberWarning;
         warning.inlineLink = {

@@ -16,7 +16,7 @@
                     <h3 class="style-title-list">
                         {{ choice.name }}
                     </h3>
-                    <p v-if="choice.description.length" class="style-description-small pre-wrap" v-text="choice.description" />
+                    <div v-if="choice.description.text" class="style-description-small style-wysiwyg" v-html="choice.description.html" />
                 </STListItem>
             </STList>
         </STInputBox>
@@ -29,7 +29,7 @@
                     <h3 class="style-title-list">
                         {{ choice.name }}
                     </h3>
-                    <p v-if="choice.description.length" class="style-description-small pre-wrap" v-text="choice.description" />
+                    <div v-if="choice.description.text" class="style-description-small style-wysiwyg" v-html="choice.description.html" />
                 </STListItem>
             </STList>
         </STInputBox>
@@ -161,7 +161,7 @@ const label = computed(() => props.record.label.length ? props.record.label : pr
 const required = computed(() => !props.allOptional && props.record.required);
 
 // Only drop the default max-width of the input box when the choices need the extra space
-const hasLargeChoices = computed(() => props.record.choices.some(choice => choice.name.toString().length > 30 || choice.description.length > 0));
+const hasLargeChoices = computed(() => props.record.choices.some(choice => choice.name.toString().length > 30 || choice.description.text.length > 0));
 const inputPlaceholder = computed(() => {
     if (!required.value) {
         if (answer.value.settings.inputPlaceholder.length > 0) {

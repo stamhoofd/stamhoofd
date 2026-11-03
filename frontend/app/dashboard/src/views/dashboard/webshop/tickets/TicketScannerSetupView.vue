@@ -75,6 +75,7 @@ import { Category, ProductType, WebshopTicketType } from '@stamhoofd/structures'
 import { Formatter } from '@stamhoofd/utility';
 
 import { LocalizedDomains } from '@stamhoofd/frontend-i18n/LocalizedDomains';
+import type { Ref } from 'vue';
 import { computed, ref } from 'vue';
 import type { WebshopManager } from '../WebshopManager';
 import TicketSyncProgressRing from './TicketSyncProgressRing.vue';
@@ -86,7 +87,8 @@ const props = defineProps<{
 }>();
 
 const present = usePresent();
-const disabledProducts = ref<Product[]>([]);
+// The deep ref unwrapping of a Product exceeds the TypeScript instantiation depth
+const disabledProducts = ref<Product[]>([]) as Ref<Product[]>;
 const isChecking = ref(false);
 const noDatabaseSupport = ref(false);
 const { isCatchingUp, progressPercentage } = useTicketSync(() => props.webshopManager);

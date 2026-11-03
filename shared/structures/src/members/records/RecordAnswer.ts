@@ -10,6 +10,7 @@ import { CountryHelper } from '../../addresses/CountryDecoder.js';
 import { AuditLogReplacement, AuditLogReplacementType } from '../../AuditLogReplacement.js';
 import { File } from '../../files/File.js';
 import { Image } from '../../files/Image.js';
+import { TranslatedRichText } from '../../TranslatedRichText.js';
 import { TranslatedString } from '../../TranslatedString.js';
 import { upgradePriceFrom2To4DecimalPlaces } from '../../upgradePriceFrom2To4DecimalPlaces.js';
 import { RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from './RecordSettings.js';
@@ -92,7 +93,7 @@ export class RecordAnswer extends AutoEncoder {
                     return [
                         RecordWarning.create({
                             id: 'validation-warning-' + this.id,
-                            text: TranslatedString.create(e.getHuman()),
+                            text: TranslatedRichText.fromText(e.getHuman()),
                             type: RecordWarningType.Error,
                         }),
                     ];

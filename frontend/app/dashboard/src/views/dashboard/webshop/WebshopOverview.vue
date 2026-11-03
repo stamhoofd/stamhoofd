@@ -484,6 +484,7 @@ import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import { EmailTemplate, EmailTemplateType, PaymentMethod, PrivateWebshop, WebshopMetaData, WebshopStatus, WebshopTicketType, WebshopType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
+import type { Ref } from 'vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import BillingWarningBox from '../settings/packages/BillingWarningBox.vue';
 
@@ -503,7 +504,8 @@ const platform = usePlatform();
 const loading = ref(false);
 const openTodoList = ref(true);
 
-const webshopManager = ref(new WebshopManager(context.value, props.preview));
+// The deep ref unwrapping of a WebshopManager exceeds the TypeScript instantiation depth
+const webshopManager = ref(new WebshopManager(context.value, props.preview)) as Ref<WebshopManager>;
 const webshop = computed(() => webshopManager.value.webshop);
 
 enum Routes {

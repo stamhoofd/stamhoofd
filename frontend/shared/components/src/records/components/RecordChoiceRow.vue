@@ -3,9 +3,7 @@
         <h3 class="style-title-list">
             {{ choice.name }}
         </h3>
-        <p v-if="choice.description" class="style-description-small">
-            {{ choice.description }}
-        </p>
+        <div v-if="choice.description.text" class="style-description-small style-wysiwyg" v-html="choice.description.html" />
 
         <template #right>
             <span class="button icon drag gray" @click.stop @contextmenu.stop />

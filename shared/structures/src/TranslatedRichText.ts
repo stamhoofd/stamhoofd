@@ -3,7 +3,7 @@ import { EnumDecoder, ObjectData } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { Language } from '@stamhoofd/types/Language';
 import { RichText } from './RichText.js';
-import { TranslatedString } from './TranslatedString.js';
+import { TranslatedString, TranslatedStringPatch } from './TranslatedString.js';
 
 type RichTextLanguageMap = {
     [key in Language]?: RichText;
@@ -59,6 +59,13 @@ export class TranslatedRichText implements Encodeable, Patchable<TranslatedRichT
 
     static create(translations: RichTextLanguageMap | RichText = RichText.create({})) {
         return new TranslatedRichText(translations);
+    }
+
+    /**
+     * Every line becomes a paragraph
+     */
+    static fromText(text: string): TranslatedRichText {
+        return new TranslatedRichText(RichText.fromText(text));
     }
 
     /**
@@ -138,9 +145,10 @@ export class TranslatedRichText implements Encodeable, Patchable<TranslatedRichT
     }
 
     /**
-     * Audit logs show the text of every language, the same way as a TranslatedString
+     * Loses the markup, so only for readers that cannot handle it: audit logs and clients from before
+     * the field became rich text.
      */
-    transformForDiff(): TranslatedString {
+    toTranslatedString(): TranslatedString {
         if (this.translations instanceof RichText) {
             return new TranslatedString(this.translations.text);
         }
@@ -149,6 +157,13 @@ export class TranslatedRichText implements Encodeable, Patchable<TranslatedRichT
             texts[language] = this.translations[language]!.text;
         }
         return new TranslatedString(texts);
+    }
+
+    /**
+     * Audit logs show the text of every language, the same way as a TranslatedString
+     */
+    transformForDiff(): TranslatedString {
+        return this.toTranslatedString();
     }
 
     patch(patch: TranslatedRichText | TranslatedRichTextPatch | RichText | RichTextLanguageMapPatch): this {
@@ -299,6 +314,67 @@ export class TranslatedRichText implements Encodeable, Patchable<TranslatedRichT
             }
         }
         return undefined;
+    }
+
+    /**
+     * Every language keeps its own text and its line breaks become paragraphs, so nothing is lost for
+     * a field that was already translated.
+     */
+    static translatedStringField(options: { version: number; nullable?: boolean; optional?: boolean; defaultValue?: () => TranslatedRichText | null }) {
+        return {
+            ...options,
+            decoder: TranslatedRichTextDecoder,
+            upgrade: (old: TranslatedString | null | undefined): TranslatedRichText | null | undefined => {
+                if (old === null || old === undefined) {
+                    return old;
+                }
+                return TranslatedRichText.fromTranslatedString(old);
+            },
+            downgrade: (value: TranslatedRichText | null | undefined): TranslatedString | null | undefined => {
+                if (value === null || value === undefined) {
+                    return value;
+                }
+                return value.toTranslatedString();
+            },
+            upgradePatch: (old: TranslatedStringPatch | TranslatedString | null | undefined): TranslatedRichText | TranslatedRichTextPatch | null | undefined => {
+                if (old === null || old === undefined) {
+                    return old;
+                }
+                if (old instanceof TranslatedString) {
+                    return TranslatedRichText.fromTranslatedString(old);
+                }
+                if (typeof old.translations === 'string') {
+                    // An old client that replaced the whole value with an untranslated string
+                    return TranslatedRichText.create(RichText.fromText(old.translations));
+                }
+                const translations: RichTextLanguageMapPatch = {};
+                for (const language of Object.keys(old.translations) as Language[]) {
+                    const text = old.translations[language];
+                    if (text === undefined) {
+                        continue;
+                    }
+                    translations[language] = text === null ? null : RichText.fromText(text);
+                }
+                return new TranslatedRichTextPatch(translations);
+            },
+            downgradePatch: (value: TranslatedRichTextPatch | TranslatedRichText | null | undefined): TranslatedStringPatch | TranslatedString | null | undefined => {
+                if (value === null || value === undefined) {
+                    return value;
+                }
+                if (value instanceof TranslatedRichText) {
+                    return value.toTranslatedString();
+                }
+                const translations: { [key in Language]?: string | null } = {};
+                for (const language of Object.keys(value.translations) as Language[]) {
+                    const richText = value.translations[language];
+                    if (richText === undefined) {
+                        continue;
+                    }
+                    translations[language] = richText === null ? null : richText.text;
+                }
+                return new TranslatedStringPatch(translations);
+            },
+        };
     }
 
     /**

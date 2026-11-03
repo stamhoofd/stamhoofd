@@ -1,6 +1,6 @@
 import { useSGVSync } from '@stamhoofd/components/members/sgvSync';
 import type { SGVSyncWarning } from '@stamhoofd/components/members/sgvSync';
-import { MemberWithRegistrationsBlob, Organization, RecordWarning, SGVSyncStatus, TranslatedString } from '@stamhoofd/structures';
+import { MemberWithRegistrationsBlob, Organization, RecordWarning, SGVSyncStatus, TranslatedRichText, TranslatedString } from '@stamhoofd/structures';
 import { mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { computed, defineComponent, h, ref, shallowRef } from 'vue';
@@ -98,7 +98,7 @@ describe('SGV member warning actions', () => {
     test('does not mistake unrelated Dutch warnings for synchronization actions', () => {
         const { sync, wrapper } = useTestSync();
         sync.sgvSyncHandleWarningClick(RecordWarning.create({
-            text: TranslatedString.create('Controleer de synchronisatie met een andere dienst.'),
+            text: TranslatedRichText.fromText('Controleer de synchronisatie met een andere dienst.'),
         }));
 
         expect(open).not.toHaveBeenCalled();

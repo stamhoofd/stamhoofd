@@ -156,7 +156,7 @@
                 </STListItem>
             </STList>
 
-            <TTextarea v-if="warningText !== null" v-model="warningText" :placeholder="$t(`%iZ`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`%JE`)" />
+            <TWYSIWYGTextInput v-if="warningText !== null" v-model="warningText" :placeholder="$t(`%iZ`)" error-fields="label" :error-box="errors.errorBox" class="max" :title="$t(`%JE`)" />
             <STInputBox v-if="warningType" class="max" :title="$t(`%1B`)">
                 <STList>
                     <STListItem :selectable="true" element-name="label">
@@ -230,6 +230,7 @@ import Checkbox from '#inputs/Checkbox.vue';
 import Dropdown from '#inputs/Dropdown.vue';
 import Radio from '#inputs/Radio.vue';
 import STInputBox from '#inputs/STInputBox.vue';
+import TWYSIWYGTextInput from '#inputs/TWYSIWYGTextInput.vue';
 import STList from '#layout/STList.vue';
 import STListItem from '#layout/STListItem.vue';
 import SaveView from '#navigation/SaveView.vue';
@@ -241,7 +242,7 @@ import { usePop, usePresent } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { ObjectWithRecords, RecordCategory, TranslatedString } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { FileType, PropertyFilter, RecordAnswerDecoder, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType } from '@stamhoofd/structures';
+import { FileType, PropertyFilter, RecordAnswerDecoder, RecordChoice, RecordSettings, RecordType, RecordWarning, RecordWarningType, TranslatedRichText } from '@stamhoofd/structures';
 
 import { computed } from 'vue';
 
@@ -543,7 +544,7 @@ const warningInverted = computed({
 
 const warningText = computed({
     get: () => patchedRecord.value.warning?.text ?? null,
-    set: (text: TranslatedString | null) => {
+    set: (text: TranslatedRichText | null) => {
         if (text === null) {
             patchRecord.value = patchRecord.value.patch({
                 warning: null,

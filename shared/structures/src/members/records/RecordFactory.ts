@@ -1,4 +1,5 @@
 import { PropertyFilter } from '../../filters/PropertyFilter.js';
+import { TranslatedRichText } from '../../TranslatedRichText.js';
 import { TranslatedString } from '../../TranslatedString.js';
 import { LegacyRecordType } from './LegacyRecordType.js';
 import { RecordCategory } from './RecordCategory.js';
@@ -192,7 +193,7 @@ export class RecordFactory {
                         name: TranslatedString.create($t(`%r9`)),
                         warning: RecordWarning.create({
                             id: '',
-                            text: TranslatedString.create($t(`%rA`)),
+                            text: TranslatedRichText.fromText($t(`%rA`)),
                             type: RecordWarningType.Error,
                         }),
                     }),
@@ -210,7 +211,7 @@ export class RecordFactory {
                             name: TranslatedString.create($t(`%rC`)),
                             warning: RecordWarning.create({
                                 id: '',
-                                text: TranslatedString.create($t(`%rD`)),
+                                text: TranslatedRichText.fromText($t(`%rD`)),
                                 type: RecordWarningType.Error,
                             }),
                         }),
@@ -226,7 +227,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%rG`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rF`)),
+                    text: TranslatedRichText.fromText($t(`%rF`)),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -240,7 +241,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%rI`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rH`)),
+                    text: TranslatedRichText.fromText($t(`%rH`)),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -252,7 +253,7 @@ export class RecordFactory {
                 record.name = TranslatedString.create($t(`%rJ`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rJ`)),
+                    text: TranslatedRichText.fromText($t(`%rJ`)),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -267,7 +268,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%rM`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rK`)),
+                    text: TranslatedRichText.fromText($t(`%rK`)),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -279,7 +280,7 @@ export class RecordFactory {
                 record.name = TranslatedString.create($t(`%rN`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rO`)),
+                    text: TranslatedRichText.fromText($t(`%rO`)),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -292,7 +293,7 @@ export class RecordFactory {
                 record.description = TranslatedString.create($t(`%rQ`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rR`)),
+                    text: TranslatedRichText.fromText($t(`%rR`)),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -304,7 +305,7 @@ export class RecordFactory {
                 record.name = TranslatedString.create($t(`%rS`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rS`)),
+                    text: TranslatedRichText.fromText($t(`%rS`)),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -316,7 +317,7 @@ export class RecordFactory {
                 record.name = TranslatedString.create($t(`%rT`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rT`)),
+                    text: TranslatedRichText.fromText($t(`%rT`)),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -333,7 +334,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%rX`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rU`)),
+                    text: TranslatedRichText.fromText($t(`%rU`)),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -348,7 +349,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rY`)),
+                    text: TranslatedRichText.fromText($t(`%rY`)),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -366,7 +367,7 @@ export class RecordFactory {
                 record.commentsDescription = TranslatedString.create($t(`%rd`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%re`)),
+                    text: TranslatedRichText.fromText($t(`%re`)),
                     type: RecordWarningType.Info,
                     inverted: true,
                 });
@@ -381,7 +382,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rf`)),
+                    text: TranslatedRichText.fromText($t(`%rf`)),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -395,7 +396,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rg`)),
+                    text: TranslatedRichText.fromText($t(`%rg`)),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -408,7 +409,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rh`)),
+                    text: TranslatedRichText.fromText($t(`%rh`)),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -421,7 +422,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%ri`)),
+                    text: TranslatedRichText.fromText($t(`%ri`)),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -435,7 +436,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rj`)),
+                    text: TranslatedRichText.fromText($t(`%rj`)),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -448,7 +449,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rk`)),
+                    text: TranslatedRichText.fromText($t(`%rk`)),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -461,7 +462,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rl`)),
+                    text: TranslatedRichText.fromText($t(`%rl`)),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -474,7 +475,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%14p`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%s`)),
+                    text: TranslatedRichText.fromText($t(`%s`)),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -490,7 +491,7 @@ export class RecordFactory {
                 record.commentsDescription = TranslatedString.create($t(`%rp`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rq`)),
+                    text: TranslatedRichText.fromText($t(`%rq`)),
                     type: RecordWarningType.Error,
                     inverted: false,
                 });
@@ -504,7 +505,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%rs`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rr`)),
+                    text: TranslatedRichText.fromText($t(`%rr`)),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -517,7 +518,7 @@ export class RecordFactory {
                 record.askComments = false;
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rt`)),
+                    text: TranslatedRichText.fromText($t(`%rt`)),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -531,7 +532,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%rv`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%ru`)),
+                    text: TranslatedRichText.fromText($t(`%ru`)),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -545,7 +546,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%rv`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rw`)),
+                    text: TranslatedRichText.fromText($t(`%rw`)),
                     type: RecordWarningType.Info,
                     inverted: false,
                 });
@@ -558,7 +559,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%rv`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%rx`)),
+                    text: TranslatedRichText.fromText($t(`%rx`)),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -572,7 +573,7 @@ export class RecordFactory {
                 record.inputPlaceholder = TranslatedString.create($t(`%rz`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%s0`)),
+                    text: TranslatedRichText.fromText($t(`%s0`)),
                     type: RecordWarningType.Warning,
                     inverted: false,
                 });
@@ -588,7 +589,7 @@ export class RecordFactory {
                 record.description = TranslatedString.create($t(`%s2`));
 
                 record.warning = RecordWarning.create({
-                    text: TranslatedString.create($t(`%s3`)),
+                    text: TranslatedRichText.fromText($t(`%s3`)),
                     type: RecordWarningType.Error,
                     inverted: true,
                 });

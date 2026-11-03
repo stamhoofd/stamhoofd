@@ -7,6 +7,7 @@ import { PropertyFilter } from '../../filters/PropertyFilter.js';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { getPermissionLevelNumber } from '../../PermissionLevel.js';
 import type { Filterable } from '../../filters/Filterable.js';
+import { TranslatedRichText } from '../../TranslatedRichText.js';
 import { TranslatedString } from '../../TranslatedString.js';
 
 export type RecordFilterOptions = { level?: PermissionLevel; additionalFilter?: (record: RecordSettings) => boolean };
@@ -119,7 +120,8 @@ export class RecordWarning extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     @field(TranslatedString.field({ version: 370 }))
-    text = TranslatedString.create();
+    @field(TranslatedRichText.translatedStringField({ version: 426 }))
+    text = TranslatedRichText.create();
 
     @field({ decoder: new EnumDecoder(RecordWarningType) })
     type = RecordWarningType.Info;
@@ -168,7 +170,8 @@ export class RecordChoice extends AutoEncoder {
 
     @field({ decoder: StringDecoder, version: 118 })
     @field(TranslatedString.field({ version: 370 }))
-    description = TranslatedString.create();
+    @field(TranslatedRichText.translatedStringField({ version: 426 }))
+    description = TranslatedRichText.create();
 
     /**
      * Show a warning if selected (or not selected if inverted)
