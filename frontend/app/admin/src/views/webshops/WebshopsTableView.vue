@@ -111,6 +111,16 @@ const allColumns: Column<ObjectType, any>[] = [
         minimumWidth: 80,
         recommendedWidth: 120,
     }),
+
+    new Column<ObjectType, number | null>({
+        id: 'orderCount',
+        name: $t('%1JX'),
+        allowSorting: false,
+        getValue: item => item.orderCount,
+        format: count => count === null ? '' : count.toString(),
+        minimumWidth: 80,
+        recommendedWidth: 120,
+    }),
 ];
 
 const route = {

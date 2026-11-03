@@ -49,6 +49,15 @@
                         {{ formatDate(props.webshopWithOrganization.webshop.createdAt) }}
                     </p>
                 </STListItem>
+
+                <STListItem v-if="props.webshopWithOrganization.orderCount !== null">
+                    <h3 class="style-definition-label">
+                        {{ $t('%1JX') }}
+                    </h3>
+                    <p class="style-definition-text">
+                        {{ props.webshopWithOrganization.orderCount }}
+                    </p>
+                </STListItem>
             </STList>
 
             <hr>
