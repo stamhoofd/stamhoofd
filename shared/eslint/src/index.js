@@ -15,6 +15,7 @@ import asyncComponentWithProperties from './rules/async-component-with-propertie
 import asyncRouteComponents from './rules/async-route-components.js';
 import hrOnOwnLine from './rules/hr-on-own-line.js';
 import noPackageSelfImport from './rules/no-package-self-import.js';
+import noRichTextInterpolation from './rules/no-rich-text-interpolation.js';
 import noTRouteUrl from './rules/no-t-route-url.js';
 import preferDefineRoute from './rules/prefer-define-route.js';
 
@@ -23,6 +24,7 @@ const rules = {
     'async-route-components': asyncRouteComponents,
     'hr-on-own-line': hrOnOwnLine,
     'no-package-self-import': noPackageSelfImport,
+    'no-rich-text-interpolation': noRichTextInterpolation,
     'no-t-route-url': noTRouteUrl,
     'prefer-define-route': preferDefineRoute,
 };
@@ -87,6 +89,7 @@ const baseRules = [
             // "exports" (the built dist for some packages), which duplicates modules and
             // breaks tsc project references. Use a relative or '#' subpath import instead.
             'stamhoofd/no-package-self-import': 'error',
+            'stamhoofd/no-rich-text-interpolation': 'error',
         },
     },
 
