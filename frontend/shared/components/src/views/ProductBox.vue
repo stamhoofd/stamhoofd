@@ -84,7 +84,11 @@ const imgHeight = computed(() => imageResolution.value?.height);
 
 const stockText = computed(() => getProductStockTag({ product: props.product, webshop: props.webshop, cart: cart.value, admin: props.admin, editExisting: editExisting.value }));
 
-const editExisting = computed(() => props.product.isUnique || !props.webshop.shouldEnableCart);
+/**
+ * Without a cart, a buyer orders one item per product: the choices are made in that item.
+ * Administrators compose the order from separate items, so they can combine e.g. several price categories of one product.
+ */
+const editExisting = computed(() => props.product.isUnique || (!props.admin && !props.webshop.shouldEnableCart));
 
 function onClicked() {
     const editExistingValue = editExisting.value;
