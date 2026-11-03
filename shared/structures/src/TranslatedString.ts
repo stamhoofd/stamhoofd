@@ -50,6 +50,12 @@ export class TranslatedStringPatch implements Encodeable, Patchable<TranslatedSt
 /**
  * Accepts legacy untranslated strings as well as language maps, so existing stored
  * text can be decoded without first migrating it to a translated representation.
+ *
+ * @deprecated The name only says that a field is translatable, not which shape it has, so its fields
+ * ended up both in small input boxes and in textareas. Use TranslatedText for a name, a title or a
+ * label, TranslatedLongText for a description of a few sentences, and TranslatedRichText for anything
+ * with line breaks or formatting. Kept working until the last call site is converted; it is not reused
+ * for the short form, so every field is assigned a type deliberately.
  */
 export class TranslatedString implements Encodeable, Patchable<TranslatedStringPatch>, StringLikeObject {
     translations: LanguageMap | string; // set to a string if not known in which language it is
