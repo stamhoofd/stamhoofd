@@ -4,6 +4,7 @@ import { render } from 'vitest-browser-vue';
 import { nextTick } from 'vue';
 
 import FloatInlineInput from './FloatInlineInput.vue';
+import PermyriadInlineInput from './PermyriadInlineInput.vue';
 
 type Props = {
     min?: number | null;
@@ -247,4 +248,35 @@ test('Keeps the suffix while the input is empty', async () => {
 
     expect(state.value).toBe(0);
     expect(container()).toHaveTextContent('0%');
+});
+
+test('PermyriadInlineInput edits a permyriad value as a percentage', async () => {
+    const state: { value: number | null } = { value: 30_00 };
+    const rendered: { result?: ReturnType<typeof render> } = {};
+
+    const result = render(PermyriadInlineInput, {
+        props: {
+            'modelValue': state.value,
+            'label': 'Percentage annuleringskost',
+            'onUpdate:modelValue': (updated: number | null) => {
+                state.value = updated;
+                void rendered.result?.rerender({ modelValue: updated });
+            },
+        },
+    });
+    rendered.result = result;
+
+    expect(input()).toHaveValue('30');
+    expect(container()).toHaveTextContent('30%');
+
+    await type('70');
+
+    expect(state.value).toBe(70_00);
+
+    await type('120');
+    await commit();
+
+    // The maximum of 100% is applied
+    expect(state.value).toBe(100_00);
+    expect(input()).toHaveValue('100');
 });
