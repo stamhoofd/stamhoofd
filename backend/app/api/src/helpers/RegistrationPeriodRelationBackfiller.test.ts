@@ -1,6 +1,6 @@
 import type { RegistrationPeriod } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemFactory, GroupFactory, MemberFactory, MemberPlatformMembership, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedText } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { backfillRegistrationPeriodRelations } from './RegistrationPeriodRelationBackfiller.js';
@@ -89,7 +89,7 @@ describe('helper.RegistrationPeriodRelationBackfiller', () => {
         const existingRelations = new Map([
             [
                 BalanceItemRelationType.RegistrationPeriod,
-                BalanceItemRelation.create({ id: period.id, name: new TranslatedString('Custom period name') }),
+                BalanceItemRelation.create({ id: period.id, name: TranslatedText.create('Custom period name') }),
             ],
         ]);
 

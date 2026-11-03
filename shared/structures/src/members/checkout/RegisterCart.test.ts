@@ -6,7 +6,7 @@ import { Organization } from '../../Organization.js';
 import { Platform } from '../../Platform.js';
 import { ReduceablePrice } from '../../ReduceablePrice.js';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from '../../RegistrationPeriod.js';
-import { TranslatedString } from '../../TranslatedString.js';
+import { TranslatedText } from '../../TranslatedText.js';
 import { BooleanStatus, MemberDetails } from '../MemberDetails.js';
 import { MembersBlob, MemberWithRegistrationsBlob } from '../MemberWithRegistrationsBlob.js';
 import { PlatformFamily } from '../PlatformMember.js';
@@ -37,7 +37,7 @@ function createTestGroups(organization: Organization, period: RegistrationPeriod
             organizationId: organization.id,
             periodId: period.id,
             settings: GroupSettings.create({
-                name: new TranslatedString(names ? names[index] : 'Name'),
+                name: TranslatedText.create(names ? names[index] : 'Name'),
                 prices: [
                     GroupPrice.create({
                         price: ReduceablePrice.create({
@@ -65,7 +65,7 @@ function createBundleDiscount({
     discounts?: Array<{ value: number; type: GroupPriceDiscountType; reducedValue?: number }>;
 } = {}) {
     return BundleDiscount.create({
-        name: new TranslatedString(name),
+        name: TranslatedText.create(name),
         countWholeFamily,
         countPerGroup,
         discounts: discounts.map(d => GroupPriceDiscount.create({
@@ -406,7 +406,7 @@ describe('Unit.RegisterCart', () => {
                 organizationId: organization.id,
                 periodId: otherPeriod.id,
                 settings: GroupSettings.create({
-                    name: new TranslatedString('Old group'),
+                    name: TranslatedText.create('Old group'),
                     prices: [
                         GroupPrice.create({
                             price: ReduceablePrice.create({ price: 50_0000 }),
@@ -680,7 +680,7 @@ describe('Unit.RegisterCart', () => {
                 organizationId: organization.id,
                 periodId: organization.period.period.id,
                 settings: GroupSettings.create({
-                    name: new TranslatedString('Group C'),
+                    name: TranslatedText.create('Group C'),
                     prices: [
                         groupCPrice,
                     ],
@@ -809,7 +809,7 @@ describe('Unit.RegisterCart', () => {
                 organizationId: organization.id,
                 periodId: organization.period.period.id,
                 settings: GroupSettings.create({
-                    name: new TranslatedString('Group C'),
+                    name: TranslatedText.create('Group C'),
                     prices: [
                         groupCPrice,
                     ],

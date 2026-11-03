@@ -293,7 +293,7 @@ import { useRequestOwner } from '#hooks/networking/useRequestOwner';
 import type { Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { DarkMode, EmailTemplate, EmailTemplateType, Event, getAppHost, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PrivateWebshop, TranslatedString, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
+import { DarkMode, EmailTemplate, EmailTemplateType, Event, getAppHost, Group, GroupSettings, GroupStatus, LimitedFilteredRequest, mergeFilters, PrivateWebshop, TranslatedText, WebshopMetaData, WebshopPreview, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
@@ -946,7 +946,7 @@ function duplicateEvent() {
                     ...clonedGroup.settings,
                     eventId: event.id,
                     period: undefined,
-                    name: TranslatedString.create(event.name),
+                    name: TranslatedText.create(event.name),
                 }),
                 createdAt: undefined,
                 status: GroupStatus.Closed,

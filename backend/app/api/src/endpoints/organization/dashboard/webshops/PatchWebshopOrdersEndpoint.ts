@@ -6,7 +6,7 @@ import { SimpleError } from '@common/errors';
 import { BalanceItem, BalanceItemPayment, Order, Payment, Webshop, WebshopCounter } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PrivateOrder, TranslatedString, Webshop as WebshopStruct, WebshopTicketType } from '@stamhoofd/structures';
+import { AuditLogSource, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PrivateOrder, TranslatedText, Webshop as WebshopStruct, WebshopTicketType } from '@stamhoofd/structures';
 
 import { Context } from '../../../../helpers/Context.js';
 import { clearOrderReservations } from '../../../../helpers/clearOrderReservations.js';
@@ -213,7 +213,7 @@ export class PatchWebshopOrdersEndpoint extends Endpoint<Params, Query, Body, Re
                                 BalanceItemRelationType.Webshop,
                                 BalanceItemRelation.create({
                                     id: webshop.id,
-                                    name: new TranslatedString(webshop.meta.name),
+                                    name: TranslatedText.create(webshop.meta.name),
                                 }),
                             ],
                         ]);

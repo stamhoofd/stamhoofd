@@ -10,25 +10,7 @@ import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { BalanceItem, Group, Member, Organization, User, Webshop } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, GroupFactory, MemberFactory, OrderFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Payment, RegistrationFactory, RegistrationPeriod, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import {
-    appToUri,
-    BalanceItemRelation,
-    BalanceItemRelationType,
-    BalanceItemType,
-    GroupCategory,
-    GroupCategorySettings,
-    PaymentMethod,
-    PaymentProvider,
-    PaymentStatus,
-    PaymentType,
-    Permissions,
-    SettlementReference,
-    STPackageBundle,
-    Token as TokenStruct,
-    TransferSettings,
-    TranslatedString,
-    Version,
-} from '@stamhoofd/structures';
+import { appToUri, BalanceItemRelation, BalanceItemRelationType, BalanceItemType, GroupCategory, GroupCategorySettings, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, Permissions, SettlementReference, STPackageBundle, Token as TokenStruct, TransferSettings, TranslatedString, TranslatedText, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { TableHelper, WorkerData } from '../helpers/index.js';
 
@@ -96,14 +78,14 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
         const registration = await new RegistrationFactory({ member, group }).create();
 
         const relations = new Map([
-            [BalanceItemRelationType.Member, BalanceItemRelation.create({ id: member.id, name: new TranslatedString(member.details.name) })],
+            [BalanceItemRelationType.Member, BalanceItemRelation.create({ id: member.id, name: TranslatedText.create(member.details.name) })],
             [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: group.id, name: group.settings.name })],
         ]);
 
         if (priceName) {
             relations.set(
                 BalanceItemRelationType.GroupPrice,
-                BalanceItemRelation.create({ id: 'price-' + priceName, name: new TranslatedString(priceName) }),
+                BalanceItemRelation.create({ id: 'price-' + priceName, name: TranslatedText.create(priceName) }),
             );
         }
 
@@ -163,7 +145,7 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
             unitPrice: price,
             pricePaid: price,
             relations: new Map([
-                [BalanceItemRelationType.Webshop, BalanceItemRelation.create({ id: webshop.id, name: new TranslatedString(webshop.meta.name) })],
+                [BalanceItemRelationType.Webshop, BalanceItemRelation.create({ id: webshop.id, name: TranslatedText.create(webshop.meta.name) })],
             ]),
         }).create();
 
@@ -190,8 +172,8 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
     test('an admin sees who received the money, per category and per article, and can narrow down', async ({ page }) => {
         const organization = await createOrganization(`PaymentBreakdown${WorkerData.id}`);
 
-        const kapoenen = await new GroupFactory({ organization, name: new TranslatedString('Kapoenen'), price: 40_0000 }).create();
-        const welpen = await new GroupFactory({ organization, name: new TranslatedString('Welpen'), price: 25_0000 }).create();
+        const kapoenen = await new GroupFactory({ organization, name: TranslatedText.create('Kapoenen'), price: 40_0000 }).create();
+        const welpen = await new GroupFactory({ organization, name: TranslatedText.create('Welpen'), price: 25_0000 }).create();
 
         const first = await new MemberFactory({ organization, firstName: 'Eva', lastName: 'Peeters' }).create();
         const second = await new MemberFactory({ organization, firstName: 'Jonas', lastName: 'Claes' }).create();
@@ -274,7 +256,7 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
     test('an admin sees which payout the money was part of, and can narrow down to one', async ({ page }) => {
         const organization = await createOrganization(`SettlementBreakdown${WorkerData.id}`);
 
-        const kapoenen = await new GroupFactory({ organization, name: new TranslatedString('Kapoenen'), price: 40_0000 }).create();
+        const kapoenen = await new GroupFactory({ organization, name: TranslatedText.create('Kapoenen'), price: 40_0000 }).create();
 
         const first = await new MemberFactory({ organization, firstName: 'Eva', lastName: 'Peeters' }).create();
         const second = await new MemberFactory({ organization, firstName: 'Jonas', lastName: 'Claes' }).create();
@@ -340,7 +322,7 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
     test('the payouts are left out when nothing was paid online', async ({ page }) => {
         const organization = await createOrganization(`NoSettlements${WorkerData.id}`);
 
-        const kapoenen = await new GroupFactory({ organization, name: new TranslatedString('Kapoenen'), price: 40_0000 }).create();
+        const kapoenen = await new GroupFactory({ organization, name: TranslatedText.create('Kapoenen'), price: 40_0000 }).create();
         const member = await new MemberFactory({ organization, firstName: 'Eva', lastName: 'Peeters' }).create();
 
         await createPaidRegistration({ organization, member, group: kapoenen, price: 40_0000, method: PaymentMethod.Transfer, iban: 'BE68539007547034' });
@@ -368,7 +350,7 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
     test('an admin can look at the payments behind the numbers', async ({ page }) => {
         const organization = await createOrganization(`BreakdownList${WorkerData.id}`);
 
-        const kapoenen = await new GroupFactory({ organization, name: new TranslatedString('Kapoenen'), price: 40_0000 }).create();
+        const kapoenen = await new GroupFactory({ organization, name: TranslatedText.create('Kapoenen'), price: 40_0000 }).create();
         const first = await new MemberFactory({ organization, firstName: 'Eva', lastName: 'Peeters' }).create();
         const second = await new MemberFactory({ organization, firstName: 'Jonas', lastName: 'Claes' }).create();
 
@@ -411,8 +393,8 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
     test('an admin sees what was charged, per category and per article', async ({ page }) => {
         const organization = await createOrganization(`BalanceBreakdown${WorkerData.id}`);
 
-        const kapoenen = await new GroupFactory({ organization, name: new TranslatedString('Kapoenen'), price: 40_0000 }).create();
-        const welpen = await new GroupFactory({ organization, name: new TranslatedString('Welpen'), price: 25_0000 }).create();
+        const kapoenen = await new GroupFactory({ organization, name: TranslatedText.create('Kapoenen'), price: 40_0000 }).create();
+        const welpen = await new GroupFactory({ organization, name: TranslatedText.create('Welpen'), price: 25_0000 }).create();
 
         const first = await new MemberFactory({ organization, firstName: 'Eva', lastName: 'Peeters' }).create();
         const second = await new MemberFactory({ organization, firstName: 'Jonas', lastName: 'Claes' }).create();
@@ -458,7 +440,7 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
         const organization = await createOrganization(`WebshopFilter${WorkerData.id}`, [STPackageBundle.Members, STPackageBundle.Webshops]);
 
         // A registration next to the webshop orders, to show "all groups" stays included
-        const kapoenen = await new GroupFactory({ organization, name: new TranslatedString('Kapoenen'), price: 40_0000 }).create();
+        const kapoenen = await new GroupFactory({ organization, name: TranslatedText.create('Kapoenen'), price: 40_0000 }).create();
         const member = await new MemberFactory({ organization, firstName: 'Eva', lastName: 'Peeters' }).create();
         await createPaidRegistration({ organization, member, group: kapoenen, price: 40_0000, method: PaymentMethod.PointOfSale, paidAt: dayOfMonth(1) });
 
@@ -505,8 +487,8 @@ test.describe('Payment breakdown (organization mode) @payment-breakdown', () => 
     test('an admin can narrow the statistics down to chosen registration groups', async ({ page }) => {
         const organization = await createOrganization(`GroupFilter${WorkerData.id}`);
 
-        const kapoenen = await new GroupFactory({ organization, name: new TranslatedString('Kapoenen'), price: 40_0000 }).create();
-        const welpen = await new GroupFactory({ organization, name: new TranslatedString('Welpen'), price: 25_0000 }).create();
+        const kapoenen = await new GroupFactory({ organization, name: TranslatedText.create('Kapoenen'), price: 40_0000 }).create();
+        const welpen = await new GroupFactory({ organization, name: TranslatedText.create('Welpen'), price: 25_0000 }).create();
 
         // The groups have to be in a category of the period to be listed in the filter
         const period = (await RegistrationPeriod.getByID(organization.periodId))!;

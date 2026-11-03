@@ -10,21 +10,7 @@ import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Group, Member, Organization, User } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, GroupFactory, MemberFactory, Order, OrganizationFactory, Payment, RegistrationFactory, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import {
-    appToUri,
-    BalanceItemRelation,
-    BalanceItemRelationType,
-    BalanceItemType,
-    OrderStatus,
-    PaymentMethod,
-    PaymentStatus,
-    PaymentType,
-    Permissions,
-    STPackageBundle,
-    Token as TokenStruct,
-    TranslatedString,
-    Version,
-} from '@stamhoofd/structures';
+import { appToUri, BalanceItemRelation, BalanceItemRelationType, BalanceItemType, OrderStatus, PaymentMethod, PaymentStatus, PaymentType, Permissions, STPackageBundle, Token as TokenStruct, TranslatedString, TranslatedText, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { readFile } from 'node:fs/promises';
 import XLSX from 'xlsx';
@@ -72,7 +58,7 @@ async function createPaidRegistration({ organization, member, group, price }: { 
         unitPrice: price,
         pricePaid: price,
         relations: new Map([
-            [BalanceItemRelationType.Member, BalanceItemRelation.create({ id: member.id, name: new TranslatedString(member.details.name) })],
+            [BalanceItemRelationType.Member, BalanceItemRelation.create({ id: member.id, name: TranslatedText.create(member.details.name) })],
             [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: group.id, name: group.settings.name })],
         ]),
     }).create();
@@ -189,7 +175,7 @@ test.describe('Payments Excel export @payments-export', () => {
         expect(janeOrder.number).not.toBeNull();
 
         // Eva paid her registration at the desk
-        const kapoenen = await new GroupFactory({ organization, name: new TranslatedString('Kapoenen'), price: 40_0000 }).create();
+        const kapoenen = await new GroupFactory({ organization, name: TranslatedText.create('Kapoenen'), price: 40_0000 }).create();
         const eva = await new MemberFactory({ organization, firstName: 'Eva', lastName: 'Peeters' }).create();
         const registrationPayment = await createPaidRegistration({ organization, member: eva, group: kapoenen, price: 40_0000 });
 

@@ -11,7 +11,7 @@ import type { Group, Organization, User } from '@stamhoofd/models';
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { appToUri, EventMeta, GroupCategory, GroupCategorySettings, GroupType, NamedObject, Permissions, PermissionsResourceKey, ResourcePermissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { appToUri, EventMeta, GroupCategory, GroupCategorySettings, GroupType, NamedObject, Permissions, PermissionsResourceKey, ResourcePermissions, STPackageBundle, Token as TokenStruct, TranslatedText, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
 
@@ -90,20 +90,20 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
         const group = await new GroupFactory({
             organization,
             period,
-            name: new TranslatedString(groupName),
+            name: TranslatedText.create(groupName),
         }).create();
 
         const otherWaitingList = await new GroupFactory({
             organization,
             period,
             type: GroupType.WaitingList,
-            name: new TranslatedString(`Wachtlijst ${label}`),
+            name: TranslatedText.create(`Wachtlijst ${label}`),
         }).create();
 
         const otherGroup = await new GroupFactory({
             organization,
             period,
-            name: new TranslatedString(otherGroupName),
+            name: TranslatedText.create(otherGroupName),
             waitingListId: otherWaitingList.id,
         }).create();
 
@@ -141,7 +141,7 @@ test.describe('Period scoped resource permissions @period-permissions', () => {
                 organization,
                 period,
                 type: GroupType.EventRegistration,
-                name: new TranslatedString(eventName),
+                name: TranslatedText.create(eventName),
             }).create()
             : undefined;
 

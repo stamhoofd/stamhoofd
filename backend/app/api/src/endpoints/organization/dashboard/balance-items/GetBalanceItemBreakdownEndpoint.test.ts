@@ -3,7 +3,7 @@ import type { BalanceItem, Organization, User } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, Cart, CartItem, CartItemOption, CartItemPrice, Customer, Option, OptionMenu, OrderData, PaymentMethod, PaymentProvider, PaymentStatus, Permissions, Product, ProductPrice, SettlementReference, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, Cart, CartItem, CartItemOption, CartItemPrice, Customer, Option, OptionMenu, OrderData, PaymentMethod, PaymentProvider, PaymentStatus, Permissions, Product, ProductPrice, SettlementReference, TranslatedText } from '@stamhoofd/structures';
 import { BreakdownRequest } from '@stamhoofd/structures/breakdown/BreakdownRequest.js';
 import type { BalanceItemBreakdown } from '@stamhoofd/structures/PaymentBreakdown.js';
 import { BreakdownAmountType, BreakdownObjectType, BreakdownPathItem, BreakdownTab } from '@stamhoofd/structures/PaymentBreakdown.js';
@@ -40,13 +40,13 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
 
     const createItem = async (organization: Organization, options: { price: number; quantity?: number; groupId: string; groupName: string; priceName?: string; status?: BalanceItemStatus; pricePaid?: number; pricePending?: number }) => {
         const relations = new Map([
-            [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: options.groupId, name: new TranslatedString(options.groupName) })],
+            [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: options.groupId, name: TranslatedText.create(options.groupName) })],
         ]);
 
         if (options.priceName) {
             relations.set(
                 BalanceItemRelationType.GroupPrice,
-                BalanceItemRelation.create({ id: 'price-' + options.priceName, name: new TranslatedString(options.priceName) }),
+                BalanceItemRelation.create({ id: 'price-' + options.priceName, name: TranslatedText.create(options.priceName) }),
             );
         }
 
@@ -124,7 +124,7 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             amount: 1,
             unitPrice: order.data.totalPrice,
             relations: new Map([
-                [BalanceItemRelationType.Webshop, BalanceItemRelation.create({ id: webshop.id, name: new TranslatedString(webshop.meta.name) })],
+                [BalanceItemRelationType.Webshop, BalanceItemRelation.create({ id: webshop.id, name: TranslatedText.create(webshop.meta.name) })],
             ]),
         }).create();
 
@@ -238,10 +238,10 @@ describe('Endpoint.GetBalanceItemBreakdownEndpoint', () => {
             amount: 1,
             unitPrice: 5_00,
             relations: new Map([
-                [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-a', name: new TranslatedString('Kapoenen') })],
-                [BalanceItemRelationType.GroupPrice, BalanceItemRelation.create({ id: 'price-Standaardtarief', name: new TranslatedString('Standaardtarief') })],
-                [BalanceItemRelationType.GroupOptionMenu, BalanceItemRelation.create({ id: 'menu-a', name: new TranslatedString('Kamp') })],
-                [BalanceItemRelationType.GroupOption, BalanceItemRelation.create({ id: 'option-a', name: new TranslatedString('Met overnachting') })],
+                [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-a', name: TranslatedText.create('Kapoenen') })],
+                [BalanceItemRelationType.GroupPrice, BalanceItemRelation.create({ id: 'price-Standaardtarief', name: TranslatedText.create('Standaardtarief') })],
+                [BalanceItemRelationType.GroupOptionMenu, BalanceItemRelation.create({ id: 'menu-a', name: TranslatedText.create('Kamp') })],
+                [BalanceItemRelationType.GroupOption, BalanceItemRelation.create({ id: 'option-a', name: TranslatedText.create('Met overnachting') })],
             ]),
         }).create();
 

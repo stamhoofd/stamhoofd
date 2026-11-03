@@ -1,6 +1,6 @@
 import { Factory } from '@node/database';
 import type { BundleDiscount, GroupPriceDiscount, GroupType } from '@stamhoofd/structures';
-import { BundleDiscountGroupPriceSettings, GroupPrice, GroupSettings, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
+import { BundleDiscountGroupPriceSettings, GroupPrice, GroupSettings, ReduceablePrice, TranslatedText } from '@stamhoofd/structures';
 
 import { SimpleError } from '@common/errors';
 import { Group } from '../models/Group.js';
@@ -23,7 +23,7 @@ class Options {
      */
     bundleDiscount?: BundleDiscount;
     bundleDiscounts?: BundleDiscount[] | Map<BundleDiscount, GroupPriceDiscount[] | null>;
-    name?: TranslatedString;
+    name?: TranslatedText;
 }
 
 export class GroupFactory extends Factory<Options, Group> {
@@ -56,7 +56,7 @@ export class GroupFactory extends Factory<Options, Group> {
         group.waitingListId = this.options.waitingListId ?? null;
 
         group.settings = GroupSettings.create({
-            name: this.options.name ?? new TranslatedString('Group ' + this.randomString(5)),
+            name: this.options.name ?? TranslatedText.create('Group ' + this.randomString(5)),
             startDate: new Date(new Date().getTime() - 10 * 1000),
             endDate: new Date(new Date().getTime() + 10 * 1000),
             registrationStartDate: new Date(new Date().getTime() - 10 * 1000),

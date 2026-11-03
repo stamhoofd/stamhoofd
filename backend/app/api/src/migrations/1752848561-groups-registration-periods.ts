@@ -1,7 +1,7 @@
 import { Migration } from '@node/database';
 import { Group, Organization, OrganizationRegistrationPeriod, Registration, RegistrationInvitation, RegistrationPeriod, V1GroupMigrationData, V1WaitingListMigrationData } from '@stamhoofd/models';
 import type { CycleInformation } from '@stamhoofd/structures';
-import { GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, RegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
+import { GroupCategory, GroupCategorySettings, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, RegistrationPeriodSettings, TranslatedText } from '@stamhoofd/structures';
 import { LoggingTools } from '@stamhoofd/utility';
 import { SeedTools } from '../helpers/SeedTools.js';
 import { GroupService } from '../services/GroupService.js';
@@ -436,7 +436,7 @@ async function migrateRegistrations({ organization, period, originalGroup, newGr
         newWaitingList.organizationId = organization.id;
         newWaitingList.periodId = period.id;
         newWaitingList.settings = GroupSettings.create({
-            name: TranslatedString.create($t(`%yh`) + ' ' + newGroup.settings.name.toString()),
+            name: TranslatedText.create($t(`%yh`) + ' ' + newGroup.settings.name.toString()),
             period: period.getBaseStructure(),
         });
 
@@ -805,7 +805,7 @@ function createPreviousGroup({ originalGroup, period, cycleInformation, index }:
         .create({
             ...originalSettings,
             cycleSettings: new Map(),
-            name: new TranslatedString(`${originalSettings.name.toString()} (${extraName})`),
+            name: TranslatedText.create(`${originalSettings.name.toString()} (${extraName})`),
             startDate,
             endDate,
             hasCustomDates: true,

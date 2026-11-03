@@ -6,7 +6,7 @@ import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, 
 import type { RegistrationInvitation as RegistrationInvitationStruct } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { GroupType, Permissions, RegistrationInvitationRequest, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
+import { GroupType, Permissions, RegistrationInvitationRequest, ResourcePermissions, TranslatedText } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchRegistrationInvitationsEndpoint } from './PatchRegistrationInvitationsEndpoint.js';
@@ -28,7 +28,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
         test('Happy path', async () => {
             const organization = await new OrganizationFactory({}).create();
             const groupName = 'test groep';
-            const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
+            const group = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
             const resources = new Map();
 
             resources.set(
@@ -81,7 +81,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
         test('Should fail if no write access to group', async () => {
             const organization = await new OrganizationFactory({}).create();
             const groupName = 'test groep';
-            const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
+            const group = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
             const resources = new Map();
 
             resources.set(
@@ -127,7 +127,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
         test('Should fail if no read access to member', async () => {
             const organization = await new OrganizationFactory({}).create();
             const groupName = 'test groep';
-            const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
+            const group = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
             const resources = new Map();
 
             resources.set(
@@ -172,7 +172,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
         test('Should fail if already registered', async () => {
             const organization = await new OrganizationFactory({}).create();
             const groupName = 'test groep';
-            const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
+            const group = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
             const resources = new Map();
 
             resources.set(
@@ -221,7 +221,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
         test('Should not be supported', async () => {
             const organization = await new OrganizationFactory({}).create();
             const groupName = 'test groep';
-            const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
+            const group = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
             const resources = new Map();
 
             resources.set(
@@ -269,7 +269,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
         test('Happy path', async () => {
             const organization = await new OrganizationFactory({}).create();
             const groupName = 'test groep';
-            const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
+            const group = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
             const resources = new Map();
 
             resources.set(
@@ -317,7 +317,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
         test('Should be able to delete if access to group but not to member', async () => {
             const organization = await new OrganizationFactory({}).create();
             const groupName = 'test groep';
-            const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
+            const group = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
             const resources = new Map();
 
             resources.set(
@@ -365,7 +365,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
         test('Should fail if no write access to group', async () => {
             const organization = await new OrganizationFactory({}).create();
             const groupName = 'test groep';
-            const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
+            const group = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
             const resources = new Map();
 
             resources.set(
@@ -413,7 +413,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
 
         test('A platform admin can invite for an event group', async () => {
             const organization = await new OrganizationFactory({}).create();
-            const group = await new GroupFactory({ organization, type: GroupType.EventRegistration, name: new TranslatedString('test event') }).create();
+            const group = await new GroupFactory({ organization, type: GroupType.EventRegistration, name: TranslatedText.create('test event') }).create();
 
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({
@@ -452,7 +452,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
 
         test('Should fail for a user without platform access', async () => {
             const organization = await new OrganizationFactory({}).create();
-            const group = await new GroupFactory({ organization, type: GroupType.EventRegistration, name: new TranslatedString('test event') }).create();
+            const group = await new GroupFactory({ organization, type: GroupType.EventRegistration, name: TranslatedText.create('test event') }).create();
 
             const user = await new UserFactory({
                 organization,
@@ -484,7 +484,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
 
         test('Should fail for a platform admin without access to the group', async () => {
             const organization = await new OrganizationFactory({}).create();
-            const group = await new GroupFactory({ organization, type: GroupType.EventRegistration, name: new TranslatedString('test event') }).create();
+            const group = await new GroupFactory({ organization, type: GroupType.EventRegistration, name: TranslatedText.create('test event') }).create();
 
             // Some platform access (passes the fast throw), but no rights on this group or its organization
             const admin = await new UserFactory({
@@ -523,7 +523,7 @@ describe('Endpoint.PatchRegistrationInvitationsEndpoint', () => {
 
         test('A platform admin can delete an invitation', async () => {
             const organization = await new OrganizationFactory({}).create();
-            const group = await new GroupFactory({ organization, type: GroupType.EventRegistration, name: new TranslatedString('test event') }).create();
+            const group = await new GroupFactory({ organization, type: GroupType.EventRegistration, name: TranslatedText.create('test event') }).create();
 
             const admin = await new UserFactory({
                 globalPermissions: Permissions.create({

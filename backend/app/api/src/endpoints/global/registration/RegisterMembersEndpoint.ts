@@ -9,7 +9,7 @@ import { BalanceItem, CachedBalance, Group, Member, Platform, RateLimiter, Regis
 import { QueueHandler } from '@stamhoofd/queues';
 import type { BalanceItem as BalanceItemStruct, PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, Payment as PaymentStruct, PlatformFamily, ReceivableBalanceType, RegisterResponse, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, IDRegisterCheckout, Payment as PaymentStruct, PlatformFamily, ReceivableBalanceType, RegisterResponse, TranslatedText } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
@@ -569,7 +569,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
             const relation = period
                 ? BalanceItemRelation.create({
                         id: period.id,
-                        name: new TranslatedString(period.getBaseStructure().name),
+                        name: TranslatedText.create(period.getBaseStructure().name),
                     })
                 : null;
 
@@ -650,7 +650,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                     BalanceItemRelationType.Member,
                     BalanceItemRelation.create({
                         id: item.member.id,
-                        name: new TranslatedString(item.member.patchedMember.name),
+                        name: TranslatedText.create(item.member.patchedMember.name),
                     }),
                 ],
                 [
@@ -701,14 +701,14 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                             BalanceItemRelationType.GroupOptionMenu,
                             BalanceItemRelation.create({
                                 id: option.optionMenu.id,
-                                name: new TranslatedString(option.optionMenu.name),
+                                name: TranslatedText.create(option.optionMenu.name),
                             }),
                         ],
                         [
                             BalanceItemRelationType.GroupOption,
                             BalanceItemRelation.create({
                                 id: option.option.id,
-                                name: new TranslatedString(option.option.name),
+                                name: TranslatedText.create(option.option.name),
                             }),
                         ],
                     ]),
@@ -768,7 +768,7 @@ export class RegisterMembersEndpoint extends Endpoint<Params, Query, Body, Respo
                         BalanceItemRelationType.Member,
                         BalanceItemRelation.create({
                             id: registration.member.id,
-                            name: new TranslatedString(registration.member.patchedMember.name),
+                            name: TranslatedText.create(registration.member.patchedMember.name),
                         }),
                     ],
                     [

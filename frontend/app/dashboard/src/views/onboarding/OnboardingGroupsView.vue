@@ -47,7 +47,7 @@ import STListItem from '@stamhoofd/components/layout/STListItem.vue';
 import SaveView from '@stamhoofd/components/navigation/SaveView.vue';
 import { useNavigationActions } from '@stamhoofd/components/types/NavigationActions';
 import { usePatchOrganizationPeriod } from '@stamhoofd/components/hooks/networking/usePatchOrganizationPeriod';
-import { GroupCategory, GroupSettings, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
+import { GroupCategory, GroupSettings, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, TranslatedText } from '@stamhoofd/structures';
 import { Group } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { onActivated, ref, watch } from 'vue';
@@ -150,7 +150,7 @@ async function goNext() {
                 if (group && group.settings.name.toString() !== row.name.trim()) {
                     periodPatch.groups.addPatch(Group.patch({
                         id: group.id,
-                        settings: GroupSettings.patch({ name: TranslatedString.create(row.name.trim()) }),
+                        settings: GroupSettings.patch({ name: TranslatedText.create(row.name.trim()) }),
                     }));
                 }
                 continue;

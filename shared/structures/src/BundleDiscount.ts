@@ -9,13 +9,15 @@ import { RegisterItem } from './members/checkout/RegisterItem.js';
 import { RegistrationWithPlatformMember } from './members/checkout/RegistrationWithPlatformMember.js';
 import type { PlatformFamily, PlatformMember } from './members/PlatformMember.js';
 import { TranslatedString } from './TranslatedString.js';
+import { TranslatedText } from './TranslatedText.js';
 
 export class BundleDiscount extends AutoEncoder {
     @field({ decoder: StringDecoder, defaultValue: () => uuidv4() })
     id: string;
 
     @field(TranslatedString.field({}))
-    name = new TranslatedString('');
+    @field(TranslatedText.field({ version: 426 }))
+    name = TranslatedText.create();
 
     @field({ decoder: new ArrayDecoder(GroupPriceDiscount) })
     discounts: GroupPriceDiscount[] = []; // second, third, fourth...

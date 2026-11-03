@@ -28,7 +28,7 @@
                     </p>
 
                     <div class="split-inputs">
-                        <TInput v-model="name" :placeholder="$t(`%d8`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%1Os`)" :autofocus="isNew ? true : undefined" />
+                        <TextInput v-model="name" :placeholder="$t(`%d8`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%1Os`)" :autofocus="isNew ? true : undefined" />
 
                         <STInputBox v-if="defaultAgeGroupsFiltered.length" :title="$t('%2')" error-fields="settings.defaultAgeGroupId" :error-box="errors.errorBox">
                             <Dropdown v-model="defaultAgeGroupId">
@@ -47,13 +47,13 @@
                 </template>
 
                 <template v-if="type === GroupType.WaitingList">
-                    <TInput v-model="name" :placeholder="$t(`%d9`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%1Os`)" />
+                    <TextInput v-model="name" :placeholder="$t(`%d9`)" error-fields="settings.name" :error-box="errors.errorBox" :title="$t(`%1Os`)" />
                     <p v-if="usedByGroupsDescription && !isNew" class="style-description-small">
                         {{ usedByGroupsDescription }}
                     </p>
                 </template>
 
-                <TTextarea v-model="description" :placeholder="$t(`%dA`)" error-fields="settings.description" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)" />
+                <LongTextInput v-model="description" :placeholder="$t(`%dA`)" error-fields="settings.description" :error-box="errors.errorBox" class="max" :title="$t(`%6o`)" />
                 <p v-if="patchedGroup.type === GroupType.EventRegistration" class="style-description-small">
                     {{ $t('%cK') }}
                 </p>
@@ -781,7 +781,7 @@ import type { AutoEncoderPatchType, PartialWithoutMethods, PatchableArrayAutoEnc
 import { PatchableArray } from '@common/encoding';
 import { useNavigate, usePop, usePresent } from '@browser/navigation';
 import type { DefaultAgeGroup, Image, MemberProperty, RecordCategory } from '@stamhoofd/structures';
-import { BooleanStatus, getGroupStatusName, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, LimitedFilteredRequest, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, PlatformFamily, PlatformMember, RegisterItem, ResolutionFit, ResolutionRequest, TranslatedString, WaitingListType } from '@stamhoofd/structures';
+import { BooleanStatus, getGroupStatusName, Group, GroupGenderType, GroupOption, GroupOptionMenu, GroupPrice, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, LimitedFilteredRequest, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationRecordsConfiguration, OrganizationRegistrationPeriod, PlatformFamily, PlatformMember, RegisterItem, ResolutionFit, ResolutionRequest, TranslatedText, WaitingListType } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { Formatter, StringCompare } from '@stamhoofd/utility';
 import { computed, onMounted, ref } from 'vue';
@@ -800,6 +800,8 @@ import { useGroupsObjectFetcher } from '#fetchers/useGroupsObjectsFetcher.ts';
 import { useExternalOrganization } from '#groups/hooks/useExternalOrganization.ts';
 import { useFinancialSupportSettings } from '#groups/hooks/useFinancialSupportSettings.ts';
 import ImageInput from '#inputs/ImageInput.vue';
+import LongTextInput from '#inputs/LongTextInput.vue';
+import TextInput from '#inputs/TextInput.vue';
 import CategorizedBox from '#layout/categorized-view/CategorizedBox.vue';
 import CategorizedView from '#layout/categorized-view/CategorizedView.vue';
 import { useOrganizationRegistrationRecordSettingsRoute } from '#records/useOrganizationRegistrationRecordSettingsRoute.ts';
@@ -1545,7 +1547,7 @@ async function addGroupPrice() {
 
     if (isValid) {
         const price = GroupPrice.create({
-            name: TranslatedString.create($t('%CL')),
+            name: TranslatedText.create($t('%CL')),
             price: patchedGroup.value.settings.prices[0]?.price?.clone(),
         });
 
@@ -1654,7 +1656,7 @@ async function addWaitingList() {
         eventId: patchedGroup.value.eventId,
         type: GroupType.WaitingList,
         settings: GroupSettings.create({
-            name: TranslatedString.create($t(`%yh`) + ' ' + patchedGroup.value.settings.name.toString()),
+            name: TranslatedText.create($t(`%yh`) + ' ' + patchedGroup.value.settings.name.toString()),
             registrationStartDate: patchedGroup.value.settings.registrationStartDate ? new Date(patchedGroup.value.settings.registrationStartDate) : null,
             registrationEndDate: patchedGroup.value.settings.registrationEndDate ? new Date(patchedGroup.value.settings.registrationEndDate) : null,
         }),

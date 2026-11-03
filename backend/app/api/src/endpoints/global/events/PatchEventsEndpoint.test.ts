@@ -7,7 +7,7 @@ import { Event as EventModel, EventFactory, Group as GroupModel, GroupFactory, O
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { Event, EventMeta, Group, GroupSettings, GroupType, NamedObject, OrganizationEventType, Permissions, PermissionsResourceKey, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
+import { Event, EventMeta, Group, GroupSettings, GroupType, NamedObject, OrganizationEventType, Permissions, PermissionsResourceKey, ResourcePermissions, TranslatedLongText, TranslatedString, TranslatedText } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { PatchEventsEndpoint } from './PatchEventsEndpoint.js';
@@ -491,7 +491,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
             id: event.id,
             group: Group.create({
                 settings: GroupSettings.create({
-                    name: TranslatedString.create('Naam'),
+                    name: TranslatedText.create('Naam'),
                 }),
             }),
         }));
@@ -554,8 +554,8 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 id: event.id,
                 group: Group.create({
                     settings: GroupSettings.create({
-                        name: TranslatedString.create('Naam'),
-                        description: TranslatedString.create('Inschrijvingsgroep'),
+                        name: TranslatedText.create('Naam'),
+                        description: TranslatedLongText.create('Inschrijvingsgroep'),
                     }),
                 }),
             });
@@ -611,8 +611,8 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 id: event.id,
                 group: Group.create({
                     settings: GroupSettings.create({
-                        name: TranslatedString.create('Naam'),
-                        description: TranslatedString.create('Inschrijvingsgroep'),
+                        name: TranslatedText.create('Naam'),
+                        description: TranslatedLongText.create('Inschrijvingsgroep'),
                     }),
                 }),
             });
@@ -674,8 +674,8 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 id: event.id,
                 group: Group.create({
                     settings: GroupSettings.create({
-                        name: TranslatedString.create('Naam'),
-                        description: TranslatedString.create('Inschrijvingsgroep'),
+                        name: TranslatedText.create('Naam'),
+                        description: TranslatedLongText.create('Inschrijvingsgroep'),
                     }),
                 }),
             });
@@ -737,8 +737,8 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                     id: event.id,
                     group: Group.create({
                         settings: GroupSettings.create({
-                            name: TranslatedString.create('Naam'),
-                            description: TranslatedString.create('Inschrijvingsgroep'),
+                            name: TranslatedText.create('Naam'),
+                            description: TranslatedLongText.create('Inschrijvingsgroep'),
                         }),
                     }),
                 });
@@ -817,7 +817,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 id: event.id,
                 group: Group.create({
                     settings: GroupSettings.create({
-                        name: TranslatedString.create('Naam'),
+                        name: TranslatedText.create('Naam'),
                     }),
                 }),
             }));
@@ -872,7 +872,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 id: event.id,
                 group: Group.create({
                     settings: GroupSettings.create({
-                        name: TranslatedString.create('Naam'),
+                        name: TranslatedText.create('Naam'),
                     }),
                 }),
             }));
@@ -934,7 +934,7 @@ describe('Endpoint.PatchEventsEndpoint', () => {
                 id: event.id,
                 group: Group.create({
                     settings: GroupSettings.create({
-                        name: TranslatedString.create('Naam'),
+                        name: TranslatedText.create('Naam'),
                     }),
                 }),
             }));

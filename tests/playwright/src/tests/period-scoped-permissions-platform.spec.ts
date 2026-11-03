@@ -10,7 +10,7 @@ import type { Group, Organization, User, RegistrationPeriod } from '@stamhoofd/m
 import { EventFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Platform, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { appToUri, GroupCategory, GroupCategorySettings, GroupType, Permissions, PermissionsResourceKey, ResourcePermissions, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { appToUri, GroupCategory, GroupCategorySettings, GroupType, Permissions, PermissionsResourceKey, ResourcePermissions, Token as TokenStruct, TranslatedText, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
 
@@ -63,7 +63,7 @@ test.describe('Period scoped permissions in platform mode @period-permissions-pl
         const group = await new GroupFactory({
             organization,
             period,
-            name: new TranslatedString(`Kapoenen ${label}`),
+            name: TranslatedText.create(`Kapoenen ${label}`),
         }).create();
 
         // A group only shows up in the members menu through a category
@@ -92,7 +92,7 @@ test.describe('Period scoped permissions in platform mode @period-permissions-pl
             organization,
             period,
             type: GroupType.EventRegistration,
-            name: new TranslatedString(eventName),
+            name: TranslatedText.create(eventName),
         }).create();
 
         const event = await new EventFactory({

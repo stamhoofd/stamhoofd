@@ -1,4 +1,4 @@
-import { Address, BalanceItemRelation, BalanceItemRelationType, BooleanStatus, EmergencyContact, Gender, MemberDetails, Parent, ReceivableBalanceType, RecordAnswer, RecordSettings, ReviewTime, ReviewTimes, TranslatedString, TranslatedText, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
+import { Address, BalanceItemRelation, BalanceItemRelationType, BooleanStatus, EmergencyContact, Gender, MemberDetails, Parent, ReceivableBalanceType, RecordAnswer, RecordSettings, ReviewTime, ReviewTimes, TranslatedText, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus } from '@stamhoofd/structures';
 import { Country } from '@stamhoofd/types/Country';
 import { v4 as uuidv4 } from 'uuid';
 import { BalanceItem, BalanceItemFactory, CachedBalance, Member, MemberFactory, OrganizationFactory } from '@stamhoofd/models';
@@ -918,7 +918,7 @@ describe('mergeTwoMembers balance items', () => {
                     BalanceItemRelationType.Member,
                     BalanceItemRelation.create({
                         id: member.id,
-                        name: new TranslatedString(member.details.name),
+                        name: TranslatedText.create(member.details.name),
                     }),
                 ],
             ]),

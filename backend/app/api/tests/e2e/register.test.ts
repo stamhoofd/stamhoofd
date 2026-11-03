@@ -2,7 +2,7 @@ import { Request } from '@node/endpoints';
 import type { MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod, Token } from '@stamhoofd/models';
 import { BalanceItemFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriod, Platform, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { AdministrationFeeSettings, BalanceItemCartItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, DefaultAgeGroup, FreeContributionSettings, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, Permissions, PlatformMembershipType, PlatformMembershipTypeConfig, ReceivableBalanceType, ReduceablePrice, RegisterItemOption, TranslatedString, Version } from '@stamhoofd/structures';
+import { AdministrationFeeSettings, BalanceItemCartItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, DefaultAgeGroup, FreeContributionSettings, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, Permissions, PlatformMembershipType, PlatformMembershipTypeConfig, ReceivableBalanceType, ReduceablePrice, RegisterItemOption, TranslatedText, Version } from '@stamhoofd/structures';
 import { IDDeleteRegisterItem } from '@stamhoofd/structures/members/checkout/DeleteRegisterItem.js';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
@@ -245,14 +245,14 @@ describe('E2E.Register', () => {
                             BalanceItemRelationType.GroupOptionMenu,
                             BalanceItemRelation.create({
                                 id: optionMenu.id,
-                                name: new TranslatedString(optionMenu.name),
+                                name: TranslatedText.create(optionMenu.name),
                             }),
                         ],
                         [
                             BalanceItemRelationType.GroupOption,
                             BalanceItemRelation.create({
                                 id: option1.id,
-                                name: new TranslatedString(option1.name),
+                                name: TranslatedText.create(option1.name),
                             }),
                         ],
                     ]),
@@ -276,14 +276,14 @@ describe('E2E.Register', () => {
                             BalanceItemRelationType.GroupOptionMenu,
                             BalanceItemRelation.create({
                                 id: optionMenu.id,
-                                name: new TranslatedString(optionMenu.name),
+                                name: TranslatedText.create(optionMenu.name),
                             }),
                         ],
                         [
                             BalanceItemRelationType.GroupOption,
                             BalanceItemRelation.create({
                                 id: option2.id,
-                                name: new TranslatedString(option2.name),
+                                name: TranslatedText.create(option2.name),
                             }),
                         ],
                     ]),

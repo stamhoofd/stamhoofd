@@ -5,7 +5,7 @@ import type { PlatformFamilyManager } from '@stamhoofd/components/members/Platfo
 import { startSilentRegister } from '@stamhoofd/components/members/checkout/startCheckout.ts';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { BalanceItem, Group, Organization, OrganizationRegistrationPeriod, Platform, PlatformFamily, PlatformMember, Registration} from '@stamhoofd/structures';
-import { BalanceItemPaymentDetailed, DetailedReceivableBalance, GroupPrice, GroupType, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, ReceivableBalanceType, RegisterCheckout, RegisterItem, RegistrationWithPlatformMember, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemPaymentDetailed, DetailedReceivableBalance, GroupPrice, GroupType, PaymentGeneral, PaymentMethod, PaymentStatus, PaymentType, ReceivableBalanceType, RegisterCheckout, RegisterItem, RegistrationWithPlatformMember, TranslatedText } from '@stamhoofd/structures';
 import { sleep } from '@stamhoofd/utility';
 import type { ImportMemberResult } from '../../../../../classes/import/ImportMemberResult';
 import { MemberImportReport } from './MemberImportReport';
@@ -459,7 +459,7 @@ export class MemberImporter {
             return matchedOnPrice[0];
         }
 
-        return prices[0] ?? GroupPrice.create({ name: TranslatedString.create($t('%15L')), id: '' });
+        return prices[0] ?? GroupPrice.create({ name: TranslatedText.create($t('%15L')), id: '' });
     }
 
     private async getBalanceItems(platformMember: PlatformMember, group: Group): Promise<BalanceItem[]> {

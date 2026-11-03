@@ -6,7 +6,7 @@ import { BalanceItem, BalanceItemFactory, EventFactory, Group, GroupFactory, Mem
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { StockReservation, TranslatedString, GroupPrice, BalanceItemCartItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, EventMeta, GroupOption, GroupOptionMenu, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, Permissions, ReduceablePrice, RegisterItemOption, ResourcePermissions, GroupType, STPackageStatus, STPackageType, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
+import { BalanceItemCartItem, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, BooleanStatus, Company, EventMeta, GroupOption, GroupOptionMenu, GroupPrice, GroupType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, OrganizationPackages, PaymentCustomer, PaymentMethod, Permissions, ReduceablePrice, RegisterItemOption, ResourcePermissions, StockReservation, STPackageStatus, STPackageType, TranslatedText, UitpasNumberDetails, UitpasSocialTariff, UitpasSocialTariffStatus, UserPermissions, Version } from '@stamhoofd/structures';
 import { IDDeleteRegisterItem } from '@stamhoofd/structures/members/checkout/DeleteRegisterItem.js';
 import { QueueHandler } from '@stamhoofd/queues';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
@@ -3715,7 +3715,7 @@ describe('Endpoint.RegisterMembers', () => {
         async function initGroupWithLimitedPrice({ organization, stock, price }: { organization: Organization; stock: number; price: number }) {
             const group = await new GroupFactory({ organization, price, stock }).create();
             group.settings.prices.push(GroupPrice.create({
-                name: new TranslatedString('Unlimited'),
+                name: TranslatedText.create('Unlimited'),
                 price: ReduceablePrice.create({ price }),
             }));
             await group.save();

@@ -19,7 +19,7 @@ import { CartItem, CartItemPrice } from '../webshops/CartItem.js';
 import { OrderData } from '../webshops/Order.js';
 import { Product, ProductPrice } from '../webshops/Product.js';
 import { TransferSettings } from '../webshops/TransferSettings.js';
-import { TranslatedString } from '../TranslatedString.js';
+import { TranslatedText } from '../TranslatedText.js';
 
 describe('Breakdown builders', () => {
     beforeEach(() => {
@@ -41,31 +41,31 @@ describe('Breakdown builders', () => {
         status?: BalanceItemStatus;
     }) {
         const relations = new Map([
-            [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: groupId, name: new TranslatedString(groupName) })],
+            [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: groupId, name: TranslatedText.create(groupName) })],
         ]);
 
         if (priceName) {
             relations.set(
                 BalanceItemRelationType.GroupPrice,
-                BalanceItemRelation.create({ id: 'price-' + priceName, name: new TranslatedString(priceName) }),
+                BalanceItemRelation.create({ id: 'price-' + priceName, name: TranslatedText.create(priceName) }),
             );
         }
 
         if (memberId) {
             relations.set(
                 BalanceItemRelationType.Member,
-                BalanceItemRelation.create({ id: memberId, name: new TranslatedString('Lid ' + memberId) }),
+                BalanceItemRelation.create({ id: memberId, name: TranslatedText.create('Lid ' + memberId) }),
             );
         }
 
         if (option) {
             relations.set(
                 BalanceItemRelationType.GroupOptionMenu,
-                BalanceItemRelation.create({ id: 'menu-' + option.menu, name: new TranslatedString(option.menu) }),
+                BalanceItemRelation.create({ id: 'menu-' + option.menu, name: TranslatedText.create(option.menu) }),
             );
             relations.set(
                 BalanceItemRelationType.GroupOption,
-                BalanceItemRelation.create({ id: 'option-' + option.name, name: new TranslatedString(option.name) }),
+                BalanceItemRelation.create({ id: 'option-' + option.name, name: TranslatedText.create(option.name) }),
             );
         }
 
@@ -84,7 +84,7 @@ describe('Breakdown builders', () => {
             amount: 1,
             unitPrice: price,
             relations: new Map([
-                [BalanceItemRelationType.Webshop, BalanceItemRelation.create({ id: webshopId, name: new TranslatedString(webshopName) })],
+                [BalanceItemRelationType.Webshop, BalanceItemRelation.create({ id: webshopId, name: TranslatedText.create(webshopName) })],
             ]),
         });
     }
@@ -209,7 +209,7 @@ describe('Breakdown builders', () => {
             amount: 1,
             unitPrice: order.totalPrice,
             relations: new Map([
-                [BalanceItemRelationType.Webshop, BalanceItemRelation.create({ id: webshopId, name: new TranslatedString(webshopName) })],
+                [BalanceItemRelationType.Webshop, BalanceItemRelation.create({ id: webshopId, name: TranslatedText.create(webshopName) })],
             ]),
         });
 
@@ -1281,7 +1281,7 @@ describe('Breakdown builders', () => {
                 amount: 1,
                 unitPrice: 5_00,
                 relations: new Map([
-                    [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-a', name: new TranslatedString('Kapoenen') })],
+                    [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-a', name: TranslatedText.create('Kapoenen') })],
                 ]),
             });
 

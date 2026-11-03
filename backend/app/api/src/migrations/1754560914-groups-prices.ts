@@ -1,7 +1,7 @@
 import { Migration } from '@node/database';
 import { Group, OrganizationRegistrationPeriod } from '@stamhoofd/models';
 import type { GroupCategory } from '@stamhoofd/structures';
-import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPrice, GroupPriceDiscount, GroupPriceDiscountType, GroupStatus, GroupType, OldGroupPrice, OldGroupPrices, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
+import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPrice, GroupPriceDiscount, GroupPriceDiscountType, GroupStatus, GroupType, OldGroupPrice, OldGroupPrices, ReduceablePrice, TranslatedText } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 const UNNASSIGNED_KEY = 'unassigned';
@@ -51,7 +51,7 @@ export async function migratePrices() {
             if (group.type !== GroupType.Membership || group.deletedAt !== null) {
                 group.settings.prices = [
                     GroupPrice.create({
-                        name: new TranslatedString('Standaardtarief'),
+                        name: TranslatedText.create('Standaardtarief'),
                         startDate: null,
                         endDate: null,
                         price: ReduceablePrice.create({
@@ -162,7 +162,7 @@ export async function migratePrices() {
                     });
 
                     const groupPrice = GroupPrice.create({
-                        name: new TranslatedString(oldPrices.startDate === null
+                        name: TranslatedText.create(oldPrices.startDate === null
                             ? 'Standaardtarief'
                             : `Vanaf ${formatDate(oldPrices.startDate)}`),
                         startDate: oldPrices.startDate ? new Date(oldPrices.startDate) : null,
@@ -357,7 +357,7 @@ function createBundleDiscount(oldPrices: OldGroupPrices, category: GroupCategory
     const nameText = oldPrices.onlySameGroup || !category ? baseNameText : `${category.settings.name} - ${baseNameText}`;
 
     const bundleDiscount = BundleDiscount.create({
-        name: new TranslatedString(nameText),
+        name: TranslatedText.create(nameText),
         discounts,
         countWholeFamily,
         countPerGroup,

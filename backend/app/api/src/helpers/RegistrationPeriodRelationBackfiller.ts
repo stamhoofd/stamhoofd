@@ -1,5 +1,5 @@
 import { BalanceItem, MemberPlatformMembership, Registration, RegistrationPeriod } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedText } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SeedTools } from './SeedTools.js';
 
@@ -29,7 +29,7 @@ class PeriodRelationCache {
         const relation = period
             ? BalanceItemRelation.create({
                     id: period.id,
-                    name: new TranslatedString(period.getBaseStructure().name),
+                    name: TranslatedText.create(period.getBaseStructure().name),
                 })
             : null;
 

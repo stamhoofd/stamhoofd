@@ -2,7 +2,7 @@ import { Request } from '@node/endpoints';
 import type { Organization, Token } from '@stamhoofd/models';
 import { Group, GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { GroupCategory, GroupSettings, Group as GroupStruct, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Permissions, TranslatedString, Version } from '@stamhoofd/structures';
+import { Group as GroupStruct, GroupCategory, GroupSettings, GroupType, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Permissions, TranslatedText, Version } from '@stamhoofd/structures';
 import { SessionService } from '../../../../services/SessionService.js';
 
 import type { PatchableArrayAutoEncoder } from '@common/encoding';
@@ -180,12 +180,12 @@ describe('Endpoint.PatchOrganizationRegistrationPeriods', () => {
             // when duplicating a period (groups with a maxAge sort before waiting lists).
             const waitingListGroup = GroupStruct.create({
                 type: GroupType.WaitingList,
-                settings: GroupSettings.create({ name: TranslatedString.create('Wachtlijst') }),
+                settings: GroupSettings.create({ name: TranslatedText.create('Wachtlijst') }),
             });
 
             const regularGroup = GroupStruct.create({
                 type: GroupType.Membership,
-                settings: GroupSettings.create({ name: TranslatedString.create('Kapoenen'), maxAge: 8 }),
+                settings: GroupSettings.create({ name: TranslatedText.create('Kapoenen'), maxAge: 8 }),
                 waitingList: waitingListGroup,
             });
 

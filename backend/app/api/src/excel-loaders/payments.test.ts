@@ -1,5 +1,5 @@
 import { isXlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
-import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelation, BalanceItemRelationType, BalanceItemType, Cart, CartItem, CartItemPrice, OrderData, OrderStatus, PaymentGeneral, PaymentMethod, PaymentStatus, Product, ProductPrice, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItem, BalanceItemPaymentDetailed, BalanceItemRelation, BalanceItemRelationType, BalanceItemType, Cart, CartItem, CartItemPrice, OrderData, OrderStatus, PaymentGeneral, PaymentMethod, PaymentStatus, Product, ProductPrice, TranslatedText } from '@stamhoofd/structures';
 import { createPaymentExportOrder, expandPaymentBalanceItemPayments, getBalanceItemPaymentColumns, getOrderColumns, getOrderNumberCell, getPaymentOrders, PaymentGeneralWithStripeAccount } from './payments.js';
 import type { PaymentExportOrder } from './payments.js';
 
@@ -64,7 +64,7 @@ function createPayment(price: number): PaymentGeneral {
                     relations: new Map([
                         [BalanceItemRelationType.Webshop, BalanceItemRelation.create({
                             id: 'webshop-1',
-                            name: new TranslatedString('Clubshop'),
+                            name: TranslatedText.create('Clubshop'),
                         })],
                     ]),
                 }),

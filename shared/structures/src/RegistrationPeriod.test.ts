@@ -5,7 +5,7 @@ import { GroupPrice, GroupSettings } from './GroupSettings.js';
 import { Group } from './Group.js';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from './RegistrationPeriod.js';
 import { ReduceablePrice } from './ReduceablePrice.js';
-import { TranslatedString } from './TranslatedString.js';
+import { TranslatedText } from './TranslatedText.js';
 
 describe('RegistrationPeriodBase naming', () => {
     test.each([
@@ -42,7 +42,7 @@ describe('OrganizationRegistrationPeriod.duplicate', () => {
             period,
         });
         const bundleDiscount = BundleDiscount.create({
-            name: new TranslatedString('Bundle discount'),
+            name: TranslatedText.create('Bundle discount'),
             discounts: [
                 GroupPriceDiscount.create({
                     value: ReduceablePrice.create({

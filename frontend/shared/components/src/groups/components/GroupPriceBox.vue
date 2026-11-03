@@ -2,7 +2,7 @@
     <div class="container">
         <STErrorsDefault :error-box="errors.errorBox" />
 
-        <TInput v-if="!isSingle" v-model="name" error-fields="name" :error-box="errors.errorBox" :title="$t(`%1Os`)" :placeholder="$t(`%dP`)" />
+        <TextInput v-if="!isSingle" v-model="name" error-fields="name" :error-box="errors.errorBox" :title="$t(`%1Os`)" :placeholder="$t(`%dP`)" />
 
         <ReduceablePriceInput v-model="groupPrice" :group="group" :error-box="errors.errorBox" :validator="errors.validator" :default-membership-type-id="defaultMembershipTypeId" :start-date="startDate ?? undefined" :external-organization="externalOrganization" />
 
@@ -128,6 +128,7 @@ import GroupPriceDiscountsInput from '#groups/components/GroupPriceDiscountsInpu
 import DateSelection from '#inputs/DateSelection.vue';
 import STInputBox from '#inputs/STInputBox.vue';
 import TimeInput from '#inputs/TimeInput.vue';
+import TextInput from '#inputs/TextInput.vue';
 import type { AutoEncoderPatchType } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import { ComponentWithProperties, usePresent } from '@browser/navigation';

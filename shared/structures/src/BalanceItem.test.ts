@@ -6,7 +6,7 @@ import { BalanceItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemS
 import type { InMemoryFilterDefinitions } from './filters/InMemoryFilter.js';
 import { baseInMemoryFilterCompilers, compileToInMemoryFilter, createInMemoryFilterCompiler } from './filters/InMemoryFilter.js';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
-import { TranslatedString } from './TranslatedString.js';
+import { TranslatedText } from './TranslatedText.js';
 import { DetailedPayableBalance } from './endpoints/PayableBalanceCollection.js';
 import { BaseOrganization, Organization } from './Organization.js';
 import { Platform } from './Platform.js';
@@ -282,7 +282,7 @@ describe('BalanceItem.categoryFilter / articleFilter', () => {
             name,
             relations: new Map(relations.map(([relationType, id]) => [
                 relationType,
-                BalanceItemRelation.create({ id, name: new TranslatedString(id) }),
+                BalanceItemRelation.create({ id, name: TranslatedText.create(id) }),
             ])),
         });
     }

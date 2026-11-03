@@ -1,6 +1,6 @@
 import { EmailAddress } from '@stamhoofd/email';
 import { GroupFactory, MemberFactory, Platform, RegistrationFactory } from '@stamhoofd/models';
-import { MemberDetails, Parent, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType, TranslatedString, TranslatedText, Version } from '@stamhoofd/structures';
+import { MemberDetails, Parent, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType, TranslatedText, Version } from '@stamhoofd/structures';
 import { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';
 import type { MailchimpSyncPreview } from '@stamhoofd/structures/mailchimp/MailchimpSyncPreview.js';
 import { MailchimpSyncRequest } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
@@ -25,7 +25,7 @@ describe('Endpoint.PreviewMailchimpSync', () => {
     test('counts unique addresses without contacting Mailchimp', async () => {
         const context = await initMailchimpOrganization();
         await connectMailchimp(mailchimp, context);
-        const group = await new GroupFactory({ organization: context.organization, name: TranslatedString.create('Welpen') }).create();
+        const group = await new GroupFactory({ organization: context.organization, name: TranslatedText.create('Welpen') }).create();
 
         for (const [firstName, email] of [['Emma', 'emma@example.com'], ['Lucas', 'invalid@'], ['Noor', 'unsubscribed@example.com']]) {
             const member = await new MemberFactory({
@@ -54,7 +54,7 @@ describe('Endpoint.PreviewMailchimpSync', () => {
         await connectMailchimp(mailchimp, context);
         await mailchimpRequest(new PatchMailchimpSettingsEndpoint(), 'PATCH', '/mailchimp/settings', context.host, context.token, MailchimpSettings.patch({ newsletterRecordId: newsletter.id }).encode({ version: Version }));
 
-        const group = await new GroupFactory({ organization, name: TranslatedString.create('Welpen') }).create();
+        const group = await new GroupFactory({ organization, name: TranslatedText.create('Welpen') }).create();
         for (const [email, selected] of [['yes@example.com', true], ['no@example.com', false]] as const) {
             const member = await new MemberFactory({
                 organization,

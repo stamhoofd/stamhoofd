@@ -9,7 +9,7 @@ import { Toast } from '@stamhoofd/components/overlays/Toast';
 import { useLoadRecentPeriods } from '@stamhoofd/components/hooks/networking/useLoadRecentPeriods';
 import { usePatchOrganizationPeriods } from '@stamhoofd/components/hooks/networking/usePatchOrganizationPeriods';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Group, GroupCategory, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, TranslatedString } from '@stamhoofd/structures';
+import { Group, GroupCategory, GroupSettings, GroupStatus, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, TranslatedText } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -232,7 +232,7 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
             duplicated.id = uuidv4();
 
             // Remove suffix
-            duplicated.settings.name = TranslatedString.create(duplicated.settings.name.replace(/ \(kopie( \d+)?\)$/, ''));
+            duplicated.settings.name = TranslatedText.create(duplicated.settings.name.replace(/ \(kopie( \d+)?\)$/, ''));
 
             const suffix = ' (' + $t('%1dX') + ')';
 
@@ -243,9 +243,9 @@ export function useGroupActions(saveHandler?: (patch: PatchableArrayAutoEncoder<
             const maxNumber = suffixesWithNumber.length > 0 ? Math.max(...suffixesWithNumber.map(s => parseInt(s[1] ?? '1'))) : 0;
 
             if (maxNumber > 0) {
-                duplicated.settings.name = TranslatedString.create(duplicated.settings.name + ' (kopie ' + (maxNumber + 1) + ')');
+                duplicated.settings.name = TranslatedText.create(duplicated.settings.name + ' (kopie ' + (maxNumber + 1) + ')');
             } else {
-                duplicated.settings.name = TranslatedString.create(duplicated.settings.name + suffix);
+                duplicated.settings.name = TranslatedText.create(duplicated.settings.name + suffix);
             }
 
             const p = GroupCategory.patch({ id: parentCategory.id });

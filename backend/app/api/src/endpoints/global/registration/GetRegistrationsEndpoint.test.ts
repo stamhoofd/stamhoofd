@@ -5,7 +5,7 @@ import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { CountFilteredRequest, EventMeta, GroupCategory, GroupCategorySettings, GroupPrice, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, OrganizationTag, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, SortItemDirection, TranslatedString } from '@stamhoofd/structures';
+import { CountFilteredRequest, EventMeta, GroupCategory, GroupCategorySettings, GroupPrice, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, OrganizationTag, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ResourcePermissions, SortItemDirection, TranslatedText } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetRegistrationsCountEndpoint } from './GetRegistrationsCountEndpoint.js';
@@ -1400,7 +1400,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             const group = await new GroupFactory({ organization, period, type: GroupType.EventRegistration }).create();
 
             group.settings.prices = [...new Set(priceNames)].map(name => GroupPrice.create({
-                name: new TranslatedString(name),
+                name: TranslatedText.create(name),
             }));
             await group.save();
 
@@ -1499,7 +1499,7 @@ describe('Endpoint.GetRegistrationsEndpoint', () => {
             const [beta, mango, zebra] = registrations;
 
             // A translated name has to be sorted (and paginated) on the value the requester sees, not on another language
-            const translated = new TranslatedString({ nl: 'Aap', en: 'Zulu' });
+            const translated = TranslatedText.create({ nl: 'Aap', en: 'Zulu' });
             group.settings.prices[2].name = translated;
             await group.save();
 

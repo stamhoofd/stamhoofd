@@ -16,7 +16,7 @@ import type { PriceBreakdown } from '../../PriceBreakdown.js';
 import type { RegistrationPeriod } from '../../RegistrationPeriod.js';
 import type { RegistrationPeriodBase } from '../../RegistrationPeriodBase.js';
 import { StockReservation } from '../../StockReservation.js';
-import { TranslatedString } from '../../TranslatedString.js';
+import { TranslatedText } from '../../TranslatedText.js';
 import type { ObjectWithRecords, PatchAnswers } from '../ObjectWithRecords.js';
 import type { PlatformMember } from '../PlatformMember.js';
 import type { RecordAnswer } from '../records/RecordAnswer.js';
@@ -178,7 +178,7 @@ export class RegisterItem implements ObjectWithRecords {
             if (!this.groupPrice) {
                 // Probably all sold out
                 // Select the first one anyway
-                this.groupPrice = prices[0] ?? GroupPrice.create({ name: TranslatedString.create($t('%15L')), id: '' });
+                this.groupPrice = prices[0] ?? GroupPrice.create({ name: TranslatedText.create($t('%15L')), id: '' });
             }
         } else {
             this.groupPrice = data.groupPrice;

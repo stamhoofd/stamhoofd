@@ -14,7 +14,7 @@ import { Notification } from '@stamhoofd/models/models/Notification.js';
 import { NotificationPreference } from '@stamhoofd/models/models/NotificationPreference.js';
 import { NotificationRecipient } from '@stamhoofd/models/models/NotificationRecipient.js';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { appToUri, GroupType, NamedObject, Permissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { appToUri, GroupType, NamedObject, Permissions, STPackageBundle, Token as TokenStruct, TranslatedText, Version } from '@stamhoofd/structures';
 import { NotificationChannel } from '@stamhoofd/structures/notifications/NotificationChannel.js';
 import { NotificationType } from '@stamhoofd/structures/notifications/NotificationType.js';
 import { RegistrationCreatedNotificationPayload } from '@stamhoofd/structures/notifications/RegistrationCreatedNotificationPayload.js';
@@ -165,8 +165,8 @@ test.describe('Notifications @notifications', () => {
     test('clicking a registration notification marks it as read and opens the registrations of its group, event or waiting list', async ({ page }) => {
         const { organization, admin } = await createAdmin({ featureFlags: ['notifications'] });
 
-        const waitingList = await new GroupFactory({ organization, type: GroupType.WaitingList, name: new TranslatedString('Wachtlijst Kapoenen') }).create();
-        const group = await new GroupFactory({ organization, name: new TranslatedString('Kapoenen'), waitingListId: waitingList.id }).create();
+        const waitingList = await new GroupFactory({ organization, type: GroupType.WaitingList, name: TranslatedText.create('Wachtlijst Kapoenen') }).create();
+        const group = await new GroupFactory({ organization, name: TranslatedText.create('Kapoenen'), waitingListId: waitingList.id }).create();
         const organizationPeriod = await organization.getPeriod();
         organizationPeriod.settings.rootCategory?.groupIds.push(group.id);
         await organizationPeriod.save();
@@ -180,10 +180,10 @@ test.describe('Notifications @notifications', () => {
         otherPeriod.customName = 'Ander werkjaar';
         await otherPeriod.save();
         const otherOrganizationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period: otherPeriod }).create();
-        const otherPeriodGroup = await new GroupFactory({ organization, period: otherPeriod, name: new TranslatedString('Welpen') }).create();
+        const otherPeriodGroup = await new GroupFactory({ organization, period: otherPeriod, name: TranslatedText.create('Welpen') }).create();
         otherOrganizationPeriod.settings.rootCategory?.groupIds.push(otherPeriodGroup.id);
         await otherOrganizationPeriod.save();
-        const eventGroup = await new GroupFactory({ organization, type: GroupType.EventRegistration, name: new TranslatedString('Weekend') }).create();
+        const eventGroup = await new GroupFactory({ organization, type: GroupType.EventRegistration, name: TranslatedText.create('Weekend') }).create();
         const event = await new EventFactory({ organization, group: eventGroup, name: 'Weekend' }).create();
 
         const scenarios = [

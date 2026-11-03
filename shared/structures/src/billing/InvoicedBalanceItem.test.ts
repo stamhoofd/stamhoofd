@@ -1,5 +1,5 @@
 import { BalanceItem, BalanceItemRelation, BalanceItemRelationType, BalanceItemType, VATExcemptReason } from '../BalanceItem.js';
-import { TranslatedString } from '../TranslatedString.js';
+import { TranslatedText } from '../TranslatedText.js';
 import { InvoicedBalanceItem } from './InvoicedBalanceItem.js';
 
 describe('InvoicedBalanceItem', () => {
@@ -34,8 +34,8 @@ describe('InvoicedBalanceItem', () => {
                 name: 'Jan bij Kapoenen',
                 description: null,
                 relations: new Map([
-                    [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-1', name: new TranslatedString('Kapoenen') })],
-                    [BalanceItemRelationType.Member, BalanceItemRelation.create({ id: 'member-1', name: new TranslatedString('Jan Janssens') })],
+                    [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-1', name: TranslatedText.create('Kapoenen') })],
+                    [BalanceItemRelationType.Member, BalanceItemRelation.create({ id: 'member-1', name: TranslatedText.create('Jan Janssens') })],
                 ]),
             });
             const invoicedItem = InvoicedBalanceItem.createFor(balanceItem, 5_00_00);
@@ -51,7 +51,7 @@ describe('InvoicedBalanceItem', () => {
                 name: 'Jan bij Kapoenen',
                 description: 'Inclusief kampvuur',
                 relations: new Map([
-                    [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-1', name: new TranslatedString('Kapoenen') })],
+                    [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-1', name: TranslatedText.create('Kapoenen') })],
                 ]),
             });
             const invoicedItem = InvoicedBalanceItem.createFor(balanceItem, 5_00_00);
@@ -309,7 +309,7 @@ describe('InvoicedBalanceItem', () => {
     describe('createFor details', () => {
         test('copies relations, startDate and endDate from the balance item', () => {
             const relations = new Map([
-                [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-1', name: new TranslatedString('Kapoenen') })],
+                [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-1', name: TranslatedText.create('Kapoenen') })],
             ]);
             const balanceItem = BalanceItem.create({
                 unitPrice: 5_00_00,

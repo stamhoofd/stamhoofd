@@ -4,7 +4,7 @@ import { BalanceItem, BalanceItemPayment, Organization, Payment, StripeAccount, 
 import { ApplicationFee } from '@stamhoofd/models/models/ApplicationFee.js';
 import { QueueHandler } from '@stamhoofd/queues';
 import { SQL } from '@stamhoofd/sql';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPaymentProviderName, PaymentCustomer, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPaymentProviderName, PaymentCustomer, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, TranslatedText } from '@stamhoofd/structures';
 import { ApplicationFeeType } from '@stamhoofd/structures/settlements/ApplicationFeeType.js';
 import { Formatter, sleep } from '@stamhoofd/utility';
 import { DateTime } from 'luxon';
@@ -352,7 +352,7 @@ export class ApplicationFeeInvoicer {
         item.description = $t('%ZqV', { date });
         item.relations.set(BalanceItemRelationType.PaymentProvider, BalanceItemRelation.create({
             id: PaymentProvider.Stripe,
-            name: TranslatedString.create(getPaymentProviderName(PaymentProvider.Stripe)),
+            name: TranslatedText.create(getPaymentProviderName(PaymentProvider.Stripe)),
         }));
         item.payingOrganizationId = organization?.id ?? null;
         item.organizationId = sellingOrganization.id;

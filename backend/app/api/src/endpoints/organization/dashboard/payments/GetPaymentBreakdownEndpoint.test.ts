@@ -3,7 +3,7 @@ import type { BalanceItem, Organization, User } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, StripeAccount, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, Cart, CartItem, CartItemOption, CartItemPrice, Customer, getBalanceItemTypeIcon, getPaymentProviderName, OptionMenu, OrderData, Option, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Permissions, Product, ProductPrice, SettlementReference, StripeBusinessProfile, StripeMetaData, TransferSettings, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, Cart, CartItem, CartItemOption, CartItemPrice, Customer, getBalanceItemTypeIcon, getPaymentProviderName, Option, OptionMenu, OrderData, PaymentMethod, PaymentMethodHelper, PaymentProvider, PaymentStatus, Permissions, Product, ProductPrice, SettlementReference, StripeBusinessProfile, StripeMetaData, TransferSettings, TranslatedText } from '@stamhoofd/structures';
 import { BreakdownRequest } from '@stamhoofd/structures/breakdown/BreakdownRequest.js';
 import type { PaymentBreakdown } from '@stamhoofd/structures/PaymentBreakdown.js';
 import { BreakdownGraphUnit, BreakdownObjectType, BreakdownPathItem, BreakdownTab } from '@stamhoofd/structures/PaymentBreakdown.js';
@@ -117,13 +117,13 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
 
     const createRegistrationItem = async (organization: Organization, options: { price: number; groupId: string; groupName: string; priceName?: string }) => {
         const relations = new Map([
-            [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: options.groupId, name: new TranslatedString(options.groupName) })],
+            [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: options.groupId, name: TranslatedText.create(options.groupName) })],
         ]);
 
         if (options.priceName) {
             relations.set(
                 BalanceItemRelationType.GroupPrice,
-                BalanceItemRelation.create({ id: 'price-' + options.priceName, name: new TranslatedString(options.priceName) }),
+                BalanceItemRelation.create({ id: 'price-' + options.priceName, name: TranslatedText.create(options.priceName) }),
             );
         }
 
@@ -253,7 +253,7 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
                 amount: 1,
                 unitPrice: order.data.totalPrice,
                 relations: new Map([
-                    [BalanceItemRelationType.Webshop, BalanceItemRelation.create({ id: webshop.id, name: new TranslatedString(webshop.meta.name) })],
+                    [BalanceItemRelationType.Webshop, BalanceItemRelation.create({ id: webshop.id, name: TranslatedText.create(webshop.meta.name) })],
                 ]),
             }).create();
 
@@ -578,8 +578,8 @@ describe('Endpoint.GetPaymentBreakdownEndpoint', () => {
                 amount: 1,
                 unitPrice: -10_00,
                 relations: new Map([
-                    [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-a', name: new TranslatedString('Kapoenen') })],
-                    [BalanceItemRelationType.Discount, BalanceItemRelation.create({ id: 'discount-a', name: new TranslatedString('Gezinskorting') })],
+                    [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: 'group-a', name: TranslatedText.create('Kapoenen') })],
+                    [BalanceItemRelationType.Discount, BalanceItemRelation.create({ id: 'discount-a', name: TranslatedText.create('Gezinskorting') })],
                 ]),
             }).create();
 

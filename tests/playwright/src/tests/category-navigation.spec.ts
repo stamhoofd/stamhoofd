@@ -7,7 +7,7 @@ import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import { GroupFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationPeriod, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { appToUri, GroupCategory, GroupCategorySettings, Permissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { appToUri, GroupCategory, GroupCategorySettings, Permissions, STPackageBundle, Token as TokenStruct, TranslatedText, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
 
@@ -29,8 +29,8 @@ test.describe('Nested category navigation @category-navigation', () => {
                 throw new Error('Missing registration period');
             }
             const organizationPeriod = await new OrganizationRegistrationPeriodFactory({ organization, period }).create();
-            const group = await new GroupFactory({ organization, period, name: new TranslatedString('Child group') }).create();
-            const siblingGroup = await new GroupFactory({ organization, period, name: new TranslatedString('Sibling group') }).create();
+            const group = await new GroupFactory({ organization, period, name: TranslatedText.create('Child group') }).create();
+            const siblingGroup = await new GroupFactory({ organization, period, name: TranslatedText.create('Sibling group') }).create();
             const child = GroupCategory.create({
                 settings: GroupCategorySettings.create({ name: 'Child category' }),
                 groupIds: [group.id],

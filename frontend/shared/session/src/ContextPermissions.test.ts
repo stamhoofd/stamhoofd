@@ -1,7 +1,7 @@
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { Group, GroupCategory, GroupCategorySettings, GroupSettings, GroupType, Organization, OrganizationMetaData, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, PermissionsResourceKey, Permissions, Platform, RegistrationPeriod, ResourcePermissions, TranslatedString, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
+import { Group, GroupCategory, GroupCategorySettings, GroupSettings, GroupType, Organization, OrganizationMetaData, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, Permissions, PermissionsResourceKey, Platform, RegistrationPeriod, ResourcePermissions, TranslatedText, UserPermissions, UserWithMembers } from '@stamhoofd/structures';
 import { describe, expect, test } from 'vitest';
 import { ContextPermissions } from './ContextPermissions.ts';
 
@@ -24,7 +24,7 @@ describe('ContextPermissions.canAccessGroup', () => {
                 organizationId,
                 periodId: period.id,
                 type: GroupType.Membership,
-                settings: GroupSettings.create({ name: TranslatedString.create(name) }),
+                settings: GroupSettings.create({ name: TranslatedText.create(name) }),
             });
 
             const category = GroupCategory.create({
@@ -120,7 +120,7 @@ describe('ContextPermissions.canAccessSomeMembershipGroup', () => {
             organizationId,
             periodId: period.id,
             type: GroupType.Membership,
-            settings: GroupSettings.create({ name: TranslatedString.create('Kapoenen') }),
+            settings: GroupSettings.create({ name: TranslatedText.create('Kapoenen') }),
         });
 
         const category = GroupCategory.create({

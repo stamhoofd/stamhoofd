@@ -10,23 +10,7 @@ import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Group, User } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemFactory, BalanceItemPayment, CachedBalance, GroupFactory, MemberFactory, MolliePayment, OrganizationFactory, Payment, RegistrationFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import {
-    appToUri,
-    BalanceItemRelation,
-    BalanceItemRelationType,
-    BalanceItemStatus,
-    BalanceItemType,
-    PaymentMethod,
-    PaymentProvider,
-    PaymentStatus,
-    PaymentType,
-    Permissions,
-    ReceivableBalanceType,
-    STPackageBundle,
-    Token as TokenStruct,
-    TranslatedString,
-    Version,
-} from '@stamhoofd/structures';
+import { appToUri, BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, Permissions, ReceivableBalanceType, STPackageBundle, Token as TokenStruct, TranslatedString, TranslatedText, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { TableHelper, WorkerData } from '../helpers/index.js';
 
@@ -81,7 +65,7 @@ test.describe('Receivable balances (organization mode) @receivable-balances', ()
         const newRegistration = await new RegistrationFactory({ member, group: newGroup }).create();
 
         const registrationRelations = (group: Group) => new Map([
-            [BalanceItemRelationType.Member, BalanceItemRelation.create({ id: member.id, name: new TranslatedString('Refunda Tester') })],
+            [BalanceItemRelationType.Member, BalanceItemRelation.create({ id: member.id, name: TranslatedText.create('Refunda Tester') })],
             [BalanceItemRelationType.Group, BalanceItemRelation.create({ id: group.id, name: group.settings.name })],
         ]);
 

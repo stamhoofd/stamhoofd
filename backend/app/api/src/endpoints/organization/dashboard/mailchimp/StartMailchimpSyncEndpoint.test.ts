@@ -3,7 +3,7 @@ import { GroupFactory, MemberFactory, MemberResponsibilityRecordFactory, OrderFa
 import { MailchimpCredential } from '@stamhoofd/models/models/MailchimpCredential.js';
 import { QueueHandler } from '@stamhoofd/queues';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { DefaultAgeGroup, MemberDetails, MemberResponsibility, OrderStatus, Parent, Permissions, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType, TranslatedString, TranslatedText, Version } from '@stamhoofd/structures';
+import { DefaultAgeGroup, MemberDetails, MemberResponsibility, OrderStatus, Parent, Permissions, RecordCategory, RecordCheckboxAnswer, RecordSettings, RecordType, TranslatedText, Version } from '@stamhoofd/structures';
 import { MailchimpSettings } from '@stamhoofd/structures/mailchimp/MailchimpSettings.js';
 import { MailchimpSyncIssueReason, MailchimpSyncStatus } from '@stamhoofd/structures/mailchimp/MailchimpSync.js';
 import { MailchimpSyncRequest, MailchimpSyncType } from '@stamhoofd/structures/mailchimp/MailchimpSyncRequest.js';
@@ -44,8 +44,8 @@ describe('Endpoint.StartMailchimpSync', () => {
             organization.meta.recordsConfiguration.recordCategories = [RecordCategory.create({ name: TranslatedText.create('Vragen'), records: [newsletter, camp] })];
             await organization.save();
 
-            const welpen = await new GroupFactory({ organization, name: TranslatedString.create('Welpen') }).create();
-            const kapoenen = await new GroupFactory({ organization, name: TranslatedString.create('Kapoenen') }).create();
+            const welpen = await new GroupFactory({ organization, name: TranslatedText.create('Welpen') }).create();
+            const kapoenen = await new GroupFactory({ organization, name: TranslatedText.create('Kapoenen') }).create();
             const answers = (values: [RecordSettings, boolean][]) => new Map(values.map(([settings, selected]) => [settings.id, RecordCheckboxAnswer.create({ settings, selected })]));
 
             const emma = await new MemberFactory({
@@ -241,10 +241,10 @@ describe('Endpoint.StartMailchimpSync', () => {
                 organization.privateMeta.responsibilities = [materiaalmeester];
                 await organization.save();
 
-                const wolfjes = await new GroupFactory({ organization, period: period!, name: TranslatedString.create('Wolfjes') }).create();
+                const wolfjes = await new GroupFactory({ organization, period: period!, name: TranslatedText.create('Wolfjes') }).create();
                 wolfjes.defaultAgeGroupId = welpenAgeGroup.id;
                 await wolfjes.save();
-                const dansgroep = await new GroupFactory({ organization, period: period!, name: TranslatedString.create('Dansgroep') }).create();
+                const dansgroep = await new GroupFactory({ organization, period: period!, name: TranslatedText.create('Dansgroep') }).create();
 
                 const emma = await new MemberFactory({
                     organization,

@@ -19,7 +19,7 @@ import {
     OrganizationRegistrationPeriodFactory,
     RegistrationPeriodFactory,
 } from '@stamhoofd/models';
-import { EventMeta, TranslatedString } from '@stamhoofd/structures';
+import { EventMeta, TranslatedText } from '@stamhoofd/structures';
 import type { Pages } from '../helpers/index.js';
 import { WorkerData } from '../helpers/index.js';
 
@@ -100,7 +100,7 @@ test.describe('Register member - choose group', () => {
             const group = await new GroupFactory({
                 organization,
                 price: 0,
-                name: new TranslatedString(name),
+                name: TranslatedText.create(name),
             }).create();
 
             // Keep registration open well into the future so the member can register
@@ -149,7 +149,7 @@ test.describe('Register member - choose group', () => {
         const membershipGroup = await new GroupFactory({
             organization,
             price: 0,
-            name: new TranslatedString('Kapoenen'),
+            name: TranslatedText.create('Kapoenen'),
         }).create();
         membershipGroup.settings.registrationEndDate = new Date(
             Date.now() + 24 * 60 * 60 * 1000,

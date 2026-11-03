@@ -4,7 +4,7 @@ import { GroupType } from '../../GroupType.js';
 import { Organization } from '../../Organization.js';
 import { Platform } from '../../Platform.js';
 import { OrganizationRegistrationPeriod, RegistrationPeriod } from '../../RegistrationPeriod.js';
-import { TranslatedString } from '../../TranslatedString.js';
+import { TranslatedText } from '../../TranslatedText.js';
 import { MemberDetails } from '../MemberDetails.js';
 import { MembersBlob, MemberWithRegistrationsBlob } from '../MemberWithRegistrationsBlob.js';
 import { PlatformFamily } from '../PlatformMember.js';
@@ -62,7 +62,7 @@ describe('Unit.RegisterItem', () => {
                 organizationId: organization.id,
                 periodId: period.id,
                 settings: GroupSettings.create({
-                    name: new TranslatedString('name'),
+                    name: TranslatedText.create('name'),
                     requireDefaultAgeGroupIds: ['default-age-group'],
                 }),
             });
@@ -108,7 +108,7 @@ describe('Unit.RegisterItem', () => {
                 organizationId: organization.id,
                 periodId: period.id,
                 settings: GroupSettings.create({
-                    name: new TranslatedString('name'),
+                    name: TranslatedText.create('name'),
                     requireDefaultAgeGroupIds: ['default-age-group'],
                 }),
             });
@@ -155,7 +155,7 @@ describe('Unit.RegisterItem', () => {
                 organizationId: organization.id,
                 periodId: period.id,
                 settings: GroupSettings.create({
-                    name: new TranslatedString('name'),
+                    name: TranslatedText.create('name'),
                     requireDefaultAgeGroupIds: ['default-age-group'],
                 }),
             });
@@ -206,7 +206,7 @@ describe('Unit.RegisterItem', () => {
                 organizationId: organization.id,
                 periodId: period.id, // This is already on the next period
                 settings: GroupSettings.create({
-                    name: new TranslatedString('name'),
+                    name: TranslatedText.create('name'),
                     requireDefaultAgeGroupIds: ['default-age-group'],
                     period: period, // This cache is required to know whether the group should be locked or not
                 }),
@@ -248,7 +248,7 @@ describe('Unit.RegisterItem', () => {
                 organizationId: organization.id,
                 periodId: period.id, // This is already on the next period
                 settings: GroupSettings.create({
-                    name: new TranslatedString('name'),
+                    name: TranslatedText.create('name'),
                     period: period, // This cache is required to know whether the group should be locked or not
                 }),
             });
@@ -288,7 +288,7 @@ describe('Unit.RegisterItem', () => {
                 organizationId: organization.id,
                 periodId: futurePeriod.id, // This is already on the next period
                 settings: GroupSettings.create({
-                    name: new TranslatedString('name'),
+                    name: TranslatedText.create('name'),
                     period: futurePeriod, // This cache is required to know whether the group should be locked or not
                 }),
             });
@@ -330,7 +330,7 @@ describe('Unit.RegisterItem', () => {
                 organizationId: organization.id,
                 periodId: futurePeriod.id, // This is already on the next period
                 settings: GroupSettings.create({
-                    name: new TranslatedString('name'),
+                    name: TranslatedText.create('name'),
                     period: futurePeriod, // This cache is required to know whether the group should be locked or not
                 }),
             });
@@ -370,7 +370,7 @@ describe('Unit.RegisterItem', () => {
                 organizationId: organization.id,
                 periodId: futurePeriod.id, // This is already on the next period
                 settings: GroupSettings.create({
-                    name: new TranslatedString('name'),
+                    name: TranslatedText.create('name'),
                     period: futurePeriod, // This cache is required to know whether the group should be locked or not
                 }),
             });

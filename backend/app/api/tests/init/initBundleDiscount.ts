@@ -1,6 +1,6 @@
 import type { Group, OrganizationRegistrationPeriod } from '@stamhoofd/models';
 import type { GroupPrice } from '@stamhoofd/structures';
-import { GroupPriceDiscountType, BundleDiscount, TranslatedString, GroupPriceDiscount, ReduceablePrice, BundleDiscountGroupPriceSettings } from '@stamhoofd/structures';
+import { BundleDiscount, BundleDiscountGroupPriceSettings, GroupPriceDiscount, GroupPriceDiscountType, ReduceablePrice, TranslatedText } from '@stamhoofd/structures';
 
 function createBundleDiscount({
     name = 'Bundle discount',
@@ -17,7 +17,7 @@ function createBundleDiscount({
     discounts?: Array<{ value: number; type: GroupPriceDiscountType; reducedValue?: number }>;
 } = {}) {
     return BundleDiscount.create({
-        name: new TranslatedString(name),
+        name: TranslatedText.create(name),
         countWholeFamily,
         countPerGroup,
         discounts: discounts.map(d => GroupPriceDiscount.create({

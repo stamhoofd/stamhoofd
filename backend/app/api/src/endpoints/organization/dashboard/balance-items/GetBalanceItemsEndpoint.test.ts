@@ -3,7 +3,7 @@ import type { Organization, User } from '@stamhoofd/models';
 import { BalanceItemFactory, GroupFactory, MemberFactory, OrderFactory, OrganizationFactory, RegistrationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import type { BalanceItem as BalanceItemStruct, PaginatedResponse, StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, LimitedFilteredRequest, Permissions, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, LimitedFilteredRequest, Permissions, TranslatedText } from '@stamhoofd/structures';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { GetBalanceItemsEndpoint } from './GetBalanceItemsEndpoint.js';
 import { SessionService } from '../../../../services/SessionService.js';
@@ -145,7 +145,7 @@ describe('Endpoint.GetBalanceItemsEndpoint', () => {
                         BalanceItemRelationType.MembershipType,
                         BalanceItemRelation.create({
                             id: membershipTypeId,
-                            name: new TranslatedString('Membership type'),
+                            name: TranslatedText.create('Membership type'),
                         }),
                     ],
                 ]),

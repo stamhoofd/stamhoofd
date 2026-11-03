@@ -1,5 +1,5 @@
 import type { GroupCategory, Organization, OrganizationRegistrationPeriod } from '@stamhoofd/structures';
-import { Group, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, OrganizationGenderType, TranslatedString } from '@stamhoofd/structures';
+import { Group, GroupGenderType, GroupPrivateSettings, GroupSettings, GroupStatus, GroupType, OrganizationGenderType, TranslatedText } from '@stamhoofd/structures';
 
 /**
  * Holds the information that is shared across the steps of the member administration
@@ -62,7 +62,7 @@ export class MemberAdministrationOnboardingViewModel {
             type: GroupType.Membership,
             status: GroupStatus.Closed,
             settings: GroupSettings.create({
-                name: TranslatedString.create(name),
+                name: TranslatedText.create(name),
                 genderType: this.organization.meta.genderType === OrganizationGenderType.Mixed ? GroupGenderType.Mixed : GroupGenderType.OnlyFemale,
             }),
             privateSettings: GroupPrivateSettings.create({}),

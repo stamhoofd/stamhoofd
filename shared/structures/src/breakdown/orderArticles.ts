@@ -1,7 +1,7 @@
 import type { BalanceItem } from '../BalanceItem.js';
 import { BalanceItemType } from '../BalanceItem.js';
 import { BreakdownGroup } from '../PaymentBreakdown.js';
-import { TranslatedString } from '../TranslatedString.js';
+import { TranslatedText } from '../TranslatedText.js';
 import type { CartItem } from '../webshops/CartItem.js';
 import type { OrderData } from '../webshops/Order.js';
 
@@ -13,7 +13,7 @@ export type OrderArticle = { id: string; name: string; description: string; icon
 export function createOrderArticleGroup(article: OrderArticle): BreakdownGroup {
     return BreakdownGroup.create({
         id: article.id,
-        name: new TranslatedString(article.name),
+        name: TranslatedText.create(article.name),
         description: article.description,
         icon: article.icon,
     });

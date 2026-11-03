@@ -1,20 +1,4 @@
-import {
-    Group,
-    GroupPrice,
-    GroupSettings,
-    GroupType,
-    MemberDetails,
-    MemberWithRegistrationsBlob,
-    Organization,
-    OrganizationMetaData,
-    OrganizationRegistrationPeriod,
-    OrganizationType,
-    Registration,
-    RegistrationPeriod,
-    SGVSyncStatus,
-    TranslatedString,
-    UmbrellaOrganization,
-} from '@stamhoofd/structures';
+import { Group, GroupPrice, GroupSettings, GroupType, MemberDetails, MemberWithRegistrationsBlob, Organization, OrganizationMetaData, OrganizationRegistrationPeriod, OrganizationType, Registration, RegistrationPeriod, SGVSyncStatus, TranslatedText, UmbrellaOrganization } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { getSGVSyncWarning } from './useSGVSync';
 
@@ -48,7 +32,7 @@ describe('useSGVSync.getSGVSyncWarning', () => {
             id: `${type}-${periodId}`,
             type,
             periodId,
-            settings: GroupSettings.create({ name: TranslatedString.create('Kapoenen') }),
+            settings: GroupSettings.create({ name: TranslatedText.create('Kapoenen') }),
         });
     }
 

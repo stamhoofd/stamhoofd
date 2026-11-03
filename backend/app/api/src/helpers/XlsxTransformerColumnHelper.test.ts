@@ -1,23 +1,6 @@
 import type { XlsxTransformerConcreteColumn } from '@stamhoofd/excel-writer';
 import type { PlatformMember } from '@stamhoofd/structures';
-import {
-    EmergencyContact,
-    Group,
-    GroupCategory,
-    GroupCategorySettings,
-    GroupSettings,
-    MemberDetails,
-    MembersBlob,
-    MemberWithRegistrationsBlob,
-    Organization,
-    OrganizationRegistrationPeriod,
-    OrganizationRegistrationPeriodSettings,
-    Platform,
-    PlatformFamily,
-    Registration,
-    RegistrationPeriod,
-    TranslatedString,
-} from '@stamhoofd/structures';
+import { EmergencyContact, Group, GroupCategory, GroupCategorySettings, GroupSettings, MemberDetails, MembersBlob, MemberWithRegistrationsBlob, Organization, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodSettings, Platform, PlatformFamily, Registration, RegistrationPeriod, TranslatedText } from '@stamhoofd/structures';
 import { XlsxTransformerColumnHelper } from './XlsxTransformerColumnHelper.js';
 
 describe('XlsxTransformerColumnHelper', () => {
@@ -27,7 +10,7 @@ describe('XlsxTransformerColumnHelper', () => {
                 organizationId: organization.id,
                 periodId,
                 settings: GroupSettings.create({
-                    name: new TranslatedString(name),
+                    name: TranslatedText.create(name),
                 }),
             });
         }

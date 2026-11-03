@@ -1,6 +1,6 @@
 import type { Group, Organization, RegistrationPeriod } from '@stamhoofd/models';
 import { GroupFactory } from '@stamhoofd/models';
-import { TranslatedString } from '@stamhoofd/structures';
+import { TranslatedText } from '@stamhoofd/structures';
 
 export type GroupCreator = (organization: Organization) => Promise<Group>;
 
@@ -12,7 +12,7 @@ export class TestGroups {
                 period,
                 price: 500000,
                 reducedPrice: 400000,
-                name: new TranslatedString(name),
+                name: TranslatedText.create(name),
             }).create();
 
             return group;

@@ -3,23 +3,7 @@ import { BalanceItem, BalanceItemPayment, CachedBalance, Invoice, InvoicedBalanc
 import { InvoiceCounter } from '@stamhoofd/models/helpers/InvoiceCounter.js';
 import { QueryableModel } from '@stamhoofd/sql';
 import type { STInvoiceItem, STInvoiceMeta } from '@stamhoofd/structures';
-import {
-    BalanceItemRelation,
-    BalanceItemRelationType,
-    BalanceItemStatus,
-    BalanceItemType,
-    Company,
-    getPricingTypeName,
-    InvoicedBalanceItem as InvoicedBalanceItemStruct,
-    PaymentCustomer,
-    PaymentMethod,
-    PaymentProvider,
-    PaymentStatus,
-    PaymentType,
-    TranslatedString,
-    VATExcemptReason,
-    VATSubtotal,
-} from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, Company, getPricingTypeName, InvoicedBalanceItem as InvoicedBalanceItemStruct, PaymentCustomer, PaymentMethod, PaymentProvider, PaymentStatus, PaymentType, TranslatedText, VATExcemptReason, VATSubtotal } from '@stamhoofd/structures';
 import { InvoiceStruct } from '@stamhoofd/structures/billing/Invoice.js';
 import { STMath } from '@stamhoofd/utility';
 import { v4 as uuidv4 } from 'uuid';
@@ -102,11 +86,11 @@ async function buildBalanceItem(item: STInvoiceItem, options: {
         balanceItem.type = BalanceItemType.STPackage;
         balanceItem.relations.set(BalanceItemRelationType.STPackage, BalanceItemRelation.create({
             id: item.package.id,
-            name: TranslatedString.create(item.package.meta.name),
+            name: TranslatedText.create(item.package.meta.name),
         }));
         balanceItem.relations.set(BalanceItemRelationType.STPricingType, BalanceItemRelation.create({
             id: item.package.meta.pricingType,
-            name: TranslatedString.create(getPricingTypeName(item.package.meta.pricingType)),
+            name: TranslatedText.create(getPricingTypeName(item.package.meta.pricingType)),
         }));
         balanceItem.startDate = item.package.meta.startDate ?? null;
         balanceItem.endDate = item.package.endDate ?? null;

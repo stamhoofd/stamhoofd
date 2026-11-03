@@ -19,13 +19,7 @@ import type {
     RecordAnswer,
     UitpasNumberDetails,
 } from '@stamhoofd/structures';
-import {
-    BalanceItemRelation,
-    BalanceItemRelationType,
-    Gender,
-    ParentType,
-    TranslatedString,
-} from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, Gender, ParentType, TranslatedText } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItemService } from '../services/BalanceItemService.js';
 import { PlatformMembershipService } from '../services/PlatformMembershipService.js';
@@ -242,7 +236,7 @@ async function mergeBalanceItems(base: Member, other: Member) {
                 BalanceItemRelationType.Member,
                 BalanceItemRelation.create({
                     id: base.id,
-                    name: new TranslatedString(base.details.name),
+                    name: TranslatedText.create(base.details.name),
                 }),
             );
         }

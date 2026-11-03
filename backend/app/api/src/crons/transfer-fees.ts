@@ -2,7 +2,7 @@ import { registerRootTenantCron } from './helpers/registerTenantCron.js';
 import { BalanceItem, Organization, Payment, Platform } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
 import type { PaymentProvider } from '@stamhoofd/structures';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPaymentProviderName, PaymentMethod, PaymentStatus, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, getPaymentProviderName, PaymentMethod, PaymentStatus, TranslatedText } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { BalanceItemService } from '../services/BalanceItemService.js';
 import { PaymentService } from '../services/PaymentService.js';
@@ -119,7 +119,7 @@ async function chargeTransferFees() {
                     if (provider) {
                         item.relations.set(BalanceItemRelationType.PaymentProvider, BalanceItemRelation.create({
                             id: provider,
-                            name: TranslatedString.create(getPaymentProviderName(provider)),
+                            name: TranslatedText.create(getPaymentProviderName(provider)),
                         }));
                     }
 

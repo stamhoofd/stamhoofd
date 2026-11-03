@@ -4,7 +4,7 @@ import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationInvitatio
 import type { PaginatedResponse, RegistrationInvitation as RegistrationInvitationStruct, StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { CountFilteredRequest, LimitedFilteredRequest, Permissions, ResourcePermissions, TranslatedString } from '@stamhoofd/structures';
+import { CountFilteredRequest, LimitedFilteredRequest, Permissions, ResourcePermissions, TranslatedText } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetRegistrationInvitationsCountEndpoint } from './GetRegistrationInvitationsCountEndpoint.js';
@@ -46,8 +46,8 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
             test('should only return invitations for that group', async () => {
                 const organization = await new OrganizationFactory({}).create();
                 const groupName = 'test groep';
-                const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
-                const group2 = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
+                const group = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
+                const group2 = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
 
                 const resources = new Map();
 
@@ -104,8 +104,8 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
             test('cannot read invitations for other group', async () => {
                 const organization = await new OrganizationFactory({}).create();
                 const groupName = 'test groep';
-                const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
-                const group2 = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
+                const group = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
+                const group2 = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
 
                 const resources = new Map();
 
@@ -162,8 +162,8 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
             test('can read invitations for any group of organization', async () => {
                 const organization = await new OrganizationFactory({}).create();
                 const groupName = 'test groep';
-                const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
-                const group2 = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
+                const group = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
+                const group2 = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
 
                 const user = await new UserFactory({
                     organization,
@@ -217,8 +217,8 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
             test('cannot read invitations for other organization', async () => {
                 const organization = await new OrganizationFactory({}).create();
                 const groupName = 'test groep';
-                const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
-                const group2 = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
+                const group = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
+                const group2 = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
 
                 const user = await new UserFactory({
                     organization,
@@ -278,8 +278,8 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
             test('can read all invitations for read access for platform', async () => {
                 const organization = await new OrganizationFactory({}).create();
                 const groupName = 'test groep';
-                const group = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
-                const group2 = await new GroupFactory({ organization, name: new TranslatedString(groupName) }).create();
+                const group = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
+                const group2 = await new GroupFactory({ organization, name: TranslatedText.create(groupName) }).create();
 
                 const user = await new UserFactory({
                     globalPermissions: Permissions.create({ level: PermissionLevel.Read }),
@@ -341,8 +341,8 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                 await organization1.save();
 
                 const groupName = 'test groep';
-                const group = await new GroupFactory({ organization: organization1, name: new TranslatedString(groupName), period }).create();
-                const group2 = await new GroupFactory({ organization: organization1, name: new TranslatedString(groupName), period }).create();
+                const group = await new GroupFactory({ organization: organization1, name: TranslatedText.create(groupName), period }).create();
+                const group2 = await new GroupFactory({ organization: organization1, name: TranslatedText.create(groupName), period }).create();
 
                 const resources = new Map();
 
@@ -431,8 +431,8 @@ describe('Endpoint.GetRegistrationInvitationsEndpoint', () => {
                 await organization.save();
 
                 const groupName = 'test groep';
-                const group = await new GroupFactory({ organization, name: new TranslatedString(groupName), period }).create();
-                const group2 = await new GroupFactory({ organization, name: new TranslatedString(groupName), period }).create();
+                const group = await new GroupFactory({ organization, name: TranslatedText.create(groupName), period }).create();
+                const group2 = await new GroupFactory({ organization, name: TranslatedText.create(groupName), period }).create();
 
                 const resources = new Map();
 

@@ -11,7 +11,7 @@ import { MailchimpMocker } from '@stamhoofd/backend/tests/helpers/MailchimpMocke
 import type { User } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, OrganizationFactory, RegistrationFactory, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { appToUri, MemberDetails, Parent, Permissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { appToUri, MemberDetails, Parent, Permissions, STPackageBundle, Token as TokenStruct, TranslatedText, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
 
@@ -74,7 +74,7 @@ test.describe('Mailchimp @mailchimp', () => {
             permissions: Permissions.create({ level: PermissionLevel.Full }),
         }).create();
 
-        const group = await new GroupFactory({ organization, name: TranslatedString.create('Welpen') }).create();
+        const group = await new GroupFactory({ organization, name: TranslatedText.create('Welpen') }).create();
         const member = await new MemberFactory({
             organization,
             details: MemberDetails.create({

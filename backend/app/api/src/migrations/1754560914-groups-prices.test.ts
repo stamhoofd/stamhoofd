@@ -1,6 +1,6 @@
 import type { Organization, RegistrationPeriod } from '@stamhoofd/models';
 import { Group, GroupFactory, OrganizationFactory, OrganizationRegistrationPeriod, OrganizationRegistrationPeriodFactory, RegistrationPeriodFactory } from '@stamhoofd/models';
-import { GroupCategory, GroupCategorySettings, GroupPriceDiscountType, GroupStatus, OldGroupPrice, OldGroupPrices, TranslatedString } from '@stamhoofd/structures';
+import { GroupCategory, GroupCategorySettings, GroupPriceDiscountType, GroupStatus, OldGroupPrice, OldGroupPrices, TranslatedText } from '@stamhoofd/structures';
 import { migratePrices } from './1754560914-groups-prices.js';
 
 describe('migration.migratePrices', () => {
@@ -28,7 +28,7 @@ describe('migration.migratePrices', () => {
 
             group1 = await new GroupFactory({ organization, period }).create();
             group1.settings.prices = [];
-            group1.settings.name = new TranslatedString('group1');
+            group1.settings.name = TranslatedText.create('group1');
 
             // initial price with discount if family members in same category
             const oldPrices1 = OldGroupPrices.create({
@@ -77,14 +77,14 @@ describe('migration.migratePrices', () => {
             group2.settings.prices = [];
             // do not set old prices for group 2 (should be set to 0 automatically in migration)
             group2.settings.oldPrices = [];
-            group2.settings.name = new TranslatedString('group2');
+            group2.settings.name = TranslatedText.create('group2');
             await group2.save();
 
             group3 = await new GroupFactory({ organization, period }).create();
             group3.settings.prices = [];
             // do not set old prices for group 3 (should be set to 0 automatically in migration)
             group3.settings.oldPrices = [];
-            group3.settings.name = new TranslatedString('group3');
+            group3.settings.name = TranslatedText.create('group3');
             await group3.save();
 
             // add group 1 and to 2 to same category, add group 3 to different category
@@ -255,7 +255,7 @@ describe('migration.migratePrices', () => {
 
             group1 = await new GroupFactory({ organization, period }).create();
             group1.settings.prices = [];
-            group1.settings.name = new TranslatedString('group1');
+            group1.settings.name = TranslatedText.create('group1');
 
             // initial price with discount if same members in same category
             const oldPrices1 = OldGroupPrices.create({
@@ -302,13 +302,13 @@ describe('migration.migratePrices', () => {
             group2 = await new GroupFactory({ organization, period }).create();
             group2.settings.prices = [];
             group2.settings.oldPrices = [];
-            group2.settings.name = new TranslatedString('group2');
+            group2.settings.name = TranslatedText.create('group2');
             await group2.save();
 
             group3 = await new GroupFactory({ organization, period }).create();
             group3.settings.prices = [];
             group3.settings.oldPrices = [];
-            group3.settings.name = new TranslatedString('group3');
+            group3.settings.name = TranslatedText.create('group3');
             await group3.save();
 
             organizationPeriod.settings.categories = [
@@ -478,7 +478,7 @@ describe('migration.migratePrices', () => {
 
             group1 = await new GroupFactory({ organization, period }).create();
             group1.settings.prices = [];
-            group1.settings.name = new TranslatedString('group1');
+            group1.settings.name = TranslatedText.create('group1');
 
             // initial price with discount if same members in same category
             const oldPrices1 = OldGroupPrices.create({
@@ -525,13 +525,13 @@ describe('migration.migratePrices', () => {
             group2 = await new GroupFactory({ organization, period }).create();
             group2.settings.prices = [];
             group2.settings.oldPrices = [];
-            group2.settings.name = new TranslatedString('group2');
+            group2.settings.name = TranslatedText.create('group2');
             await group2.save();
 
             group3 = await new GroupFactory({ organization, period }).create();
             group3.settings.prices = [];
             group3.settings.oldPrices = [];
-            group3.settings.name = new TranslatedString('group3');
+            group3.settings.name = TranslatedText.create('group3');
             await group3.save();
 
             organizationPeriod.settings.categories = [
@@ -735,7 +735,7 @@ describe('migration.migratePrices', () => {
 
             group1 = await new GroupFactory({ organization, period }).create();
             group1.settings.prices = [];
-            group1.settings.name = new TranslatedString('group1');
+            group1.settings.name = TranslatedText.create('group1');
 
             // price with discount if same members in same category
             const oldPrices1 = OldGroupPrices.create({
@@ -841,7 +841,7 @@ describe('migration.migratePrices', () => {
                 ],
             });
             group2.settings.oldPrices = [oldPrices_g2_1, oldPrices_g2_2];
-            group2.settings.name = new TranslatedString('group2');
+            group2.settings.name = TranslatedText.create('group2');
             await group2.save();
 
             group3 = await new GroupFactory({ organization, period }).create();
@@ -864,13 +864,13 @@ describe('migration.migratePrices', () => {
                 ],
             });
             group3.settings.oldPrices = [oldPrices_g3_1];
-            group3.settings.name = new TranslatedString('group3');
+            group3.settings.name = TranslatedText.create('group3');
             await group3.save();
 
             group4 = await new GroupFactory({ organization, period }).create();
             group4.settings.prices = [];
             group4.settings.oldPrices = [];
-            group4.settings.name = new TranslatedString('group4');
+            group4.settings.name = TranslatedText.create('group4');
             await group4.save();
 
             organizationPeriod.settings.categories = [
@@ -1163,7 +1163,7 @@ describe('migration.migratePrices', () => {
 
             group1 = await new GroupFactory({ organization, period }).create();
             group1.settings.prices = [];
-            group1.settings.name = new TranslatedString('group1');
+            group1.settings.name = TranslatedText.create('group1');
 
             // initial price with discount if family members in same category
             const oldPrices1 = OldGroupPrices.create({
@@ -1212,14 +1212,14 @@ describe('migration.migratePrices', () => {
             group2.settings.prices = [];
             // do not set old prices for group 2 (should be set to 0 automatically in migration)
             group2.settings.oldPrices = [];
-            group2.settings.name = new TranslatedString('group2');
+            group2.settings.name = TranslatedText.create('group2');
             await group2.save();
 
             group3 = await new GroupFactory({ organization, period }).create();
             group3.settings.prices = [];
             // do not set old prices for group 3 (should be set to 0 automatically in migration)
             group3.settings.oldPrices = [];
-            group3.settings.name = new TranslatedString('group3');
+            group3.settings.name = TranslatedText.create('group3');
             await group3.save();
 
             // add group 1 and to 2 to same category, add group 3 to different category
@@ -1430,7 +1430,7 @@ describe('migration.migratePrices', () => {
 
             group1 = await new GroupFactory({ organization, period }).create();
             group1.settings.prices = [];
-            group1.settings.name = new TranslatedString('group1');
+            group1.settings.name = TranslatedText.create('group1');
 
             // initial price with discount if family members in same category
             const oldPrices1 = OldGroupPrices.create({
@@ -1532,7 +1532,7 @@ describe('migration.migratePrices', () => {
 
             group1 = await new GroupFactory({ organization, period }).create();
             group1.settings.prices = [];
-            group1.settings.name = new TranslatedString('group1');
+            group1.settings.name = TranslatedText.create('group1');
 
             // initial price with discount if same members in same category
             const oldPrices1 = OldGroupPrices.create({
@@ -1634,7 +1634,7 @@ describe('migration.migratePrices', () => {
 
             group1 = await new GroupFactory({ organization, period }).create();
             group1.settings.prices = [];
-            group1.settings.name = new TranslatedString('group1');
+            group1.settings.name = TranslatedText.create('group1');
 
             // initial price with discount if same members in same category
             const oldPrices1 = OldGroupPrices.create({
@@ -1758,7 +1758,7 @@ describe('migration.migratePrices', () => {
 
             group1 = await new GroupFactory({ organization, period }).create();
             group1.settings.prices = [];
-            group1.settings.name = new TranslatedString('group1');
+            group1.settings.name = TranslatedText.create('group1');
 
             // initial price with discount if family members in same category
             const oldPrices1 = OldGroupPrices.create({
@@ -1787,7 +1787,7 @@ describe('migration.migratePrices', () => {
 
             group2 = await new GroupFactory({ organization, period }).create();
             group2.settings.prices = [];
-            group2.settings.name = new TranslatedString('group2');
+            group2.settings.name = TranslatedText.create('group2');
 
             // initial price with discount if family members in same category (same discounts as oldPrices1)
             const oldPrices2 = OldGroupPrices.create({
@@ -1910,7 +1910,7 @@ describe('migration.migratePrices', () => {
 
             group1 = await new GroupFactory({ organization, period }).create();
             group1.settings.prices = [];
-            group1.settings.name = new TranslatedString('group1');
+            group1.settings.name = TranslatedText.create('group1');
 
             // initial price with discount if family members in same category
             const oldPrices1 = OldGroupPrices.create({
@@ -1939,7 +1939,7 @@ describe('migration.migratePrices', () => {
 
             group2 = await new GroupFactory({ organization, period }).create();
             group2.settings.prices = [];
-            group2.settings.name = new TranslatedString('group2');
+            group2.settings.name = TranslatedText.create('group2');
 
             // initial price with discount if family members in same category (different discount as oldPrices1)
             const oldPrices2 = OldGroupPrices.create({
@@ -2043,7 +2043,7 @@ describe('migration.migratePrices', () => {
 
             group1 = await new GroupFactory({ organization, period }).create();
             group1.settings.prices = [];
-            group1.settings.name = new TranslatedString('group1');
+            group1.settings.name = TranslatedText.create('group1');
 
             // initial price with discount if family members in same category
             const oldPrices1 = OldGroupPrices.create({
@@ -2072,7 +2072,7 @@ describe('migration.migratePrices', () => {
 
             group2 = await new GroupFactory({ organization, period }).create();
             group2.settings.prices = [];
-            group2.settings.name = new TranslatedString('group2');
+            group2.settings.name = TranslatedText.create('group2');
 
             // initial price with discount if family members in same category (different discount as oldPrices1)
             const oldPrices2 = OldGroupPrices.create({
@@ -2187,7 +2187,7 @@ describe('migration.migratePrices', () => {
 
             group1 = await new GroupFactory({ organization, period }).create();
             group1.settings.prices = [];
-            group1.settings.name = new TranslatedString('group1');
+            group1.settings.name = TranslatedText.create('group1');
 
             // initial price with discount if family members in same category
             const oldPrices1 = OldGroupPrices.create({
@@ -2216,7 +2216,7 @@ describe('migration.migratePrices', () => {
 
             group2 = await new GroupFactory({ organization, period }).create();
             group2.settings.prices = [];
-            group2.settings.name = new TranslatedString('group2');
+            group2.settings.name = TranslatedText.create('group2');
 
             // initial price with discount if family members in same category (different discount as oldPrices1)
             const oldPrices2 = OldGroupPrices.create({
@@ -2310,7 +2310,7 @@ describe('migration.migratePrices', () => {
 
         const group1 = await new GroupFactory({ organization, period }).create();
         group1.settings.prices = [];
-        group1.settings.name = new TranslatedString('group1');
+        group1.settings.name = TranslatedText.create('group1');
 
         // initial price with discount if family members in same category
         const oldPrices1 = OldGroupPrices.create({
@@ -2339,7 +2339,7 @@ describe('migration.migratePrices', () => {
 
         const group2 = await new GroupFactory({ organization, period }).create();
         group2.settings.prices = [];
-        group2.settings.name = new TranslatedString('group2');
+        group2.settings.name = TranslatedText.create('group2');
 
         // initial price with discount if same members in same category
         const oldPrices2 = OldGroupPrices.create({
@@ -2439,7 +2439,7 @@ describe('migration.migratePrices', () => {
         // archived group
         group1.status = GroupStatus.Archived;
         group1.settings.prices = [];
-        group1.settings.name = new TranslatedString('group1');
+        group1.settings.name = TranslatedText.create('group1');
 
         // initial price with discount if family members in same category
         const oldPrices1 = OldGroupPrices.create({
@@ -2470,7 +2470,7 @@ describe('migration.migratePrices', () => {
         // archived group
         group2.status = GroupStatus.Archived;
         group2.settings.prices = [];
-        group2.settings.name = new TranslatedString('group2');
+        group2.settings.name = TranslatedText.create('group2');
 
         // initial price with discount if same members in same category
         const oldPrices2 = OldGroupPrices.create({
@@ -2601,7 +2601,7 @@ describe('migration.migratePrices', () => {
 
             group1 = await new GroupFactory({ organization, period }).create();
             group1.settings.prices = [];
-            group1.settings.name = new TranslatedString('group1');
+            group1.settings.name = TranslatedText.create('group1');
 
             // initial price with discount if family members in same category
             const oldPrices1 = OldGroupPrices.create({
@@ -2630,7 +2630,7 @@ describe('migration.migratePrices', () => {
 
             group2 = await new GroupFactory({ organization, period }).create();
             group2.settings.prices = [];
-            group2.settings.name = new TranslatedString('group2');
+            group2.settings.name = TranslatedText.create('group2');
 
             // initial price with discount if family members in same category (same discount as oldPrices1)
             const oldPrices2 = OldGroupPrices.create({
@@ -2722,7 +2722,7 @@ describe('migration.migratePrices', () => {
 
             group1 = await new GroupFactory({ organization, period }).create();
             group1.settings.prices = [];
-            group1.settings.name = new TranslatedString('group1');
+            group1.settings.name = TranslatedText.create('group1');
 
             // initial price with discount if family members in same category
             const oldPrices1 = OldGroupPrices.create({
@@ -2751,7 +2751,7 @@ describe('migration.migratePrices', () => {
 
             group2 = await new GroupFactory({ organization, period }).create();
             group2.settings.prices = [];
-            group2.settings.name = new TranslatedString('group2');
+            group2.settings.name = TranslatedText.create('group2');
 
             // initial price with discount if family members in same category (different discount as oldPrices1)
             const oldPrices2 = OldGroupPrices.create({
@@ -2859,7 +2859,7 @@ describe('migration.migratePrices', () => {
 
             group1 = await new GroupFactory({ organization, period }).create();
             group1.settings.prices = [];
-            group1.settings.name = new TranslatedString('group1');
+            group1.settings.name = TranslatedText.create('group1');
 
             // initial price with discount if family members in same category
             const oldPrices1 = OldGroupPrices.create({
@@ -2888,7 +2888,7 @@ describe('migration.migratePrices', () => {
 
             group2 = await new GroupFactory({ organization, period }).create();
             group2.settings.prices = [];
-            group2.settings.name = new TranslatedString('group2');
+            group2.settings.name = TranslatedText.create('group2');
 
             // initial price with discount if family members in same category (same discount as oldPrices1)
             const oldPrices2 = OldGroupPrices.create({

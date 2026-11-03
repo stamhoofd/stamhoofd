@@ -2,6 +2,7 @@ import { AutoEncoder, DateDecoder, EnumDecoder, field, StringDecoder } from '@co
 import { v4 as uuidv4 } from 'uuid';
 import { GroupType } from '../GroupType.js';
 import { TranslatedString } from '../TranslatedString.js';
+import { TranslatedText } from '../TranslatedText.js';
 
 /**
  * Invitation to register for a group. If an invitation exists the member can always register even if he does not meet the requirements of the group.
@@ -23,7 +24,8 @@ export class InvitationGroupData extends AutoEncoder {
     id: string;
 
     @field(TranslatedString.field({}))
-    name: TranslatedString;
+    @field(TranslatedText.field({ version: 426 }))
+    name: TranslatedText;
 
     @field({ decoder: new EnumDecoder(GroupType) })
     type: GroupType;

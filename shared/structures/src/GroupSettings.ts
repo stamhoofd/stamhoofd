@@ -12,7 +12,9 @@ import { ReduceablePrice } from './ReduceablePrice.js';
 import type { OrganizationRegistrationPeriodSettings } from './RegistrationPeriod.js';
 import { RegistrationPeriodBase } from './RegistrationPeriodBase.js';
 import { StockReservation } from './StockReservation.js';
+import { TranslatedLongText } from './TranslatedLongText.js';
 import { TranslatedString } from './TranslatedString.js';
+import { TranslatedText } from './TranslatedText.js';
 import { Image } from './files/Image.js';
 import { OrganizationRecordsConfiguration } from './members/OrganizationRecordsConfiguration.js';
 import type { RegisterItem } from './members/checkout/RegisterItem.js';
@@ -24,7 +26,8 @@ export class GroupPrice extends AutoEncoder {
 
     @field({ decoder: StringDecoder, defaultValue: () => '' })
     @field(TranslatedString.field({ version: 370, defaultValue: () => new TranslatedString($t(`%132`)) }))
-    name: TranslatedString;
+    @field(TranslatedText.field({ version: 426, defaultValue: () => TranslatedText.create($t(`%132`)) }))
+    name: TranslatedText;
 
     @field({ decoder: ReduceablePrice, defaultValue: () => ReduceablePrice.create({}) })
     price: ReduceablePrice;
@@ -315,11 +318,13 @@ export class GroupDefaultEventTime extends AutoEncoder {
 export class GroupSettings extends AutoEncoder {
     @field({ decoder: StringDecoder })
     @field(TranslatedString.field({ version: 370 }))
-    name = new TranslatedString();
+    @field(TranslatedText.field({ version: 426 }))
+    name = TranslatedText.create();
 
     @field({ decoder: StringDecoder })
     @field(TranslatedString.field({ version: 370 }))
-    description = new TranslatedString();
+    @field(TranslatedLongText.field({ version: 426 }))
+    description = TranslatedLongText.create();
 
     /**
      * @deprecated
@@ -1024,7 +1029,7 @@ export class GroupSettings extends AutoEncoder {
             });
         }
 
-        this.name = TranslatedString.create(name);
+        this.name = TranslatedText.create(name);
     }
 
     throwIfInvalidPrices() {

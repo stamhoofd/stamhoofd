@@ -7,6 +7,7 @@ import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { Payment, PrivatePayment } from './members/Payment.js';
 import type { PriceBreakdown } from './PriceBreakdown.js';
 import { TranslatedString } from './TranslatedString.js';
+import { TranslatedText } from './TranslatedText.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export enum BalanceItemStatusV352 {
@@ -287,7 +288,8 @@ export class BalanceItemRelation extends AutoEncoder {
 
     @field({ decoder: StringDecoder })
     @field(TranslatedString.field({ version: 372 }))
-    name = new TranslatedString();
+    @field(TranslatedText.field({ version: 426 }))
+    name = TranslatedText.create();
 }
 
 /**

@@ -6,7 +6,7 @@ import { Notification } from '@stamhoofd/models/models/Notification.js';
 import { NotificationRecipient } from '@stamhoofd/models/models/NotificationRecipient.js';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { GroupType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, Permissions, ResourcePermissions, TranslatedString, Version } from '@stamhoofd/structures';
+import { GroupType, IDRegisterCart, IDRegisterCheckout, IDRegisterItem, PaymentMethod, Permissions, ResourcePermissions, TranslatedText, Version } from '@stamhoofd/structures';
 import { NotificationSubjectType } from '@stamhoofd/structures/notifications/NotificationSubjectType.js';
 import { NotificationType } from '@stamhoofd/structures/notifications/NotificationType.js';
 import { RegistrationCreatedNotificationPayload } from '@stamhoofd/structures/notifications/RegistrationCreatedNotificationPayload.js';
@@ -48,7 +48,7 @@ describe('RegistrationNotificationService', () => {
         organization.privateMeta.featureFlags = featureFlag ? ['notifications'] : [];
         await organization.save();
 
-        const group = await new GroupFactory({ organization, period, price: 25_0000, name: new TranslatedString('Kapoenen') }).create();
+        const group = await new GroupFactory({ organization, period, price: 25_0000, name: TranslatedText.create('Kapoenen') }).create();
         const otherGroup = await new GroupFactory({ organization, period, price: 0 }).create();
 
         const fullAdmin = await new UserFactory({ organization, permissions: Permissions.create({ level: PermissionLevel.Full }) }).create();

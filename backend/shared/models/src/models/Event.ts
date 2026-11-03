@@ -1,6 +1,6 @@
 import { column } from '@node/database';
 import { QueryableModel } from '@stamhoofd/sql';
-import { EventMeta, Event as EventStruct, GroupType, TranslatedString } from '@stamhoofd/structures';
+import { Event as EventStruct, EventMeta, GroupType, TranslatedText } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { Group } from './Group.js';
 
@@ -97,7 +97,7 @@ export class Event extends QueryableModel {
 
         if (group.type === GroupType.EventRegistration) {
             // Don't change the name of the waiting list
-            group.settings.name = new TranslatedString(this.name);
+            group.settings.name = TranslatedText.create(this.name);
             group.settings.eventId = this.id;
         }
 

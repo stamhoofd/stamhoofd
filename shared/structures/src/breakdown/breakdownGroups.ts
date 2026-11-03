@@ -5,7 +5,7 @@ import type { PaymentAccount } from '../PaymentAccount.js';
 import { BreakdownAmountType, BreakdownGroup, BreakdownObjectType, BreakdownSelection } from '../PaymentBreakdown.js';
 import type { PaymentSettlementGroup } from '../PaymentSettlement.js';
 import { PaymentStatus } from '../PaymentStatus.js';
-import { TranslatedString } from '../TranslatedString.js';
+import { TranslatedText } from '../TranslatedText.js';
 import { toBalanceItemFilter } from './breakdownFilters.js';
 
 /**
@@ -52,7 +52,7 @@ export function createBalanceItemSelection(filter: StamhoofdFilter, amountType =
 export function createNamedGroup(source: PaymentAccount | PaymentSettlementGroup): BreakdownGroup {
     return BreakdownGroup.create({
         id: source.id,
-        name: new TranslatedString(source.name),
+        name: TranslatedText.create(source.name),
         description: source.description,
         icon: source.icon,
         asideIcon: 'asideIcon' in source ? source.asideIcon : null,
@@ -75,7 +75,7 @@ export function createCategoryGroup(balanceItem: BalanceItem, amountType = Break
 
     return BreakdownGroup.create({
         id: balanceItem.categoryId,
-        name: new TranslatedString(name),
+        name: TranslatedText.create(name),
         // Several types are named after the same relation, e.g. a registration and the fee for
         // canceling it are both named after their group, so the row says which one it is
         description: relationType && name !== typeName ? typeName : '',
@@ -94,7 +94,7 @@ export const ROUNDING_ID = 'rounding';
 export function createRoundingGroup(): BreakdownGroup {
     return BreakdownGroup.create({
         id: ROUNDING_ID,
-        name: new TranslatedString($t('%1b6')),
+        name: TranslatedText.create($t('%1b6')),
         description: $t('%Zit'),
         icon: 'calculator',
         // What a payment rounded away is a part of the payment itself, not of one of the things it
@@ -111,7 +111,7 @@ export const UNALLOCATED_ID = 'unallocated';
 export function createUnallocatedGroup(): BreakdownGroup {
     return BreakdownGroup.create({
         id: UNALLOCATED_ID,
-        name: new TranslatedString($t('%Zjq')),
+        name: TranslatedText.create($t('%Zjq')),
         description: $t('%ZjB'),
         icon: 'help',
         // There is no filter that selects the part of a payment that isn't linked to anything, so this
@@ -189,7 +189,7 @@ export function createBalanceItemGroup(group: PaymentSettlementGroup, amountType
 export function createFailedGroup(): BreakdownGroup {
     return BreakdownGroup.create({
         id: UNPAID_FAILED_ID,
-        name: new TranslatedString($t('%ZjW')),
+        name: TranslatedText.create($t('%ZjW')),
         description: $t('%ZjU'),
         icon: 'canceled',
         canNarrowDown: true,
@@ -200,7 +200,7 @@ export function createFailedGroup(): BreakdownGroup {
 export function createOpenAfterFailedGroup(): BreakdownGroup {
     return BreakdownGroup.create({
         id: UNPAID_OPEN_AFTER_FAILED_ID,
-        name: new TranslatedString($t('%ZjC')),
+        name: TranslatedText.create($t('%ZjC')),
         description: $t('%ZjP'),
         icon: 'label',
         canNarrowDown: true,
@@ -211,7 +211,7 @@ export function createOpenAfterFailedGroup(): BreakdownGroup {
 export function createOpenGroup(): BreakdownGroup {
     return BreakdownGroup.create({
         id: UNPAID_OPEN_ID,
-        name: new TranslatedString($t('%1Ni')),
+        name: TranslatedText.create($t('%1Ni')),
         description: $t('%Zjj'),
         icon: 'label',
         canNarrowDown: true,
@@ -222,7 +222,7 @@ export function createOpenGroup(): BreakdownGroup {
 export function createRefundGroup(): BreakdownGroup {
     return BreakdownGroup.create({
         id: REFUND_ID,
-        name: new TranslatedString($t('%10b')),
+        name: TranslatedText.create($t('%10b')),
         description: $t('%ZjS'),
         icon: 'undo',
         canNarrowDown: true,

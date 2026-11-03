@@ -2,7 +2,7 @@ import { BalanceItem, Organization, Platform, STPackage } from '@stamhoofd/model
 import { sendEmailTemplate } from '../helpers/EmailBuilder.js';
 import { SQL } from '@stamhoofd/sql';
 import type { Company } from '@stamhoofd/structures';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, getPricingTypeName, Recipient, Replacement, STPackageStatus, STPackageType, STPackageTypeHelper, STPricingType, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemStatus, BalanceItemType, EmailTemplateType, getPricingTypeName, Recipient, Replacement, STPackageStatus, STPackageType, STPackageTypeHelper, STPricingType, TranslatedText } from '@stamhoofd/structures';
 import { Formatter, STMath } from '@stamhoofd/utility';
 import { VATService } from './VATService.js';
 import { OrganizationAdminService } from './OrganizationAdminService.js';
@@ -169,11 +169,11 @@ export class STPackageService {
         );
         item.relations.set(BalanceItemRelationType.STPackage, BalanceItemRelation.create({
             id: pack.id,
-            name: TranslatedString.create(pack.meta.name),
+            name: TranslatedText.create(pack.meta.name),
         }));
         item.relations.set(BalanceItemRelationType.STPricingType, BalanceItemRelation.create({
             id: pack.meta.pricingType,
-            name: TranslatedString.create(getPricingTypeName(pack.meta.pricingType)),
+            name: TranslatedText.create(getPricingTypeName(pack.meta.pricingType)),
         }));
 
         item.packageId = pack.id;

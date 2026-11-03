@@ -1,5 +1,6 @@
 import { AutoEncoder, field, IntegerDecoder } from '@common/encoding';
 import { TranslatedString } from './TranslatedString.js';
+import { TranslatedText } from './TranslatedText.js';
 import { upgradePriceFrom2To4DecimalPlaces } from './upgradePriceFrom2To4DecimalPlaces.js';
 
 export class AppliedRegistrationDiscount extends AutoEncoder {
@@ -8,7 +9,8 @@ export class AppliedRegistrationDiscount extends AutoEncoder {
      * This contains the name of the discount and settings.
      */
     @field(TranslatedString.field({}))
-    name = new TranslatedString('');
+    @field(TranslatedText.field({ version: 426 }))
+    name = TranslatedText.create();
 
     /**
      * Discount in hunderd cents.

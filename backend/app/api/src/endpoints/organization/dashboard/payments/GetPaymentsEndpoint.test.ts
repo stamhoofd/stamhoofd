@@ -3,7 +3,7 @@ import type { Organization, User, BalanceItem } from '@stamhoofd/models';
 import { BalanceItemFactory, BalanceItemPayment, OrderFactory, OrganizationFactory, Payment, StripeAccount, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import type { PaginatedResponse, PaymentGeneral, StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, LimitedFilteredRequest, PaymentMethod, PaymentProvider, PaymentStatus, Permissions, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, LimitedFilteredRequest, PaymentMethod, PaymentProvider, PaymentStatus, Permissions, TranslatedText } from '@stamhoofd/structures';
 import { v4 as uuidv4 } from 'uuid';
 import { testServer } from '../../../../../tests/helpers/TestServer.js';
 import { SettlementService } from '../../../../services/SettlementService.js';
@@ -125,7 +125,7 @@ describe('Endpoint.GetPaymentsEndpoint', () => {
                             BalanceItemRelationType.MembershipType,
                             BalanceItemRelation.create({
                                 id: membershipTypeId,
-                                name: new TranslatedString('Membership type'),
+                                name: TranslatedText.create('Membership type'),
                             }),
                         ],
                     ]),

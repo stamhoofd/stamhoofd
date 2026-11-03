@@ -1,6 +1,6 @@
 import type { Organization, RegistrationPeriod, Webshop } from '@stamhoofd/models';
 import { BalanceItem, BalanceItemFactory, GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, Order, RegistrationFactory, RegistrationPeriodFactory, WebshopFactory } from '@stamhoofd/models';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, OrderData, ReduceablePrice, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, OrderData, ReduceablePrice, TranslatedText } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { v4 as uuidv4 } from 'uuid';
 import { backfillBalanceItemRelations } from './BalanceItemRelationsBackfiller.js';
@@ -67,7 +67,7 @@ describe('helper.BalanceItemRelationsBackfiller', () => {
         // Add a second price so the relation should be filled
         group.settings.prices.push(group.settings.prices[0].clone());
         group.settings.prices[1].id = uuidv4();
-        group.settings.prices[1].name = new TranslatedString('Late price');
+        group.settings.prices[1].name = TranslatedText.create('Late price');
         group.settings.prices[1].price = ReduceablePrice.create({ price: 30_00 });
         await group.save();
 
@@ -151,7 +151,7 @@ describe('helper.BalanceItemRelationsBackfiller', () => {
         const existingRelations = new Map([
             [
                 BalanceItemRelationType.Member,
-                BalanceItemRelation.create({ id: member.id, name: new TranslatedString('Custom name') }),
+                BalanceItemRelation.create({ id: member.id, name: TranslatedText.create('Custom name') }),
             ],
         ]);
 

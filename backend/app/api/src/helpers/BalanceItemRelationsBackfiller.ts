@@ -1,6 +1,6 @@
 import { BalanceItem, Group, Member, Order, Registration, Webshop } from '@stamhoofd/models';
 import { SQL } from '@stamhoofd/sql';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedText } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SeedTools } from './SeedTools.js';
 
@@ -26,7 +26,7 @@ function buildRegistrationRelations(registration: Registration, group: Group, me
     if (member) {
         relations.set(BalanceItemRelationType.Member, BalanceItemRelation.create({
             id: member.id,
-            name: new TranslatedString(member.details.name),
+            name: TranslatedText.create(member.details.name),
         }));
     }
 
@@ -139,7 +139,7 @@ async function backfillOrderBalanceItems(): Promise<number> {
                         BalanceItemRelationType.Webshop,
                         BalanceItemRelation.create({
                             id: webshop.id,
-                            name: new TranslatedString(webshop.meta.name),
+                            name: TranslatedText.create(webshop.meta.name),
                         }),
                     ],
                 ]);

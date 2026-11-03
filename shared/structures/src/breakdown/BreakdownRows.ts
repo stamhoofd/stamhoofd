@@ -4,7 +4,7 @@ import { getBalanceItemTitle, getBalanceItemTypeIcon } from '../BalanceItem.js';
 import type { BalanceItemPaymentDetailed } from '../BalanceItemDetailed.js';
 import type { PaymentGeneral } from '../members/PaymentGeneral.js';
 import { BreakdownGroup } from '../PaymentBreakdown.js';
-import { TranslatedString } from '../TranslatedString.js';
+import { TranslatedText } from '../TranslatedText.js';
 
 /**
  * A payment can pay for several things at once, so money is broken down per balance item it was
@@ -153,7 +153,7 @@ export class BreakdownRow {
         if (this.article) {
             // Only the title: what the article is for is in the relations, which say what they are
             // instead of ending up in a description that would only be true for the first item
-            this.group.name = new TranslatedString(getBalanceItemTitle(this.article, this.hasMultipleArticles));
+            this.group.name = TranslatedText.create(getBalanceItemTitle(this.article, this.hasMultipleArticles));
         }
 
         return this.group;
@@ -201,7 +201,7 @@ export class BreakdownRows {
 
         shown.push(BreakdownGroup.create({
             id: OTHER_GROUPS_ID,
-            name: new TranslatedString($t('%mV')),
+            name: TranslatedText.create($t('%mV')),
             description: $t('%ZiR', { count: Formatter.integer(rest.length) }),
             icon: 'box',
             price: rest.reduce((total, group) => total + group.price, 0),

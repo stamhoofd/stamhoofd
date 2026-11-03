@@ -13,7 +13,7 @@
 
         <div class="split-inputs">
             <div>
-                <TInput v-model="name" :placeholder="$t(`%16R`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`%1Os`)" />
+                <TextInput v-model="name" :placeholder="$t(`%16R`)" error-fields="name" :error-box="errors.errorBox" :title="$t(`%1Os`)" />
                 <p class="style-description-small">
                     {{ $t('%161') }}
                 </p>
@@ -129,6 +129,7 @@
 </template>
 
 <script setup lang="ts">
+import TextInput from '#inputs/TextInput.vue';
 import GroupAvatar from '#GroupAvatar.vue';
 import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
 import { ErrorBox } from '#errors/ErrorBox.ts';

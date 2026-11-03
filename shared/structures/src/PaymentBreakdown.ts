@@ -4,6 +4,7 @@ import { BalanceItemRelation, BalanceItemRelationType } from './BalanceItem.js';
 import { StamhoofdFilterDecoder } from './filters/FilteredRequest.js';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { TranslatedString } from './TranslatedString.js';
+import { TranslatedText } from './TranslatedText.js';
 
 /**
  * The ways a breakdown splits up its amounts. Each one is a tab in the interface.
@@ -125,7 +126,8 @@ export class BreakdownGroup extends AutoEncoder {
     id = '';
 
     @field(TranslatedString.field({}))
-    name = new TranslatedString();
+    @field(TranslatedText.field({ version: 426 }))
+    name = TranslatedText.create();
 
     @field({ decoder: StringDecoder })
     description = '';

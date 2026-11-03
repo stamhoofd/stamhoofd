@@ -10,7 +10,7 @@ import { STPackageService } from '@stamhoofd/backend/tests/helpers';
 import type { Group, Organization, User } from '@stamhoofd/models';
 import { GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriod, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { Address, appToUri, BooleanStatus, GroupCategory, GroupCategorySettings, MemberDetails, NationalRegisterNumberOptOut, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationType, Parent, ParentType, Permissions, PropertyFilter, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { Address, appToUri, BooleanStatus, GroupCategory, GroupCategorySettings, MemberDetails, NationalRegisterNumberOptOut, OrganizationMetaData, OrganizationRecordsConfiguration, OrganizationType, Parent, ParentType, Permissions, PropertyFilter, STPackageBundle, Token as TokenStruct, TranslatedText, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { Country } from '@stamhoofd/types/Country';
 import { Organization as OrganizationModel } from '@stamhoofd/models';
@@ -112,7 +112,7 @@ test.describe('Tax dependent parents (organization mode) @tax-dependent', () => 
         const group = await new GroupFactory({
             organization,
             period,
-            name: new TranslatedString('Kapoenen'),
+            name: TranslatedText.create('Kapoenen'),
         }).create();
 
         // The factory closes the group ten seconds after creation, too short to register through the UI

@@ -1,7 +1,7 @@
 import { SimpleError } from '@common/errors';
 import { BalanceItem, Member, MemberPlatformMembership, Platform, RegistrationPeriod } from '@stamhoofd/models';
 import { SQL, SQLOrderBy, SQLWhereSign } from '@stamhoofd/sql';
-import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedString } from '@stamhoofd/structures';
+import { BalanceItemRelation, BalanceItemRelationType, BalanceItemType, TranslatedText } from '@stamhoofd/structures';
 import { Formatter, sleep } from '@stamhoofd/utility';
 import { PlatformMembershipService } from '../services/PlatformMembershipService.js';
 
@@ -36,7 +36,7 @@ export const MembershipCharger = {
             const relation = period
                 ? BalanceItemRelation.create({
                         id: period.id,
-                        name: new TranslatedString(period.getBaseStructure().name),
+                        name: TranslatedText.create(period.getBaseStructure().name),
                     })
                 : null;
 
@@ -111,14 +111,14 @@ export const MembershipCharger = {
                         BalanceItemRelationType.Member,
                         BalanceItemRelation.create({
                             id: member.id,
-                            name: new TranslatedString(member.details.name),
+                            name: TranslatedText.create(member.details.name),
                         }),
                     ],
                     [
                         BalanceItemRelationType.MembershipType,
                         BalanceItemRelation.create({
                             id: type.id,
-                            name: new TranslatedString(type.name),
+                            name: TranslatedText.create(type.name),
                         }),
                     ],
                 ]);

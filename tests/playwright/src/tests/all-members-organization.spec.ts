@@ -10,7 +10,7 @@ import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Organization, User } from '@stamhoofd/models';
 import { GroupFactory, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationFactory, RegistrationPeriod, RegistrationPeriodFactory, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { appToUri, GroupCategory, GroupCategorySettings, Permissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { appToUri, GroupCategory, GroupCategorySettings, Permissions, STPackageBundle, Token as TokenStruct, TranslatedText, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
 
@@ -61,7 +61,7 @@ test.describe('All members list (organization mode) @all-members', () => {
         const currentGroup = await new GroupFactory({
             organization,
             period: currentPeriod,
-            name: new TranslatedString('Kapoenen'),
+            name: TranslatedText.create('Kapoenen'),
         }).create();
 
         // The group must be part of a category to show up in the period groups
@@ -82,7 +82,7 @@ test.describe('All members list (organization mode) @all-members', () => {
         const previousGroup = await new GroupFactory({
             organization,
             period: previousPeriod,
-            name: new TranslatedString('Oude tak'),
+            name: TranslatedText.create('Oude tak'),
         }).create();
 
         // A completely separate organization with its own member
@@ -92,7 +92,7 @@ test.describe('All members list (organization mode) @all-members', () => {
         }).create();
         const otherOrganizationGroup = await new GroupFactory({
             organization: otherOrganization,
-            name: new TranslatedString('Andere tak'),
+            name: TranslatedText.create('Andere tak'),
         }).create();
 
         const names = {

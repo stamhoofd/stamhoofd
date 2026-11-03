@@ -10,7 +10,7 @@ import { SessionService } from '@stamhoofd/backend/services/SessionService';
 import type { Group, Organization, User } from '@stamhoofd/models';
 import { GroupFactory, Member, MemberFactory, OrganizationFactory, OrganizationRegistrationPeriodFactory, RegistrationPeriod, Token, UserFactory } from '@stamhoofd/models';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { appToUri, GroupCategory, GroupCategorySettings, Permissions, STPackageBundle, Token as TokenStruct, TranslatedString, Version } from '@stamhoofd/structures';
+import { appToUri, GroupCategory, GroupCategorySettings, Permissions, STPackageBundle, Token as TokenStruct, TranslatedText, Version } from '@stamhoofd/structures';
 import { TestUtils } from '@stamhoofd/test-utils';
 import { WorkerData } from '../helpers/index.js';
 
@@ -52,7 +52,7 @@ test.describe('Import emergency contacts (organization mode) @import-emergency-c
 
         const group = await new GroupFactory({
             organization,
-            name: new TranslatedString('Kapoenen'),
+            name: TranslatedText.create('Kapoenen'),
         }).create();
 
         // The group must be part of a category to show up in the period groups
