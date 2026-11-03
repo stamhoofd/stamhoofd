@@ -316,6 +316,7 @@ test.describe('Register member - choose group', () => {
         await openChooseGroup(page, pages, 'An Claes');
 
         await expect(page.getByTestId('register-tabs')).toBeVisible();
+        await expect(page.getByText('kan je op dit moment niet inschrijven')).toBeVisible();
         await expect(page.getByTestId('event-search-input')).toHaveCount(0);
         await expect(page.getByTestId('group-button')).toHaveCount(0);
     });
@@ -343,12 +344,13 @@ test.describe('Register member - choose group', () => {
             user,
         }).create();
 
-        // Simulate a network error, which the events list keeps retrying
+        // Simulate a network error
         await page.route(/\/events(\?|$)/, route => route.abort('internetdisconnected'));
 
         await openChooseGroup(page, pages, 'Lies Wouters');
 
         await expect(page.getByTestId('register-tabs')).toBeVisible();
+        await expect(page.getByText('kan je op dit moment niet inschrijven')).toBeVisible();
         await expect(page.getByTestId('event-search-input')).toHaveCount(0);
         await expect(page.getByTestId('group-button')).toHaveCount(0);
     });
