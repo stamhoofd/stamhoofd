@@ -12,9 +12,10 @@
                 </template>
             </ScrollableSegmentedControl>
 
-            <RegisterMemberEventsBox v-if="isEventsActive" :member="member" :organization="selectedOrganization" @select="openEvent" />
+            <!-- Also mounted (hidden) while checking whether there are events to show by default -->
+            <RegisterMemberEventsBox v-if="isEventsActive || isCheckingEvents" v-show="isEventsActive" :key="eventsCheckIndex" :member="member" :organization="selectedOrganization" @select="openEvent" @loaded="onEventsLoaded" />
 
-            <template v-else>
+            <LoadingBoxTransition v-if="!isEventsActive" :loading="isCheckingEvents">
                 <p v-if="differentOrganization" class="info-box icon basket">
                     {{ $t('%dk') }} {{ selectedOrganization.name }}.
                 </p>
@@ -54,13 +55,14 @@
                 <p v-if="showGroupSearch && groupSearchQuery && filteredCategories.length === 0" class="info-box">
                     {{ $t('%ZdY') }}
                 </p>
-            </template>
+            </LoadingBoxTransition>
         </main>
     </div>
 </template>
 
 <script setup lang="ts">
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
 import { useAppContext } from '#context/appContext.ts';
 import { useScopedAuth } from '#hooks/useAuth.ts';
 import { useEventsEnabled } from '#hooks/useEventsEnabled.ts';
@@ -158,6 +160,7 @@ const selectedControlTab = computed<string>({
         return selectedOrganization.value?.id ?? GROUPS_TAB;
     },
     set(value: string) {
+        isCheckingEvents.value = false;
         if (value === EVENTS_TAB) {
             isEventsTab.value = true;
             return;
@@ -172,18 +175,32 @@ const selectedControlTab = computed<string>({
     },
 });
 
-// Organizations without any groups (e.g. only camps) open on the activities tab
-const hasGroups = computed(() => treeFactory({}).categories.length > 0);
-
-function selectDefaultTab() {
-    isEventsTab.value = !hasGroups.value;
-}
-
 const tree = computed(() => treeFactory({
     filterGroups: (g) => {
         return props.member.family.checkout.isAdminFromSameOrganization || props.member.canRegister(g, selectedOrganization.value!) || props.member.canRegisterForWaitingList(g, selectedOrganization.value!);
     },
 }));
+
+// When the member cannot register for any group (e.g. all groups are closed), open on the activities tab
+// if there are activities to show. Until the events have loaded, show a loading box instead of either tab.
+const isCheckingEvents = ref(false);
+// Remounts the events box for each check, so it reports its initial load again
+const eventsCheckIndex = ref(0);
+
+function selectDefaultTab() {
+    isEventsTab.value = false;
+    isCheckingEvents.value = eventsEnabled.value && tree.value.categories.length === 0;
+    if (isCheckingEvents.value) {
+        eventsCheckIndex.value++;
+    }
+}
+
+function onEventsLoaded(hasEvents: boolean) {
+    if (isCheckingEvents.value) {
+        isEventsTab.value = hasEvents;
+        isCheckingEvents.value = false;
+    }
+}
 
 // Search within the listed groups, only offered when the list gets long
 const groupSearchQuery = ref('');

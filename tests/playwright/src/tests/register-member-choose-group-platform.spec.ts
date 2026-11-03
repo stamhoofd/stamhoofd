@@ -59,6 +59,7 @@ test.describe('Register member - choose group', () => {
     test.afterEach(async () => {
         await WorkerData.databaseHelper.clearRegistrations();
         await WorkerData.databaseHelper.clearMembers();
+        await WorkerData.databaseHelper.clearEvents();
         await WorkerData.databaseHelper.clearGroups();
     });
 
@@ -240,6 +241,115 @@ test.describe('Register member - choose group', () => {
         await expect(
             page.getByTestId('event-button').filter({ hasText: eventName }),
         ).toBeVisible();
+        await expect(page.getByTestId('group-button')).toHaveCount(0);
+    });
+
+    test('opens on the activities tab when all groups of the organization are closed', async ({
+        page,
+        pages,
+    }) => {
+        const closedGroup = await new GroupFactory({
+            organization,
+            price: 0,
+            name: new TranslatedString('Kapoenen'),
+        }).create();
+        closedGroup.settings.registrationEndDate = new Date(
+            Date.now() - 24 * 60 * 60 * 1000,
+        );
+        await closedGroup.save();
+        organizationPeriod.settings.rootCategory?.groupIds.push(closedGroup.id);
+        await organizationPeriod.save();
+
+        const eventGroup = await new GroupFactory({ organization, price: 0 }).create();
+        const startDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
+        const eventName = `Kamp ${WorkerData.id}-${Math.floor(Math.random() * 1_000_000)}`;
+
+        await new EventFactory({
+            organization,
+            group: eventGroup,
+            name: eventName,
+            startDate,
+            endDate,
+            meta: EventMeta.create({ visible: true, minAge: 0, maxAge: 99 }),
+        }).create();
+
+        await new MemberFactory({
+            firstName: 'Piet',
+            lastName: 'Janssens',
+            user,
+        }).create();
+
+        await openChooseGroup(page, pages, 'Piet Janssens');
+
+        await expect(page.getByTestId('register-tabs')).toBeVisible();
+        await expect(
+            page.getByTestId('event-button').filter({ hasText: eventName }),
+        ).toBeVisible();
+        await expect(page.getByTestId('group-button')).toHaveCount(0);
+    });
+
+    test('stays on the groups tab when there are no groups and no activities to register for', async ({
+        page,
+        pages,
+    }) => {
+        // A past event enables the activities tab without offering anything to register for
+        const eventGroup = await new GroupFactory({ organization, price: 0 }).create();
+        const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
+
+        await new EventFactory({
+            organization,
+            group: eventGroup,
+            name: `Voorbij ${WorkerData.id}`,
+            startDate,
+            endDate,
+            meta: EventMeta.create({ visible: true, minAge: 0, maxAge: 99 }),
+        }).create();
+
+        await new MemberFactory({
+            firstName: 'An',
+            lastName: 'Claes',
+            user,
+        }).create();
+
+        await openChooseGroup(page, pages, 'An Claes');
+
+        await expect(page.getByTestId('register-tabs')).toBeVisible();
+        await expect(page.getByTestId('event-search-input')).toHaveCount(0);
+        await expect(page.getByTestId('group-button')).toHaveCount(0);
+    });
+
+    test('falls back to the groups tab when the activities cannot be loaded', async ({
+        page,
+        pages,
+    }) => {
+        const eventGroup = await new GroupFactory({ organization, price: 0 }).create();
+        const startDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
+
+        await new EventFactory({
+            organization,
+            group: eventGroup,
+            name: `Kamp ${WorkerData.id}`,
+            startDate,
+            endDate,
+            meta: EventMeta.create({ visible: true, minAge: 0, maxAge: 99 }),
+        }).create();
+
+        await new MemberFactory({
+            firstName: 'Lies',
+            lastName: 'Wouters',
+            user,
+        }).create();
+
+        // Simulate a network error, which the events list keeps retrying
+        await page.route(/\/events(\?|$)/, route => route.abort('internetdisconnected'));
+
+        await openChooseGroup(page, pages, 'Lies Wouters');
+
+        await expect(page.getByTestId('register-tabs')).toBeVisible();
+        await expect(page.getByTestId('event-search-input')).toHaveCount(0);
         await expect(page.getByTestId('group-button')).toHaveCount(0);
     });
 });
