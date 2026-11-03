@@ -61,6 +61,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'metabase', path: 'shared/metabase', needsDatabase: false },
     { name: 'filters', path: 'shared/filters', needsDatabase: false },
     { name: 'structures', path: 'shared/structures', needsDatabase: false },
+    { name: 'criminal-record-check', path: 'shared/criminal-record-check', needsDatabase: false },
     { name: 'object-differ', path: 'shared/object-differ', needsDatabase: false },
     { name: 'pdf-signature', path: 'shared/pdf-signature', needsDatabase: false },
     { name: 'sgv', path: 'shared/sgv', needsDatabase: false },
