@@ -19,8 +19,20 @@
             </span>
         </button>
 
+        <p v-if="stepInfo" class="info-box" data-testid="single-form-step-info">
+            {{ stepInfo }}
+        </p>
+
         <div v-if="showName || showType" class="split-inputs">
             <STInputBox v-if="showName" error-fields="name" :error-box="errorBox" :title="$t(`%1Os`)">
+                <!-- An older form can have its own name: the form takes the name of the webshop again -->
+                <template v-if="formMode && name !== webshop.meta.name" #right>
+                    <!-- The tooltip does not work on touch devices: the text stays visible except on very small screens -->
+                    <button v-tooltip="$t('Naam van webshop gebruiken')" :aria-label="$t('Naam van webshop gebruiken')" type="button" class="button text only-icon-tiny-smartphone" data-testid="use-webshop-name-button" @click="name = webshop.meta.name">
+                        <span class="icon undo" />
+                        <span>{{ $t('%KL') }}</span>
+                    </button>
+                </template>
                 <input ref="firstInput" v-model="name" v-autofocus="isNew" class="input" type="text" :placeholder="$t(`%1Os`) + ' '+typeName" autocomplete="off" enterkeyhint="next">
                 <p v-if="nameWarning" class="warning-box">
                     {{ nameWarning }}
@@ -473,6 +485,7 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@brow
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 import type { ErrorBox } from '@stamhoofd/components/errors/ErrorBox.ts';
 import type { Validator } from '@stamhoofd/components/errors/Validator.ts';
+import { getSingleFormStepReason } from '@stamhoofd/components/helpers/singleFormStep.ts';
 import { useFeatureFlagComputed } from '@stamhoofd/components/hooks/useFeatureFlag.ts';
 import { useRequiredOrganization } from '@stamhoofd/components/hooks/useOrganization.ts';
 import DateSelection from '@stamhoofd/components/inputs/DateSelection.vue';
@@ -489,7 +502,7 @@ import type { NavigationActions } from '@stamhoofd/components/types/NavigationAc
 import { useSetUitpasEvent } from '@stamhoofd/components/uitpas/useSetUitpasEvent.ts';
 import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
 import type { Image, PrivateWebshop } from '@stamhoofd/structures';
-import { Address, OptionMenu, ProductDateRange, Product, ProductPrice, ProductType, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopTicketType, ProductLocation } from '@stamhoofd/structures';
+import { Address, OptionMenu, ProductDateRange, Product, ProductPrice, ProductType, ResolutionRequest, UitpasClientCredentialsStatus, UitpasClientCredentialsStatusHelper, Version, WebshopField, WebshopLayout, WebshopTicketType, ProductLocation } from '@stamhoofd/structures';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import { Country } from '@stamhoofd/types/Country';
 import type { CustomerSettings } from '@stamhoofd/structures/webshops/CustomerSettings.js';
@@ -565,6 +578,30 @@ function shows(isUsed: (product: Product) => boolean) {
 const showName = computed(() => shows(p => p.name !== props.webshop.meta.name));
 const showType = computed(() => shows(p => p.type === ProductType.Voucher || p.type === ProductType.Person));
 const showDescription = computed(() => shows(p => p.description.length > 0));
+
+/**
+ * Form mode: older webshops often still have a photo or description on their product, which the webshop shows in a
+ * separate step instead of on the page itself. Explains the order button on the webshop and how to get rid of it.
+ */
+const stepInfo = computed(() => {
+    // A hidden product is not on the webshop, so there is no step to explain
+    if (!props.formMode || patchedProduct.value.hidden) {
+        return null;
+    }
+    const reason = getSingleFormStepReason(props.webshop, patchedProduct.value);
+    if (!reason) {
+        return null;
+    }
+    const texts = [
+        reason === 'photo'
+            ? $t('Op de webshop opent het formulier in een aparte stap via een knop, omdat dit artikel eigen foto\'s heeft. Verwijder de foto\'s om het formulier op de pagina zelf te tonen.')
+            : $t('Op de webshop opent het formulier in een aparte stap via een knop, omdat dit artikel een eigen beschrijving heeft naast de beschrijving van de webshop. Maak de beschrijving van dit artikel leeg, of die van de webshop bij de instellingen van de webshoppagina, om het formulier op de pagina zelf te tonen.'),
+    ];
+    if (props.webshop.meta.layout === WebshopLayout.Split) {
+        texts.push($t('Op brede schermen staat het formulier wel naast de inhoud van de webshop.'));
+    }
+    return texts.join(' ');
+});
 const { goToUitpasConfiguration, goToUitpasEventSearch, goToUitpasSettings } = useGoToUitpasConfiguration(patchedProduct, addProductPatch);
 const { clearUitpasEvent } = useSetUitpasEvent(patchedProduct, addProductPatch);
 
