@@ -1,0 +1,16 @@
+@use '../base/variables' as *;
+
+// A list that is grouped in a box, instead of running to the edges of the view.
+.st-list-box {
+    border: $border-width solid $color-border-shade;
+    border-radius: $border-radius;
+    overflow: hidden;
+    margin: 15px 0;
+
+    // The rows are padded by the box instead of by the view
+    --st-horizontal-padding: 15px;
+
+    > .st-list {
+        margin: 0;
+    }
+}

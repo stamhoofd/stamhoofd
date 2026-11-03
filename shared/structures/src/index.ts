@@ -187,6 +187,7 @@ export * from './members/RegistrationInvitation.js';
 
 // Register checkout
 export * from './members/checkout/BalanceItemCartItem.js';
+export * from './members/checkout/DeleteRegisterItem.js';
 export * from './members/checkout/RegisterCart.js';
 export * from './members/checkout/RegisterCheckout.js';
 export * from './members/checkout/RegisterItem.js';

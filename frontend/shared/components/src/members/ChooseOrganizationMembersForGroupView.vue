@@ -25,11 +25,15 @@
 
         <SendConfirmationEmailBox v-if="checkout.cart.items.length" :checkout="checkout" :group="group" :group-organization="props.groupOrganization" :validator="errors.validator" />
 
-        <STList>
-            <DeleteRegistrationRow v-for="item in checkout.cart.deleteRegistrations" :key="item.id" class="right-stack" :registration="item.registration" :checkout="checkout" />
-            <RegisterItemRow v-for="item in checkout.cart.items" :key="item.id" class="right-stack" :item="item" :show-group="false" />
-            <BalanceItemCartItemRow v-for="item in checkout.cart.balanceItems" :key="item.id" class="right-stack" :item="item" :checkout="checkout" />
-        </STList>
+        <RefundRegistrationsBox v-if="isOnlyDeleting" :checkout="checkout" />
+
+        <div v-if="!checkout.cart.isEmpty" class="st-list-box">
+            <STList>
+                <DeleteRegistrationRow v-for="item in checkout.cart.deleteRegistrations" :key="item.id" class="right-stack" :registration="item.registration" :checkout="checkout" />
+                <RegisterItemRow v-for="item in checkout.cart.items" :key="item.id" class="right-stack" :item="item" :show-group="false" />
+                <BalanceItemCartItemRow v-for="item in checkout.cart.balanceItems" :key="item.id" class="right-stack" :item="item" :checkout="checkout" />
+            </STList>
+        </div>
 
         <p v-if="checkout.cart.isEmpty" class="info-box">
             {{ $t('%dq') }}
@@ -46,21 +50,6 @@
                 <span>{{ $t('%ds') }}</span>
             </button>
         </p>
-
-        <div v-if="isOnlyDeleting && hasPaidRegistrationDelete" class="container">
-            <hr><h2>{{ $t('%8q') }}</h2>
-            <p>{{ $t('%8x') }}</p>
-
-            <p v-if="hadPaidByOrganization" class="info-box">
-                {{ $t('%8r') }}
-            </p>
-
-            <PermyriadInputBox v-model="cancellationFeePercentage" :title="$t(`%2I`)" :min="0" :max="10000" :placeholder="$t(`%L`)" :validator="errors.validator" :error-box="errors.errorBox" />
-
-            <p v-if="cancellationFeePercentage !== 0 && cancellationFeePercentage !== 10000" class="style-description-small">
-                {{ $t('%dt') }}
-            </p>
-        </div>
 
         <PriceBreakdownBox :price-breakdown="checkout.priceBreakown" />
     </SaveView>
@@ -85,11 +74,11 @@ import { useEditMember } from '#members/hooks/useEditMember.ts';
 import { useContext } from '#hooks/useContext.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
 import { usePlatform } from '#hooks/usePlatform.ts';
-import PermyriadInputBox from '../inputs/PermyriadInputBox.vue';
 import type { NavigationActions } from '../types/NavigationActions';
 import { useNavigationActions } from '../types/NavigationActions';
 import BalanceItemCartItemRow from './components/group/BalanceItemCartItemRow.vue';
 import DeleteRegistrationRow from './components/group/DeleteRegistrationRow.vue';
+import RefundRegistrationsBox from './components/group/RefundRegistrationsBox.vue';
 import RegisterItemRow from './components/group/RegisterItemRow.vue';
 
 import SendConfirmationEmailBox from './SendConfirmationEmailBox.vue';
@@ -127,16 +116,6 @@ const chooseGroupForMember = useChooseGroupForMember();
 
 const isOnlyDeleting = computed(() => props.checkout.cart.items.length === 0 && props.checkout.cart.balanceItems.length === 0 && props.checkout.cart.deleteRegistrations.length > 0);
 const hasDeleteRegistrations = computed(() => props.checkout.cart.deleteRegistrations.length > 0);
-const hasPaidRegistrationDelete = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
-const hadPaidByOrganization = computed(() => props.checkout.cart.deleteRegistrations.some(r => r.registration.registration.payingOrganizationId && r.registration.registration.balances.some(b => b.amountOpen > 0 || b.amountPaid > 0 || b.amountPending > 0)));
-const cancellationFeePercentage = computed({
-    get: () => props.checkout.cart.deleteRegistrations[0]?.cancellationFeePercentage ?? 0,
-    set: (value: number) => {
-        for (const item of props.checkout.cart.deleteRegistrations) {
-            item.cancellationFeePercentage = value;
-        }
-    },
-});
 let added = false;
 
 async function addMember() {
