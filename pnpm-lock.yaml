@@ -538,6 +538,9 @@ importers:
       '@stamhoofd/backend-middleware':
         specifier: workspace:*
         version: link:../../shared/middleware
+      '@stamhoofd/criminal-record-check':
+        specifier: workspace:*
+        version: link:../../../shared/criminal-record-check
       '@stamhoofd/crons':
         specifier: workspace:*
         version: link:../../shared/crons

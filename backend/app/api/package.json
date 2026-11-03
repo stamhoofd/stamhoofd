@@ -81,6 +81,7 @@
         "@stamhoofd/backend-env": "workspace:*",
         "@stamhoofd/backend-i18n": "workspace:*",
         "@stamhoofd/backend-middleware": "workspace:*",
+        "@stamhoofd/criminal-record-check": "workspace:*",
         "@stamhoofd/crons": "workspace:*",
         "@stamhoofd/email": "workspace:*",
         "@stamhoofd/excel-writer": "workspace:*",
