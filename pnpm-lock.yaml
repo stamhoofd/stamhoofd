@@ -2116,6 +2116,9 @@ importers:
       '@stamhoofd/object-differ':
         specifier: workspace:*
         version: link:../../../shared/object-differ
+      '@stamhoofd/pdf-verify-core':
+        specifier: workspace:*
+        version: link:../../../shared/pdf-verify-core
       '@stamhoofd/scss':
         specifier: workspace:*
         version: link:../scss
