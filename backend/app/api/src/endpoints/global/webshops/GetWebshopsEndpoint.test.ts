@@ -2,11 +2,11 @@ import type { Endpoint } from '@node/endpoints';
 import { Request } from '@node/endpoints';
 import { Database } from '@node/database';
 import type { User } from '@stamhoofd/models';
-import { MemberFactory, OrganizationFactory, OrganizationTagFactory, RegistrationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
+import { MemberFactory, OrderFactory, OrganizationFactory, OrganizationTagFactory, RegistrationFactory, Token, UserFactory, WebshopFactory } from '@stamhoofd/models';
 import type { StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { CountFilteredRequest, LimitedFilteredRequest, Permissions, ResourcePermissions, SortItemDirection, WebshopMetaData, WebshopStatus } from '@stamhoofd/structures';
+import { CountFilteredRequest, LimitedFilteredRequest, OrderStatus, Permissions, ResourcePermissions, SortItemDirection, WebshopMetaData, WebshopStatus } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { testServer } from '../../../../tests/helpers/TestServer.js';
 import { GetWebshopsCountEndpoint } from './GetWebshopsCountEndpoint.js';
@@ -57,6 +57,35 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             expect(response.body.results).toIncludeSameMembers([
                 expect.objectContaining({ id: webshop1.id }),
                 expect.objectContaining({ id: webshop2.id }),
+            ]);
+        });
+
+        test('Order counts are not returned in organization context', async () => {
+            const organization = await new OrganizationFactory({}).create();
+
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({
+                    level: PermissionLevel.Full,
+                }),
+            }).create();
+
+            const token = await SessionService.createSession(user);
+
+            const webshop = await new WebshopFactory({ organizationId: organization.id }).create();
+            await new OrderFactory({ webshop }).create();
+
+            const request = Request.get({
+                path: baseUrl,
+                host: organization.getApiHost(),
+                query: new LimitedFilteredRequest({ limit: 100 }),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results).toEqual([
+                expect.objectContaining({ id: webshop.id, orderCount: null }),
             ]);
         });
 
@@ -167,6 +196,52 @@ describe('Endpoint.GetWebshopsEndpoint', () => {
             expect(response.body.results).toIncludeSameMembers([
                 expect.objectContaining({ id: webshop1.id }),
                 expect.objectContaining({ id: webshop2.id }),
+            ]);
+        });
+
+        test('Returns the number of orders per webshop, excluding deleted and unfinished orders', async () => {
+            const org1 = await new OrganizationFactory({}).create();
+            const org2 = await new OrganizationFactory({}).create();
+
+            const webshop1 = await new WebshopFactory({ organizationId: org1.id }).create();
+            const webshop2 = await new WebshopFactory({ organizationId: org2.id }).create();
+            const webshop3 = await new WebshopFactory({ organizationId: org2.id }).create();
+
+            await new OrderFactory({ webshop: webshop1 }).create();
+            await new OrderFactory({ webshop: webshop1, status: OrderStatus.Completed }).create();
+            await new OrderFactory({ webshop: webshop1, status: OrderStatus.Canceled }).create();
+            await new OrderFactory({ webshop: webshop1, status: OrderStatus.Deleted }).create();
+
+            const unfinishedOrder = await new OrderFactory({ webshop: webshop1 }).create();
+            unfinishedOrder.number = null;
+            await unfinishedOrder.save();
+
+            await new OrderFactory({ webshop: webshop2 }).create();
+
+            const platformAdmin = await new UserFactory({
+                globalPermissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const token = await SessionService.createSession(platformAdmin);
+
+            const request = Request.get({
+                path: baseUrl,
+                host: 'platform.stamhoofd.app',
+                query: new LimitedFilteredRequest({
+                    filter: {
+                        id: { $in: [webshop1.id, webshop2.id, webshop3.id] },
+                    },
+                    limit: 100,
+                }),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+            });
+
+            const response = await testServer.test(endpoint, request);
+            expect(response.status).toBe(200);
+            expect(response.body.results).toIncludeSameMembers([
+                expect.objectContaining({ id: webshop1.id, orderCount: 3 }),
+                expect.objectContaining({ id: webshop2.id, orderCount: 1 }),
+                expect.objectContaining({ id: webshop3.id, orderCount: 0 }),
             ]);
         });
 

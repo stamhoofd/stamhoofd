@@ -1,4 +1,4 @@
-import { AutoEncoder, field } from '@common/encoding';
+import { AutoEncoder, field, IntegerDecoder } from '@common/encoding';
 import { BaseOrganization } from '../Organization.js';
 import { WebshopPreview } from './Webshop.js';
 
@@ -8,6 +8,13 @@ export class WebshopWithOrganization extends AutoEncoder {
 
     @field({ decoder: BaseOrganization })
     organization: BaseOrganization = BaseOrganization.create({});
+
+    /**
+     * Number of orders, excluding deleted orders (same as the orders list of a webshop).
+     * Only set in platform context, null otherwise.
+     */
+    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    orderCount: number | null = null;
 
     /**
      * Proxy the webshop id so this object can be used in table/routing contexts

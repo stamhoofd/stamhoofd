@@ -2,11 +2,11 @@ import type { Decoder } from '@common/encoding';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
-import { Organization, Webshop } from '@stamhoofd/models';
-import { SQL, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
+import { Order, Organization, Webshop } from '@stamhoofd/models';
+import { SQL, SQLAlias, SQLCount, SQLSelectAs, applySQLSorter, compileToSQLFilter } from '@stamhoofd/sql';
 import type { CountFilteredRequest, StamhoofdFilter } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { LimitedFilteredRequest, PaginatedResponse, WebshopWithOrganization, assertSort, getSortFilter } from '@stamhoofd/structures';
+import { LimitedFilteredRequest, OrderStatus, PaginatedResponse, WebshopWithOrganization, assertSort, getSortFilter } from '@stamhoofd/structures';
 
 import type { SQLResultNamespacedRow } from '@node/database';
 import { Formatter } from '@stamhoofd/utility';
@@ -113,6 +113,37 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         return query;
     }
 
+    /**
+     * Counts the orders per webshop, excluding deleted orders (same as the orders list of a webshop)
+     */
+    static async getOrderCounts(webshopIds: string[]): Promise<Map<string, number>> {
+        const counts = new Map<string, number>();
+        if (webshopIds.length === 0) {
+            return counts;
+        }
+
+        const rows = await SQL
+            .select(
+                SQL.column(Order.table, 'webshopId'),
+                new SQLSelectAs(
+                    new SQLCount(),
+                    new SQLAlias('data__count'),
+                ),
+            )
+            .setMaxExecutionTime(15 * 1000)
+            .from(SQL.table(Order.table))
+            .where('webshopId', webshopIds)
+            .whereNot('number', null)
+            .whereNot('status', OrderStatus.Deleted)
+            .groupBy(SQL.column(Order.table, 'webshopId'))
+            .fetch();
+
+        for (const row of rows) {
+            counts.set(row[Order.table]['webshopId'] as string, row['data']['count'] as number);
+        }
+        return counts;
+    }
+
     static async buildData(requestQuery: LimitedFilteredRequest): Promise<PaginatedResponse<WebshopWithOrganization[], LimitedFilteredRequest>> {
         const query = await GetWebshopsEndpoint.buildQuery(requestQuery);
         let data: SQLResultNamespacedRow[];
@@ -143,6 +174,10 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
         // Batch-load organizations for accessible webshops
         const organizationIds = Formatter.uniqueArray(accessibleWebshops.map(w => w.organizationId));
         const organizationModels = organizationIds.length > 0 ? await Organization.getByIDs(...organizationIds) : [];
+
+        // Only the webshops overview of the administration portal shows the order counts. The endpoint is
+        // also used in organization context (e.g. to pick a webshop in filters), where we skip the extra query.
+        const orderCounts = Context.organization ? null : await GetWebshopsEndpoint.getOrderCounts(accessibleWebshops.map(w => w.id));
 
         let next: LimitedFilteredRequest | undefined;
 
@@ -177,6 +212,7 @@ export class GetWebshopsEndpoint extends Endpoint<Params, Query, Body, ResponseB
             results.push(WebshopWithOrganization.create({
                 webshop: webshopStruct,
                 organization: organizationModel.getBaseStructure(),
+                orderCount: orderCounts ? (orderCounts.get(webshop.id) ?? 0) : null,
             }));
         }
 
