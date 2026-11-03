@@ -311,15 +311,7 @@ export const RegistrationService = {
      */
     async unsafeStockUpdate(updated: Registration) {
         // Start with clearing all the stock reservations we've already made
-        if (updated.stockReservations) {
-            const groupIds = Formatter.uniqueArray(updated.stockReservations.flatMap(r => r.objectType === 'Group' ? [r.objectId] : []));
-            for (const groupId of groupIds) {
-                const stocks = StockReservation.filter('Group', groupId, updated.stockReservations);
-
-                // Technically we don't need to await this, but okay...
-                await Group.freeStockReservations(groupId, stocks);
-            }
-        }
+        await RegistrationService.unsafeFreeGroupStockReservations(updated);
 
         if (updated.shouldIncludeStock()) {
             const groupStockReservations: StockReservation[] = [
@@ -356,6 +348,41 @@ export const RegistrationService = {
                 await updated.save();
             }
         }
+    },
+
+    /**
+     * Avoid calling this method directly. This can cause race conditions.
+     * Does not clear registration.stockReservations.
+     */
+    async unsafeFreeGroupStockReservations(registration: Registration) {
+        if (registration.stockReservations) {
+            const groupIds = Formatter.uniqueArray(registration.stockReservations.flatMap(r => r.objectType === 'Group' ? [r.objectId] : []));
+            for (const groupId of groupIds) {
+                const stocks = StockReservation.filter('Group', groupId, registration.stockReservations);
+
+                // Technically we don't need to await this, but okay...
+                await Group.freeStockReservations(groupId, stocks);
+            }
+        }
+    },
+
+    /**
+     * Frees the stock of a registration that is about to be deleted. Call this before deleting the registration (or its member, which cascades),
+     * because a stock update after the delete can no longer find the registration.
+     */
+    async freeStockBeforeDelete(id: string) {
+        await AuditLogService.setContext({ source: AuditLogSource.System }, async () => {
+            await QueueHandler.schedule('registration-stock-update-' + id, async function (this: undefined) {
+                const registration = await Registration.getByID(id);
+                if (!registration || !registration.stockReservations.length) {
+                    return;
+                }
+
+                await RegistrationService.unsafeFreeGroupStockReservations(registration);
+                registration.stockReservations = [];
+                await registration.save();
+            });
+        });
     },
 
     async scheduleStockUpdateAsync(id: string) {
