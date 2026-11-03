@@ -1,0 +1,87 @@
+@use '../base/variables' as *;
+
+// Chrome for inputs that sit inside a paragraph: no box, the font of the
+// surrounding text and a width that follows the content.
+.st-inline-input {
+    display: inline-flex;
+    align-items: baseline;
+    max-width: 100%;
+    cursor: text;
+    color: inherit;
+    border-bottom: $border-width solid $color-border-shade;
+
+    @media (hover: hover) {
+        // The value colors along with the line: a line of one pixel is too little
+        // to notice in running text
+        &:hover {
+            border-bottom-color: $color-primary-gray-light;
+            color: $color-primary-gray-light;
+        }
+    }
+
+    &:focus-within {
+        border-bottom-color: $color-primary;
+        color: $color-primary;
+    }
+
+    &.error {
+        border-bottom-color: $color-error-border-shade;
+        color: $color-error;
+    }
+
+    &.disabled {
+        color: $color-gray-1;
+        cursor: not-allowed;
+        border-bottom-color: $color-border;
+    }
+
+    > .affix {
+        flex-shrink: 0;
+        white-space: pre;
+    }
+
+    > .field {
+        // The hidden sizer determines the width, the input is layed out on top of it,
+        // so the field is always exactly as wide as the text it contains
+        position: relative;
+        min-width: 0;
+
+        > .sizer {
+            display: block;
+            white-space: pre;
+            visibility: hidden;
+            // Leave room for the caret
+            padding-right: 1px;
+        }
+
+        > input, > select {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            appearance: none;
+            -webkit-appearance: none;
+            background: none;
+            border: 0;
+            border-radius: 0;
+            padding: 0;
+            margin: 0;
+            min-width: 0;
+            font: inherit;
+            color: inherit;
+            text-align: inherit;
+            outline: none;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
+            &:disabled {
+                color: $color-gray-1;
+
+                // Safari fix color opacity
+                -webkit-text-fill-color: $color-gray-1;
+                opacity: 1; /* required on iOS */
+                cursor: not-allowed;
+            }
+        }
+    }
+}
