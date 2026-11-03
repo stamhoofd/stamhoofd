@@ -1702,7 +1702,7 @@ describe('Unit.RegisterCart', () => {
     });
 
     describe('Cancellation fees', () => {
-        test('Deleted registrations share the default cancellation fee percentage of the first deleted registration', () => {
+        test('Every deleted registration starts at the default cancellation fee for what it was paid', () => {
             const { organization, groups, family } = setupDiscountTest({ memberCount: 2 });
             const [groupA, groupB] = groups;
             const [memberA, memberB] = family.members;
@@ -1714,13 +1714,14 @@ describe('Unit.RegisterCart', () => {
             const cart = family.checkout.cart;
             cart.removeRegistration(paid);
             cart.removeRegistration(unpaid);
-            expect(cart.deleteRegistrations.map(r => r.cancellationFeePercentage)).toEqual([100_00, 100_00]);
+            expect(cart.deleteRegistrations.map(r => r.cancellationFeePercentage)).toEqual([100_00, 0]);
 
+            // The order in which they are removed does not change the defaults
             cart.unremoveRegistration(paid);
             cart.unremoveRegistration(unpaid);
             cart.removeRegistration(unpaid);
             cart.removeRegistration(paid);
-            expect(cart.deleteRegistrations.map(r => r.cancellationFeePercentage)).toEqual([0, 0]);
+            expect(cart.deleteRegistrations.map(r => r.cancellationFeePercentage)).toEqual([0, 100_00]);
         });
     });
 });

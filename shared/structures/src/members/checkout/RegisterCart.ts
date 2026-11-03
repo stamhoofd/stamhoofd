@@ -163,11 +163,9 @@ export class RegisterCart {
     removeRegistration(registration: RegistrationWithPlatformMember) {
         const index = this.deleteRegistrations.findIndex(r => r.id === registration.registration.id);
         if (index === -1) {
-            const first = this.deleteRegistrations[0];
-            this.deleteRegistrations.push(first
-                ? new DeleteRegisterItem({ registration, cancellationFeePercentage: first.cancellationFeePercentage })
-                : DeleteRegisterItem.defaultFor(registration),
-            );
+            // The refund is chosen per payment status, so every registration starts at its own
+            // default instead of following the registration that happened to be removed first
+            this.deleteRegistrations.push(DeleteRegisterItem.defaultFor(registration));
         }
     }
 
