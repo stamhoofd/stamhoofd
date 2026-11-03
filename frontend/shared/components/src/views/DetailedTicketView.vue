@@ -31,6 +31,9 @@
             <p v-if="isSingle && order" class="description" v-text="$t('%x3')+order.number" />
             <p v-if="isSingle && order" class="description" v-text="order.data.customer.name" />
             <p v-if="cartItem.descriptionWithoutDate" class="description" v-text="cartItem.descriptionWithoutDate" />
+            <p v-if="cartItem.customer" class="description">
+                {{ cartItem.customer.firstName }} {{ cartItem.customer.lastName }}
+            </p>
             <p v-if="changedSeatString" class="warning-box">
                 {{ changedSeatString }}
             </p>
@@ -96,7 +99,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ComponentWithProperties, useShow } from '@browser/navigation';
+import { useShow } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import ImageComponent from '#views/ImageComponent.vue';
 import OrganizationLogo from '#context/OrganizationLogo.vue';
@@ -140,7 +143,7 @@ const isSingle = computed(() => props.webshop.meta.ticketType === WebshopTicketT
 function share() {
     navigator.share({
         title: props.webshop.meta.name + ' - ' + name.value,
-        text: $t(`%12d`),
+        text: $t('%12d'),
         url: qrMessage.value,
     }).catch(e => console.error(e));
 }
