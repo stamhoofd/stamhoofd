@@ -43,15 +43,16 @@ import type { Organization, PlatformMember, StamhoofdFilter } from '@stamhoofd/s
 import { Event, isEmptyFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
-import { computed, ref, watchEffect } from 'vue';
+import { computed, ref, watch, watchEffect } from 'vue';
 
 const props = defineProps<{
     member: PlatformMember;
     organization: Organization;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
     (e: 'select', event: Event): void;
+    (e: 'loaded', hasEvents: boolean): void;
 }>();
 
 type ObjectType = Event;
@@ -83,6 +84,18 @@ watchEffect(() => {
     const filter = selectedUIFilter.value ? selectedUIFilter.value.build() : null;
     fetcher.setFilter(filter);
 });
+
+// Report once whether the initial load found any events. Errors (including network errors, which are retried) count as no events.
+const stopLoadedCheck = watch(
+    () => fetcher.objects.length > 0 || fetcher.errorState !== null || fetcher.retryCount > 0 || (!fetcher.hasMoreObjects && !fetcher.fetchingData),
+    (loaded) => {
+        if (!loaded) {
+            return;
+        }
+        stopLoadedCheck();
+        emit('loaded', fetcher.objects.length > 0);
+    },
+);
 
 function blurFocus() {
     (document.activeElement as HTMLElement)?.blur();
