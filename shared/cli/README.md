@@ -26,6 +26,13 @@ The CLI build clears its own compiled output before compiling so commands remove
 
 ## For CLI Users
 
+### Documentation images
+
+`pnpm stam docs image build <tag>` builds the docs Node server image locally for
+`linux/amd64`. `pnpm stam docs image publish <tag>` pushes that existing image to
+`STAM_DOCS_REGISTRY` after a separate Docker login. Neither needs the private DevOps
+checkout. See [the docs image guide](../../docs/README.md). Publication does not deploy.
+
 ### Commands
 
 | Area        | Command                                | Purpose                                                                    |

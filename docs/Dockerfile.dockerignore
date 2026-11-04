@@ -1,0 +1,21 @@
+# Keep workspace manifests for the frozen install, but only copy docs sources.
+**
+!**/package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!docs/**
+!frontend/shared/assets/**
+!frontend/shared/scss/**
+**/node_modules
+**/.git
+**/.jj
+**/.env*
+**/.npmrc
+**/.nuxt
+**/.output
+**/.data
+**/.cache
+**/dist
+**/dist-types
+**/*.tsbuildinfo
+devops
