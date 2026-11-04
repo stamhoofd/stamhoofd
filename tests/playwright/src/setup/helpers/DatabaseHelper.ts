@@ -173,6 +173,11 @@ export class DatabaseHelper {
         await Database.delete('DELETE FROM `groups`');
     }
 
+    async clearEvents() {
+        const Database = await this.getDatabase();
+        await Database.delete('DELETE FROM `events`');
+    }
+
     private async getDatabase(): Promise<DatabaseInstance> {
         if (this._database) {
             return this._database;

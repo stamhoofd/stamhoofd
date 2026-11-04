@@ -30,20 +30,18 @@
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController } from '@browser/navigation';
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
-import { useAppContext } from '#context/appContext.ts';
 import EventRow from '#events/components/EventRow.vue';
 import { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
-import { useEventUIFilterBuilders } from '#filters/filterBuilders.ts';
 import type { UIFilter } from '#filters/UIFilter.ts';
-import { usePlatform } from '#hooks/usePlatform.ts';
 import { useInfiniteObjectFetcher } from '#tables/classes/InfiniteObjectFetcher.ts';
 import InfiniteObjectFetcherEnd from '#tables/InfiniteObjectFetcherEnd.vue';
 import { usePositionableSheet } from '#tables/usePositionableSheet.ts';
-import type { Organization, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
+import type { Organization, PlatformMember } from '@stamhoofd/structures';
 import { Event, isEmptyFilter } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, ref, watchEffect } from 'vue';
+import { useRegisterMemberEventsFilter } from './useRegisterMemberEventsFilter';
 
 const props = defineProps<{
     member: PlatformMember;
@@ -56,15 +54,15 @@ defineEmits<{
 
 type ObjectType = Event;
 
-const app = useAppContext();
 const searchQuery = ref('');
-const platform = usePlatform();
 const { presentPositionableSheet } = usePositionableSheet();
 
-const organizations = computed(() => props.member.family.organizations.length > 0 ? props.member.family.organizations : [props.organization]);
-const filterBuilders = useEventUIFilterBuilders({ platform: platform.value, organizations: organizations.value, app: useAppContext() });
+const { filterBuilders, createRecommendedUIFilter, getRequiredFilter } = useRegisterMemberEventsFilter({
+    member: props.member,
+    organization: () => props.organization,
+});
 
-const selectedUIFilter = ref(filterBuilders.value[0].fromFilter(props.member.family.getRecommendedEventsFilter())) as Ref<null | UIFilter>;
+const selectedUIFilter = ref(createRecommendedUIFilter()) as Ref<null | UIFilter>;
 
 const objectFetcher = useEventsObjectFetcher({
     get requiredFilter() {
@@ -103,28 +101,5 @@ async function editFilter(event: MouseEvent) {
             }),
         ],
     });
-}
-
-function getRequiredFilter(): StamhoofdFilter | null {
-    const filter: StamhoofdFilter = {
-        startDate: {
-            $gt: new Date(),
-        },
-        // Only events that can actually be registered for
-        groupId: {
-            $neq: null,
-        },
-    };
-
-    if (app === 'registration') {
-        filter['meta.visible'] = true;
-    }
-
-    // In organization mode there is only ever a single organization, so scope to it
-    if (STAMHOOFD.userMode === 'organization' && organizations.value.length === 1) {
-        filter['organizationId'] = organizations.value[0].id;
-    }
-
-    return filter;
 }
 </script>

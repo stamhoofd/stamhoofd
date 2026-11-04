@@ -14,7 +14,7 @@
 
             <RegisterMemberEventsBox v-if="isEventsActive" :member="member" :organization="selectedOrganization" @select="openEvent" />
 
-            <template v-else>
+            <LoadingBoxTransition v-else :loading="isCheckingEvents">
                 <p v-if="differentOrganization" class="info-box icon basket">
                     {{ $t('%dk') }} {{ selectedOrganization.name }}.
                 </p>
@@ -54,14 +54,16 @@
                 <p v-if="showGroupSearch && groupSearchQuery && filteredCategories.length === 0" class="info-box">
                     {{ $t('%ZdY') }}
                 </p>
-            </template>
+            </LoadingBoxTransition>
         </main>
     </div>
 </template>
 
 <script setup lang="ts">
 import { AsyncComponent } from '#containers/AsyncComponent.ts';
+import LoadingBoxTransition from '#containers/LoadingBoxTransition.vue';
 import { useAppContext } from '#context/appContext.ts';
+import { useEventsObjectFetcher } from '#fetchers/useEventsObjectFetcher.ts';
 import { useScopedAuth } from '#hooks/useAuth.ts';
 import { useEventsEnabled } from '#hooks/useEventsEnabled.ts';
 import { useOrganization } from '#hooks/useOrganization.ts';
@@ -71,12 +73,13 @@ import type { NavigationActions } from '#types/NavigationActions.ts';
 import { useNavigationActions } from '#types/NavigationActions.ts';
 import { usePresent } from '@browser/navigation';
 import type { Event, Group, Organization, PlatformMember } from '@stamhoofd/structures';
-import { GroupCategoryTree, GroupType } from '@stamhoofd/structures';
+import { GroupCategoryTree, GroupType, LimitedFilteredRequest } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import RegisterMemberEventsBox from './components/group/RegisterMemberEventsBox.vue';
 import RegisterMemberGroupRow from './components/group/RegisterMemberGroupRow.vue';
+import { useRegisterMemberEventsFilter } from './components/group/useRegisterMemberEventsFilter';
 import SearchOrganizationView from './SearchOrganizationView.vue';
 
 const props = defineProps<{
@@ -158,6 +161,7 @@ const selectedControlTab = computed<string>({
         return selectedOrganization.value?.id ?? GROUPS_TAB;
     },
     set(value: string) {
+        isCheckingEvents.value = false;
         if (value === EVENTS_TAB) {
             isEventsTab.value = true;
             return;
@@ -177,6 +181,48 @@ const tree = computed(() => treeFactory({
         return props.member.family.checkout.isAdminFromSameOrganization || props.member.canRegister(g, selectedOrganization.value!) || props.member.canRegisterForWaitingList(g, selectedOrganization.value!);
     },
 }));
+
+// When the member cannot register for any group (e.g. all groups are closed), open on the activities tab
+// if there are activities to show. Until that is known, show a loading box instead of either tab.
+const isCheckingEvents = ref(false);
+let eventsCheckIndex = 0;
+const eventsFilter = useRegisterMemberEventsFilter({
+    member: props.member,
+    organization: () => selectedOrganization.value,
+});
+const eventsObjectFetcher = useEventsObjectFetcher();
+
+function selectDefaultTab() {
+    isEventsTab.value = false;
+    isCheckingEvents.value = !!selectedOrganization.value && eventsEnabled.value && tree.value.categories.length === 0;
+    if (isCheckingEvents.value) {
+        checkForEvents().catch(console.error);
+    }
+}
+
+// When this finds an event, RegisterMemberEventsBox fetches its first page again. We accept that extra request:
+// it only happens when no group is open, and reusing these results would require seeding InfiniteObjectFetcher.
+async function checkForEvents() {
+    const index = ++eventsCheckIndex;
+    let hasEvents = false;
+    try {
+        const { results } = await eventsObjectFetcher.fetch(new LimitedFilteredRequest({
+            filter: eventsFilter.getInitialFilter(),
+            limit: 1,
+        }));
+        hasEvents = results.length > 0;
+    } catch (e) {
+        // Fall back to the groups tab
+        console.error(e);
+    }
+
+    // Ignore the result when a newer check started or the user picked a tab in the meantime
+    if (index !== eventsCheckIndex || !isCheckingEvents.value) {
+        return;
+    }
+    isEventsTab.value = hasEvents;
+    isCheckingEvents.value = false;
+}
 
 // Search within the listed groups, only offered when the list gets long
 const groupSearchQuery = ref('');
@@ -258,12 +304,13 @@ const noGroupsMessage = computed(() => {
 function addOrganization(organization: Organization) {
     props.member.insertOrganization(organization);
     selectedOrganization.value = organization;
-    // Selecting an organization always shows its groups, not the events tab
-    isEventsTab.value = false;
+    selectDefaultTab();
 }
 
 if (props.defaultOrganization) {
     addOrganization(props.defaultOrganization);
+} else {
+    selectDefaultTab();
 }
 
 async function openGroup(group: Group) {

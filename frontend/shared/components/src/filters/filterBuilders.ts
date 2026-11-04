@@ -5,7 +5,8 @@ import { usePlatform } from '#hooks/usePlatform.ts';
 import type { AppType, EventNotificationType, Group, LoadedPermissions, Organization, Platform, WrapperFilter } from '@stamhoofd/structures';
 import { AuditLogType, BalanceItemRelationType, BalanceItemStatus, DocumentStatus, DocumentStatusHelper, EventNotificationStatus, EventNotificationStatusHelper, FilterWrapperMarker, Gender, getApplicableBalanceItemRelationTypes, getApplicableBalanceItemTypes, getAuditLogTypeName, getBalanceItemRelationTypeName, getBalanceItemStatusName, getBalanceItemTypeName, getEventTypes, GroupType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
-import { computed } from 'vue';
+import type { MaybeRefOrGetter } from 'vue';
+import { computed, toValue } from 'vue';
 import { DateFilterBuilder } from './DateUIFilter';
 import { getFilterBuildersForRecordCategories } from './filter-builders/record-categories';
 import { GroupUIFilterBuilder } from './GroupUIFilter';
@@ -523,11 +524,11 @@ export function getOrganizationUIFilterBuildersForTags(platform: Platform) {
 }
 
 // Events
-export function useEventUIFilterBuilders({ platform, organizations, app }: { platform: Platform; organizations: Organization[]; app: AppType | 'auto' }) {
+export function useEventUIFilterBuilders({ platform, organizations, app }: { platform: Platform; organizations: MaybeRefOrGetter<Organization[]>; app: AppType | 'auto' }) {
     const context = useContext();
     const groupsRelationFetcher = useGroupsRelationFetcher();
 
-    return computed(() => getEventUIFilterBuilders({ platform, organizations, app, permissions: context.value.auth.permissions, groupsRelationFetcher }));
+    return computed(() => getEventUIFilterBuilders({ platform, organizations: toValue(organizations), app, permissions: context.value.auth.permissions, groupsRelationFetcher }));
 }
 
 function getEventUIFilterBuilders({ platform, organizations, app, permissions, groupsRelationFetcher }: { platform: Platform; organizations: Organization[]; app: AppType | 'auto'; permissions: LoadedPermissions | null | undefined; groupsRelationFetcher: ReturnType<typeof useGroupsRelationFetcher> }) {
