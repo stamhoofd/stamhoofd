@@ -140,7 +140,7 @@ The version is only increased during a Stamhoofd release, to avoid conflicts whe
 `Version.ts` exports two numbers:
 
 - `ReleasedVersion`: the version of the latest release. Only the release command (`stam release bump-structures`) changes it.
-- `Version`: the version the code runs at. In `development` and `test` (`STAMHOOFD.environment`) this is `ReleasedVersion + 1`, so `...NextVersion` fields are active and their hooks run. In `production` and `staging` it equals `ReleasedVersion`, where those fields are still omitted, exactly like after the release.
+- `Version`: the version the code runs at. In `development` and `test` (`STAMHOOFD.environment`) this is `ReleasedVersion + 1`, so `...NextVersion` fields are active and their hooks run. In `production` and `staging` it equals `ReleasedVersion`, where those fields are still omitted on encode and ignored on decode. That is only until the release: once `ReleasedVersion` is bumped, production and staging include the fields too, at the bumped version.
 
 ```typescript
 export class User extends AutoEncoder {

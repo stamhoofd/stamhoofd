@@ -14,7 +14,10 @@ export const ReleasedVersion = 426;
 /**
  * Development and test run one version ahead of the latest release, so fields that are added or changed
  * with `...NextVersion` are already active there (including their `upgrade` and `downgrade` hooks).
- * Production and staging run at `ReleasedVersion`, where those fields are still omitted.
+ * Production and staging run at `ReleasedVersion`, where those fields are still omitted on encode and
+ * ignored on decode. That lasts until the release: `stam release bump-structures` turns every
+ * `...NextVersion` into an explicit `version: ReleasedVersion + 1` and bumps `ReleasedVersion`, after
+ * which production and staging include the fields too.
  *
  * `STAMHOOFD` must be defined before this module is evaluated. Evaluating it without `STAMHOOFD` throws,
  * because silently falling back to `ReleasedVersion` would drop every `...NextVersion` field without any
