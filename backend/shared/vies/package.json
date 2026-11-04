@@ -35,7 +35,7 @@
         "@stamhoofd/models": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/types": "workspace:*",
-        "axios": "1.20.0",
+        "axios": "1.21.0",
         "jsvat-next": "3.0.4"
     },
     "devDependencies": {
