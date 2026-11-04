@@ -35,6 +35,6 @@
     "devDependencies": {
         "@stamhoofd/vite-config": "workspace:*",
         "eslint-plugin-stamhoofd": "workspace:*",
-        "vite": "8.3.4"
+        "vite": "8.3.5"
     }
 }
