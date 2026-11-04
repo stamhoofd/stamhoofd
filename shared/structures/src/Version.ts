@@ -26,7 +26,11 @@ export const ReleasedVersion = 426;
  */
 export const Version = isRunningAhead() ? ReleasedVersion + 1 : ReleasedVersion;
 
-function isRunningAhead(): boolean {
+/**
+ * Exported for the tests: `Version` is fixed as soon as this module is evaluated, so this is the only place
+ * where the mapping from environment to version can still be checked per environment.
+ */
+export function isRunningAhead(): boolean {
     if (typeof STAMHOOFD === 'undefined') {
         throw new Error('STAMHOOFD is not defined. Load the environment before importing @stamhoofd/structures');
     }
