@@ -1,0 +1,47 @@
+{
+    "name": "@stamhoofd/pdf-verify-core",
+    "version": "2.157.1",
+    "type": "module",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist-types/index.d.ts",
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "types": "./dist-types/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./*.js": {
+            "types": "./dist-types/*.d.ts",
+            "default": "./dist/*.js"
+        }
+    },
+    "files": [
+        "dist",
+        "dist-types",
+        "package.json"
+    ],
+    "scripts": {
+        "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
+        "lint": "eslint . --quiet",
+        "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",
+        "test": "vitest",
+        "test:coverage": "vitest --coverage"
+    },
+    "dependencies": {
+        "@common/errors": "workspace:*",
+        "asn1js": "4.0.0",
+        "pkijs": "4.0.0"
+    },
+    "devDependencies": {
+        "@stamhoofd/test-utils": "workspace:*",
+        "@stamhoofd/types": "workspace:*",
+        "eslint-plugin-stamhoofd": "workspace:*",
+        "vitest": "4.1.12"
+    },
+    "license": "UNLICENCED",
+    "publishConfig": {
+        "access": "public"
+    }
+}
