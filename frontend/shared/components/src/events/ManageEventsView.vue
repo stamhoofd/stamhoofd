@@ -301,7 +301,7 @@ async function onClickEvent(event: Event) {
 }
 
 async function editFilter(event: MouseEvent) {
-    if (!filterBuilders) {
+    if (!filterBuilders.value) {
         return;
     }
     const filter = selectedUIFilter.value ?? filterBuilders.value[0].create();
