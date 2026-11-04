@@ -1,7 +1,7 @@
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
 import { SimpleError } from '@common/errors';
-import { checkCriminalRecordExtract, unverifiedSignatureCheck } from '@stamhoofd/criminal-record-check/server/index.js';
+import { checkCriminalRecordExtract, CRIMINAL_RECORD_MAX_FILE_SIZE } from '@stamhoofd/criminal-record-check/server/index.js';
 import { Member, RateLimiter } from '@stamhoofd/models';
 import type { CriminalRecordDeliveryResponse } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
@@ -13,9 +13,6 @@ type Params = { id: string };
 type Query = undefined;
 type Body = undefined;
 type ResponseBody = CriminalRecordDeliveryResponse;
-
-/** An extract from FOD Justitie is a few hundred kilobytes. */
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 /**
  * Checking a document is expensive, and a member needs only a handful of attempts.
@@ -51,8 +48,9 @@ export const criminalRecordUserLimiter = new RateLimiter({
 });
 
 /**
- * Deliver an extract from the criminal register for a member: the document is checked while the
- * request runs and the result is returned right away. No background task, no polling.
+ * Deliver an extract from the criminal register for a member: the signature of FOD Justitie is
+ * verified and the document is read and checked while the request runs, so the result is returned
+ * right away. No background task, no polling.
  *
  * The document itself is not stored: it is read, checked and removed again. Storing it for a
  * reviewer comes with the review flow.
@@ -108,8 +106,6 @@ export class DeliverMemberCriminalRecordEndpoint extends Endpoint<Params, Query,
                     birthDay: member.details.birthDay,
                 },
                 deliveredAt: new Date(),
-                // The signature verification is not implemented yet, so nothing is approved automatically
-                authentic: unverifiedSignatureCheck(),
             }));
         } finally {
             // The document is never kept: formidable wrote the upload to a temporary file
@@ -144,7 +140,7 @@ export class DeliverMemberCriminalRecordEndpoint extends Endpoint<Params, Query,
             throw new Error('Not supported without real request');
         }
 
-        const form = formidable({ maxFileSize: MAX_FILE_SIZE, maxFields: 2, keepExtensions: true });
+        const form = formidable({ maxFileSize: CRIMINAL_RECORD_MAX_FILE_SIZE, maxFields: 2, keepExtensions: true });
 
         return await new Promise((resolve, reject) => {
             form.parse(incoming, (error, fields, files) => {

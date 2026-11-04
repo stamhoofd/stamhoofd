@@ -64,29 +64,28 @@ describe('Endpoint.DeliverMemberCriminalRecord', () => {
     }
 
     /**
-     * An extract for this member, issued today, so only the signature is missing.
+     * A blank extract for this member, issued today. It carries a text layer but no signature:
+     * signing one needs the private key of FOD Justitie, so the checks on the content are tested in
+     * the package itself, with the signature result injected.
      */
-    function validExtract(overrides: Parameters<typeof blankExtractLines>[0] = {}) {
+    function unsignedExtract() {
         const issuedAt = new Date();
-        const documentDate = `Datum: ${issuedAt.getDate()}/${issuedAt.getMonth() + 1}/${issuedAt.getFullYear()}`;
 
         return createTestPdf(blankExtractLines({
             lastName: 'Naam: JANSSENS',
             firstName: 'Voorna(a)m(en): Jan',
             birthDate: 'Geboortedatum: 05/04/2006',
-            documentDate,
-            ...overrides,
+            documentDate: `Datum: ${issuedAt.getDate()}/${issuedAt.getMonth() + 1}/${issuedAt.getFullYear()}`,
         }).map((text, index) => ({ text, y: 800 - index * 20 })));
     }
 
     /**
      * Builds the multipart request a browser sends: the pdf, plus the consent of the member.
      */
-    function buildRequest({ token, organizationHost, memberId, content, consent = 'true', includeFile = true }: {
+    function buildRequest({ token, organizationHost, memberId, consent = 'true', includeFile = true }: {
         token: string;
         organizationHost: string;
         memberId: string;
-        content?: Uint8Array;
         consent?: string | null;
         includeFile?: boolean;
     }) {
@@ -96,7 +95,7 @@ describe('Endpoint.DeliverMemberCriminalRecord', () => {
         if (includeFile) {
             parts.push(
                 Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="uittreksel.pdf"\r\nContent-Type: application/pdf\r\n\r\n`),
-                Buffer.from(content ?? validExtract()),
+                Buffer.from(unsignedExtract()),
                 Buffer.from('\r\n'),
             );
         }
@@ -121,7 +120,7 @@ describe('Endpoint.DeliverMemberCriminalRecord', () => {
         return request;
     }
 
-    test('It checks a delivered extract and sends it to a reviewer while the signature is not verified', async () => {
+    test('It rejects a delivered extract that is not signed by FOD Justitie', async () => {
         const { organization, token, member } = await setup();
 
         const response = await testServer.test(endpoint, buildRequest({
@@ -130,14 +129,16 @@ describe('Endpoint.DeliverMemberCriminalRecord', () => {
             memberId: member.id,
         }));
 
-        expect(response.body.status).toBe(CriminalRecordStatus.UnderReview);
+        // Without a signature of FOD Justitie the content is never read
+        expect(response.body.status).toBe(CriminalRecordStatus.AutomaticallyRejected);
         expect(response.body.checks.map(c => [c.check, c.status])).toEqual([
-            [CriminalRecordCheck.Authentic, CriminalRecordCheckStatus.NotStarted],
-            [CriminalRecordCheck.Identity, CriminalRecordCheckStatus.Passed],
-            [CriminalRecordCheck.Model, CriminalRecordCheckStatus.Passed],
-            [CriminalRecordCheck.Age, CriminalRecordCheckStatus.Passed],
-            [CriminalRecordCheck.Blank, CriminalRecordCheckStatus.Passed],
+            [CriminalRecordCheck.Authentic, CriminalRecordCheckStatus.Failed],
+            [CriminalRecordCheck.Identity, CriminalRecordCheckStatus.NotStarted],
+            [CriminalRecordCheck.Model, CriminalRecordCheckStatus.NotStarted],
+            [CriminalRecordCheck.Age, CriminalRecordCheckStatus.NotStarted],
+            [CriminalRecordCheck.Blank, CriminalRecordCheckStatus.NotStarted],
         ]);
+        expect(response.body.checks[0].explanation).toBe(CriminalRecordCheckExplanation.SignatureInvalid);
     });
 
     test('It removes the document after checking it', async () => {
@@ -151,34 +152,6 @@ describe('Endpoint.DeliverMemberCriminalRecord', () => {
 
         expect(removedFiles).toHaveLength(1);
         await expect(fs.access(removedFiles[0])).rejects.toThrow();
-    });
-
-    test('It rejects an extract of someone else', async () => {
-        const { organization, token, member } = await setup();
-
-        const response = await testServer.test(endpoint, buildRequest({
-            token: token.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            content: validExtract({ lastName: 'Naam: PEETERS' }),
-        }));
-
-        expect(response.body.status).toBe(CriminalRecordStatus.AutomaticallyRejected);
-        expect(response.body.checks.find(c => c.check === CriminalRecordCheck.Identity)?.explanation).toBe(CriminalRecordCheckExplanation.IdentityMismatch);
-    });
-
-    test('It rejects a file that is not a readable pdf', async () => {
-        const { organization, token, member } = await setup();
-
-        const response = await testServer.test(endpoint, buildRequest({
-            token: token.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            content: new Uint8Array(Buffer.from('a photo of an extract')),
-        }));
-
-        expect(response.body.status).toBe(CriminalRecordStatus.AutomaticallyRejected);
-        expect(response.body.checks.find(c => c.check === CriminalRecordCheck.Identity)?.explanation).toBe(CriminalRecordCheckExplanation.DocumentNotReadable);
     });
 
     test('It does not check the document without consent', async () => {

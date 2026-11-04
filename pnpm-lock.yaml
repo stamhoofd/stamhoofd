@@ -2846,6 +2846,9 @@ importers:
       '@common/errors':
         specifier: workspace:*
         version: link:../../packages/common/errors
+      '@stamhoofd/pdf-signature':
+        specifier: workspace:*
+        version: link:../pdf-signature
       '@stamhoofd/structures':
         specifier: workspace:*
         version: link:../structures

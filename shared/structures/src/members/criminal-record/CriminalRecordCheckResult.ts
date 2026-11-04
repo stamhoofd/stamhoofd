@@ -34,8 +34,11 @@ export enum CriminalRecordCheckExplanation {
     SignedByJustice = 'SignedByJustice',
     /** The document was downloaded at FOD Justitie through the scanned QR code. */
     FetchedViaQrCode = 'FetchedViaQrCode',
-    /** The signature was not verified (yet). */
-    SignatureNotVerified = 'SignatureNotVerified',
+    /**
+     * The file is not an unmodified pdf signed by FOD Justitie. Params: `code` - which step of the
+     * verification refused it, for support and for noticing a certificate rotation.
+     */
+    SignatureInvalid = 'SignatureInvalid',
 
     IdentityMatches = 'IdentityMatches',
     /** Params: `name` - the name of the member the document should be about. */

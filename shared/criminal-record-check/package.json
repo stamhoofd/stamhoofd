@@ -24,6 +24,7 @@
     },
     "dependencies": {
         "@common/errors": "workspace:*",
+        "@stamhoofd/pdf-signature": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "unpdf": "1.9.1"
     },

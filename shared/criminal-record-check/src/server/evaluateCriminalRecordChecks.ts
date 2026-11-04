@@ -37,8 +37,19 @@ export function evaluateCriminalRecordChecks({ parsed, member, deliveredAt, auth
 export function unreadableCriminalRecordChecks(code: CriminalRecordParseErrorCode, authentic: CriminalRecordCheckResult): CriminalRecordCheckResult[] {
     return [
         authentic,
-        ...[CriminalRecordCheck.Identity, CriminalRecordCheck.Model, CriminalRecordCheck.Age, CriminalRecordCheck.Blank].map(check => result(check, CriminalRecordCheckStatus.Failed, CriminalRecordCheckExplanation.DocumentNotReadable, { code })),
+        ...CONTENT_CHECKS.map(check => result(check, CriminalRecordCheckStatus.Failed, CriminalRecordCheckExplanation.DocumentNotReadable, { code })),
     ];
+}
+
+/** The four checks that read the content of the document, in the order they are shown. */
+const CONTENT_CHECKS = [CriminalRecordCheck.Identity, CriminalRecordCheck.Model, CriminalRecordCheck.Age, CriminalRecordCheck.Blank];
+
+/**
+ * The content checks of a document that was not read: the signature did not hold, so the text is
+ * not worth reading.
+ */
+export function notStartedCriminalRecordChecks(): CriminalRecordCheckResult[] {
+    return CONTENT_CHECKS.map(check => result(check, CriminalRecordCheckStatus.NotStarted));
 }
 
 /**
@@ -119,6 +130,6 @@ function checkBlank(parsed: ParsedCriminalRecordExtract): CriminalRecordCheckRes
     return result(CriminalRecordCheck.Blank, CriminalRecordCheckStatus.Passed, CriminalRecordCheckExplanation.IsBlank);
 }
 
-function result(check: CriminalRecordCheck, status: CriminalRecordCheckStatus, explanation: CriminalRecordCheckExplanation, explanationParams: Record<string, string> = {}): CriminalRecordCheckResult {
+function result(check: CriminalRecordCheck, status: CriminalRecordCheckStatus, explanation: CriminalRecordCheckExplanation | null = null, explanationParams: Record<string, string> = {}): CriminalRecordCheckResult {
     return CriminalRecordCheckResult.create({ check, status, explanation, explanationParams });
 }
