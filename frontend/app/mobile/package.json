@@ -33,7 +33,7 @@
         "@capacitor/preferences": "8.0.1",
         "@capacitor/share": "8.0.3",
         "@capacitor/status-bar": "8.0.4",
-        "@capgo/capacitor-updater": "8.53.1",
+        "@capgo/capacitor-updater": "8.54.0",
         "@common/encoding": "workspace:*",
         "@common/networking": "workspace:*",
         "@browser/navigation": "workspace:*",
