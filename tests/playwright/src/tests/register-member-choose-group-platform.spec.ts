@@ -65,6 +65,58 @@ test.describe('Register member - choose group', () => {
     });
 
     const eventsRequestUrl = /\/events(?:\?|$)/;
+    const DAY = 24 * 60 * 60 * 1000;
+
+    /**
+     * Create a group in the root category whose registration is open or already closed.
+     */
+    async function createGroup({ name, open }: { name: string; open: boolean }) {
+        const group = await new GroupFactory({
+            organization,
+            price: 0,
+            name: new TranslatedString(name),
+        }).create();
+        group.settings.registrationEndDate = new Date(Date.now() + (open ? DAY : -DAY));
+        await group.save();
+
+        organizationPeriod.settings.rootCategory?.groupIds.push(group.id);
+        await organizationPeriod.save();
+        return group;
+    }
+
+    /**
+     * Create a visible event with a registration group, starting the given number of days
+     * from now (negative for a past event). Also registers a platform event type, which
+     * enables the activities tab. Returns the event name.
+     */
+    async function createEvent({ daysFromNow, name }: { daysFromNow: number; name?: string }) {
+        const eventGroup = await new GroupFactory({ organization, price: 0 }).create();
+        const startDate = new Date(Date.now() + daysFromNow * DAY);
+        const eventName = name ?? `Kamp ${WorkerData.id}-${Math.floor(Math.random() * 1_000_000)}`;
+
+        await new EventFactory({
+            organization,
+            group: eventGroup,
+            name: eventName,
+            startDate,
+            endDate: new Date(startDate.getTime() + 2 * 60 * 60 * 1000),
+            meta: EventMeta.create({ visible: true, minAge: 0, maxAge: 99 }),
+        }).create();
+        return eventName;
+    }
+
+    /**
+     * Count the events requests made from now on.
+     */
+    function trackEventsRequests(page: Page) {
+        let count = 0;
+        page.on('request', (request) => {
+            if (eventsRequestUrl.test(request.url())) {
+                count++;
+            }
+        });
+        return () => count;
+    }
 
     /**
      * Open the member portal and start registering the given member. For a member
@@ -80,13 +132,7 @@ test.describe('Register member - choose group', () => {
             .click();
     }
 
-    /**
-     * Open the member portal, start registering the given member and pick the
-     * organization, leaving the browser on ChooseGroupForMemberView.
-     */
-    async function openChooseGroup(page: Page, pages: Pages, memberName: string) {
-        await startRegistering(page, pages, memberName);
-
+    async function selectOrganization(page: Page) {
         const organizationSearch = page.getByTestId('organization-search-input');
         await organizationSearch.click();
         await organizationSearch.fill(organizationName);
@@ -94,6 +140,15 @@ test.describe('Register member - choose group', () => {
             .getByTestId('organization-button')
             .filter({ hasText: organizationName })
             .click();
+    }
+
+    /**
+     * Open the member portal, start registering the given member and pick the
+     * organization, leaving the browser on ChooseGroupForMemberView.
+     */
+    async function openChooseGroup(page: Page, pages: Pages, memberName: string) {
+        await startRegistering(page, pages, memberName);
+        await selectOrganization(page);
     }
 
     test('shows a search field that filters the group list when more than five groups are available', async ({
@@ -110,21 +165,8 @@ test.describe('Register member - choose group', () => {
         ];
 
         for (const name of groupNames) {
-            const group = await new GroupFactory({
-                organization,
-                price: 0,
-                name: new TranslatedString(name),
-            }).create();
-
-            // Keep registration open well into the future so the member can register
-            group.settings.registrationEndDate = new Date(
-                Date.now() + 24 * 60 * 60 * 1000,
-            );
-            await group.save();
-
-            organizationPeriod.settings.rootCategory?.groupIds.push(group.id);
+            await createGroup({ name, open: true });
         }
-        await organizationPeriod.save();
 
         await new MemberFactory({
             firstName: 'John',
@@ -159,33 +201,12 @@ test.describe('Register member - choose group', () => {
         pages,
     }) => {
         // A regular group so the "Groepen" tab is not empty
-        const membershipGroup = await new GroupFactory({
-            organization,
-            price: 0,
-            name: new TranslatedString('Kapoenen'),
-        }).create();
-        membershipGroup.settings.registrationEndDate = new Date(
-            Date.now() + 24 * 60 * 60 * 1000,
-        );
-        await membershipGroup.save();
-        organizationPeriod.settings.rootCategory?.groupIds.push(membershipGroup.id);
-        await organizationPeriod.save();
+        await createGroup({ name: 'Kapoenen', open: true });
 
-        // An upcoming, visible event with a registration group. Creating the event
-        // also registers a platform event type, which enables the activities tab.
-        const eventGroup = await new GroupFactory({ organization, price: 0 }).create();
-        const startDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
-        const eventName = `Zomerkamp ${WorkerData.id}-${Math.floor(Math.random() * 1_000_000)}`;
-
-        await new EventFactory({
-            organization,
-            group: eventGroup,
-            name: eventName,
-            startDate,
-            endDate,
-            meta: EventMeta.create({ visible: true, minAge: 0, maxAge: 99 }),
-        }).create();
+        const eventName = await createEvent({
+            daysFromNow: 1,
+            name: `Zomerkamp ${WorkerData.id}-${Math.floor(Math.random() * 1_000_000)}`,
+        });
 
         await new MemberFactory({
             firstName: 'Jane',
@@ -193,13 +214,18 @@ test.describe('Register member - choose group', () => {
             user,
         }).create();
 
-        await openChooseGroup(page, pages, 'Jane Doe');
+        await startRegistering(page, pages, 'Jane Doe');
+        const eventsRequests = trackEventsRequests(page);
+        await selectOrganization(page);
 
         // The tab bar is shown and the groups tab is active by default
         const tabs = page.getByTestId('register-tabs');
         await expect(tabs).toBeVisible();
         await expect(page.getByTestId('group-button')).toHaveCount(1);
         await expect(page.getByTestId('event-button')).toHaveCount(0);
+
+        // With open groups there is no need to check for activities
+        expect(eventsRequests()).toBe(0);
 
         await test.step('the activities tab lists the relevant event', async () => {
             await tabs.getByText('Activiteiten').click();
@@ -226,19 +252,7 @@ test.describe('Register member - choose group', () => {
         page,
         pages,
     }) => {
-        const eventGroup = await new GroupFactory({ organization, price: 0 }).create();
-        const startDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
-        const eventName = `Kamp ${WorkerData.id}-${Math.floor(Math.random() * 1_000_000)}`;
-
-        await new EventFactory({
-            organization,
-            group: eventGroup,
-            name: eventName,
-            startDate,
-            endDate,
-            meta: EventMeta.create({ visible: true, minAge: 0, maxAge: 99 }),
-        }).create();
+        const eventName = await createEvent({ daysFromNow: 1 });
 
         await new MemberFactory({
             firstName: 'Jan',
@@ -259,31 +273,8 @@ test.describe('Register member - choose group', () => {
         page,
         pages,
     }) => {
-        const closedGroup = await new GroupFactory({
-            organization,
-            price: 0,
-            name: new TranslatedString('Kapoenen'),
-        }).create();
-        closedGroup.settings.registrationEndDate = new Date(
-            Date.now() - 24 * 60 * 60 * 1000,
-        );
-        await closedGroup.save();
-        organizationPeriod.settings.rootCategory?.groupIds.push(closedGroup.id);
-        await organizationPeriod.save();
-
-        const eventGroup = await new GroupFactory({ organization, price: 0 }).create();
-        const startDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
-        const eventName = `Kamp ${WorkerData.id}-${Math.floor(Math.random() * 1_000_000)}`;
-
-        await new EventFactory({
-            organization,
-            group: eventGroup,
-            name: eventName,
-            startDate,
-            endDate,
-            meta: EventMeta.create({ visible: true, minAge: 0, maxAge: 99 }),
-        }).create();
+        await createGroup({ name: 'Kapoenen', open: false });
+        const eventName = await createEvent({ daysFromNow: 1 });
 
         await new MemberFactory({
             firstName: 'Piet',
@@ -305,18 +296,7 @@ test.describe('Register member - choose group', () => {
         pages,
     }) => {
         // A past event must not count as an activity to register for
-        const eventGroup = await new GroupFactory({ organization, price: 0 }).create();
-        const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
-
-        await new EventFactory({
-            organization,
-            group: eventGroup,
-            name: `Voorbij ${WorkerData.id}`,
-            startDate,
-            endDate,
-            meta: EventMeta.create({ visible: true, minAge: 0, maxAge: 99 }),
-        }).create();
+        await createEvent({ daysFromNow: -7 });
 
         await new MemberFactory({
             firstName: 'An',
@@ -325,45 +305,22 @@ test.describe('Register member - choose group', () => {
         }).create();
 
         // Only the check after picking the organization may fetch events, not the organization search
-        let eventsRequests = 0;
         await startRegistering(page, pages, 'An Claes');
-        page.on('request', (request) => {
-            if (eventsRequestUrl.test(request.url())) {
-                eventsRequests++;
-            }
-        });
-
-        const organizationSearch = page.getByTestId('organization-search-input');
-        await organizationSearch.click();
-        await organizationSearch.fill(organizationName);
-        await page
-            .getByTestId('organization-button')
-            .filter({ hasText: organizationName })
-            .click();
+        const eventsRequests = trackEventsRequests(page);
+        await selectOrganization(page);
 
         await expect(page.getByTestId('register-tabs')).toBeVisible();
         await expect(page.getByText('kan je op dit moment niet inschrijven')).toBeVisible();
         await expect(page.getByTestId('event-search-input')).toHaveCount(0);
         await expect(page.getByTestId('group-button')).toHaveCount(0);
-        expect(eventsRequests).toBe(1);
+        expect(eventsRequests()).toBe(1);
     });
 
     test('falls back to the groups tab when the activities cannot be loaded', async ({
         page,
         pages,
     }) => {
-        const eventGroup = await new GroupFactory({ organization, price: 0 }).create();
-        const startDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
-
-        await new EventFactory({
-            organization,
-            group: eventGroup,
-            name: `Kamp ${WorkerData.id}`,
-            startDate,
-            endDate,
-            meta: EventMeta.create({ visible: true, minAge: 0, maxAge: 99 }),
-        }).create();
+        await createEvent({ daysFromNow: 1 });
 
         await new MemberFactory({
             firstName: 'Lies',
@@ -387,31 +344,8 @@ test.describe('Register member - choose group', () => {
         pages,
     }) => {
         // Registering the member in a closed group links them to the organization
-        const closedGroup = await new GroupFactory({
-            organization,
-            price: 0,
-            name: new TranslatedString('Kapoenen'),
-        }).create();
-        closedGroup.settings.registrationEndDate = new Date(
-            Date.now() - 24 * 60 * 60 * 1000,
-        );
-        await closedGroup.save();
-        organizationPeriod.settings.rootCategory?.groupIds.push(closedGroup.id);
-        await organizationPeriod.save();
-
-        const eventGroup = await new GroupFactory({ organization, price: 0 }).create();
-        const startDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
-        const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
-        const eventName = `Kamp ${WorkerData.id}-${Math.floor(Math.random() * 1_000_000)}`;
-
-        await new EventFactory({
-            organization,
-            group: eventGroup,
-            name: eventName,
-            startDate,
-            endDate,
-            meta: EventMeta.create({ visible: true, minAge: 0, maxAge: 99 }),
-        }).create();
+        const closedGroup = await createGroup({ name: 'Kapoenen', open: false });
+        const eventName = await createEvent({ daysFromNow: 1 });
 
         const member = await new MemberFactory({
             firstName: 'Tom',
@@ -434,23 +368,13 @@ test.describe('Register member - choose group', () => {
         page,
         pages,
     }) => {
-        // No groups and no activities: the check would fall back to the groups tab
+        // No groups and only a past event: the check would fall back to the groups tab
+        await createEvent({ daysFromNow: -7 });
+
         await new MemberFactory({
             firstName: 'Eva',
             lastName: 'Peeters',
             user,
-        }).create();
-
-        // A past event so the activities tab is available
-        const eventGroup = await new GroupFactory({ organization, price: 0 }).create();
-        const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-        await new EventFactory({
-            organization,
-            group: eventGroup,
-            name: `Voorbij ${WorkerData.id}`,
-            startDate,
-            endDate: new Date(startDate.getTime() + 2 * 60 * 60 * 1000),
-            meta: EventMeta.create({ visible: true, minAge: 0, maxAge: 99 }),
         }).create();
 
         // Hold back the events requests until the user picked a tab
