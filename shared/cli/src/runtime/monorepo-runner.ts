@@ -1,6 +1,8 @@
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { buildBackendEnv } from '../config/build-config.js';
 import { caddyRootCaPath, localIpv4Host, localhostPort, localhostPortMappingDynamic, mysqlImage, mysqlInternalPort, mysqlRootPassword, mysqlRootUser, mysqlServerArgs } from '../config/shared-service-config.js';
 import type { E2eMysqlTarget } from '../config/test-database-config.js';
@@ -57,6 +59,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'node-logging', path: 'packages/node/logging', needsDatabase: false },
     { name: 'navigation', path: 'packages/browser/navigation', needsDatabase: false },
     { name: 'cli', path: 'shared/cli', needsDatabase: false },
+    ...(existsSync(fileURLToPath(new URL('../../../../devops/package.json', import.meta.url))) ? [{ name: 'devops', path: 'devops', needsDatabase: false }] : []),
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
     { name: 'metabase', path: 'shared/metabase', needsDatabase: false },
     { name: 'filters', path: 'shared/filters', needsDatabase: false },
