@@ -106,7 +106,7 @@ const { filterBuilders, loading } = useAdvancedMemberWithRegistrationsBlobUIFilt
 const selectedUIFilter = ref(filterBuilders.value[0].fromFilter(props.group.getRecommendedFilter(auth.hasSomePlatformAccess() || STAMHOOFD.userMode === 'organization' ? (contextOrganization.value ?? null) : null))) as Ref<null | UIFilter>;
 
 async function editFilter(event: MouseEvent) {
-    if (!filterBuilders) {
+    if (!filterBuilders.value) {
         return;
     }
     const filter = selectedUIFilter.value ?? filterBuilders.value[0].create();
