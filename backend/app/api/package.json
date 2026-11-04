@@ -88,6 +88,8 @@
         "@stamhoofd/logging": "workspace:*",
         "@stamhoofd/models": "workspace:*",
         "@stamhoofd/object-differ": "workspace:*",
+        "@stamhoofd/pdf-parse": "workspace:*",
+        "@stamhoofd/pdf-verify": "workspace:*",
         "@stamhoofd/queues": "workspace:*",
         "@stamhoofd/sql": "workspace:*",
         "@stamhoofd/structures": "workspace:*",

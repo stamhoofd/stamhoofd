@@ -559,6 +559,12 @@ importers:
       '@stamhoofd/object-differ':
         specifier: workspace:*
         version: link:../../../shared/object-differ
+      '@stamhoofd/pdf-parse':
+        specifier: workspace:*
+        version: link:../../shared/pdf-parse
+      '@stamhoofd/pdf-verify':
+        specifier: workspace:*
+        version: link:../../shared/pdf-verify
       '@stamhoofd/queues':
         specifier: workspace:*
         version: link:../../shared/queues
