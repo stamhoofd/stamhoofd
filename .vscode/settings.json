@@ -61,13 +61,22 @@
     "i18n-ally.tabStyle": "space",
     "javascript.format.enable": false,
     "search.exclude": {
+        "**/.turbo/**": true,
+        "**/.jj/**": true,
         "**/.terraform/**": true,
         "**/.terraform-*/**": true,
-        "**.tsbuildinfo": true,
+        "**/*.tsbuildinfo": true,
         "**/.cache": true,
         "**/android/app/build": true,
         "**/android/app/src/main/assets": true,
         "**/dist": true,
+        "**/dist-cli/**": true,
+        "**/dist-types/**": true,
+        "**/.nuxt/**": true,
+        "**/.output/**": true,
+        "**/playwright-report/**": true,
+        "**/test-results/**": true,
+        "**/blob-report/**": true,
         "**/dist-playwright": true,
         "**/dist-prefix": true,
         "**/coverage": true,
@@ -83,6 +92,8 @@
     },
     "search.useIgnoreFiles": false,
     "files.watcherExclude": {
+        "**/.turbo/**": true,
+        "**/.jj/**": true,
         "**/.terraform/**": true,
         "**/.terraform-*/**": true
     },
@@ -101,7 +112,6 @@
         "@stamhoofd/components",
         "@stamhoofd/structures",
         "frontend/shared/components/*/index.ts",
-        "shared/structures/index.ts",
         "shared/structures/index.ts"
     ],
     "js/ts.preferences.autoImportSpecifierExcludeRegexes": [
