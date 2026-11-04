@@ -15,7 +15,7 @@
         "@stamhoofd/scss": "workspace:*",
         "docus": "5.15.0",
         "better-sqlite3": "12.11.1",
-        "nuxt": "4.6.2"
+        "nuxt": "4.6.3"
     },
     "devDependencies": {
         "eslint-plugin-stamhoofd": "workspace:*",
