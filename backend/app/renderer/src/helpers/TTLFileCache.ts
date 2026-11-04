@@ -80,6 +80,7 @@ export class TTLFileCache {
                 try {
                     const stat = await fs.stat(filePath);
                     if (stat.isFile() && stat.mtimeMs < cutoff) {
+                        // eslint-disable-next-line node-security/no-toctou-vulnerability -- The stat only selects expired cache entries, not access permissions; unlink does not follow symlinks and concurrent deletion is caught below.
                         await fs.unlink(filePath);
                     }
                 } catch {
