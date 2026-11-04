@@ -586,8 +586,8 @@ importers:
         specifier: 3.7.2
         version: 3.7.2
       mailparser:
-        specifier: 3.10.0
-        version: 3.10.0
+        specifier: 3.12.4
+        version: 3.12.4
       mockdate:
         specifier: 3.0.5
         version: 3.0.5
@@ -8255,8 +8255,8 @@ packages:
     resolution: {integrity: sha512-nrUSn7hzt7J6JWgWGz78ZYI8wj+gdIJdk0Ynjpp8l+trkn58Uqsf6RYrYkEK+3X18EX+TNdtJI0WxAtc+L84SQ==}
     hasBin: true
 
-  '@zone-eu/mailsplit@5.4.27':
-    resolution: {integrity: sha512-9008ddFqqKk7lMF2S1sLU7ExfJZP9zPw5tkZy24EVt45Ryme2x85f/5vJZZqQ+vCJkKcCY78dJ5yuEVG3ZrVZA==}
+  '@zone-eu/mailsplit@5.4.29':
+    resolution: {integrity: sha512-CCUNycmUjrV5M0wNf23waWAt9eOHczhjLbUQS7k0FNJvR0py9VSqHFt+tSl/D0+XI73VLG0U+PwYtq9R0zsm9Q==}
     engines: {node: '>=20.0.0'}
 
   '@zxcvbn-ts/core@0.3.0':
@@ -11280,8 +11280,8 @@ packages:
     resolution: {integrity: sha512-Nyh3H90B3gRtrcxIe56Ayy7635J0jmh6AbxbQgQae8wrSPQMH5wFqJChiMTB13yKG512L3YspbA5DzumhFTITA==}
     engines: {node: '>=20.0.0'}
 
-  libmime@5.5.2:
-    resolution: {integrity: sha512-Byw3CchK4eSqbgzpttsUoC4hx2VPP+hnveAuYAYZNipEc+0WlDFjVb1ISNscjq/idvyDP/Xjg8mnBcdgbsgvzg==}
+  libmime@5.6.3:
+    resolution: {integrity: sha512-cuTUW/Jybvh5O4/U9p61gyutHOjDtZyGQYuY99+bfnaFwqcDf2Nb+R6hMHY6DDen2H9wLKQSMpofWUgn2TI5JQ==}
     engines: {node: '>=20.0.0'}
 
   libnpmaccess@10.0.3:
@@ -11611,8 +11611,8 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  mailparser@3.10.0:
-    resolution: {integrity: sha512-kgJPwOde5VrPp4zwh+bfRw82+5AlgJ9rnzoPTyb9Hyn0iAZEfRcbRr/LFn7yRFCE02LKjdVUgSAb+Gk7k8aQ4Q==}
+  mailparser@3.12.4:
+    resolution: {integrity: sha512-FdoMF+S89/AQaJHY7StwTfABPHZ8Vey+CDyUno5j+TO0jF0UxM+la4Pe9MeqKqBO4Y9ZMB2eomdyg5i+jzpfZw==}
     engines: {node: '>=20.0.0'}
 
   make-dir@4.0.0:
@@ -21084,10 +21084,10 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
-  '@zone-eu/mailsplit@5.4.27':
+  '@zone-eu/mailsplit@5.4.29':
     dependencies:
       libbase64: 1.4.1
-      libmime: 5.5.2
+      libmime: 5.6.3
       libqp: 3.0.1
 
   '@zxcvbn-ts/core@0.3.0': {}
@@ -24826,7 +24826,7 @@ snapshots:
 
   libbase64@1.4.1: {}
 
-  libmime@5.5.2:
+  libmime@5.6.3:
     dependencies:
       encoding-japanese: 2.4.0
       iconv-lite: 0.7.3
@@ -25163,14 +25163,12 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  mailparser@3.10.0:
+  mailparser@3.12.4:
     dependencies:
-      '@zone-eu/mailsplit': 5.4.27
-      encoding-japanese: 2.4.0
+      '@zone-eu/mailsplit': 5.4.29
       he: 1.2.0
       html-to-text: 10.0.1
-      iconv-lite: 0.7.3
-      libmime: 5.5.2
+      libmime: 5.6.3
       linkify-it: 5.0.2
       nodemailer: 10.2.1
       punycode.js: 2.3.1
