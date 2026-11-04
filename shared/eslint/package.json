@@ -13,7 +13,7 @@
     "dependencies": {
         "@eslint/js": "10.0.1",
         "@stylistic/eslint-plugin": "5.10.0",
-        "@vitest/eslint-plugin": "1.6.27",
+        "@vitest/eslint-plugin": "1.6.28",
         "eslint": "10.13.0",
         "eslint-import-resolver-typescript": "4.4.5",
         "eslint-plugin-import": "2.32.0",
@@ -21,7 +21,7 @@
         "eslint-plugin-regexp": "3.3.1",
         "eslint-plugin-vue": "10.12.0",
         "globals": "15.15.0",
-        "typescript-eslint": "8.72.0",
+        "typescript-eslint": "8.72.1",
         "vue-eslint-parser": "10.4.1"
     },
     "devDependencies": {
