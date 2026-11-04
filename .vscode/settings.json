@@ -61,6 +61,8 @@
     "i18n-ally.tabStyle": "space",
     "javascript.format.enable": false,
     "search.exclude": {
+        "**/.terraform/**": true,
+        "**/.terraform-*/**": true,
         "**.tsbuildinfo": true,
         "**/.cache": true,
         "**/android/app/build": true,
@@ -80,6 +82,15 @@
         ".claude": true
     },
     "search.useIgnoreFiles": false,
+    "files.watcherExclude": {
+        "**/.terraform/**": true,
+        "**/.terraform-*/**": true
+    },
+    "files.associations": {
+        "*.tf": "opentofu",
+        "*.tofu": "opentofu",
+        "*.tfvars": "opentofu-vars"
+    },
     "js/ts.tsdk.promptToUseWorkspaceVersion": true,
     "js/ts.preferGoToSourceDefinition": true,
     "js/ts.preferences.importModuleSpecifier": "shortest",
@@ -96,5 +107,11 @@
     "js/ts.preferences.autoImportSpecifierExcludeRegexes": [
         "\\.\\./\\.\\./\\.\\./\\.\\./",
         "/dist/"
-    ]
+    ],
+    "[opentofu]": {
+        "editor.defaultFormatter": "opentofu.vscode-opentofu"
+    },
+    "[opentofu-vars]": {
+        "editor.defaultFormatter": "opentofu.vscode-opentofu"
+    }
 }

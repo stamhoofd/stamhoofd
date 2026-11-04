@@ -4,6 +4,7 @@
         "vue.volar",
         "editorconfig.editorconfig",
         "lokalise.i18n-ally",
-        "oxc.oxc-vscode"
+        "oxc.oxc-vscode",
+        "opentofu.vscode-opentofu"
     ]
 }
