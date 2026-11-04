@@ -50,7 +50,7 @@ withDefaults(defineProps<{
         padding-top: 15px;
     }
 
-    > h4:has(.button) {
+    > h4:has(.button, .style-tooltip) {
         max-width: 315px;
 
         @media (max-width: 500px) {
