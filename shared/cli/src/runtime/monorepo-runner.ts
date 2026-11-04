@@ -62,6 +62,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'filters', path: 'shared/filters', needsDatabase: false },
     { name: 'structures', path: 'shared/structures', needsDatabase: false },
     { name: 'object-differ', path: 'shared/object-differ', needsDatabase: false },
+    { name: 'pdf-verify-core', path: 'shared/pdf-verify-core', needsDatabase: false },
     { name: 'sgv', path: 'shared/sgv', needsDatabase: false },
     { name: 'stdsync', path: 'shared/stdsync', needsDatabase: false },
     { name: 'eslint', path: 'shared/eslint', needsDatabase: false },
