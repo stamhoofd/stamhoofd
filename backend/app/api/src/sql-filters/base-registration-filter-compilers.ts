@@ -129,9 +129,9 @@ export const baseRegistrationFilterCompilers: SQLFilterDefinitions = {
             nullable: false,
         }),
         name: createColumnFilter({
-            expression: SQL.jsonExtract(SQL.column('groups', 'settings'), '$.value.name'),
-            type: SQLValueType.JSONString,
-            nullable: false,
+            expression: new SQLTranslatedString(SQL.column('groups', 'settings'), '$.value.name'),
+            type: SQLValueType.String,
+            nullable: true,
         }),
         status: createColumnFilter({
             expression: SQL.column('groups', 'status'),

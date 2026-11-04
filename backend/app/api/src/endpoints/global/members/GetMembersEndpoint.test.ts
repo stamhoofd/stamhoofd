@@ -6,7 +6,7 @@ import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { CountFilteredRequest, EventMeta, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, OrganizationTag, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ReceivableBalanceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection, STPackageBundle, STPackageType } from '@stamhoofd/structures';
+import { CountFilteredRequest, EventMeta, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, OrganizationTag, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ReceivableBalanceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection, STPackageBundle, STPackageType, TranslatedString } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
@@ -3569,6 +3569,49 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     headers: noAccessHeaders,
                 }))).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
             }
+        });
+    });
+
+    describe('Registration group name filter', () => {
+        test('Filtering on a translated group name matches the name in the language of the request', async () => {
+            const organization = await new OrganizationFactory({ period }).create();
+            const user = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+            const token = await SessionService.createSession(user);
+
+            const group = await new GroupFactory({ organization, period }).create();
+            group.settings.name = new TranslatedString({ nl: 'Zomerkamp', en: 'Summer camp' });
+            await group.save();
+
+            const otherGroup = await new GroupFactory({ organization, period }).create();
+            otherGroup.settings.name = new TranslatedString('Winterkamp');
+            await otherGroup.save();
+
+            const member = await new MemberFactory({}).create();
+            const otherMember = await new MemberFactory({}).create();
+            await new RegistrationFactory({ member, group }).create();
+            await new RegistrationFactory({ member: otherMember, group: otherGroup }).create();
+
+            const fetchIds = async (name: StamhoofdFilter) => {
+                const response = await testServer.test(endpoint, Request.get({
+                    path: baseUrl,
+                    host: organization.getApiHost(),
+                    query: new LimitedFilteredRequest({
+                        filter: { registrations: { $elemMatch: { group: { name } } } },
+                        limit: 10,
+                    }),
+                    headers: { authorization: 'Bearer ' + token.accessToken },
+                }));
+                expect(response.status).toBe(200);
+                return response.body.results.members.map(m => m.id);
+            };
+
+            expect(await fetchIds('Zomerkamp')).toEqual([member.id]);
+            expect(await fetchIds({ $contains: 'merka' })).toEqual([member.id]);
+            expect(await fetchIds('Winterkamp')).toEqual([otherMember.id]);
+            expect(await fetchIds('Summer camp')).toEqual([]);
         });
     });
 });
