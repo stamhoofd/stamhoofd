@@ -159,11 +159,11 @@ describe('shared service Docker args', () => {
     });
 
     it('starts every shared service by default', () => {
-        expect(sharedServicesToStart().map(service => service.key)).toEqual(['coredns', 'caddy', 'mysql', 'maildev', 'rustfs']);
+        expect(sharedServicesToStart().map(service => service.key)).toEqual(['coredns', 'caddy', 'mysql', 'maildev', 'rustfs', 'elasticmq', 'elasticmq-ui']);
     });
 
     it('leaves only MySQL out for a run that brings its own database', () => {
-        expect(sharedServicesToStart({ skipMysql: true }).map(service => service.key)).toEqual(['coredns', 'caddy', 'maildev', 'rustfs']);
+        expect(sharedServicesToStart({ skipMysql: true }).map(service => service.key)).toEqual(['coredns', 'caddy', 'maildev', 'rustfs', 'elasticmq', 'elasticmq-ui']);
     });
 
     it('tails all shared service logs through concurrently', async () => {
@@ -173,12 +173,14 @@ describe('shared service Docker args', () => {
             'exec',
             'concurrently',
             '-n',
-            'MySQL,MailDev,RustFS,CoreDNS,Caddy',
+            'MySQL,MailDev,RustFS,CoreDNS,Caddy,ElasticMQ,ElasticMQ UI',
             'podman logs -f stamhoofd-mysql',
             'podman logs -f stamhoofd-maildev',
             'podman logs -f stamhoofd-rustfs',
             'podman logs -f stamhoofd-coredns',
             'podman logs -f stamhoofd-caddy',
+            'podman logs -f stamhoofd-elasticmq',
+            'podman logs -f stamhoofd-elasticmq-ui',
         ], { allowFailure: true, verbosity: RunVerbosity.Output });
     });
 });
