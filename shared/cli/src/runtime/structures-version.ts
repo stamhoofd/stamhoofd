@@ -4,6 +4,7 @@ import path from 'node:path';
 import { run, RunVerbosity } from './command-runner.js';
 import { readStructuresVersion, replaceNextVersion, writeStructuresVersion } from './next-version-scanner.js';
 import { info, success, warning } from './ux.js';
+import { detectVcs, Vcs } from './vcs.js';
 
 const excludedFolders = ['node_modules', 'dist', 'dist-types', '.development'];
 const versionFile = 'shared/structures/src/Version.ts';
@@ -13,16 +14,18 @@ export type IncreaseStructuresVersionOptions = {
     cwd: string;
     /** Skip the git checks (clean working tree, on main, up to date with origin/main) */
     force?: boolean;
-    /** Report what would change without writing, committing or pushing */
+    /** Report what would change without writing or committing */
     dryRun?: boolean;
+    /** Command-line and subprocess output of the git/jj commands */
+    verbosity?: RunVerbosity;
 };
 
 /**
  * Replaces every `...NextVersion` in the repository by the next structures version, bumps `Version.ts` and
- * commits and pushes the result. Does nothing when no `...NextVersion` is used.
+ * commits the result. Does nothing when no `...NextVersion` is used. Pushing is left to the caller.
  */
 export async function increaseStructuresVersion(options: IncreaseStructuresVersionOptions): Promise<void> {
-    const { cwd, force = false, dryRun = false } = options;
+    const { cwd, force = false, dryRun = false, verbosity = RunVerbosity.Quiet } = options;
     const versionPath = path.join(cwd, versionFile);
 
     const currentVersion = readStructuresVersion(await fs.readFile(versionPath, 'utf8'));
@@ -32,7 +35,7 @@ export async function increaseStructuresVersion(options: IncreaseStructuresVersi
     info(chalk.bold(chalk.blueBright('Increasing structures version to ' + nextVersion + '... (if changed)\n')));
 
     if (!dryRun && !force) {
-        await assertReleasableCheckout(cwd);
+        await assertReleasableCheckout(cwd, verbosity);
     }
 
     const changedFiles: string[] = [];
@@ -82,34 +85,50 @@ export async function increaseStructuresVersion(options: IncreaseStructuresVersi
     }
 
     info(chalk.bold('Found and wrote new fields. Structures version bumped from ' + currentVersion + ' to ' + chalk.yellow(nextVersion)));
-    info(chalk.bold('Commiting and pushing changes...'));
+    info(chalk.bold('Commiting changes...'));
 
     if (!dryRun) {
-        await run('git', ['add', '.'], { cwd, verbosity: RunVerbosity.Quiet });
-        await run('git', ['commit', '-m', 'Increased structures to version ' + nextVersion], { cwd, verbosity: RunVerbosity.Quiet });
-        await run('git', ['push'], { cwd, verbosity: RunVerbosity.Quiet });
+        await commitVersionBump(cwd, nextVersion, verbosity);
     }
     else {
-        warning(chalk.yellow('Dry run: Changes not commited or pushed.'));
+        warning(chalk.yellow('Dry run: Changes not commited.'));
     }
 
     success('Increased structures to version ' + nextVersion + ' successfully!');
 }
 
-async function assertReleasableCheckout(cwd: string): Promise<void> {
-    await run('git', ['remote', 'update'], { cwd, verbosity: RunVerbosity.Quiet });
+/**
+ * Commits the bump with the detected version control system. JJ snapshots the working copy on every
+ * command, so it has no `add` step. Pushing is left to the caller: `pnpm ship` pushes through
+ * `lerna version` after the packages are built.
+ */
+async function commitVersionBump(cwd: string, nextVersion: number, verbosity: RunVerbosity): Promise<void> {
+    const message = 'Increased structures to version ' + nextVersion;
+    const vcs = await detectVcs(cwd, verbosity);
 
-    const { stdout: status } = await run('git', ['status', '--porcelain'], { cwd, capture: true, verbosity: RunVerbosity.Quiet });
+    if (vcs === Vcs.Jj) {
+        await run('jj', ['commit', '-m', message], { cwd, verbosity });
+        return;
+    }
+
+    await run('git', ['add', '.'], { cwd, verbosity });
+    await run('git', ['commit', '-m', message], { cwd, verbosity });
+}
+
+async function assertReleasableCheckout(cwd: string, verbosity: RunVerbosity): Promise<void> {
+    await run('git', ['remote', 'update'], { cwd, verbosity });
+
+    const { stdout: status } = await run('git', ['status', '--porcelain'], { cwd, capture: true, verbosity });
     if (status.trim()) {
         throw new Error('You have pending changes in Git. Please commit to main before releasing a new version.');
     }
 
-    const { stdout: branch } = await run('git', ['branch', '--show-current'], { cwd, capture: true, verbosity: RunVerbosity.Quiet });
+    const { stdout: branch } = await run('git', ['branch', '--show-current'], { cwd, capture: true, verbosity });
     if (branch.trim() !== 'main') {
         throw new Error('You are not on the main branch. Please checkout main before releasing a new version.');
     }
 
-    const { stdout: tracking } = await run('git', ['status', '-uno'], { cwd, capture: true, verbosity: RunVerbosity.Quiet });
+    const { stdout: tracking } = await run('git', ['status', '-uno'], { cwd, capture: true, verbosity });
     if (!tracking.includes("Your branch is up to date with 'origin/main'")) {
         throw new Error('Your branch is not up to date with origin/main. Please pull before releasing a new version.');
     }
