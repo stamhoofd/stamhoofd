@@ -13,7 +13,7 @@ export class WebshopWithOrganization extends AutoEncoder {
      * Number of orders, excluding deleted orders (same as the orders list of a webshop).
      * Only set in platform context, null otherwise.
      */
-    @field({ decoder: IntegerDecoder, nullable: true, ...NextVersion })
+    @field({ decoder: IntegerDecoder, nullable: true, version: 426 })
     orderCount: number | null = null;
 
     /**
