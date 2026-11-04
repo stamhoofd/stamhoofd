@@ -21,6 +21,7 @@ import { checkNodeVersion, setupNodeVersion } from './setup-node.js';
 import { checkPackageManager, setupPackageManager } from './setup-package-manager.js';
 import { checkVcs, setupVcs } from './setup-vcs.js';
 import { checkShellShortcut } from './setup-shell.js';
+import { getOptionalDevopsSetupChecks } from '../runtime/devops-plugin.js';
 
 const directDnsQueryTimeoutMs = 1000;
 
@@ -34,6 +35,7 @@ export type SetupReport = {
     dns: CheckResult;
     cert: CheckResult;
     shell: CheckResult;
+    devops?: { label: string; result: CheckResult }[];
 };
 
 export enum SetupAutomaticFixKey {
@@ -81,7 +83,8 @@ function setupCheckDefinitions(context: CliContext): { key: keyof SetupReport; l
 
 export async function checkSetup(context: CliContext): Promise<SetupReport> {
     const results = await Promise.all(setupCheckDefinitions(context).map(async ({ key, optional, check }) => [key, { ...await check(), optional }]));
-    return Object.fromEntries(results) as SetupReport;
+    const devops = await getOptionalDevopsSetupChecks(path.join(context.rootDir, 'devops'));
+    return { ...Object.fromEntries(results), devops: await Promise.all(devops.map(async ({ label, check }) => ({ label, result: { ...await check(), optional: true } }))) } as SetupReport;
 }
 
 export async function checkSetupWithTable(context: CliContext, options: { live: boolean }): Promise<SetupReport> {
@@ -90,6 +93,10 @@ export async function checkSetupWithTable(context: CliContext, options: { live: 
         row: Table.row([definition.label, Table.cell('checking', { indeterminate: true }), '']),
     }));
     const optional = checks.filter(check => check.optional);
+    const devops = (await getOptionalDevopsSetupChecks(path.join(context.rootDir, 'devops'))).map(definition => ({
+        ...definition,
+        row: Table.row([definition.label, Table.cell('checking', { indeterminate: true }), '']),
+    }));
     const liveTable = Table.create({
         title: 'Checking Stamhoofd local development setup',
         headers: ['Check', 'Status', 'Details'],
@@ -97,14 +104,16 @@ export async function checkSetupWithTable(context: CliContext, options: { live: 
             ...checks.filter(check => !check.optional).map(check => check.row),
             ...(optional.length ? optionalSectionRows().map(cells => Table.row(cells)) : []),
             ...optional.map(check => check.row),
+            ...(devops.length ? devopsSectionRows().map(cells => Table.row(cells)) : []),
+            ...devops.map(check => check.row),
         ],
         live: options.live,
     });
 
-    const results = await Promise.allSettled(checks.map(async ({ key, label, optional, check, row }) => [
+    const results = await Promise.allSettled([...checks.map(async ({ key, label, optional, check, row }) => [
         key,
         { ...await runSetupCheck(row, label, check()), optional },
-    ]));
+    ]), Promise.all(devops.map(async ({ label, check, row }) => ({ label, result: { ...await runSetupCheck(row, label, check()), optional: true } }))).then(results => ['devops', results])]);
 
     await liveTable.wait();
 
@@ -133,6 +142,8 @@ export function printSetupReport(report: SetupReport): void {
         ...checks.filter(([, result]) => !result.optional).map(([label, result]) => row(label, result)),
         ...(optional.length ? optionalSectionRows() : []),
         ...optional.map(([label, result]) => row(label, result)),
+        ...(report.devops?.length ? devopsSectionRows() : []),
+        ...(report.devops ?? []).map(({ label, result }) => row(label, result)),
     ], { title: 'Checking Stamhoofd local development setup' });
 }
 
@@ -214,6 +225,10 @@ function setupChecks(report: SetupReport): CheckResult[] {
 
 function optionalSectionRows(): string[][] {
     return [['', '', ''], [chalk.dim('Optional'), '', '']];
+}
+
+function devopsSectionRows(): string[][] {
+    return [['', '', ''], [chalk.dim('DevOps'), '', '']];
 }
 
 async function vcsCheck(context: CliContext): Promise<CheckResult> {
@@ -461,7 +476,7 @@ async function dnsCheck(context: CliContext, profile: SharedServiceProfile): Pro
 
     const corednsStatus = await corednsService.status(context);
     if (!corednsStatus.running) {
-        return { ok: false, details: `Local DNS is configured, but CoreDNS is not running`, manualFix: 'stam services up', automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' } };
+        return { ok: false, details: 'Local DNS is configured, but CoreDNS is not running', manualFix: 'stam services up', automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' } };
     }
 
     return { ok: false, details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${localIpv4Host}`, manualFix: 'stam setup dns' };
@@ -479,7 +494,7 @@ async function macosDnsCheck(context: CliContext, domain: string): Promise<Check
 
     const corednsStatus = await corednsService.status(context);
     if (!corednsStatus.running) {
-        return { ok: false, details: `Local DNS is configured, but CoreDNS is not running`, manualFix: 'stam services up', automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' } };
+        return { ok: false, details: 'Local DNS is configured, but CoreDNS is not running', manualFix: 'stam services up', automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' } };
     }
 
     if (await directCorednsCheck(domain)) {

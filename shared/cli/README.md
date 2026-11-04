@@ -18,6 +18,11 @@ Run `pnpm stam setup shortcut` to install `shared/cli/bin/stam` as `/usr/local/b
 
 Setup lists the binary shortcut under **Optional**, with its installation command when missing. Optional checks do not block development readiness or appear in recommended fixes.
 
+When the private DevOps checkout is present, a **DevOps** section follows Optional.
+It checks OpenTofu, Scaleway CLI, 1Password CLI and TFLint and shows installation
+guidance. These checks are also optional and never authenticate or provision cloud
+resources. DevOps owns the definitions in `devops/cli/setup-checks.ts`.
+
 Open the dashboard URL printed by the CLI, or run `pnpm stam status` to see active services, instances, URLs, and credentials.
 
 Run `pnpm stam --help` or `pnpm stam <topic> --help` for command help.
