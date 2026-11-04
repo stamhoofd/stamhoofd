@@ -34,7 +34,7 @@ function isRunningAhead(): boolean {
 }
 
 declare global {
-    const NextVersion: { /* optional: true; */ version: number };
+    const NextVersion: { version: number };
 }
 
 import { AutoEncoder } from '@common/encoding';
@@ -45,9 +45,5 @@ AutoEncoder.skipDefaultValuesVersion = 10000; // todo
  * On release, the version gets bumped and the usages of NextVersion are replaced by that version.
  */
 (globalThis as any).NextVersion = {
-    // optional: true,
     version: ReleasedVersion + 1,
-    /* defaultValue() {
-        return this.upgrade ?? undefined;
-    }, */
 };
