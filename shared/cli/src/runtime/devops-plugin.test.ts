@@ -2,7 +2,7 @@ import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { getOptionalDevopsPlugin } from './devops-plugin.js';
+import { getOptionalDevopsPlugin, getOptionalDevopsSetupChecks } from './devops-plugin.js';
 
 const roots: string[] = [];
 
@@ -13,6 +13,18 @@ afterEach(async () => {
 });
 
 describe('optional devops plugin', () => {
+    it('loads setup definitions only from an available compiled DevOps checkout', async () => {
+        const root = await mkdtemp(join(tmpdir(), 'stam-devops-setup-'));
+        roots.push(root);
+        expect(await getOptionalDevopsSetupChecks(root)).toEqual([]);
+        await writeFile(join(root, 'package.json'), JSON.stringify({ name: 'devops', type: 'module' }));
+        expect(await getOptionalDevopsSetupChecks(root)).toEqual([]);
+        await mkdir(join(root, 'dist-cli'));
+        await writeFile(join(root, 'dist-cli/setup-checks.js'), 'export function setupChecks() { return [{ label: "OpenTofu", check: async () => ({ ok: false, details: "missing", manualFix: "install tofu" }) }]; }');
+        const checks = await getOptionalDevopsSetupChecks(root);
+        expect(checks[0].label).toBe('OpenTofu');
+        expect(await checks[0].check()).toEqual({ ok: false, details: 'missing', manualFix: 'install tofu' });
+    });
     it('is absent when the checkout is missing or empty', async () => {
         const root = await mkdtemp(join(tmpdir(), 'stam-devops-'));
         roots.push(root);

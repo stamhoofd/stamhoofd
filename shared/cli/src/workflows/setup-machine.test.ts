@@ -12,6 +12,7 @@ import { checkPackageManager, setupPackageManager } from './setup-package-manage
 import { runServices } from './start-services.js';
 import { checkVcs, setupVcs } from './setup-vcs.js';
 import { checkShellShortcut } from './setup-shell.js';
+import { getOptionalDevopsSetupChecks } from '../runtime/devops-plugin.js';
 
 const dnsResolver = vi.hoisted(() => ({
     resolve4: vi.fn(),
@@ -61,12 +62,14 @@ vi.mock('./start-services.js', () => ({
 
 vi.mock('./setup-vcs.js', () => ({ checkVcs: vi.fn(), setupVcs: vi.fn() }));
 vi.mock('./setup-shell.js', () => ({ checkShellShortcut: vi.fn() }));
+vi.mock('../runtime/devops-plugin.js', () => ({ getOptionalDevopsSetupChecks: vi.fn(async () => []) }));
 
 describe('setup machine workflow', () => {
     const platform = process.platform;
 
     beforeEach(() => {
         vi.clearAllMocks();
+        vi.mocked(getOptionalDevopsSetupChecks).mockResolvedValue([]);
         vi.mocked(checkVcs).mockResolvedValue([]);
         vi.mocked(checkShellShortcut).mockResolvedValue({ ok: true, details: 'stam installed in /usr/local/bin' });
         setPlatform(platform);
@@ -282,10 +285,13 @@ describe('setup machine workflow', () => {
         }
     });
 
-    it.each(['static', 'live'])('groups optional checks and displays their manual fix in the %s report', async (mode) => {
+    it.each([['static', false], ['static', true], ['live', false], ['live', true]] as const)('groups optional checks in the %s report (DevOps: %s)', async (mode, devopsAvailable) => {
         setPlatform('linux');
         mockSetupCommands({ dns: 'Global: 127.0.0.1:1053\n', domains: 'Global: ~stamhoofd\n' });
         vi.mocked(checkShellShortcut).mockResolvedValue({ ok: false, details: 'stam not installed in /usr/local/bin' });
+        if (devopsAvailable) vi.mocked(getOptionalDevopsSetupChecks).mockResolvedValue([
+            { label: 'OpenTofu', check: async () => ({ ok: false, details: 'not installed', manualFix: 'Install OpenTofu 1.11.5' }) },
+        ]);
         const log = vi.spyOn(console, 'log').mockImplementation(() => {});
         try {
             const context = { rootDir: '/repo', verbosity: RunVerbosity.Quiet } as any;
@@ -298,6 +304,14 @@ describe('setup machine workflow', () => {
             expect(output.indexOf('Optional')).toBeGreaterThan(output.indexOf('Caddy local CA'));
             expect(output.indexOf('Binary shortcut')).toBeGreaterThan(output.indexOf('Optional'));
             expect(output).toContain('pnpm stam setup shortcut');
+            if (devopsAvailable) {
+                expect(output.indexOf('DevOps')).toBeGreaterThan(output.indexOf('Binary shortcut'));
+                expect(output.indexOf('OpenTofu')).toBeGreaterThan(output.indexOf('DevOps'));
+                expect(output).toContain('Install OpenTofu 1.11.5');
+                expect(report.devops?.[0].result.optional).toBe(true);
+            } else expect(output).not.toContain('DevOps');
+            expect(isSetupReady(report)).toBe(isSetupReady({ ...report, devops: [] }));
+            expect(getRecommendedSetupFixes(report)).toEqual(getRecommendedSetupFixes({ ...report, devops: [] }));
         } finally {
             log.mockRestore();
         }
@@ -309,7 +323,7 @@ describe('setup machine workflow', () => {
             domains: 'Global:\n',
         });
 
-        const report = await checkSetup({ verbose: false } as any);
+        const report = await checkSetup({ rootDir: '/repo', verbose: false } as any);
 
         expect(report.dns).toMatchObject({
             ok: false,
@@ -364,7 +378,7 @@ describe('setup machine workflow', () => {
         });
         vi.mocked(corednsService.status).mockResolvedValue({ name: 'CoreDNS', running: false, detail: '127.0.0.1:1053' });
 
-        const report = await checkSetup({ verbose: false } as any);
+        const report = await checkSetup({ rootDir: '/repo', verbose: false } as any);
 
         expect(report.dns).toMatchObject({
             ok: false,
@@ -382,7 +396,7 @@ describe('setup machine workflow', () => {
         });
         vi.mocked(corednsService.status).mockResolvedValue({ name: 'CoreDNS', running: true, detail: '127.0.0.1:1053' });
 
-        const report = await checkSetup({ verbose: false } as any);
+        const report = await checkSetup({ rootDir: '/repo', verbose: false } as any);
 
         expect(report.dns).toMatchObject({
             ok: false,
@@ -406,7 +420,7 @@ describe('setup machine workflow', () => {
         vi.mocked(confirm).mockResolvedValue(false);
 
         try {
-            await runSetup({ verbose: false } as any);
+            await runSetup({ rootDir: '/repo', verbose: false } as any);
         } finally {
             console.log = original;
         }
@@ -423,7 +437,7 @@ describe('setup machine workflow', () => {
             missingRedirects: true,
         });
 
-        const report = await checkSetup({ verbose: false } as any);
+        const report = await checkSetup({ rootDir: '/repo', verbose: false } as any);
 
         expect(report.privilegedPorts).toMatchObject({
             ok: false,
@@ -440,7 +454,7 @@ describe('setup machine workflow', () => {
             missingRedirects: true,
         });
 
-        const report = await checkSetup({ verbose: false } as any);
+        const report = await checkSetup({ rootDir: '/repo', verbose: false } as any);
 
         expect(report.privilegedPorts).toMatchObject({
             ok: false,
@@ -455,7 +469,7 @@ describe('setup machine workflow', () => {
             resolver: 'nameserver 127.0.0.1\n',
         });
 
-        const report = await checkSetup({ verbose: false } as any);
+        const report = await checkSetup({ rootDir: '/repo', verbose: false } as any);
 
         expect(report.privilegedPorts).toEqual({ ok: true, details: 'not needed for docker' });
     });
@@ -468,7 +482,7 @@ describe('setup machine workflow', () => {
         });
         vi.mocked(corednsService.status).mockResolvedValue({ name: 'CoreDNS', running: true, detail: '127.0.0.1:53' });
 
-        const report = await checkSetup({ verbose: false } as any);
+        const report = await checkSetup({ rootDir: '/repo', verbose: false } as any);
 
         expect(report.dns).toMatchObject({ ok: true });
         expect(fs.readFile).toHaveBeenCalledWith('/etc/resolver/stamhoofd', 'utf8');
@@ -483,7 +497,7 @@ describe('setup machine workflow', () => {
         });
         vi.mocked(corednsService.status).mockResolvedValue({ name: 'CoreDNS', running: false, detail: '127.0.0.1:53' });
 
-        const report = await checkSetup({ verbose: false } as any);
+        const report = await checkSetup({ rootDir: '/repo', verbose: false } as any);
 
         expect(report.dns).toMatchObject({
             ok: false,
@@ -503,7 +517,7 @@ describe('setup machine workflow', () => {
         vi.mocked(corednsService.status).mockResolvedValue({ name: 'CoreDNS', running: true, detail: '127.0.0.1:53' });
         dnsResolver.resolve4.mockResolvedValue([]);
 
-        const report = await checkSetup({ verbose: false } as any);
+        const report = await checkSetup({ rootDir: '/repo', verbose: false } as any);
 
         expect(report.dns).toMatchObject({
             ok: false,
@@ -518,7 +532,7 @@ describe('setup machine workflow', () => {
             resolver: 'nameserver 10.0.0.1\n',
         });
 
-        const report = await checkSetup({ verbose: false } as any);
+        const report = await checkSetup({ rootDir: '/repo', verbose: false } as any);
 
         expect(report.dns).toMatchObject({
             ok: false,
@@ -548,7 +562,7 @@ describe('setup machine workflow', () => {
             caddyMissing: true,
         });
 
-        const macReport = await checkSetup({ verbose: false } as any);
+        const macReport = await checkSetup({ rootDir: '/repo', verbose: false } as any);
         expect(macReport.caddy).toMatchObject({ automaticFix: { key: SetupAutomaticFixKey.Caddy, label: 'Install Caddy with Homebrew' } });
 
         setPlatform('linux');
@@ -558,7 +572,7 @@ describe('setup machine workflow', () => {
             caddyMissing: true,
         });
 
-        const linuxReport = await checkSetup({ verbose: false } as any);
+        const linuxReport = await checkSetup({ rootDir: '/repo', verbose: false } as any);
         expect(linuxReport.caddy.automaticFix).toBeUndefined();
     });
 
@@ -586,7 +600,7 @@ describe('setup machine workflow', () => {
             throw new Error(`Unexpected command: ${command} ${args.join(' ')}`);
         });
 
-        const report = await checkSetup({ generatedDir: '/repo' } as any);
+        const report = await checkSetup({ rootDir: '/repo', generatedDir: '/repo' } as any);
 
         expect(report.cert).toMatchObject({ ok: false, manualFix: 'stam setup cert' });
         expect(run).toHaveBeenCalledWith('security', ['verify-cert', '-c', expect.any(String), '-p', 'ssl', '-l', '-L', '-q'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
