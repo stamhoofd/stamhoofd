@@ -305,13 +305,13 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             expect.objectContaining({
                 to: 'event-notification-reviewer@example.com',
                 subject: EmailTemplateType.EventNotificationSubmittedReviewer,
-                text: expect.stringContaining(event.name),
+                text: expect.stringContaining(event.name.toString()),
             }),
 
             expect.objectContaining({
                 to: user.email,
                 subject: EmailTemplateType.EventNotificationSubmittedCopy,
-                text: expect.stringContaining(event.name),
+                text: expect.stringContaining(event.name.toString()),
             }),
         ]);
 
@@ -371,13 +371,13 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             expect.objectContaining({
                 to: 'event-notification-reviewer@example.com',
                 subject: EmailTemplateType.EventNotificationSubmittedReviewer,
-                text: expect.stringContaining(event.name),
+                text: expect.stringContaining(event.name.toString()),
             }),
 
             expect.objectContaining({
                 to: user.email,
                 subject: EmailTemplateType.EventNotificationSubmittedCopy,
-                text: expect.stringContaining(event.name),
+                text: expect.stringContaining(event.name.toString()),
             }),
         ]);
     });
@@ -417,13 +417,13 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             expect.objectContaining({
                 to: 'event-notification-reviewer@example.com',
                 subject: EmailTemplateType.EventNotificationSubmittedReviewer,
-                text: expect.stringContaining(event.name),
+                text: expect.stringContaining(event.name.toString()),
             }),
 
             expect.objectContaining({
                 to: user.email,
                 subject: EmailTemplateType.EventNotificationSubmittedCopy,
-                text: expect.stringContaining(event.name),
+                text: expect.stringContaining(event.name.toString()),
             }),
         ]);
     });
@@ -695,7 +695,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             expect.objectContaining({
                 to: user.email,
                 subject: EmailTemplateType.EventNotificationAccepted,
-                text: expect.stringContaining(event.name),
+                text: expect.stringContaining(event.name.toString()),
             }),
         ]);
     });
@@ -756,7 +756,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             expect.objectContaining({
                 to: user.email,
                 subject: EmailTemplateType.EventNotificationPartiallyAccepted,
-                text: expect.stringContaining(event.name),
+                text: expect.stringContaining(event.name.toString()),
                 html: expect.stringContaining('Some feedback'),
             }),
         ]);
@@ -818,7 +818,7 @@ describe('Endpoint.PatchEventNotificationsEndpoint', () => {
             expect.objectContaining({
                 to: user.email,
                 subject: EmailTemplateType.EventNotificationRejected,
-                text: expect.stringContaining(event.name),
+                text: expect.stringContaining(event.name.toString()),
                 html: expect.stringContaining('Some feedback'),
             }),
         ]);

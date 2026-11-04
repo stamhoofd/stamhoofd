@@ -92,7 +92,7 @@ const props = defineProps<{
 }>();
 
 const platform = usePlatform();
-const title = computed(() => props.event.name);
+const title = computed(() => props.event.name.toString());
 const memberManager = useMemberManager();
 const groupOrganization = ref<Organization | null>(null) as Ref<Organization | null>;
 const differentOrganization = computed(() => props.event.group && !memberManager.family.checkout.cart.isEmpty && memberManager.family.checkout.singleOrganization?.id !== props.event.group.organizationId);

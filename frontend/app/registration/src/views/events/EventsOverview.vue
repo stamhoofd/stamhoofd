@@ -134,7 +134,7 @@ defineRoute({
         return {
             params: {
                 year: event.startDate.getFullYear(),
-                slug: Formatter.slug(event.name),
+                slug: Formatter.slug(event.name.toString()),
                 id: event.id,
             },
         };

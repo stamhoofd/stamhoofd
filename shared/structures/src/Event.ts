@@ -6,6 +6,7 @@ import { Image } from './files/Image.js';
 import { Group } from './Group.js';
 import { Platform } from './Platform.js';
 import { RichText } from './RichText.js';
+import { TranslatedString } from './TranslatedString.js';
 
 export class EventLocation extends AutoEncoder {
     @field({ decoder: StringDecoder })
@@ -88,7 +89,8 @@ export class Event extends AutoEncoder {
     id: string;
 
     @field({ decoder: StringDecoder })
-    name = '';
+    @field(TranslatedString.field({ version: 426 }))
+    name = new TranslatedString();
 
     @field({ decoder: StringDecoder })
     typeId = '';
@@ -122,7 +124,7 @@ export class Event extends AutoEncoder {
     }
 
     getNameWithPeriod(): string {
-        return this.name + ' (' + Formatter.year(this.startDate) + ')';
+        return this.name.toString() + ' (' + Formatter.year(this.startDate) + ')';
     }
 
     static group(events: Event[]) {
@@ -162,6 +164,6 @@ export class Event extends AutoEncoder {
     }
 
     get slug() {
-        return `${Formatter.luxon(this.startDate).year}/${Formatter.slug(this.name)}/${this.id}`;
+        return `${Formatter.luxon(this.startDate).year}/${Formatter.slug(this.name.toString())}/${this.id}`;
     }
 }

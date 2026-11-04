@@ -10,9 +10,7 @@
         <STErrorsDefault :error-box="errors.errorBox" />
 
         <div class="split-inputs">
-            <STInputBox :title="$t('%1Os')" error-fields="name" :error-box="errors.errorBox">
-                <input ref="firstInput" v-model="name" class="input" type="text" :placeholder="$t('%1Os')" autocomplete="off" enterkeyhint="next">
-            </STInputBox>
+            <TInput v-model="name" :title="$t('%1Os')" :placeholder="$t('%1Os')" error-fields="name" :error-box="errors.errorBox" :autofocus="isNew" enterkeyhint="next" />
 
             <STInputBox v-if="eventTypes.length > 1" error-fields="type" :error-box="errors.errorBox" :title="$t(`%1B`)">
                 <Dropdown v-model="typeId">
@@ -285,6 +283,7 @@ import AgeInput from '#inputs/AgeInput.vue';
 import DateSelection from '#inputs/DateSelection.vue';
 import Dropdown from '#inputs/Dropdown.vue';
 import TagIdsInput from '#inputs/TagIdsInput.vue';
+import TInput from '#inputs/TInput.vue';
 import TimeInput from '#inputs/TimeInput.vue';
 import UploadButton from '#inputs/UploadButton.vue';
 import WYSIWYGTextInput from '#inputs/WYSIWYGTextInput.vue';
@@ -789,7 +788,7 @@ async function deleteMe() {
         return;
     }
 
-    const confirmationCode = name.value;
+    const confirmationCode = name.value.toString();
 
     await present({
         components: [
