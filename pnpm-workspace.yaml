@@ -22,6 +22,14 @@ disallowWorkspaceCycles: true
 linkWorkspacePackages: true
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
+  - vue-i18n@11.4.14
+  - '@intlify/core@11.4.14'
+  - '@intlify/core-base@11.4.14'
+  - '@intlify/shared@11.4.14'
+  - '@intlify/message-compiler@11.4.14'
+  - '@intlify/devtools-types@11.4.14'
+  - seroval@1.6.11
+  - '@hono/node-server@2.1.3'
   - node-forge@1.4.1
   - nodemailer@10.1.4
   - body-parser@1.20.9 || 2.4.0
@@ -96,6 +104,14 @@ allowBuilds:
   vue-demi@0.14.10: true
 
 overrides:
+  vue-i18n: '11.4.14'
+  '@intlify/core': '11.4.14'
+  '@intlify/core-base': '11.4.14'
+  '@intlify/shared': '11.4.14'
+  '@intlify/message-compiler': '11.4.14'
+  '@intlify/devtools-types': '11.4.14'
+  seroval: '1.6.11'
+  '@hono/node-server': '2.1.3'
   '@types/node': '22.20.4'
   axios: '1.20.0'
   cookie: '2.0.1'
