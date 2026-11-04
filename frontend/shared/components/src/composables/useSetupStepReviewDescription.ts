@@ -8,11 +8,9 @@ export function useSetupStepReviewDescription(): { getDescription: (review: Setu
             const userName = review.userName;
 
             if (short) {
-                // todo: translate
-                return `Nagekeken op ${reviewedAtString}`;
+                return $t('Nagekeken op {date}', { date: reviewedAtString });
             }
-            // todo: translate
-            return `Gemarkeerd als nagekeken op ${reviewedAtString} door ${userName}`;
+            return $t('Gemarkeerd als nagekeken op {date} door {userName}', { date: reviewedAtString, userName });
         }
 
         return textIfNotReviewed;

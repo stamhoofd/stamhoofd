@@ -1,7 +1,7 @@
 <template>
     <div class="container field-box">
         <hr v-if="withTitle"><h2 v-if="withTitle">
-            {{ field.name || 'Maak een keuze' }}
+            {{ field.name || $t('Maak een keuze') }}
         </h2>
         <STInputBox :title="withTitle ? undefined : (field.name || $t(`%1Fq`))" :error-box="errorBox" :error-fields="'fieldAnswers.'+field.id" :class="{'no-padding': withTitle}">
             <input v-model="value" :placeholder="field.required ? (field.placeholder || field.name) : $t(`%14p`) " class="input"><p v-if="field.description" class="style-description-small" v-text="field.description" />

@@ -381,7 +381,7 @@ export class SessionContext implements RequestMiddleware {
                     console.warn('SSO state didn\'t match');
 
                     if (!this.canGetCompleted()) {
-                        Toast.error('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.').setHide(20000).show();
+                        Toast.error($t('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.')).setHide(20000).show();
                     }
                     return false;
                 }
@@ -391,7 +391,7 @@ export class SessionContext implements RequestMiddleware {
                 console.error(e);
 
                 if (!this.canGetCompleted()) {
-                    Toast.error('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.').setHide(20000).show();
+                    Toast.error($t('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.')).setHide(20000).show();
                 }
                 return false;
             }
@@ -450,7 +450,7 @@ export class SessionContext implements RequestMiddleware {
                     console.warn('SSO state didn\'t match');
 
                     if (!this.canGetCompleted()) {
-                        Toast.error('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.').setHide(20000).show();
+                        Toast.error($t('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.')).setHide(20000).show();
                     }
                     return;
                 }
@@ -458,7 +458,7 @@ export class SessionContext implements RequestMiddleware {
             } catch (e) {
                 console.error(e);
                 if (!this.canGetCompleted()) {
-                    Toast.error('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.').setHide(20000).show();
+                    Toast.error($t('Er is een fout opgetreden bij het inloggen. Probeer het opnieuw.')).setHide(20000).show();
                 }
                 return;
             }

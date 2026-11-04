@@ -567,7 +567,7 @@ async function linkMollie(skipWarning = false) {
     // Start oauth flow
     const client_id = STAMHOOFD.MOLLIE_CLIENT_ID;
     if (!client_id) {
-        new Toast('Mollie wordt momenteel niet ondersteund. Probeer later opnieuw.', 'error red').show();
+        new Toast($t('Mollie wordt momenteel niet ondersteund. Probeer later opnieuw.'), 'error red').show();
         return;
     }
     const bytes = crypto.getRandomValues(new Uint8Array(64));
@@ -585,7 +585,7 @@ async function linkMollie(skipWarning = false) {
 }
 
 async function disconnectMollie() {
-    if (await CenteredMessage.confirm('Ben je zeker dat je Mollie wilt loskoppelen?', 'Ja, loskoppelen', 'Jouw Mollie account blijft behouden en kan je later terug koppelen als je dat wilt.')) {
+    if (await CenteredMessage.confirm($t('Ben je zeker dat je Mollie wilt loskoppelen?'), $t('Ja, loskoppelen'), $t('Jouw Mollie account blijft behouden en kan je later terug koppelen als je dat wilt.'))) {
         try {
             const response = await context.value.authenticatedServer.request({
                 method: 'POST',
