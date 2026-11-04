@@ -4,7 +4,7 @@ type TranslateResult = string;
 /**
  * Object literals are the translation-call boundary, not internal dictionary state.
  * Implementations normalize their own replacement entries to Maps before traversal;
- * callers can keep $t('...', { name: '...' }) without converting every template.
+ * callers can keep passing replacement objects without converting every template.
  */
 export type TranslateMethod = (key: string, replace?: Record<string, string>) => TranslateResult;
 
