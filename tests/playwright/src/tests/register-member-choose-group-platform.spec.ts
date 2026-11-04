@@ -17,6 +17,7 @@ import {
     MemberFactory,
     OrganizationFactory,
     OrganizationRegistrationPeriodFactory,
+    RegistrationFactory,
     RegistrationPeriodFactory,
 } from '@stamhoofd/models';
 import { EventMeta, TranslatedString } from '@stamhoofd/structures';
@@ -63,11 +64,13 @@ test.describe('Register member - choose group', () => {
         await WorkerData.databaseHelper.clearGroups();
     });
 
+    const eventsRequestUrl = /\/events(?:\?|$)/;
+
     /**
-     * Open the member portal, start registering the given member and pick the
-     * organization, leaving the browser on ChooseGroupForMemberView.
+     * Open the member portal and start registering the given member. For a member
+     * that is not linked to an organization yet, this shows the organization search.
      */
-    async function openChooseGroup(page: Page, pages: Pages, memberName: string) {
+    async function startRegistering(page: Page, pages: Pages, memberName: string) {
         await pages.memberPortal.goto();
 
         await page.getByTestId('register-member-button').click();
@@ -75,6 +78,14 @@ test.describe('Register member - choose group', () => {
             .getByTestId('member-button')
             .filter({ hasText: memberName })
             .click();
+    }
+
+    /**
+     * Open the member portal, start registering the given member and pick the
+     * organization, leaving the browser on ChooseGroupForMemberView.
+     */
+    async function openChooseGroup(page: Page, pages: Pages, memberName: string) {
+        await startRegistering(page, pages, memberName);
 
         const organizationSearch = page.getByTestId('organization-search-input');
         await organizationSearch.click();
@@ -293,7 +304,7 @@ test.describe('Register member - choose group', () => {
         page,
         pages,
     }) => {
-        // A past event enables the activities tab without offering anything to register for
+        // A past event must not count as an activity to register for
         const eventGroup = await new GroupFactory({ organization, price: 0 }).create();
         const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
@@ -313,12 +324,28 @@ test.describe('Register member - choose group', () => {
             user,
         }).create();
 
-        await openChooseGroup(page, pages, 'An Claes');
+        // Only the check after picking the organization may fetch events, not the organization search
+        let eventsRequests = 0;
+        await startRegistering(page, pages, 'An Claes');
+        page.on('request', (request) => {
+            if (eventsRequestUrl.test(request.url())) {
+                eventsRequests++;
+            }
+        });
+
+        const organizationSearch = page.getByTestId('organization-search-input');
+        await organizationSearch.click();
+        await organizationSearch.fill(organizationName);
+        await page
+            .getByTestId('organization-button')
+            .filter({ hasText: organizationName })
+            .click();
 
         await expect(page.getByTestId('register-tabs')).toBeVisible();
         await expect(page.getByText('kan je op dit moment niet inschrijven')).toBeVisible();
         await expect(page.getByTestId('event-search-input')).toHaveCount(0);
         await expect(page.getByTestId('group-button')).toHaveCount(0);
+        expect(eventsRequests).toBe(1);
     });
 
     test('falls back to the groups tab when the activities cannot be loaded', async ({
@@ -345,7 +372,7 @@ test.describe('Register member - choose group', () => {
         }).create();
 
         // Simulate a network error
-        await page.route(/\/events(\?|$)/, route => route.abort('internetdisconnected'));
+        await page.route(eventsRequestUrl, route => route.abort('internetdisconnected'));
 
         await openChooseGroup(page, pages, 'Lies Wouters');
 
@@ -353,5 +380,107 @@ test.describe('Register member - choose group', () => {
         await expect(page.getByText('kan je op dit moment niet inschrijven')).toBeVisible();
         await expect(page.getByTestId('event-search-input')).toHaveCount(0);
         await expect(page.getByTestId('group-button')).toHaveCount(0);
+    });
+
+    test('opens on the activities tab for a member already linked to an organization without open groups', async ({
+        page,
+        pages,
+    }) => {
+        // Registering the member in a closed group links them to the organization
+        const closedGroup = await new GroupFactory({
+            organization,
+            price: 0,
+            name: new TranslatedString('Kapoenen'),
+        }).create();
+        closedGroup.settings.registrationEndDate = new Date(
+            Date.now() - 24 * 60 * 60 * 1000,
+        );
+        await closedGroup.save();
+        organizationPeriod.settings.rootCategory?.groupIds.push(closedGroup.id);
+        await organizationPeriod.save();
+
+        const eventGroup = await new GroupFactory({ organization, price: 0 }).create();
+        const startDate = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000);
+        const eventName = `Kamp ${WorkerData.id}-${Math.floor(Math.random() * 1_000_000)}`;
+
+        await new EventFactory({
+            organization,
+            group: eventGroup,
+            name: eventName,
+            startDate,
+            endDate,
+            meta: EventMeta.create({ visible: true, minAge: 0, maxAge: 99 }),
+        }).create();
+
+        const member = await new MemberFactory({
+            firstName: 'Tom',
+            lastName: 'Maes',
+            user,
+        }).create();
+        await new RegistrationFactory({ member, group: closedGroup }).create();
+
+        // No organization search: the view opens directly on the linked organization
+        await startRegistering(page, pages, 'Tom Maes');
+
+        await expect(page.getByTestId('register-tabs')).toBeVisible();
+        await expect(
+            page.getByTestId('event-button').filter({ hasText: eventName }),
+        ).toBeVisible();
+        await expect(page.getByTestId('group-button')).toHaveCount(0);
+    });
+
+    test('keeps the tab the user picks while checking for activities', async ({
+        page,
+        pages,
+    }) => {
+        // No groups and no activities: the check would fall back to the groups tab
+        await new MemberFactory({
+            firstName: 'Eva',
+            lastName: 'Peeters',
+            user,
+        }).create();
+
+        // A past event so the activities tab is available
+        const eventGroup = await new GroupFactory({ organization, price: 0 }).create();
+        const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        await new EventFactory({
+            organization,
+            group: eventGroup,
+            name: `Voorbij ${WorkerData.id}`,
+            startDate,
+            endDate: new Date(startDate.getTime() + 2 * 60 * 60 * 1000),
+            meta: EventMeta.create({ visible: true, minAge: 0, maxAge: 99 }),
+        }).create();
+
+        // Hold back the events requests until the user picked a tab
+        let releaseEvents!: () => void;
+        const eventsReleased = new Promise<void>((resolve) => {
+            releaseEvents = resolve;
+        });
+        await page.route(eventsRequestUrl, async (route) => {
+            await eventsReleased;
+            await route.continue();
+        });
+
+        await openChooseGroup(page, pages, 'Eva Peeters');
+
+        const tabs = page.getByTestId('register-tabs');
+        await expect(tabs).toBeVisible();
+        await tabs.getByText('Activiteiten').click();
+        await expect(page.getByTestId('event-search-input')).toBeVisible();
+
+        let eventsResponses = 0;
+        page.on('response', (response) => {
+            if (eventsRequestUrl.test(response.url())) {
+                eventsResponses++;
+            }
+        });
+        releaseEvents();
+
+        // The empty check result (and the activities list) must not switch back to the groups tab
+        await expect.poll(() => eventsResponses).toBe(2);
+        await expect(page.getByTestId('event-search-input')).toBeVisible();
+        await expect(page.getByText('kan je op dit moment niet inschrijven')).toHaveCount(0);
     });
 });

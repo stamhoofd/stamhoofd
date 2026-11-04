@@ -194,7 +194,7 @@ const eventsObjectFetcher = useEventsObjectFetcher();
 
 function selectDefaultTab() {
     isEventsTab.value = false;
-    isCheckingEvents.value = eventsEnabled.value && tree.value.categories.length === 0;
+    isCheckingEvents.value = !!selectedOrganization.value && eventsEnabled.value && tree.value.categories.length === 0;
     if (isCheckingEvents.value) {
         checkForEvents().catch(console.error);
     }
