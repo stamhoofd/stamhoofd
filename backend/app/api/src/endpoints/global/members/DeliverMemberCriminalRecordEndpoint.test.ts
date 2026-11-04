@@ -1,4 +1,5 @@
 import { Request } from '@node/endpoints';
+import { CRIMINAL_RECORD_MAX_FILE_SIZE } from '@stamhoofd/criminal-record-check/server/index.js';
 import { blankExtractLines, createTestPdf } from '@stamhoofd/criminal-record-check/testing/index.js';
 import type { RateLimiter } from '@stamhoofd/models';
 import { MemberFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';
@@ -80,13 +81,13 @@ describe('Endpoint.DeliverMemberCriminalRecord', () => {
     }
 
     /**
-     * Builds the multipart request a browser sends: the pdf, plus the consent of the member.
+     * Builds the multipart request a browser sends: the pdf.
      */
-    function buildRequest({ token, organizationHost, memberId, consent = 'true', includeFile = true }: {
+    function buildRequest({ token, organizationHost, memberId, content, includeFile = true }: {
         token: string;
         organizationHost: string;
         memberId: string;
-        consent?: string | null;
+        content?: Uint8Array;
         includeFile?: boolean;
     }) {
         const boundary = '--------------------------StamhoofdTest';
@@ -95,13 +96,9 @@ describe('Endpoint.DeliverMemberCriminalRecord', () => {
         if (includeFile) {
             parts.push(
                 Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="uittreksel.pdf"\r\nContent-Type: application/pdf\r\n\r\n`),
-                Buffer.from(unsignedExtract()),
+                Buffer.from(content ?? unsignedExtract()),
                 Buffer.from('\r\n'),
             );
-        }
-
-        if (consent !== null) {
-            parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="consent"\r\n\r\n${consent}\r\n`));
         }
 
         parts.push(Buffer.from(`--${boundary}--\r\n`));
@@ -154,18 +151,15 @@ describe('Endpoint.DeliverMemberCriminalRecord', () => {
         await expect(fs.access(removedFiles[0])).rejects.toThrow();
     });
 
-    test('It does not check the document without consent', async () => {
+    test('It refuses a file that is too large to verify', async () => {
         const { organization, token, member } = await setup();
 
         await expect(testServer.test(endpoint, buildRequest({
             token: token.accessToken,
             organizationHost: organization.getApiHost(),
             memberId: member.id,
-            consent: 'false',
-        }))).rejects.toThrow(STExpect.simpleError({ code: 'missing_consent' }));
-
-        // The document is removed, also when it was not checked
-        expect(removedFiles).toHaveLength(1);
+            content: new Uint8Array(CRIMINAL_RECORD_MAX_FILE_SIZE + 1),
+        }))).rejects.toThrow(STExpect.simpleError({ code: 'file_too_large' }));
     });
 
     test('It requires a file', async () => {

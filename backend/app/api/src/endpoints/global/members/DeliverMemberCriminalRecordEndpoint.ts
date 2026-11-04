@@ -5,7 +5,7 @@ import { checkCriminalRecordExtract, CRIMINAL_RECORD_MAX_FILE_SIZE } from '@stam
 import { Member, RateLimiter } from '@stamhoofd/models';
 import type { CriminalRecordDeliveryResponse } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import formidable from 'formidable';
+import formidable, { errors as formidableErrors } from 'formidable';
 import { promises as fs } from 'fs';
 import { Context } from '../../../helpers/Context.js';
 
@@ -83,19 +83,9 @@ export class DeliverMemberCriminalRecordEndpoint extends Endpoint<Params, Query,
 
         this.trackLimits(user.id, member.id);
 
-        const { file, consent } = await this.parseForm(request);
+        const file = await this.parseForm(request);
 
         try {
-            if (!consent) {
-                throw new SimpleError({
-                    code: 'missing_consent',
-                    message: 'Consent is required to check an extract from the criminal register',
-                    human: $t('Je moet toestemming geven om het uittreksel te laten controleren.'),
-                    field: 'consent',
-                    statusCode: 400,
-                });
-            }
-
             const data = await fs.readFile(file.filepath);
 
             return new Response(await checkCriminalRecordExtract({
@@ -128,22 +118,20 @@ export class DeliverMemberCriminalRecordEndpoint extends Endpoint<Params, Query,
     }
 
     /**
-     * Read the multipart body: the pdf in `file`, and the consent of the member in `consent`.
-     *
-     * The consent is validated and discarded, never stored: refusing the request without it is the
-     * enforcement, and it is asked again on every delivery.
+     * Read the multipart body: the pdf in `file`.
      */
-    private async parseForm(request: DecodedRequest<Params, Query, Body>): Promise<{ file: formidable.File; consent: boolean }> {
+    private async parseForm(request: DecodedRequest<Params, Query, Body>): Promise<formidable.File> {
         const incoming = request.request.request;
 
         if (!incoming) {
             throw new Error('Not supported without real request');
         }
 
-        const form = formidable({ maxFileSize: CRIMINAL_RECORD_MAX_FILE_SIZE, maxFields: 2, keepExtensions: true });
+        // Only the pdf: a document is checked, nothing else is read from the body
+        const form = formidable({ maxFileSize: CRIMINAL_RECORD_MAX_FILE_SIZE, maxFields: 0, maxFiles: 1, keepExtensions: true });
 
         return await new Promise((resolve, reject) => {
-            form.parse(incoming, (error, fields, files) => {
+            form.parse(incoming, (error, _fields, files) => {
                 if (error) {
                     reject(this.formError(error));
                     return;
@@ -161,13 +149,15 @@ export class DeliverMemberCriminalRecordEndpoint extends Endpoint<Params, Query,
                     return;
                 }
 
-                resolve({ file, consent: fields.consent?.[0] === 'true' });
+                resolve(file);
             });
         });
     }
 
     private formError(error: unknown): unknown {
-        if (typeof error === 'object' && error !== null && 'httpCode' in error && error.httpCode === 413) {
+        const code = typeof error === 'object' && error !== null && 'code' in error ? error.code : null;
+
+        if (code === formidableErrors.biggerThanMaxFileSize || code === formidableErrors.biggerThanTotalMaxFileSize) {
             return new SimpleError({
                 code: 'file_too_large',
                 message: 'The uploaded file is too large',
