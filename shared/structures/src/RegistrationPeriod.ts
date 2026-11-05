@@ -256,7 +256,10 @@ export class OrganizationRegistrationPeriod extends AutoEncoder {
         newOrganizationPeriod.settings.rootCategoryId = categoryMap.get(
             this.settings.rootCategoryId,
         )!;
-        return newOrganizationPeriod;
+        return {
+            newOrganizationPeriod,
+            groupMap,
+        };
     }
 }
 

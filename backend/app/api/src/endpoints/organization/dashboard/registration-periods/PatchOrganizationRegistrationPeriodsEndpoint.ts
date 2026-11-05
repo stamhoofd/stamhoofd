@@ -434,15 +434,18 @@ export class PatchOrganizationRegistrationPeriodsEndpoint extends Endpoint<
             return 0;
         });
 
+        const createdGroups: Group[] = [];
+
         for (const s of sortedGroups) {
             s.settings.registeredMembers = 0;
             s.settings.reservedMembers = 0;
             try {
-                await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
+                const model = await PatchOrganizationRegistrationPeriodsEndpoint.createGroup(
                     s,
                     organization.id,
                     period,
                 );
+                createdGroups.push(model);
             } catch (e) {
                 // Can happen when a group is no longer valid anymore when duplicating a period
                 console.error('Error creating group', s.id, e);
