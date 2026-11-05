@@ -1,5 +1,10 @@
 import { Flags } from '@oclif/core';
 
+export const fixFlag = Flags.boolean({
+    description: 'Automatically fix problems where supported',
+    default: false,
+});
+
 export const verboseFlag = Flags.boolean({
     description: 'Print extra diagnostics while running',
     default: false,

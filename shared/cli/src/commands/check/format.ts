@@ -1,5 +1,5 @@
-import { Flags } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
+import { fixFlag } from '../../command-flags.js';
 import { run, RunVerbosity } from '../../runtime/command-runner.js';
 
 export default class CheckFormat extends BaseCommand {
@@ -11,7 +11,7 @@ export default class CheckFormat extends BaseCommand {
     ];
 
     static flags = {
-        fix: Flags.boolean({ description: 'Format files in place', default: false }),
+        fix: fixFlag,
     };
 
     async run(): Promise<void> {

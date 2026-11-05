@@ -109,8 +109,9 @@ export async function buildAll(context: CliContext): Promise<void> {
     await run('pnpm', ['exec', 'turbo', 'run', 'build', '--env-mode=loose', '--filter=@stamhoofd/backend', '--filter=@stamhoofd/backend-renderer', '--filter=@stamhoofd/backend-statistics-syncer', '--filter=@stamhoofd/web-app', '--filter=@stamhoofd/webshop'], { cwd: context.rootDir, env: { STAMHOOFD_ENV: context.env }, verbosity: context.verbosity ?? RunVerbosity.Output });
 }
 
-export async function lint(context: CliContext, filters: string[] = []): Promise<void> {
-    await run('pnpm', ['run', 'lint', ...filters.map(filter => `--filter=${filter}`)], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
+export async function lint(context: CliContext, filters: string[] = [], fix = false): Promise<void> {
+    // Fixes modify source files, which Turbo's check cache does not restore.
+    await run('pnpm', ['run', 'lint', ...filters.map(filter => `--filter=${filter}`), ...(fix ? ['--cache=local:,remote:', '--', '--fix'] : [])], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
 }
 
 export async function typecheck(context: CliContext, filters: string[] = []): Promise<void> {
