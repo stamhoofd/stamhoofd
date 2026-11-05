@@ -1,11 +1,12 @@
 import type { MemberWithUsersRegistrationsAndGroups } from '@stamhoofd/models';
 import type { SQLOrderByDirection, SQLSortDefinition, SQLSortDefinitions } from '@stamhoofd/sql';
-import { SQL, SQLIfNull, SQLOrderBy } from '@stamhoofd/sql';
+import { SQL, SQLAlias, SQLIfNull, SQLOrderBy, SQLSelectAs } from '@stamhoofd/sql';
 import { Formatter } from '@stamhoofd/utility';
 import { memberCachedBalanceJoinForOrganization } from '../helpers/outstandingBalanceJoin.js';
 import { throwIfNoFinancialReadAccess } from '../sql-filters/members.js';
+import { judicialRecordStatusExpression } from '../helpers/judicialRecordStatus.js';
 
-export const memberSorters = (organizationId: string | null = null): SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> => {
+export const memberSorters = (organizationId: string | null = null, { judicialRecordMinimumAges }: { judicialRecordMinimumAges?: Map<string, number> } = {}): SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> => {
     const sorters: SQLSortDefinitions<MemberWithUsersRegistrationsAndGroups> = new Map<string, SQLSortDefinition<MemberWithUsersRegistrationsAndGroups>>([
         // WARNING! TEST NEW SORTERS THOROUGHLY!
         // Try to avoid creating sorters on fields that er not 1:1 with the database, that often causes pagination issues if not thought through
@@ -92,6 +93,29 @@ export const memberSorters = (organizationId: string | null = null): SQLSortDefi
             },
         }],
     ]);
+
+    if (judicialRecordMinimumAges?.size) {
+        // The status is derived from the member's responsibilities, so it is selected along with the member to keep
+        // getValue (and with it the page filter) identical to what the database ordered on.
+        const expression = judicialRecordStatusExpression(judicialRecordMinimumAges);
+
+        sorters.set('judicialRecordStatus', {
+            getValue(a) {
+                const row = a.rawSelectedRow?.['data'];
+                if (!row || !('judicialRecordStatus' in row)) {
+                    throw new Error('judicialRecordStatus was not selected when selecting this member');
+                }
+                return row['judicialRecordStatus'] as string;
+            },
+            toSQL: (direction: SQLOrderByDirection): SQLOrderBy => {
+                return new SQLOrderBy({
+                    column: expression,
+                    direction,
+                });
+            },
+            select: [new SQLSelectAs(expression, new SQLAlias('data__judicialRecordStatus'))],
+        });
+    }
 
     if (organizationId) {
         sorters.set('memberCachedBalance.amountOpen', {
