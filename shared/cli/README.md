@@ -45,7 +45,9 @@ through the standard test command; it is also included in `stam test unit`.
 #### Command telemetry
 
 `BaseCommand` owns the telemetry scope around oclif's execution lifecycle, including
-command cleanup. It parses once before resolving verbosity and reuses that result
+command cleanup. All main CLI commands extend this base, including release and
+translation commands. Common quiet/verbose flags are inherited. It parses once
+before resolving verbosity and reuses that result
 when the command requests its typed arguments. Help and invalid arguments do not
 start a telemetry SDK. Nested commands reuse the invocation's terminal, SDK and
 cancellation signal. Command code should not call `withCliTelemetry` itself.

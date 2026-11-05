@@ -1,7 +1,8 @@
-import { Command, Flags } from '@oclif/core';
+import { Flags } from '@oclif/core';
+import { BaseCommand } from '../../../base-command.js';
 import { loopAndPromptValidateInvalidTranslations } from 'i18n-uuid/post-validator';
 
-export default class TranslateReview extends Command {
+export default class TranslateReview extends BaseCommand {
     static summary = 'Review machine translations identical to the original';
     static description = 'Optional review, not a stage of auto or a general quality check. Accept (y/Enter) writes the translation to the human-maintained locale file and removes its machine entry. Reject (n) removes the machine entry so it can be translated again. Defer (d) leaves it unchanged. No AI requests are made.';
     static examples = ['stam translate manual review --dry-run', 'stam translate manual review'];

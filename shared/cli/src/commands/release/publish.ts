@@ -1,4 +1,5 @@
-import { Command, Flags } from '@oclif/core';
+import { Flags } from '@oclif/core';
+import { BaseCommand } from '../../base-command.js';
 import { writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -11,7 +12,7 @@ import { buildReleaseNotes, getPreviousVersionTag, getReleaseVersion, getReposit
 import { resolveSlackConfig } from '../../runtime/slack.js';
 import { info, success, warning } from '../../runtime/ux.js';
 
-export default class ReleasePublish extends Command {
+export default class ReleasePublish extends BaseCommand {
     static summary = 'Publish release notes for the current version tag to GitHub';
     static description = 'Generates release notes from the emoji commits since the previous version tag and creates (or updates) the matching GitHub release. When a new release is created it is also announced in the Slack #development channel, with the release notes posted as thread replies. Runs automatically as part of "pnpm ship" after the git tags are pushed.';
     static examples = [

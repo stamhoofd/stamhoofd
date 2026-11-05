@@ -39,6 +39,8 @@ export abstract class BaseCommand extends Command {
         };
     }
 
+    static override baseFlags = BaseCommand.verbosityFlags();
+
     static environmentFlags = {
         env: Flags.string({ description: 'Environment to use, such as stamhoofd or keeo', default: 'stamhoofd' }),
         ...BaseCommand.verbosityFlags(),

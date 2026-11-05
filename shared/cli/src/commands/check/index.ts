@@ -1,7 +1,7 @@
-import { Command } from '@oclif/core';
+import { BaseCommand } from '../../base-command.js';
 import { showHelp } from '../../runtime/show-help.js';
 
-export default class Check extends Command {
+export default class Check extends BaseCommand {
     static summary = 'Run build, lint, typecheck, and tests';
     static description = 'Use these commands to run build, lint, type checks, or the full validation suite locally before opening a PR.';
     static examples = [

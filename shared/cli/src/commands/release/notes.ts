@@ -1,11 +1,12 @@
-import { Command, Flags } from '@oclif/core';
+import { Flags } from '@oclif/core';
+import { BaseCommand } from '../../base-command.js';
 import { getProjectPath } from '../../context/project-path.js';
 import { writeOutputLine } from '../../runtime/output-target.js';
 import { composeReleaseNotesBody } from '../../runtime/release-notes-translator.js';
 import { buildReleaseNotes, getLatestVersionTag, getRepositorySlug, renderReleaseNotes } from '../../runtime/release-notes.js';
 import { info, warning } from '../../runtime/ux.js';
 
-export default class ReleaseNotes extends Command {
+export default class ReleaseNotes extends BaseCommand {
     static summary = 'Preview release notes for the pending (unreleased) changes';
     static description = 'Summarizes every commit that starts with an emoji since the latest version tag, grouped into sections, and appends an AI-generated Dutch translation for end users. Use this to see what a new release would contain without publishing anything.';
     static examples = [

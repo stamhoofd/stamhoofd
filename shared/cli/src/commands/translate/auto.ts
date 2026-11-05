@@ -1,4 +1,5 @@
-import { Command, Flags } from '@oclif/core';
+import { Flags } from '@oclif/core';
+import { BaseCommand } from '../../base-command.js';
 import { translate, validateMachineTranslation } from '../../runtime/translate.js';
 import type { TranslationStage } from '../../runtime/translate.js';
 import { machineArgs, machineFlags } from '../../runtime/translation-flags.js';
@@ -7,7 +8,7 @@ import { getProjectPath } from '../../context/project-path.js';
 import { run, RunVerbosity } from '../../runtime/command-runner.js';
 import { detectVcs, Vcs } from '../../runtime/vcs.js';
 
-export default class TranslateAuto extends Command {
+export default class TranslateAuto extends BaseCommand {
     static summary = 'Prepare translations for release: keys, cleanup, then machine';
     static description = 'Rewrite Dutch translation strings as keys, merge duplicates, remove unused keys, and translate missing or changed strings. Review and commit the generated changes separately before releasing. Source extraction and interactive review are not part of this flow.';
     static examples = ['stam translate auto', 'stam translate auto --locale fr --provider openai', 'stam translate auto --no-machine'];
@@ -39,8 +40,7 @@ export default class TranslateAuto extends Command {
         if (locales) {
             info(`Locales: ${locales.join(', ')}. Provider: ${flags.provider}.`);
             warning(flags.fake ? 'Fake translations will be written; no AI requests will be made.' : 'Machine translation can make paid AI requests.');
-        }
-        else {
+        } else {
             info('Machine translation is disabled. No AI requests will be made.');
         }
         warning('This rewrites source translation keys and translation files. Existing working-copy changes are preserved, but review the resulting diff before committing.');
@@ -57,8 +57,7 @@ export default class TranslateAuto extends Command {
                     stage = next;
                 },
             });
-        }
-        catch (error) {
+        } catch (error) {
             warning(`Stopped during ${stage}. Review any partial changes; the flow does not roll them back. Run stam translate manual ${stage} --help to investigate this step.`);
             throw error;
         }

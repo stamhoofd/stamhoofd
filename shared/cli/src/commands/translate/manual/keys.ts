@@ -1,8 +1,8 @@
-import { Command } from '@oclif/core';
+import { BaseCommand } from '../../../base-command.js';
 import { translateKeys } from '../../../runtime/translate.js';
 import { info } from '../../../runtime/ux.js';
 
-export default class TranslateKeys extends Command {
+export default class TranslateKeys extends BaseCommand {
     static summary = 'Replace translation keys with generated keys';
     static examples = ['stam translate manual keys'];
 

@@ -1,4 +1,4 @@
-import { Command } from '@oclif/core';
+import { BaseCommand } from '../../../base-command.js';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { getProjectPath } from '../../../context/project-path.js';
@@ -7,7 +7,7 @@ import { globals } from 'i18n-uuid/globals';
 import { createAutoTranslateComparison } from 'i18n-uuid/create-comparison';
 import { info, warning } from '../../../runtime/ux.js';
 
-export default class TranslateComparison extends Command {
+export default class TranslateComparison extends BaseCommand {
     static summary = 'Generate legacy translation comparison JSON files';
     static description = 'Build locales and write comparison files under .development/i18n-uuid/output. This makes no AI requests and does not modify source translations. The legacy format repeats the same saved machine translation under every provider label; it does not compare independent provider results.';
 

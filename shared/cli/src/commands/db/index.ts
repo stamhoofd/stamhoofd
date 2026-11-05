@@ -1,7 +1,7 @@
-import { Command } from '@oclif/core';
+import { BaseCommand } from '../../base-command.js';
 import { showHelp } from '../../runtime/show-help.js';
 
-export default class Db extends Command {
+export default class Db extends BaseCommand {
     static summary = 'Inspect, migrate, and manage local databases';
     static description = 'Use these commands to inspect, migrate, copy, move, or remove local databases for the selected environment and instance.';
     static examples = [

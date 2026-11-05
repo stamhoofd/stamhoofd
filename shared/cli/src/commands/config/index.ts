@@ -1,7 +1,7 @@
-import { Command } from '@oclif/core';
+import { BaseCommand } from '../../base-command.js';
 import { showHelp } from '../../runtime/show-help.js';
 
-export default class Config extends Command {
+export default class Config extends BaseCommand {
     static summary = 'Inspect resolved local configuration';
     static description = 'Use these commands to confirm which environment, instance, domains, and settings `stam` resolved before you start running things locally.';
     static examples = [

@@ -1,7 +1,8 @@
-import { Command, Flags } from '@oclif/core';
+import { Flags } from '@oclif/core';
+import { BaseCommand } from '../../../base-command.js';
 import { replaceText } from 'i18n-uuid/replace-text';
 
-export default class TranslateSource extends Command {
+export default class TranslateSource extends BaseCommand {
     static summary = 'Wrap untranslated source text in $t(...)';
     static description = 'Optional source migration, not a stage of auto. This rewrites Vue and TypeScript text as translation calls without generating keys or making AI requests. Review and commit the Dutch strings with your source changes.';
     static examples = ['stam translate manual source --changes --dry-run', 'stam translate manual source --changes --prompt --fix'];
