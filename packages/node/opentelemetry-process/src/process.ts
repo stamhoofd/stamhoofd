@@ -28,6 +28,8 @@ export type ProcessOptions = {
     /** Raw stdout is returned to the caller; only sanitized diagnostics are emitted. */
     capture?: boolean;
     output?: 'verbose' | 'always';
+    /** Plain output omits renderer gutters while retaining coordinated, redacted diagnostics. */
+    outputStyle?: 'plain' | 'decorated';
     /** Interactive passthrough; output bypasses diagnostics, capture and redaction. */
     inheritStdio?: boolean;
     redact?: string[];
@@ -107,8 +109,8 @@ export function formatCommandLine(command: string, args: string[], redact: strin
 }
 
 export const runProcess = instrumentFunction('process.run', async function (command: string, args: string[], options: ProcessOptions = {}): Promise<ProcessResult> {
-    const emit: LogSink = (...event) => {
-        try { return (options.log ?? log)(...event); } catch { return false; }
+    const emit: LogSink = (level, message, fields) => {
+        try { return (options.log ?? log)(level, message, { ...fields, 'diagnostic.output.style': options.outputStyle }); } catch { return false; }
     };
     const secrets = redactionValues(options.redact);
     const clean = (value: string) => sanitize(value, secrets);

@@ -182,8 +182,9 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
                 npm_config_color: process.env.npm_config_color ?? 'always',
                 npm_config_script_shell: process.env.npm_config_script_shell ?? '/bin/bash',
             },
-            label: 'Running development applications',
+            label: false,
             output: 'always',
+            outputStyle: 'plain',
             processGroup: true,
             // This is a continuous log stream, not bounded diagnostic capture.
             maxDiagnosticChars: Number.MAX_SAFE_INTEGER,

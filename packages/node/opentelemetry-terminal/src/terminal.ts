@@ -105,7 +105,7 @@ export class TerminalRenderer implements SpanProcessor {
             for (const [index, line] of lines.entries()) {
                 const newline = index < lines.length - 1;
                 if (!line && !newline) continue;
-                if (!this.outputLine) {
+                if (!this.outputLine && fields['diagnostic.output.style'] !== 'plain') {
                     const marker = kind === 'stderr' ? this.colors.yellow('│ stderr: ') : this.colors.dim('│ ');
                     this.output.write(`${indent}${marker}`);
                 }

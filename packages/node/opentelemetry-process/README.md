@@ -17,6 +17,8 @@ as a deployment plan. Events carry `diagnostic.kind` (`command`, `stdout`, or
 `stderr`) and are routed through the common library's scoped sink. An explicit
 `log` callback supports applications without a scoped sink. Output is not exported
 as span attributes or events.
+Use `outputStyle: 'plain'` for continuous logs without renderer gutters or
+indentation. Redaction, verbosity filtering and terminal coordination still apply.
 
 `capture: true` returns raw stdout for the caller to parse. Stderr is redacted and
 bounded to its last 8192 characters, with explicit empty/truncated markers.
