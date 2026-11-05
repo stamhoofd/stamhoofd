@@ -99,6 +99,17 @@ launchers remain best-effort and are deliberately not tied to the command lifeti
 
 #### Development logs and status
 
+Development lifecycle transport lives in `dev/events.mjs` (with its public types
+beside it). It has no build-time dependencies, so docs and shared-build scripts can
+load it before shared packages exist. `openDevEventChannel` owns a private temporary
+Unix socket per session. Emitters use `STAM_DEV_SOCKET`, `STAM_DEV_SESSION` and
+`STAM_DEV_TRACEPARENT`; supervised children can share `STAM_DEV_PROCESS_ID` and
+`STAM_DEV_GENERATION`. These are runtime metadata, never build inputs.
+Events are versioned NDJSON with app, process identity, monotonic generation and
+sequence; build events also carry a cycle ID. Frames and emitter queues are bounded.
+An unavailable receiver never prevents an app from running. Ordinary logs continue
+on stdout/stderr. Call emitter `close()` to drain final events before exiting.
+
 `stam dev all` keeps application logs above one compact footer:
 
 ```text
