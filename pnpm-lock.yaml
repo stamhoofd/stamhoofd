@@ -2871,8 +2871,8 @@ importers:
         specifier: 3.3.1
         version: 3.3.1(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))
       eslint-plugin-secure-coding:
-        specifier: 5.4.17
-        version: 5.4.17(@typescript-eslint/utils@8.72.0(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(typescript@6.0.3)
+        specifier: 5.5.0
+        version: 5.5.0(@typescript-eslint/utils@8.72.0(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(typescript@6.0.3)
       eslint-plugin-security:
         specifier: 4.2.0
         version: 4.2.0
@@ -4487,6 +4487,24 @@ packages:
       typescript: '>=4.8.4'
     peerDependenciesMeta:
       '@typescript-eslint/utils':
+        optional: true
+      oxc-resolver:
+        optional: true
+      typescript:
+        optional: true
+
+  '@interlace/eslint-devkit@1.21.0':
+    resolution: {integrity: sha512-tCCzkKICVRStv2L/EesHRlAgZ46dBk2QWQfIiPO6pdQNXKGpg8fR85lNfEB/YOLIwsbjC+6rzxd99Np6TG8+fA==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      '@typescript-eslint/utils': ^7.0.0 || ^8.0.0
+      eslint: ^8.40.0 || ^9.0.0 || ^10.0.0
+      oxc-resolver: ^11.24.2
+      typescript: '>=4.8.4'
+    peerDependenciesMeta:
+      '@typescript-eslint/utils':
+        optional: true
+      eslint:
         optional: true
       oxc-resolver:
         optional: true
@@ -9952,13 +9970,15 @@ packages:
     peerDependencies:
       eslint: '>=9.38.0'
 
-  eslint-plugin-secure-coding@5.4.17:
-    resolution: {integrity: sha512-4LRXJJU0quvpkOuxB/5IxF1d5DbvYYJt8sOoI+tR1nZ0sKhRh6Xdo0BgxZNxyimZQS9ieuTCviTd9HZeMoKjJg==}
+  eslint-plugin-secure-coding@5.5.0:
+    resolution: {integrity: sha512-dUXMVm9rpXrg2BTqnnKj+2aVlu01shOj7Q6QySQCw+ZWyewrm7/ECismQjbWcwswNDYjC0LIWm61q1nnUiU1DQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       eslint: ^8.40.0 || ^9.0.0 || ^10.0.0
       recheck: ^4.5.0
     peerDependenciesMeta:
+      eslint:
+        optional: true
       recheck:
         optional: true
 
@@ -16884,6 +16904,12 @@ snapshots:
       '@typescript-eslint/utils': 8.72.0(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
       typescript: 6.0.3
 
+  '@interlace/eslint-devkit@1.21.0(@typescript-eslint/utils@8.72.0(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(typescript@6.0.3)':
+    optionalDependencies:
+      '@typescript-eslint/utils': 8.72.0(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3)
+      eslint: 10.13.0(jiti@2.7.0)(supports-color@10.2.2)
+      typescript: 6.0.3
+
   '@internationalized/date@3.12.4':
     dependencies:
       '@swc/helpers': 0.5.23
@@ -23097,13 +23123,14 @@ snapshots:
       regexp-ast-analysis: 0.7.1
       scslre: 0.3.0
 
-  eslint-plugin-secure-coding@5.4.17(@typescript-eslint/utils@8.72.0(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(typescript@6.0.3):
+  eslint-plugin-secure-coding@5.5.0(@typescript-eslint/utils@8.72.0(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(typescript@6.0.3):
     dependencies:
       '@eslint-community/regexpp': 4.12.2
-      '@interlace/eslint-devkit': 1.20.3(@typescript-eslint/utils@8.72.0(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(typescript@6.0.3)
-      eslint: 10.13.0(jiti@2.7.0)(supports-color@10.2.2)
+      '@interlace/eslint-devkit': 1.21.0(@typescript-eslint/utils@8.72.0(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@6.0.3))(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(typescript@6.0.3)
       refa: 0.12.1
       scslre: 0.3.0
+    optionalDependencies:
+      eslint: 10.13.0(jiti@2.7.0)(supports-color@10.2.2)
     transitivePeerDependencies:
       - '@typescript-eslint/utils'
       - oxc-resolver
