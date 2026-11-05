@@ -18,6 +18,10 @@ import type { PropertyFilter } from '../filters/PropertyFilter.js';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { getActivePeriodIds } from '../getActivePeriods.js';
 import { MemberPlatformMembershipHelper } from '../helpers/MemberPlatformMembershipHelper.js';
+import type { JudicialRecordRequirement } from '../helpers/JudicialRecordHelper.js';
+import { JudicialRecordHelper } from '../helpers/JudicialRecordHelper.js';
+import type { MemberResponsibility } from '../MemberResponsibility.js';
+import type { MemberResponsibilityRecordBase } from './MemberResponsibilityRecord.js';
 import type { EmergencyContact } from './EmergencyContact.js';
 import { Member } from './Member.js';
 import type { MemberProperty } from './MemberDetails.js';
@@ -767,6 +771,38 @@ export class PlatformMember implements ObjectWithRecords {
 
     get shouldApplyReducedPrice() {
         return this.patchedMember.details.shouldApplyReducedPrice;
+    }
+
+    /**
+     * The responsibility a responsibility record points to. Organizations can define their own responsibilities next to
+     * the platform ones, so the record's organization is checked too.
+     */
+    getResponsibility(record: MemberResponsibilityRecordBase): MemberResponsibility | null {
+        const platformResponsibility = this.platform.config.responsibilities.find(r => r.id === record.responsibilityId);
+        if (platformResponsibility) {
+            return platformResponsibility;
+        }
+
+        if (record.organizationId) {
+            const organization = this.family.getOrganization(record.organizationId);
+            return organization?.privateMeta?.responsibilities.find(r => r.id === record.responsibilityId) ?? null;
+        }
+
+        return null;
+    }
+
+    /**
+     * Virtual: whether this member has to have their judicial record extract checked today, with the reason behind it.
+     */
+    get judicialRecord(): JudicialRecordRequirement {
+        return JudicialRecordHelper.getRequirement({
+            birthDay: this.patchedMember.details.birthDay,
+            responsibilities: this.patchedMember.responsibilities.map(record => ({
+                startDate: record.startDate,
+                endDate: record.endDate,
+                minimumAge: this.getResponsibility(record)?.judicialRecordMinimumAge ?? null,
+            })),
+        });
     }
 
     getContinuousMembershipStatus({ start, end }: { start: Date; end: Date }): ContinuousMembershipStatus {
