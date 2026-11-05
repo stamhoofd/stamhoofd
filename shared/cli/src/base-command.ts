@@ -1,4 +1,5 @@
-import { Command, Flags, type Parser } from '@oclif/core';
+import { Command, Flags } from '@oclif/core';
+import type { Parser } from '@oclif/core';
 import { createContext } from './context/create-context.js';
 import type { CliContext } from './context/create-context.js';
 import { RunVerbosity } from './runtime/command-runner.js';
@@ -43,7 +44,7 @@ export abstract class BaseCommand extends Command {
         return { ...context, verbosity: this.resolveRunVerbosity(flags, verbosity, raw) };
     }
 
-    private resolveRunVerbosity(flags: { quiet?: boolean; verbose?: boolean }, verbosity: RunVerbosity, raw: { type: string; flag?: string }[]): RunVerbosity {
+    protected resolveRunVerbosity(flags: { quiet?: boolean; verbose?: boolean }, verbosity: RunVerbosity, raw: { type: string; flag?: string }[]): RunVerbosity {
         if (flags.quiet) {
             return Math.max(RunVerbosity.Quiet, verbosity - 1) as RunVerbosity;
         }

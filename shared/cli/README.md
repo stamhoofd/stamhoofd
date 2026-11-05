@@ -42,6 +42,28 @@ through the standard test command; it is also included in `stam test unit`.
 
 ### Commands
 
+#### Infrastructure telemetry trial
+
+`stam devops infra sync` and `stam devops infra setup` show labelled OpenTelemetry
+operations and timings by default, grouped by environment and vault. Interactive
+stderr gets live progress; redirected output gets plain start/completion lines.
+`--verbose` adds command invocations and subprocess output. Credential JSON is
+shown with values redacted. `--quiet` suppresses normal progress and diagnostics.
+Setup shows the operator plan before asking for approval in normal mode.
+Trace/span IDs remain in telemetry. Failures include command, exit code and
+redacted stderr; empty or truncated stderr is marked.
+
+The CLI only wires the SDK, verbosity and grouping. Reusable rendering and process
+instrumentation live in `@node/opentelemetry-terminal` and
+`@node/opentelemetry-process`. The optional DevOps bootstrap depends on their
+builds through the CLI and its explicit process-library task dependency.
+
+The command creates an OpenTelemetry trace and awaits exporter shutdown on success
+and failure. Remote export is opt-in: set `OTEL_EXPORTER_OTLP_ENDPOINT` or
+`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` for OTLP/HTTP JSON, and optionally
+`OTEL_EXPORTER_OTLP_HEADERS`. Without an endpoint, traces remain local and operation
+diagnostics still work. Other commands retain their existing logging.
+
 | Area        | Command                                | Purpose                                                                    |
 | ----------- | -------------------------------------- | -------------------------------------------------------------------------- |
 | Build       | `pnpm stam build`                      | Build shared packages and all app packages for the selected environment.   |
@@ -458,6 +480,14 @@ pnpm stam check all
 ## For CLI Maintainers
 
 The sections below are for contributors working on `shared/cli` itself rather than only using the CLI.
+
+### CLI Design Guidelines
+
+Follow the [Command Line Interface Guidelines](https://clig.dev/) when designing
+commands, flags, progress output, errors, and interactive behavior. Prefer readable,
+actionable diagnostics; respect verbosity and non-interactive environments; keep
+machine-readable output separate from progress; and avoid reporting failures twice.
+Use the shared output helpers so live progress and subprocess output coexist.
 
 ### Architecture Overview
 

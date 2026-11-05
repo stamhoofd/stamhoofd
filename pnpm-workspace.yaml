@@ -7,11 +7,14 @@ packages:
   - 'shared/*'
   # Register imported libraries individually until they are integrated.
   - 'packages/common/errors'
+  - 'packages/common/opentelemetry-decorators'
   - 'packages/common/encoding'
   - 'packages/common/networking'
   - 'packages/node/endpoints'
   - 'packages/node/database'
   - 'packages/node/logging'
+  - 'packages/node/opentelemetry-terminal'
+  - 'packages/node/opentelemetry-process'
   - 'packages/browser/navigation'
   - 'tests/*'
   - '.development/*'
@@ -85,6 +88,7 @@ minimumReleaseAgeExclude:
   - joi@18.3.1
 strictDepBuilds: true
 allowBuilds:
+  protobufjs@7.6.6: false
   '@parcel/watcher@2.6.0': true
   argon2@0.45.1: true
   better-sqlite3@12.11.1: true

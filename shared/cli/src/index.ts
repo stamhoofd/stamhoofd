@@ -1,4 +1,6 @@
 export { run } from '@oclif/core';
+export { BaseCommand } from './base-command.js';
+export { withCliTelemetry } from './runtime/telemetry.js';
 export { buildDevelopmentEnvironment } from './config/development-config.js';
 export { createS3Client, type S3ClientEnvironment } from './config/s3-client.js';
 export { caddyAdminPort, localIpv4Host } from './config/shared-service-config.js';

@@ -57,6 +57,12 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 
 ## Common patterns
 
+[OpenTelemetry decorators](../packages/common/opentelemetry-decorators/README.md)
+
+[OpenTelemetry terminal renderer](../packages/node/opentelemetry-terminal/README.md)
+
+[OpenTelemetry subprocesses](../packages/node/opentelemetry-process/README.md)
+
 ---
 
 These are guides on how we generally do certain things in the Stamhoofd code base.
