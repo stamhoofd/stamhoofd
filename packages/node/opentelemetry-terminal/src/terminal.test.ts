@@ -7,6 +7,42 @@ import { TerminalRenderer } from './terminal.js';
 
 afterEach(() => vi.unstubAllEnvs());
 
+it.each([true, false])('dims command labels throughout their lifetime (TTY: %s)', async (isTTY) => {
+    vi.stubEnv('NO_COLOR', undefined);
+    const stream = new PassThrough();
+    Object.assign(stream, { isTTY });
+    let output = '';
+    stream.on('data', (chunk: Buffer) => { output += chunk.toString(); });
+    const renderer = new TerminalRenderer({ stream: stream as unknown as NodeJS.WriteStream, color: true });
+    const span = { attributes: { 'operation.label': 'git remote get-url origin', 'operation.label.kind': 'command' }, spanContext: () => ({ spanId: 'command' }), duration: [0, 0], status: { code: 0 } };
+    try {
+        renderer.onStart(span as never);
+        expect(output).toContain('\x1b[2mgit remote get-url origin\x1b[22m');
+        output = '';
+        renderer.onEnd(span as never);
+        expect(output).toContain('\x1b[32m✓\x1b[39m \x1b[2mgit remote get-url origin\x1b[22m');
+        expect(output).toContain('\x1b[2m— 0.0s\x1b[22m');
+        output = '';
+        span.attributes = { 'operation.label': 'Planning infrastructure', 'operation.label.kind': 'description' };
+        renderer.onStart(span as never);
+        renderer.onEnd(span as never);
+        expect(output).toContain('Planning infrastructure');
+        expect(output).not.toContain('\x1b[2mPlanning infrastructure');
+    } finally { await renderer.shutdown(); }
+});
+
+it('suppresses command progress in quiet mode', async () => {
+    const stream = new PassThrough();
+    let output = '';
+    stream.on('data', (chunk: Buffer) => { output += chunk.toString(); });
+    const renderer = new TerminalRenderer({ stream: stream as unknown as NodeJS.WriteStream, verbosity: 'quiet' });
+    const span = { attributes: { 'operation.label': 'git status', 'operation.label.kind': 'command' }, spanContext: () => ({ spanId: 'command' }), duration: [0, 0], status: { code: 0 } };
+    renderer.onStart(span as never);
+    renderer.onEnd(span as never);
+    await renderer.shutdown();
+    expect(output).toBe('');
+});
+
 it('updates the active live operation when progress is reported', async () => {
     const stream = new PassThrough();
     Object.assign(stream, { isTTY: true });
@@ -75,6 +111,9 @@ it.each([undefined, false, true])('honors NO_COLOR with color override %s', asyn
     const renderer = new TerminalRenderer({ stream: stream as unknown as NodeJS.WriteStream, verbosity: 'verbose', color, groupBy: ['environment'] });
     renderer.log('debug', 'op item list', { 'diagnostic.kind': 'command', 'environment': 'staging' });
     renderer.log('error', 'Failed', {});
+    const span = { attributes: { 'operation.label': 'git status', 'operation.label.kind': 'command' }, spanContext: () => ({ spanId: 'command' }), duration: [0, 0], status: { code: 0 } };
+    renderer.onStart(span as never);
+    renderer.onEnd(span as never);
     await renderer.shutdown();
     expect(output).toContain('staging');
     expect(output).toContain('Error: Failed');

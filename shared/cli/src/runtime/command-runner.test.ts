@@ -8,7 +8,7 @@ afterEach(() => { vi.clearAllMocks(); vi.unstubAllEnvs(); });
 it('preserves ambient environment and allows explicit overrides', async () => {
     vi.stubEnv('STAM_TEST_AMBIENT', 'ambient');
     await run('example', [], { env: { CUSTOM: 'override' } });
-    expect(execResult).toHaveBeenCalledWith('example', [], expect.objectContaining({ env: expect.objectContaining({ STAM_TEST_AMBIENT: 'ambient', CUSTOM: 'override' }), label: 'Running example' }));
+    expect(execResult).toHaveBeenCalledWith('example', [], expect.objectContaining({ env: expect.objectContaining({ STAM_TEST_AMBIENT: 'ambient', CUSTOM: 'override' }), label: undefined }));
 });
 
 it('preserves captured result shape and empty stderr', async () => {
@@ -20,7 +20,7 @@ it('suppresses explicit quiet probes and keeps failed stderr in the error', asyn
     vi.mocked(execResult).mockResolvedValueOnce({ code: 2, stdout: '', stderr: 'useful failure', signal: null });
     await expect(run('example', [], { verbosity: RunVerbosity.Quiet })).rejects.toThrow('useful failure');
     const options = vi.mocked(execResult).mock.calls[0][2]!;
-    expect(options.label).toBeUndefined();
+    expect(options.label).toBe(false);
     expect(options.log?.('error', 'hidden', {})).toBe(false);
 });
 
