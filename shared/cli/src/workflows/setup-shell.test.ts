@@ -18,6 +18,33 @@ const execFileAsync = promisify(execFile);
 const script = fileURLToPath(new URL('../../bin/stam', import.meta.url));
 const legacySnippet = '# >>> stam cli >>>\nstam() { echo old; }\n# <<< stam cli <<<\n';
 
+describe('shortcut freshness', () => {
+    afterEach(() => vi.restoreAllMocks());
+
+    it.each([true, false])('compares installed contents against this checkout (current: %s)', async (current) => {
+        vi.spyOn(fs, 'access').mockResolvedValue(undefined);
+        const read = vi.spyOn(fs, 'readFile')
+            .mockResolvedValueOnce(Buffer.from(current ? 'current launcher' : 'old launcher'))
+            .mockResolvedValueOnce(Buffer.from('current launcher'));
+        expect(await checkShellShortcut()).toEqual({
+            ok: current,
+            details: current ? 'stam installed in /usr/local/bin' : '/usr/local/bin/stam is out of date',
+        });
+        expect(read).toHaveBeenNthCalledWith(1, '/usr/local/bin/stam');
+        expect(read).toHaveBeenNthCalledWith(2, script);
+    });
+
+    it.each([
+        ['ENOENT', 'stam not installed in /usr/local/bin'],
+        ['EACCES', '/usr/local/bin/stam is not executable'],
+    ])('preserves the %s installation check', async (code, details) => {
+        vi.spyOn(fs, 'access').mockRejectedValue(Object.assign(new Error(code), { code }));
+        const read = vi.spyOn(fs, 'readFile');
+        expect(await checkShellShortcut()).toEqual({ ok: false, details });
+        expect(read).not.toHaveBeenCalled();
+    });
+});
+
 describe.skip('setup-shell', () => {
     let tmpDir: string;
 
