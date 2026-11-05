@@ -7,6 +7,20 @@ import { TerminalRenderer } from './terminal.js';
 
 afterEach(() => vi.unstubAllEnvs());
 
+it('keeps plain split output free of gutters and separates stream changes', async () => {
+    const stream = new PassThrough();
+    let output = '';
+    stream.on('data', (chunk: Buffer) => { output += chunk.toString(); });
+    const renderer = new TerminalRenderer({ stream: stream as unknown as NodeJS.WriteStream, color: false });
+    const fields = { 'diagnostic.output.style': 'plain', 'diagnostic.kind': 'stdout' };
+    expect(renderer.log('info', '@backend: first ', fields)).toBe(true);
+    renderer.log('info', 'line\nsecond', fields);
+    renderer.log('info', 'error\n', { ...fields, 'diagnostic.kind': 'stderr' });
+    renderer.log('info', 'ordinary\n', { 'diagnostic.kind': 'stdout' });
+    await renderer.shutdown();
+    expect(output).toBe('@backend: first line\nsecond\nerror\n  │ ordinary\n');
+});
+
 it.each([true, false])('dims command labels throughout their lifetime (TTY: %s)', async (isTTY) => {
     vi.stubEnv('NO_COLOR', undefined);
     const stream = new PassThrough();

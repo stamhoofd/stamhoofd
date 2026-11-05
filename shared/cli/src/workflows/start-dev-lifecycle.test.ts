@@ -25,7 +25,7 @@ beforeEach(() => vi.clearAllMocks());
 it('treats cancellation as a normal session stop and removes its manifest before reloading routes', async () => {
     vi.mocked(execResult).mockResolvedValueOnce({ code: 130, reason: 'aborted', stdout: '', stderr: '', signal: 'SIGTERM' });
     await runDev(context, DevTarget.Docs, { services: true, stripe: false });
-    expect(execResult).toHaveBeenCalledWith('pnpm', expect.any(Array), expect.objectContaining({ processGroup: true, maxDiagnosticChars: Number.MAX_SAFE_INTEGER }));
+    expect(execResult).toHaveBeenCalledWith('pnpm', expect.any(Array), expect.objectContaining({ label: false, output: 'always', outputStyle: 'plain', processGroup: true, maxDiagnosticChars: Number.MAX_SAFE_INTEGER }));
     expect(removeInstanceManifest).toHaveBeenCalledOnce();
     expect(vi.mocked(removeInstanceManifest).mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(CaddyService.reload).mock.invocationCallOrder[1]);
     expect(stopServices).not.toHaveBeenCalled();

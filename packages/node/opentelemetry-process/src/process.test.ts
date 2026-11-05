@@ -1,6 +1,17 @@
 import { expect, it } from 'vitest';
 import { runProcess } from './process.js';
 
+it('preserves redaction and diagnostic metadata for plain output', async () => {
+    const records: { message: string; fields: Record<string, unknown> }[] = [];
+    await runProcess(process.execPath, ['-e', "process.stdout.write('secret output')"], {
+        output: 'always', outputStyle: 'plain', redact: ['secret'],
+        log: (_level, message, fields) => { records.push({ message, fields }); return true; },
+    });
+    const output = records.filter(record => record.fields['diagnostic.kind'] === 'stdout');
+    expect(output.map(record => record.message).join('')).toBe('[redacted] output');
+    expect(output.every(record => record.fields['diagnostic.output.style'] === 'plain')).toBe(true);
+});
+
 it('returns captured output but redacts split credentials in diagnostics and failure stderr', async () => {
     const messages: string[] = [];
     const result = await runProcess(process.execPath, ['-e', `
