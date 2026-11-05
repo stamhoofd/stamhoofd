@@ -24,7 +24,8 @@ describe('the chain the revocation lookup runs over', () => {
         });
 
         // The signature itself still validates: the decoy signed nothing, so no path runs through it.
-        const links = toCertificateChain(await verifyPdfSignature(bytes, chain.policy, NO_AGE_LIMIT));
+        const { certificatePath } = await verifyPdfSignature(bytes, chain.policy, NO_AGE_LIMIT);
+        const links = toCertificateChain(certificatePath);
 
         expect(links).toHaveLength(2);
         expect(links[0].issuer.subjectPublicKeyInfo.subjectPublicKey.isEqual(chain.intermediate.certificate.subjectPublicKeyInfo.subjectPublicKey)).toBe(true);

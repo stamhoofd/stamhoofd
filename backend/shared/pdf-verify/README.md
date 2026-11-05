@@ -8,8 +8,12 @@ also runs in the browser, and adds the step that cannot live there — the revoc
 import { verifyPdfFromFodJustitie } from '@stamhoofd/pdf-verify';
 
 // Resolves when the signature is valid and nothing in its chain is revoked, throws a SimpleError otherwise.
-await verifyPdfFromFodJustitie(bytes, 31);
+const signedAt = await verifyPdfFromFodJustitie(bytes, 31);
 ```
+
+`signedAt` is the moment the signature says it was made. It is one of the signed attributes, so it
+comes out of the signature rather than off the document, which is what makes it the date worth
+storing next to an accepted file.
 
 For another signer, `verifyPdf(bytes, policy, maximumAgeInDays)` takes a `PdfSignaturePolicy` of the
 core package: the signer to accept, its pinned trust anchor and intermediates, and a file size cap.
