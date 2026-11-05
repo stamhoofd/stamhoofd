@@ -2,11 +2,12 @@ import dns from 'node:dns/promises';
 import fs from 'node:fs/promises';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { run, RunVerbosity } from '../runtime/command-runner.js';
+import { exec } from '../runtime/process.js';
 import { confirm } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
 import type { CheckResult, SetupReport } from './setup-machine.js';
-import { checkSetup, checkSetupWithTable, getRecommendedSetupFixes, isSetupReady, printSetupReport, runSetup, SetupAutomaticFixKey, setupCaddy, setupDns } from './setup-machine.js';
+import { checkSetup, checkSetupWithTable, getRecommendedSetupFixes, isSetupReady, printSetupReport, runSetup, SetupAutomaticFixKey, setupCaddy, setupDns, setupPrivilegedPortRedirects } from './setup-machine.js';
 import { checkNodeVersion, setupNodeVersion } from './setup-node.js';
 import { checkPackageManager, setupPackageManager } from './setup-package-manager.js';
 import { runServices } from './start-services.js';
@@ -18,6 +19,8 @@ const dnsResolver = vi.hoisted(() => ({
     resolve4: vi.fn(),
     setServers: vi.fn(),
 }));
+
+vi.mock('../runtime/process.js', () => ({ exec: vi.fn(async () => ({ code: 0, stdout: '', stderr: '', signal: null })) }));
 
 vi.mock('node:dns/promises', () => ({
     default: {
@@ -66,6 +69,20 @@ vi.mock('../runtime/devops-plugin.js', () => ({ getOptionalDevopsSetupChecks: vi
 
 describe('setup machine workflow', () => {
     const platform = process.platform;
+
+    it('gives password-capable sudo repairs exclusive native terminal access', async () => {
+        setPlatform('linux');
+        mockSetupCommands({});
+        vi.spyOn(fs, 'writeFile').mockResolvedValue(undefined);
+        vi.spyOn(fs, 'rm').mockResolvedValue(undefined);
+        await setupDns({ yes: true, dryRun: false });
+        expect(exec).toHaveBeenCalledWith('sudo', ['systemctl', 'restart', 'systemd-resolved'], { inheritStdio: true });
+        vi.mocked(run).mockResolvedValue({ status: 1, stdout: '', stderr: '' } as never);
+        await setupPrivilegedPortRedirects({ yes: true, dryRun: false });
+        expect(exec).toHaveBeenCalledWith('sudo', expect.arrayContaining(['iptables', '-A']), { inheritStdio: true });
+        expect(vi.mocked(exec).mock.calls).toHaveLength(7);
+        for (const [, , options] of vi.mocked(exec).mock.calls) expect(options).toEqual({ inheritStdio: true });
+    });
 
     beforeEach(() => {
         vi.clearAllMocks();
