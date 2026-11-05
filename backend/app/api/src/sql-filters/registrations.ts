@@ -12,12 +12,18 @@ export const groupJoin = SQL.join(Group.table).where(SQL.column(Group.table, 'id
 
 export const organizationJoin = SQL.join(Organization.table).where(SQL.column(Organization.table, 'id'), SQL.column(Registration.table, 'organizationId'));
 
-export const registrationFilterCompilers: SQLFilterDefinitions = new Map([
+/**
+ * Defines how to filter registrations in the database from StamhoofdFilter objects
+ *
+ * `judicialRecordMinimumAges` is only needed to support the `member.judicialRecordStatus` key, the same way
+ * `memberFilterCompilers` needs them. The registrations list resolves them.
+ */
+export const registrationFilterCompilers = ({ judicialRecordMinimumAges }: { judicialRecordMinimumAges?: Map<string, number> } = {}): SQLFilterDefinitions => new Map([
     ...baseSQLFilterCompilers,
     ...baseRegistrationFilterCompilers,
     ['member', createJoinedRelationFilter(
         memberJoin,
-        memberFilterCompilers(),
+        memberFilterCompilers(null, { judicialRecordMinimumAges }),
     )],
     ['group', createJoinedRelationFilter(
         groupJoin,
