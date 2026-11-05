@@ -50,7 +50,7 @@
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/ticket-builder": "workspace:*",
         "@stamhoofd/utility": "workspace:*",
-        "@plausible-analytics/tracker": "0.4.6",
+        "@plausible-analytics/tracker": "0.4.7",
         "vue": "3.5.44",
         "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
     },
