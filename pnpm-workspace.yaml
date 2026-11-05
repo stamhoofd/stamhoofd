@@ -146,6 +146,7 @@ overrides:
   'eslint>minimatch': '11.0.1'
   'ignore-walk>minimatch': '11.0.1'
   'nodemon>minimatch': '11.0.1'
+  'nx>minimatch': '11.0.1'
   '@npmcli/map-workspaces>glob': '14.0.2'
   '@npmcli/package-json>glob': '14.0.2'
   '@vercel/nft>glob': '14.0.2'
