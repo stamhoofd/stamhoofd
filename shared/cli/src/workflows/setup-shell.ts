@@ -9,6 +9,14 @@ import { command, info, success } from '../runtime/ux.js';
 export async function checkShellShortcut(): Promise<{ ok: boolean; details: string }> {
     try {
         await fs.access('/usr/local/bin/stam', constants.X_OK);
+        const source = fileURLToPath(new URL('../../bin/stam', import.meta.url));
+        const [installed, current] = await Promise.all([
+            fs.readFile('/usr/local/bin/stam'),
+            fs.readFile(source),
+        ]);
+        if (!installed.equals(current)) {
+            return { ok: false, details: '/usr/local/bin/stam is out of date' };
+        }
         return { ok: true, details: 'stam installed in /usr/local/bin' };
     } catch (error) {
         if ((error as NodeJS.ErrnoException).code === 'ENOENT') {

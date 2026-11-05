@@ -21,7 +21,10 @@ before returning to the shell. Reinstall older copied shortcuts with
 
 Run `pnpm stam setup shortcut` to install `shared/cli/bin/stam` as `/usr/local/bin/stam` using sudo. This removes the need to type `pnpm` or run commands in the project root. Setup also removes the legacy `stam` function blocks from `.zshrc` and `.bashrc`; restart your terminal or run `unset -f stam` if the old function is still loaded. Afterwards, `stam setup` performs the normal setup checks.
 
-Setup lists the binary shortcut under **Optional**, with its installation command when missing. Optional checks do not block development readiness or appear in recommended fixes.
+Setup lists the binary shortcut under **Optional**, with its installation command
+when missing, non-executable, or different from this checkout's current shortcut.
+Run `stam setup shortcut` to replace an outdated copy. Optional checks do not block
+development readiness or appear in recommended fixes.
 
 When the private DevOps checkout is present, a **DevOps** section follows Optional.
 It checks OpenTofu, Scaleway CLI, 1Password CLI and TFLint and shows installation
