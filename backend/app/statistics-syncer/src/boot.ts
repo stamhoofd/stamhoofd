@@ -37,8 +37,8 @@ function loadGlobalTranslateFunction() {
 
 export const boot = async (options: { killProcess: boolean; lifecycle?: ApplicationLifecycle }) => {
     const lifecycle = options.lifecycle ?? new ApplicationLifecycle('stats');
-    console.log('Started Statistics.');
     loadLogger();
+    console.debug('Started Statistics.');
 
     loadGlobalTranslateFunction();
 

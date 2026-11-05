@@ -44,7 +44,7 @@ async function chargeServiceFees() {
 
     const allPayments = [...payments, ...pendingPayments];
 
-    console.log('Found ' + allPayments.length + ' payments to charge service fees for');
+    console.debug('Found ' + allPayments.length + ' payments to charge service fees for');
 
     const mappedToOrganizationId = new Map<string, Payment[]>();
     for (const payment of allPayments) {

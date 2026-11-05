@@ -10,7 +10,7 @@ export function useSavedIterator<T extends object = SQLResultNamespacedRow>(star
             savedIterator = null;
             lastFullRun = new Date();
 
-            console.log('Done full loop');
+            console.debug('Done full loop');
         }
     }
 

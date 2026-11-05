@@ -37,6 +37,6 @@ async function updateOrganizationFutureEvents() {
 
     lastRunDate = new Date().getDate();
 
-    console.log('Updating hasFutureEvents for all organizations...');
+    console.debug('Updating hasFutureEvents for all organizations...');
     await Organization.updateFutureEventsForOrganizations('all');
 }

@@ -25,7 +25,7 @@ export async function deleteExpiredImpersonationTokens() {
     }
 
     const tokens = await ImpersonationToken.deleteExpired();
-    console.log(`Deleted ${tokens} expired impersonation tokens.`);
+    console.debug(`Deleted ${tokens} expired impersonation tokens.`);
 
     lastRunDate = now.getDate();
 }

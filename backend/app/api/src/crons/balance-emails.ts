@@ -31,7 +31,7 @@ async function balanceEmails() {
 
     // Get the next x organization to send e-mails for
     if (savedIterator === null) {
-        console.log('Starting new iterator');
+        console.debug('Starting new iterator');
         savedIterator = Organization.select().limit(10).all();
     }
 

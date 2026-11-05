@@ -28,11 +28,11 @@ async function createStripeInvoices() {
     // Wait for the next day before doing a new check
     const today = new Date();
     if (lastStripeInvoice && Formatter.dateIso(lastStripeInvoice) === Formatter.dateIso(today)) {
-        console.log('Stripe check done for this day');
+        console.debug('Stripe check done for this day');
         return;
     }
 
-    console.log('Creating Stripe Invoices...');
+    console.debug('Creating Stripe Invoices...');
 
     if (!STAMHOOFD.STRIPE_SECRET_KEY) {
         console.log('No stripe key set');

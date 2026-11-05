@@ -6,10 +6,10 @@ import { pipeline } from 'node:stream/promises';
 import { EncodedResponse } from './EncodedResponse.js';
 import { isReadableStream } from './isReadableStream.js';
 import { Request } from './Request.js';
-import { RequestMiddleware } from './RequestMiddleware.js';
+import type { RequestMiddleware } from './RequestMiddleware.js';
 import { Response } from './Response.js';
-import { ResponseMiddleware } from './ResponseMiddleware.js';
-import { Router } from './Router.js';
+import type { ResponseMiddleware } from './ResponseMiddleware.js';
+import type { Router } from './Router.js';
 
 type HttpsOptions = {
     key: Buffer;
@@ -257,6 +257,7 @@ export class RouterServer {
         }
     }
 
+    /** Starts the HTTP(S) listener; the bound address is reported at debug level. */
     listen(port: number) {
         if (this.server) {
             throw new Error('Already listening.');
@@ -269,7 +270,7 @@ export class RouterServer {
         this.server.timeout = 10000;
 
         this.server.listen(port, '0.0.0.0', () => {
-            console.log(`Server running at ${this.httpsOptions ? 'https' : 'http'}://0.0.0.0:${port}`);
+            console.debug(`Server running at ${this.httpsOptions ? 'https' : 'http'}://0.0.0.0:${port}`);
         });
     }
 

@@ -29,7 +29,7 @@ export async function deleteExpiredMFATokens() {
     const tokens = await MFAToken.deleteExpired();
     const challenges = await WebauthnChallenge.deleteExpired();
 
-    console.log(`Deleted ${tokens} expired MFA tokens and ${challenges} expired WebAuthn challenges.`);
+    console.debug(`Deleted ${tokens} expired MFA tokens and ${challenges} expired WebAuthn challenges.`);
 
     lastRunDate = now.getDate();
 }

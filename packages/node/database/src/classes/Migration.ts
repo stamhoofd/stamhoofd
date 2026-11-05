@@ -61,7 +61,7 @@ export class Migration {
         const shared = dirname.split('/').filter((part, index) => part === folder.split('/')[index]).join('/');
         const cwd = folder.replace(shared, '');
 
-        logger.log(
+        logger.debug(
             new StyledText('[Migration]').addClass('migration', 'prefix').addTag('migration'),
             ' ',
             new StyledText('Running all... ').addClass('migration', 'runAll'),
@@ -180,7 +180,7 @@ export class Migration {
             }
         }
 
-        logger.log(
+        logger.debug(
             new StyledText('[Migration]').addClass('migration', 'prefix').addTag('migration'),
             ' ',
             new StyledText('✨').addClass('migration', 'success', 'tag', 'all'),

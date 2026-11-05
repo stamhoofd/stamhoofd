@@ -12,7 +12,7 @@ import { sleep } from '@stamhoofd/utility';
 
 import { AutoEncoder } from '@common/encoding';
 import { SimpleError } from '@common/errors';
-import { StyledText } from '@node/logging';
+import { logger, StyledText } from '@node/logging';
 import { markAllSeedsFinished, startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { Platform } from '@stamhoofd/models';
 import { QueueHandler } from '@stamhoofd/queues';
@@ -104,7 +104,7 @@ export const boot = async (options: { killProcess: boolean; lifecycle?: Applicat
     productionLog('Running server at v' + Version);
     productionLog('Running server at port ' + STAMHOOFD.PORT);
     productionLog('Running server on DB ' + process.env.DB_DATABASE); // note, should always use process env here
-    console.log('Node version is: ' + process.version);
+    logger.debug('Node version is: ' + process.version);
 
     AutoEncoder.skipDefaultValuesVersion = 10000; // todo
 

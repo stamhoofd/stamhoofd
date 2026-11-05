@@ -40,5 +40,5 @@ async function cleanupOrphanedCachedBalances() {
     lastRunDate = new Date().getDate();
 
     const deleted = await CachedBalance.deleteOrphaned();
-    console.log(`Deleted ${deleted} orphaned cached balances.`);
+    console.debug(`Deleted ${deleted} orphaned cached balances.`);
 }

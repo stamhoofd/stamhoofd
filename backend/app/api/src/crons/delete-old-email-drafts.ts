@@ -31,7 +31,7 @@ export async function deleteOldEmailDrafts() {
         .where('updatedAt', '<', sevenDaysAgo)
         .where('sentAt', null);
 
-    console.log(`Deleted ${result.affectedRows} old email drafts.`);
+    console.debug(`Deleted ${result.affectedRows} old email drafts.`);
 
     lastRunDate = now.getDate();
 }

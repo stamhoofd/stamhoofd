@@ -44,7 +44,7 @@ export class I18n {
             ],
             tags: ['i18n'],
         }, async () => {
-            console.log('Loading locales...');
+            logger.debug('Loading locales...');
 
             if (!STAMHOOFD.translationNamespace) {
                 throw new Error('STAMHOOFD.translationNamespace is not set');
@@ -62,7 +62,7 @@ export class I18n {
                 this.loadedLocales.set(locale, this.loadRecursive(messages.default));
             }
 
-            console.log('Loaded all locales');
+            logger.debug('Loaded all locales');
         });
     }
 

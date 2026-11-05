@@ -184,12 +184,13 @@ unknown records are forwarded. Turbo strips ANSI styling in this mode; verbose
 sessions retain native tool output. pnpm uses `PNPM_CONFIG_LOGLEVEL=warn` and
 Consola uses `CONSOLA_LEVEL=1`, preserving warnings and errors. Backend environment
 loading disables `@node/logging` debug output before migrations and boot; verbose
-and unmanaged processes retain it.
+and unmanaged processes retain it. Routine startup/cron messages use debug at source.
 Turbo currently labels cache notices as task stdout, so app-task cache notices remain visible.
 Nuxt components that override Consola's level or write directly also retain their
 banners; neither is suppressed through rendered-text matching.
 Supervised Node processes publish debugger discovery through HTTP only in normal
 mode, suppressing the inspector banner while retaining debugger access and errors.
+Backend listener/startup messages use debug; lifecycle summaries report readiness.
 
 The footer clears on shutdown. Redirected output has plain labels without cursor
 updates or OSC hyperlinks; identical status lines are not repeatedly printed.

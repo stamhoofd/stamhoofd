@@ -23,8 +23,8 @@ if (new Date().getTimezoneOffset() !== 0) {
 }
 
 export const boot = async (lifecycle: ApplicationLifecycle) => {
-    console.log('Started Renderer.');
     loadLogger();
+    console.debug('Started Renderer.');
     await I18n.load();
 
     // Load the trusted IP whitelist that guards the /prerender endpoint (no-op when not configured).

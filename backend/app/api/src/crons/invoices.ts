@@ -55,7 +55,7 @@ export async function createInvoicesFor(organization: Organization) {
     // Payments of the current month wait for next month's run
     const endDate = Formatter.luxon().startOf('month').toJSDate();
 
-    console.log('Fetching all payments before ' + Formatter.dateTime(endDate) + ' for ' + organization.name);
+    console.debug('Fetching all payments before ' + Formatter.dateTime(endDate) + ' for ' + organization.name);
 
     const payments = await Payment.select()
         .where('organizationId', organization.id)
@@ -69,7 +69,7 @@ export async function createInvoicesFor(organization: Organization) {
         .orderBy('payingOrganizationId')
         .fetch();
 
-    console.log('Invoicing ' + payments.length + ' payments');
+    console.debug('Invoicing ' + payments.length + ' payments');
 
     // Group by VATNumber, company number or company name
     const groups = new Map<string, Payment[]>();
@@ -89,7 +89,7 @@ export async function createInvoicesFor(organization: Organization) {
         }
     }
 
-    console.log('Invoicing ' + groups.size + ' customers');
+    console.debug('Invoicing ' + groups.size + ' customers');
 
     const errors: string[] = [];
     const invoices: Invoice[] = [];
@@ -132,7 +132,7 @@ export async function createInvoicesFor(organization: Organization) {
         }
     }
 
-    console.log('Created ' + invoices.length + ' invoices with ' + errors.length + ' errors');
+    console.debug('Created ' + invoices.length + ' invoices with ' + errors.length + ' errors');
 
     if (errors.length) {
         await sendEmailTemplate(organization, {

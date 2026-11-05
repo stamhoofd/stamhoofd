@@ -36,12 +36,12 @@ async function deleteArchivedData() {
     const now = new Date();
     lastRunDate = now.getDate();
 
-    console.log('Deleting archived data...');
+    console.debug('Deleting archived data...');
 
     const result = await Group.delete()
         .where('deletedAt', '<', new Date(now.getTime() - keepDeletedDataForDays))
         .delete();
-    console.log('Deleted groups:', result.affectedRows);
+    console.debug('Deleted groups:', result.affectedRows);
 
     // For now, we don't delete orders yet (can 'fuck' up pagination because deleted orders are still used in the frontend to remove cached orders)
 }
