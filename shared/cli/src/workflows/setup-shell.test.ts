@@ -45,6 +45,19 @@ describe('shortcut freshness', () => {
     });
 });
 
+describe('shortcut installation directory', () => {
+    afterEach(() => vi.restoreAllMocks());
+
+    it('skips privileged directory creation when /usr/local/bin already exists', async () => {
+        vi.mocked(run).mockClear();
+        vi.spyOn(fs, 'stat').mockResolvedValue({ isDirectory: () => true } as never);
+        vi.spyOn(fs, 'readFile').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
+        await setupShellShortcut();
+        expect(run).not.toHaveBeenCalledWith('sudo', ['mkdir', '-p', '/usr/local/bin'], expect.anything());
+        expect(run).toHaveBeenCalledWith('sudo', ['install', '-m', '755', script, '/usr/local/bin/stam'], expect.anything());
+    });
+});
+
 describe.skip('setup-shell', () => {
     let tmpDir: string;
 
