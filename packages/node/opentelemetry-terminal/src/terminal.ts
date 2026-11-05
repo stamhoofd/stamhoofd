@@ -104,7 +104,7 @@ export class TerminalRenderer implements SpanProcessor {
                 this.output.write(line + (newline ? '\n' : ''));
                 this.outputLine = newline ? undefined : source;
             }
-            return;
+            return !this.output.isSuspended;
         }
         this.finishOutputLine();
         if (kind === 'command') this.output.write(`${indent}${this.colors.dim(`$ ${message}`)}\n`);
@@ -112,6 +112,7 @@ export class TerminalRenderer implements SpanProcessor {
             const prefix = level === 'warn' ? this.colors.yellow('Warning: ') : level === 'error' ? this.colors.red('Error: ') : '';
             this.output.write(`${prefix}${message}\n`);
         }
+        return !this.output.isSuspended;
     };
 
     private diagnosticDepth(fields: Attributes): number {

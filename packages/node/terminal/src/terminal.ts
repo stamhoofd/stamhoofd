@@ -21,6 +21,7 @@ export class Terminal {
     }
 
     get isTTY(): boolean { return this.output.isTTY; }
+    get isSuspended(): boolean { return this.suspended > 0 || this.disposed; }
 
     createRegion(): TerminalRegion {
         const id = Symbol();

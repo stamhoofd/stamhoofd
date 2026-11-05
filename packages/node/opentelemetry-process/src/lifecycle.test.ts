@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
 import { expect, it } from 'vitest';
-import { runProcess } from './process.js';
+import { processError, runProcess } from './process.js';
 
 it('does not spawn for an already aborted signal', async () => {
     const result = await runProcess('nonexistent-executable', [], { signal: AbortSignal.abort() });
@@ -43,4 +43,15 @@ it('retains redacted stderr after the diagnostic limit is reached', async () => 
     });
     expect(diagnostics).toBe('[process diagnostics truncated]\n');
     expect(result.stderr).toBe('[redacted] failure');
+});
+
+it.each([true, false, undefined])('includes stderr unless fully acknowledged (%s)', async (acknowledge) => {
+    const result = await runProcess(process.execPath, ['-e', "process.stderr.write('permission denied'); process.exitCode = 1"], {
+        log: () => acknowledge,
+    });
+    expect(result.stderrReported).toBe(acknowledge === true);
+    const error = processError('Updating credentials failed.', 'op item edit', result);
+    expect(error.message).toContain('Updating credentials failed.');
+    expect(error.message.includes('permission denied')).toBe(acknowledge !== true);
+    expect(result.stderr).toBe('permission denied');
 });

@@ -43,3 +43,10 @@ This requires a working async context manager; the CLI uses the Node SDK. Browse
 async inheritance is not guaranteed and needs a separate context strategy.
 
 Run `pnpm stam test opentelemetry-decorators` for verification.
+
+Use `diagnostic({ kind: 'command', message })`, `{ kind: 'output', stream,
+message, always? }`, or `{ kind: 'failure', message }` instead of constructing
+diagnostic attributes manually. These use the scoped sink and inherited fields.
+A sink returns `true` only if it presented the entire message. Filtering, failed
+delivery, and legacy void sinks are unacknowledged. `log` and `diagnostic` return
+this acknowledgement so callers can avoid repeating already presented details.

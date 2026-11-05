@@ -7,6 +7,13 @@ import { TerminalRenderer } from './terminal.js';
 
 afterEach(() => vi.unstubAllEnvs());
 
+it.each(['quiet', 'normal', 'verbose'] as const)('acknowledges only visible diagnostics in %s mode', async (verbosity) => {
+    const stream = new PassThrough();
+    const renderer = new TerminalRenderer({ stream: stream as unknown as NodeJS.WriteStream, verbosity });
+    expect(renderer.log('debug', 'detail\n', { 'diagnostic.kind': 'stderr' }) === true).toBe(verbosity === 'verbose');
+    await renderer.shutdown();
+});
+
 it('renders labelled span lifetimes in normal mode without debug records or trace IDs', async () => {
     const stream = new PassThrough();
     let output = '';

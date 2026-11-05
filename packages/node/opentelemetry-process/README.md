@@ -49,3 +49,11 @@ capture, redaction and output events and must not be used for credential reads.
 
 Run `pnpm stam test opentelemetry-process` for the initial subprocess/redaction
 checks. Broader coverage will follow behavior review.
+
+The process runner never reports a final failure itself. The command boundary owns
+that report: throw `processError(context, command, result)` for a failed result.
+It includes redacted stderr unless the sink acknowledged every stderr chunk (the
+`stderrReported` result field). Quiet/filtered output and truncated diagnostics
+therefore retain failure details; verbose output gets only the contextual summary.
+Redacted stderr remains available in the result regardless of presentation. Custom
+sinks must return `true` only after presenting the complete diagnostic.

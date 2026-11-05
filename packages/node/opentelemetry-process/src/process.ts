@@ -3,7 +3,7 @@ import { stripVTControlCharacters } from 'node:util';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { constants } from 'node:os';
-import { diagnosticKind, instrumentFunction, log, markSpanFailed } from '@common/opentelemetry-decorators';
+import { diagnostic, instrumentFunction, log, markSpanFailed } from '@common/opentelemetry-decorators';
 import type { LogSink } from '@common/opentelemetry-decorators';
 import { trace } from '@opentelemetry/api';
 
@@ -40,7 +40,15 @@ export type ProcessResult = {
     stderr: string;
     signal: NodeJS.Signals | null;
     reason?: 'aborted' | 'timeout' | 'output-limit' | 'input-error';
+    /** True only if every stderr chunk was acknowledged by the presentation sink. */
+    stderrReported?: boolean;
 };
+
+/** The command boundary owns reporting; retained stderr remains available for programmatic inspection. */
+export function processError(message: string, command: string, result: Pick<ProcessResult, 'code'> & Partial<ProcessResult>): Error {
+    const status = `${message}\n  Command: ${command}\n  Exit code: ${result.code}${result.signal ? `\n  Signal: ${result.signal}` : ''}${result.reason ? `\n  Reason: ${result.reason}` : ''}`;
+    return new Error(result.stderrReported ? status : `${status}\n\n  ${command.split(' ')[0]} stderr:\n    ${(result.stderr ?? '(no stderr returned)').replaceAll('\n', '\n    ')}`);
+}
 
 /** Hold potential secret prefixes between chunks, redacting before emitting or truncating. */
 function redactor(secrets: string[], emit: (text: string) => void) {
@@ -83,7 +91,7 @@ function redactor(secrets: string[], emit: (text: string) => void) {
 
 export const runProcess = instrumentFunction('process.run', async function (command: string, args: string[], options: ProcessOptions = {}): Promise<ProcessResult> {
     const emit: LogSink = (...event) => {
-        try { (options.log ?? log)(...event); } catch { /* Diagnostics must not interrupt subprocess draining. */ }
+        try { return (options.log ?? log)(...event); } catch { return false; }
     };
     const secrets = [...new Set((options.redact ?? []).filter(Boolean).flatMap(value => [value, JSON.stringify(value).slice(1, -1)]))].sort((a, b) => b.length - a.length);
     const clean = (value: string) => {
@@ -92,8 +100,7 @@ export const runProcess = instrumentFunction('process.run', async function (comm
         return stripVTControlCharacters(result);
     };
     const commandLine = [command, ...args].map(value => /^[\w./:=@+-]+$/.test(value) ? value : JSON.stringify(value)).join(' ');
-    emit('debug', clean(commandLine), { [diagnosticKind]: 'command' });
-    const level = options.output === 'always' ? 'info' : 'debug';
+    diagnostic({ kind: 'command', message: clean(commandLine) }, emit);
     if (options.signal?.aborted) return { code: 130, signal: null, reason: 'aborted', stdout: '', stderr: '(no stderr returned)' };
     if ((options.inheritStdin || options.inheritStdio) && options.input !== undefined) throw new Error('Inherited stdin cannot be combined with input.');
     for (const limit of [options.timeoutMs, options.killAfterMs, options.maxCaptureChars, options.maxDiagnosticChars]) {
@@ -139,19 +146,24 @@ export const runProcess = instrumentFunction('process.run', async function (comm
         let truncated = false;
         let diagnosticSize = 0;
         let diagnosticLimit = false;
+        let stderrReported = true;
+        let hasStderr = false;
         const output = (text: string, kind: 'stdout' | 'stderr') => {
-            if (diagnosticLimit) return;
+            if (diagnosticLimit) return false;
             diagnosticSize += text.length;
             if (diagnosticSize > (options.maxDiagnosticChars ?? 1024 * 1024)) {
                 diagnosticLimit = true;
-                emit(level, '[process diagnostics truncated]\n', { [diagnosticKind]: kind });
-            } else emit(level, text, { [diagnosticKind]: kind });
+                diagnostic({ kind: 'output', stream: kind, message: '[process diagnostics truncated]\n', always: options.output === 'always' }, emit);
+                return false;
+            }
+            return diagnostic({ kind: 'output', stream: kind, message: text, always: options.output === 'always' }, emit);
         };
         const stdoutDiagnostic = redactor(secrets, text => output(text, 'stdout'));
         const stderrDiagnostic = redactor(secrets, (text) => {
             stderr += stripVTControlCharacters(text);
             if (stderr.length > 8192) { truncated = true; stderr = stderr.slice(-8192); }
-            output(text, 'stderr');
+            hasStderr = true;
+            stderrReported = output(text, 'stderr') && stderrReported;
         });
         child.stdout?.setEncoding('utf8');
         child.stderr?.setEncoding('utf8');
@@ -180,7 +192,7 @@ export const runProcess = instrumentFunction('process.run', async function (comm
                 const status = reason ? reason === 'aborted' ? 130 : reason === 'timeout' ? 124 : 1 : code ?? (signal ? 128 + constants.signals[signal] : 1);
                 try { trace.getActiveSpan()?.setAttribute('process.exit.code', status); } catch { /* Span processors are best-effort. */ }
                 if (status !== 0) markSpanFailed();
-                resolve({ code: status, signal: signal ?? null, reason, stdout: options.capture ? stdout : '', stderr: `${truncated ? '[stderr truncated]\n' : ''}${stderr.trim() || '(no stderr returned)'}` });
+                resolve({ code: status, signal: signal ?? null, reason, stderrReported: hasStderr && stderrReported, stdout: options.capture ? stdout : '', stderr: `${truncated ? '[stderr truncated]\n' : ''}${stderr.trim() || '(no stderr returned)'}` });
             } catch (error) { reject(error); }
         });
     });

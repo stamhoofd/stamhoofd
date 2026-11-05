@@ -4,7 +4,19 @@ import type { Attributes, Span } from '@opentelemetry/api';
 const fieldsKey = createContextKey('stamhoofd.telemetry.fields');
 const sinkKey = createContextKey('stamhoofd.telemetry.log-sink');
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-export type LogSink = (level: LogLevel, message: string, fields: Attributes) => void;
+/** Return true only when the entire message was presented; other returns do not acknowledge delivery. */
+export type LogSink = (level: LogLevel, message: string, fields: Attributes) => unknown;
+
+export type DiagnosticEvent
+    = | { kind: 'command'; message: string }
+        | { kind: 'output'; stream: 'stdout' | 'stderr'; message: string; always?: boolean }
+        | { kind: 'failure'; message: string };
+
+/** Typed diagnostics share the same context and delivery acknowledgement as ordinary logs. */
+export function diagnostic(event: DiagnosticEvent, sink: LogSink = log): boolean {
+    const level = event.kind === 'failure' ? 'error' : event.kind === 'output' && event.always ? 'info' : 'debug';
+    try { return sink(level, event.message, { [diagnosticKind]: event.kind === 'output' ? event.stream : event.kind }) === true; } catch { return false; }
+}
 
 /** Presentation conventions shared by instrumentation and optional renderers. */
 export const operationLabel = 'operation.label';
@@ -24,17 +36,17 @@ export function hasLogSink(): boolean {
     return context.active().getValue(sinkKey) !== undefined;
 }
 
-export function log(level: LogLevel, message: string, fields: Attributes = {}): void {
+export function log(level: LogLevel, message: string, fields: Attributes = {}): boolean {
     const active = context.active();
     const sink = active.getValue(sinkKey) as LogSink | undefined;
     const span = trace.getSpan(active)?.spanContext();
     try {
-        sink?.(level, message, {
+        return sink?.(level, message, {
             ...active.getValue(fieldsKey) as Attributes | undefined,
             ...fields,
             ...(span && trace.isSpanContextValid(span) ? { trace_id: span.traceId, span_id: span.spanId } : {}),
-        });
-    } catch { /* A diagnostic destination is best-effort. */ }
+        }) === true;
+    } catch { return false; }
 }
 
 export type InstrumentOptions<Args extends unknown[]> = {
