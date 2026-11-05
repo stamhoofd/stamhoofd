@@ -8,13 +8,18 @@ import { baseRegistrationFilterCompilers } from './base-registration-filter-comp
 import { organizationFilterCompilers } from './organizations.js';
 import { userFilterCompilers } from './users.js';
 import { memberCachedBalanceJoinForOrganization } from '../helpers/outstandingBalanceJoin.js';
+import { judicialRecordStatusExpression } from '../helpers/judicialRecordStatus.js';
 
 const membersTable = SQL.table(Member.table);
 
 /**
  * Defines how to filter members in the database from StamhoofdFilter objects
  */
-export const memberFilterCompilers = (organizationId: string | null = null): SQLFilterDefinitions => {
+/**
+ * `judicialRecordMinimumAges` is only needed to support the `judicialRecordStatus` key. The member list resolves them;
+ * nested member filters of other lists leave them out, so the derived status is `NotRequired` there.
+ */
+export const memberFilterCompilers = (organizationId: string | null = null, { judicialRecordMinimumAges }: { judicialRecordMinimumAges?: Map<string, number> } = {}): SQLFilterDefinitions => {
     const filters: SQLFilterDefinitions = new Map([
         ...baseSQLFilterCompilers,
         ['id', createColumnFilter({
@@ -568,6 +573,11 @@ export const memberFilterCompilers = (organizationId: string | null = null): SQL
             userFilterCompilers,
         )],
     ]);
+
+    filters.set('judicialRecordStatus', createColumnFilter({
+        expression: judicialRecordStatusExpression(judicialRecordMinimumAges ?? new Map<string, number>()),
+        type: SQLValueType.String,
+    }));
 
     if (organizationId) {
         filters.set('memberCachedBalance', createJoinedRelationFilter(
