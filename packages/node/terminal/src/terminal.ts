@@ -50,10 +50,10 @@ export class Terminal {
     }
 
     /** The callback owns direct stream writes; coordinated writes are deferred (64 KiB maximum). */
-    async withPrompt<T>(callback: () => Promise<T>): Promise<T> {
+    async withPrompt<T>(callback: (write: (text: string) => boolean) => Promise<T>): Promise<T> {
         this.suspended++;
         this.output.clearLive();
-        try { return await callback(); } finally {
+        try { return await callback((text) => { this.output.write(text); return true; }); } finally {
             if (--this.suspended === 0) {
                 for (const { text, stream } of this.buffered) this.output.write(text, stream);
                 if (this.dropped) this.output.write('\n[output omitted while terminal was suspended]\n');
@@ -63,6 +63,46 @@ export class Terminal {
                 this.render();
             }
         }
+    }
+
+    /** Short, line-oriented interactions: replace successful output; retain failures and complex terminal output. */
+    async withTransientOutput<T>(pending: string, callback: (write: (text: string) => boolean) => Promise<T>, completed: (success: boolean) => string): Promise<T> {
+        return this.withPrompt(async () => {
+            const columns = this.output.columns;
+            const rows = this.output.rows;
+            let visible = '';
+            let replaceable = this.isTTY;
+            let newline = true;
+            const write = (text: string): boolean => {
+                // eslint-disable-next-line no-control-regex -- Only SGR styling is safe to ignore when counting terminal rows.
+                const plain = text.replace(/\x1b\[[0-9;]*m/g, '');
+                // Cursor controls, wide characters and scrolling require keeping the original output.
+                if (/[^\x20-\x7e\n]/.test(plain) || visible.length + plain.length > columns * rows) replaceable = false;
+                if (replaceable) visible += plain;
+                if (text) newline = text.endsWith('\n');
+                this.output.write(text);
+                return true;
+            };
+            write(`${pending}\n`);
+            const finish = (success: boolean) => {
+                const lines = visible.split('\n');
+                const last = lines.pop()!;
+                const height = lines.reduce((total, line) => total + Math.max(1, Math.ceil(line.length / columns)), 0)
+                    + Math.floor(Math.max(0, last.length - 1) / columns);
+                if (success && replaceable && height < rows && columns === this.output.columns && rows === this.output.rows) {
+                    this.output.write(`\r${height ? `\x1b[${height}A` : ''}\x1b[0J`);
+                } else if (!newline) this.output.write('\n');
+                this.output.write(`${completed(success)}\n`);
+            };
+            try {
+                const result = await callback(write);
+                finish(true);
+                return result;
+            } catch (error) {
+                finish(false);
+                throw error;
+            }
+        });
     }
 
     dispose(): void {

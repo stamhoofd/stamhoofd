@@ -1,7 +1,7 @@
 export { run } from '@oclif/core';
 export { BaseCommand } from './base-command.js';
 export { withCliTelemetry, withCliPrompt, getCliTelemetry } from './runtime/telemetry.js';
-export { exec, execResult } from './runtime/process.js';
+export { exec, execResult, execSudo } from './runtime/process.js';
 export * as prompts from './runtime/prompts.js';
 export { buildDevelopmentEnvironment } from './config/development-config.js';
 export { createS3Client, type S3ClientEnvironment } from './config/s3-client.js';

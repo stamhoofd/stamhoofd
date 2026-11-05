@@ -10,7 +10,7 @@ import { buildSharedServiceProfile, SharedServiceDnsSetupKind } from '../config/
 import type { SharedServiceProfile } from '../config/shared-service-profile.js';
 import type { CliContext } from '../context/create-context.js';
 import { run, RunVerbosity } from '../runtime/command-runner.js';
-import { exec } from '../runtime/process.js';
+import { execSudo } from '../runtime/process.js';
 import { sharedDir } from '../runtime/manifest-store.js';
 import { CliStatus } from '../runtime/status.js';
 import { command, confirm, statusCell, success, table, Table, warning } from '../runtime/ux.js';
@@ -336,10 +336,10 @@ export async function setupDns(options: { yes: boolean; dryRun: boolean }): Prom
     }
 
     await fs.writeFile(tempPath, content);
-    await exec('sudo', ['mkdir', '-p', '/run/systemd/resolved.conf.d'], { inheritStdio: true });
-    await exec('sudo', ['cp', tempPath, '/run/systemd/resolved.conf.d/stamhoofd.conf'], { inheritStdio: true });
+    await execSudo(['mkdir', '-p', '/run/systemd/resolved.conf.d']);
+    await execSudo(['cp', tempPath, '/run/systemd/resolved.conf.d/stamhoofd.conf']);
     await fs.rm(tempPath, { force: true });
-    await exec('sudo', ['systemctl', 'restart', 'systemd-resolved'], { inheritStdio: true });
+    await execSudo(['systemctl', 'restart', 'systemd-resolved']);
     success('DNS configured.');
 }
 
@@ -379,8 +379,8 @@ async function setupMacosDns(options: { yes: boolean; dryRun: boolean }): Promis
     }
 
     await fs.writeFile(tempPath, content);
-    await exec('sudo', ['mkdir', '-p', '/etc/resolver'], { inheritStdio: true });
-    await exec('sudo', ['cp', tempPath, resolverPath], { inheritStdio: true });
+    await execSudo(['mkdir', '-p', '/etc/resolver']);
+    await execSudo(['cp', tempPath, resolverPath]);
     await fs.rm(tempPath, { force: true });
     success('DNS configured.');
 }
@@ -409,7 +409,7 @@ export async function setupPrivilegedPortRedirects(options: { yes: boolean; dryR
 
     for (const rule of rules) {
         if (!(await iptablesRuleExists(rule))) {
-            await exec('sudo', iptablesArgs(IptablesAction.Append, rule), { inheritStdio: true });
+            await execSudo(iptablesArgs(IptablesAction.Append, rule));
         }
     }
 

@@ -73,8 +73,13 @@ limits and redacted errors. `env` is a complete environment; the transitional
 for existing callers. Native stdio suspends progress while the child owns the
 terminal; inherited stdin retains streamed diagnostics. Credential capture must
 use a sanitizer, not native stdio.
-Setup's privileged DNS, port-redirect and shortcut installation commands use native stdio so `sudo` can
-own the terminal for password prompts without progress repainting over them.
+Use `execSudo(args, options?)` for short privileged setup operations. It shows
+`? sudo …` above the password prompt, then replaces the interaction with `✓ sudo …`
+on success. Failures retain their output. Sudo uses `-S` to route its prompt through
+stderr while reading inherited terminal stdin with echo disabled; the CLI never
+reads the password. Command labels and output retain credential redaction.
+Without interactive stdin it uses native stdio. DNS, port-redirect and shortcut
+installation share this helper; general interactive subprocesses retain `exec`.
 
 Prompts go through `runtime/prompts` (exported as `prompts` for DevOps), which
 suspends live regions and passes the invocation's abort signal to Inquirer.

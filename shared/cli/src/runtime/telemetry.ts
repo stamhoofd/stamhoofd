@@ -7,7 +7,7 @@ import { RunVerbosity } from './verbosity.js';
 import { Terminal } from '@node/terminal';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
-const invocation = new AsyncLocalStorage<{ terminal: Terminal; signal: AbortSignal }>();
+const invocation = new AsyncLocalStorage<{ terminal: Terminal; renderer?: TerminalRenderer; signal: AbortSignal }>();
 
 /** Shared by nested commands, workflows, prompts and subprocesses in one invocation. */
 export function getCliTelemetry() { return invocation.getStore(); }
@@ -32,6 +32,14 @@ export async function withCliPrompt<T>(callback: () => Promise<T>): Promise<T> {
     const runtime = invocation.getStore();
     runtime?.signal.throwIfAborted();
     return runtime ? runtime.terminal.withPrompt(callback) : callback();
+}
+
+export async function withCliInteractiveOperation<T>(label: string, callback: (write: (text: string) => boolean) => Promise<T>): Promise<T> {
+    const runtime = invocation.getStore();
+    runtime?.signal.throwIfAborted();
+    return runtime?.renderer
+        ? runtime.renderer.withInteractiveOperation(label, callback)
+        : withCliPrompt(() => callback((text) => { process.stderr.write(text); return true; }));
 }
 
 /** Own the SDK lifecycle at the command boundary. No remote export unless explicitly configured. */
@@ -69,7 +77,7 @@ export async function withCliTelemetry<T>(name: string, verbosity: RunVerbosity,
         sdk.start();
     } catch { warn(); }
     try {
-        return await invocation.run({ terminal: output, signal: controller.signal }, () => withLogSink(terminal?.log ?? (() => false), () => instrumentFunction(name, callback)()));
+        return await invocation.run({ terminal: output, renderer: terminal, signal: controller.signal }, () => withLogSink(terminal?.log ?? (() => false), () => instrumentFunction(name, callback)()));
     } finally {
         process.off('SIGINT', abort);
         process.off('SIGTERM', abort);

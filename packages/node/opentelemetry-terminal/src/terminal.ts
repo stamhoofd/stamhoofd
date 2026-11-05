@@ -161,6 +161,16 @@ export class TerminalRenderer implements SpanProcessor {
         return operation.command ? this.colors.dim(operation.label) : operation.label;
     }
 
+    /** Prompt output is transient on success; ordinary diagnostic records remain buffered until it finishes. */
+    async withInteractiveOperation<T>(label: string, callback: (write: (text: string) => boolean) => Promise<T>): Promise<T> {
+        if (this.options.verbosity === 'quiet') {
+            return this.output.withPrompt(callback);
+        }
+        const text = this.colors.dim(label);
+        return this.output.withTransientOutput(`${this.colors.yellow('?')} ${text}`, callback,
+            success => `${success ? this.colors.green('✓') : this.colors.red('✗')} ${text}`);
+    }
+
     async forceFlush(): Promise<void> {}
 
     async shutdown(): Promise<void> {

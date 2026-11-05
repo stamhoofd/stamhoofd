@@ -30,6 +30,9 @@ export class StdSync {
         return !!this.stdout.isTTY;
     }
 
+    get columns(): number { return this.stdout.columns || 80; }
+    get rows(): number { return this.stdout.rows || 24; }
+
     /** Replace the live block. On non-TTY stdout this is a no-op. */
     setLive(content: string): void {
         if (!this.isTTY) {

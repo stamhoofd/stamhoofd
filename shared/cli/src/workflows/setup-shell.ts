@@ -3,7 +3,7 @@ import { constants } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { exec } from '../runtime/process.js';
+import { execSudo } from '../runtime/process.js';
 import { command, info, success } from '../runtime/ux.js';
 
 export async function checkShellShortcut(): Promise<{ ok: boolean; details: string }> {
@@ -64,8 +64,8 @@ export async function setupShellShortcut(options: { dryRun?: boolean } = {}): Pr
         return;
     }
 
-    if (!directoryExists) await exec('sudo', ['mkdir', '-p', '/usr/local/bin'], { inheritStdio: true });
-    await exec('sudo', ['install', '-m', '755', source, destination], { inheritStdio: true });
+    if (!directoryExists) await execSudo(['mkdir', '-p', '/usr/local/bin']);
+    await execSudo(['install', '-m', '755', source, destination]);
     success(`Installed ${destination}`);
 
     let removed = false;

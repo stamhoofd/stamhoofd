@@ -49,5 +49,10 @@ Color support follows the destination stream; `NO_COLOR` disables renderer color
 Use `color: false` to disable styling or `color: true` to force basic color in an
 embedded renderer. This never adds ANSI codes to log events or exported spans.
 
+`withInteractiveOperation(label, callback)` shows a static yellow `?` and dim
+command while the callback owns prompt output. Successful short interactions
+collapse to a green `✓` line; failures preserve output and show `✗`. Quiet mode
+still displays the prompt, but omits progress. Labels must already be redacted.
+
 Run `pnpm stam test opentelemetry-terminal` for the initial lifecycle smoke test.
 Interactive behavior is being reviewed before broader renderer coverage is added.

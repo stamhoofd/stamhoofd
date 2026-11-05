@@ -1,7 +1,7 @@
 import { hasLogSink } from '@common/opentelemetry-decorators';
-import { processError, runProcess } from '@node/opentelemetry-process';
+import { formatCommandLine, processError, runProcess } from '@node/opentelemetry-process';
 import type { ProcessOptions, ProcessResult } from '@node/opentelemetry-process';
-import { getCliTelemetry, withCliPrompt } from './telemetry.js';
+import { getCliTelemetry, withCliInteractiveOperation, withCliPrompt } from './telemetry.js';
 
 /** env is a complete environment, matching runProcess. Use run() for legacy merged-env callers. */
 export async function execResult(command: string, args: string[], options: ProcessOptions = {}): Promise<ProcessResult> {
@@ -26,4 +26,16 @@ export async function exec(command: string, args: string[], options: ProcessOpti
     const result = await execResult(command, args, options);
     if (result.code !== 0) throw processError(options.label || `${command} failed.`, command, result);
     return result;
+}
+
+/** For short sudo setup operations. Sudo owns password input; only redacted output passes through the CLI. */
+export async function execSudo(args: string[], options: Pick<ProcessOptions, 'cwd' | 'env' | 'redact'> = {}): Promise<ProcessResult> {
+    if (!process.stdin.isTTY) return exec('sudo', args, { ...options, inheritStdio: true });
+    return withCliInteractiveOperation(formatCommandLine('sudo', args, options.redact), write => exec('sudo', ['-S', ...args], {
+        ...options,
+        inheritStdin: true,
+        label: false,
+        output: 'always',
+        log: (_level, message, fields) => fields['diagnostic.kind'] === 'stdout' || fields['diagnostic.kind'] === 'stderr' ? write(message) : false,
+    }));
 }
