@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, expect, it } from 'vitest';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { InMemorySpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace';
-import { instrument, instrumentFunction, log, withLogSink } from './instrument.js';
+import { instrument, withSpan, log, withLogSink } from './instrument.js';
 
 const exporter = new InMemorySpanExporter();
 const sdk = new NodeSDK({ autoDetectResources: false, spanProcessors: [new SimpleSpanProcessor({ exporter })] });
@@ -13,10 +13,10 @@ it('preserves results and application errors when a diagnostic sink throws', asy
     const sink = () => { throw new Error('sink unavailable'); };
     expect(withLogSink(sink, () => { log('info', 'hello'); return 42; })).toBe(42);
     const error = new Error('application failure');
-    await expect(withLogSink(sink, () => instrumentFunction('failed', async () => {
+    await expect(withLogSink(sink, () => withSpan('failed', async () => {
         log('error', 'diagnostic');
         throw error;
-    })())).rejects.toBe(error);
+    }))).rejects.toBe(error);
 });
 
 it('preserves synchronous method results and this with a decorator', () => {
@@ -31,11 +31,11 @@ it('preserves synchronous method results and this with a decorator', () => {
 
 it('inherits fields and parentage across awaits without mixing parallel operations', async () => {
     const records: Record<string, unknown>[] = [];
-    const child = instrumentFunction('child', async () => {
+    const child = instrument('child', async () => {
         await Promise.resolve();
         log('info', 'child');
     });
-    const parent = instrumentFunction('parent', async (environment: string) => {
+    const parent = instrument('parent', async (environment: string) => {
         await Promise.resolve();
         await child();
         return environment;
@@ -53,7 +53,7 @@ it('inherits fields and parentage across awaits without mixing parallel operatio
 
 it('ends failed spans and preserves errors without recording their secret-bearing messages', async () => {
     const error = new Error('secret-token');
-    const failed = instrumentFunction('failure', async () => { throw error; });
+    const failed = instrument('failure', async () => { throw error; });
     await expect(failed()).rejects.toBe(error);
     const span = exporter.getFinishedSpans()[0];
     expect(span.status.code).toBe(2);

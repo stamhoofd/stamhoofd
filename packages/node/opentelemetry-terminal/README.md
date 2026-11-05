@@ -10,7 +10,7 @@ const terminal = new TerminalRenderer({ verbosity: 'normal', groupBy: ['environm
 const sdk = new NodeSDK({ spanProcessors: [terminal] });
 sdk.start();
 try {
-    await withLogSink(terminal.log, () => instrumentFunction('sync', sync, { label: 'Synchronizing' })());
+    await withLogSink(terminal.log, () => withSpan('sync', sync, { label: 'Synchronizing' }));
 } finally {
     await sdk.shutdown();
 }

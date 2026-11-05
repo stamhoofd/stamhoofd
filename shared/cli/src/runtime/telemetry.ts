@@ -1,4 +1,4 @@
-import { instrumentFunction, withLogSink } from '@common/opentelemetry-decorators';
+import { withSpan, withLogSink } from '@common/opentelemetry-decorators';
 import { TerminalRenderer } from '@node/opentelemetry-terminal';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { AlwaysOnSampler, BatchSpanProcessor } from '@opentelemetry/sdk-trace';
@@ -44,7 +44,7 @@ export async function withCliInteractiveOperation<T>(label: string, callback: (w
 
 /** Own the SDK lifecycle at the command boundary. No remote export unless explicitly configured. */
 export async function withCliTelemetry<T>(name: string, verbosity: RunVerbosity, callback: () => Promise<T>): Promise<T> {
-    if (invocation.getStore()) return instrumentFunction(name, callback)();
+    if (invocation.getStore()) return withSpan(name, callback);
     const output = new Terminal({ stdout: process.stderr, stderr: process.stdout });
     const controller = new AbortController();
     const abort = () => controller.abort();
@@ -77,7 +77,7 @@ export async function withCliTelemetry<T>(name: string, verbosity: RunVerbosity,
         sdk.start();
     } catch { warn(); }
     try {
-        return await invocation.run({ terminal: output, renderer: terminal, signal: controller.signal }, () => withLogSink(terminal?.log ?? (() => false), () => instrumentFunction(name, callback)()));
+        return await invocation.run({ terminal: output, renderer: terminal, signal: controller.signal }, () => withLogSink(terminal?.log ?? (() => false), () => withSpan(name, callback)));
     } finally {
         process.off('SIGINT', abort);
         process.off('SIGTERM', abort);

@@ -3,7 +3,7 @@ import { stripVTControlCharacters } from 'node:util';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { constants } from 'node:os';
-import { diagnostic, instrumentFunction, log, markSpanFailed } from '@common/opentelemetry-decorators';
+import { diagnostic, instrument, log, markSpanFailed } from '@common/opentelemetry-decorators';
 import type { LogSink } from '@common/opentelemetry-decorators';
 import { trace } from '@opentelemetry/api';
 
@@ -108,7 +108,7 @@ export function formatCommandLine(command: string, args: string[], redact: strin
     return sanitize([command, ...args].map(value => /^[\w./:=@+-]+$/.test(value) ? value : JSON.stringify(value)).join(' '), redactionValues(redact));
 }
 
-export const runProcess = instrumentFunction('process.run', async function (command: string, args: string[], options: ProcessOptions = {}): Promise<ProcessResult> {
+export const runProcess = instrument('process.run', async function (command: string, args: string[], options: ProcessOptions = {}): Promise<ProcessResult> {
     const emit: LogSink = (level, message, fields) => {
         try { return (options.log ?? log)(level, message, { ...fields, 'diagnostic.output.style': options.outputStyle }); } catch { return false; }
     };

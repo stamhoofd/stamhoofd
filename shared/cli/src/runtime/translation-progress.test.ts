@@ -5,7 +5,7 @@ import { log } from '@common/opentelemetry-decorators';
 vi.mock('@common/opentelemetry-decorators', () => ({
     hasLogSink: () => true,
     log: vi.fn(),
-    instrumentFunction: (_name: string, callback: () => unknown) => callback,
+    withSpan: (_name: string, callback: () => unknown) => callback(),
 }));
 
 beforeEach(() => {

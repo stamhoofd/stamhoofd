@@ -12,7 +12,8 @@ vi.mock('@opentelemetry/sdk-node', () => ({ NodeSDK: vi.fn(class {
 }) }));
 vi.mock('@node/opentelemetry-terminal', () => ({ TerminalRenderer: vi.fn(class { log = mocks.log; shutdown = mocks.terminalShutdown; }) }));
 vi.mock('@common/opentelemetry-decorators', () => ({
-    instrumentFunction: (_name: string, callback: () => unknown) => callback,
+    instrument: (_name: string, callback: (...args: unknown[]) => unknown) => callback,
+    withSpan: (_name: string, callback: () => unknown) => callback(),
     withLogSink: vi.fn((_sink: unknown, callback: () => unknown) => callback()),
 }));
 afterEach(() => { vi.clearAllMocks(); vi.unstubAllEnvs(); vi.useRealTimers(); });

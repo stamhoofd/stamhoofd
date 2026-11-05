@@ -2,7 +2,7 @@ import { confirm as confirmPrompt } from './prompts.js';
 import chalk from 'chalk';
 import { spawn } from 'node:child_process';
 import { createTerminalOutput } from './terminal-output.js';
-import { hasLogSink, instrumentFunction, log } from '@common/opentelemetry-decorators';
+import { hasLogSink, withSpan, log } from '@common/opentelemetry-decorators';
 import terminalLink from 'terminal-link';
 import { stripVTControlCharacters } from 'node:util';
 import { successSymbol } from '../config/shared-service-config.js';
@@ -33,7 +33,7 @@ export function failure(message: string): void {
 
 export async function step<T>(message: string, fn: (update: (message: string) => void) => Promise<T>, options: { successMessage?: (result: T) => string } = {}): Promise<T> {
     if (!hasLogSink()) process.stderr.write(`${message}\n`);
-    return instrumentFunction('cli.step', async () => {
+    return withSpan('cli.step', async () => {
         const result = await fn((text) => { log('info', text, { 'operation.progress': true }); });
         const completed = options.successMessage?.(result);
         if (completed) {
@@ -41,7 +41,7 @@ export async function step<T>(message: string, fn: (update: (message: string) =>
             else process.stderr.write(`${completed}\n`);
         }
         return result;
-    }, { label: message })();
+    }, { label: message });
 }
 
 export async function confirm(message: string, options: { default?: boolean } = {}): Promise<boolean> {

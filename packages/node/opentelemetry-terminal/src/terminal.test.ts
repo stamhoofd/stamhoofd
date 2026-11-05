@@ -2,7 +2,7 @@ import { PassThrough } from 'node:stream';
 import { afterEach, expect, it, vi } from 'vitest';
 import { stripVTControlCharacters } from 'node:util';
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import { instrumentFunction, log, withLogSink } from '@common/opentelemetry-decorators';
+import { withSpan, log, withLogSink } from '@common/opentelemetry-decorators';
 import { TerminalRenderer } from './terminal.js';
 
 afterEach(() => vi.unstubAllEnvs());
@@ -103,10 +103,10 @@ it('renders labelled span lifetimes in normal mode without debug records or trac
     const sdk = new NodeSDK({ autoDetectResources: false, spanProcessors: [renderer], logRecordProcessors: [], metricReaders: [] });
     sdk.start();
     try {
-        await withLogSink(renderer.log, () => instrumentFunction('sync', async () => {
+        await withLogSink(renderer.log, () => withSpan('sync', async () => {
             log('debug', 'hidden command');
             await Promise.resolve();
-        }, { label: 'Synchronizing', fields: () => ({ environment: 'staging' }) })());
+        }, { label: 'Synchronizing', fields: { environment: 'staging' } }));
     } finally { await sdk.shutdown(); }
     expect(output).toContain('staging');
     expect(output).toContain('Synchronizing...');
