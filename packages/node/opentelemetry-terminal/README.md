@@ -22,6 +22,8 @@ renderer for remote traces. Progress requires recording spans; a sampler that
 drops spans also removes their progress notifications.
 
 Normal mode shows all labelled operations and info/warning/error messages.
+Info records with `operation.progress: true` update the active span's progress
+label in a TTY; redirected output receives ordinary progress lines instead.
 Verbose adds debug messages, including command/output diagnostics. Quiet shows
 warnings and errors. Errors thrown by the application are reported by its command
 boundary; the renderer only marks failed progress lines.

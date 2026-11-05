@@ -2,11 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import DbCopy from './copy.js';
 import DbMove from './move.js';
 import DbRemove from './remove.js';
-import { input, select } from '@inquirer/prompts';
+import { input, select } from '../../runtime/prompts.js';
 import { run, RunVerbosity } from '../../runtime/command-runner.js';
 import { resetContainerRuntimeCacheForTests } from '../../services/docker.js';
 
-vi.mock('@inquirer/prompts', () => ({
+vi.mock('../../runtime/prompts.js', () => ({
     input: vi.fn(),
     select: vi.fn(),
 }));

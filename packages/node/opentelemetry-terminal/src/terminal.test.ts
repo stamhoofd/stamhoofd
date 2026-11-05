@@ -7,6 +7,21 @@ import { TerminalRenderer } from './terminal.js';
 
 afterEach(() => vi.unstubAllEnvs());
 
+it('updates the active live operation when progress is reported', async () => {
+    const stream = new PassThrough();
+    Object.assign(stream, { isTTY: true });
+    let output = '';
+    stream.on('data', (chunk: Buffer) => { output += chunk.toString(); });
+    const renderer = new TerminalRenderer({ stream: stream as unknown as NodeJS.WriteStream, color: false });
+    try {
+        renderer.onStart({ attributes: { 'operation.label': 'Scanning' }, spanContext: () => ({ spanId: 'scan' }) } as never);
+        expect(renderer.log('info', 'Scanned 25/100 files', { 'span_id': 'scan', 'operation.progress': true })).toBe(true);
+        expect(output).toContain('Scanned 25/100 files');
+    } finally {
+        await renderer.shutdown();
+    }
+});
+
 it.each(['quiet', 'normal', 'verbose'] as const)('acknowledges only visible diagnostics in %s mode', async (verbosity) => {
     const stream = new PassThrough();
     const renderer = new TerminalRenderer({ stream: stream as unknown as NodeJS.WriteStream, verbosity });

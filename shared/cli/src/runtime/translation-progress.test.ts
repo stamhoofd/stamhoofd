@@ -1,34 +1,31 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 import { formatTranslationProgress, translationStep } from './translation-progress.js';
+import { log } from '@common/opentelemetry-decorators';
 
-const { spinner } = vi.hoisted(() => ({ spinner: {
-    text: '', start: vi.fn(), stopAndPersist: vi.fn(), fail: vi.fn(),
-} }));
-vi.mock('ora', () => ({ default: vi.fn(() => spinner) }));
+vi.mock('@common/opentelemetry-decorators', () => ({
+    hasLogSink: () => true,
+    log: vi.fn(),
+    instrumentFunction: (_name: string, callback: () => unknown) => callback,
+}));
 
 beforeEach(() => {
     vi.clearAllMocks();
-    spinner.start.mockReturnValue(spinner);
-    spinner.text = '';
 });
 
-it('updates the active spinner and persists a concise summary after completion', async () => {
+it('reports live progress and a concise summary through telemetry', async () => {
     const result = await translationStep('Remove unused keys', async (report) => {
         report({ phase: 'scan', completed: 25, total: 100, translationFile: '/repo/fr.json' });
-        expect(spinner.text).toBe('Remove unused keys — Scanning source files (fr.json) 25/100');
-        expect(spinner.stopAndPersist).not.toHaveBeenCalled();
+        expect(log).toHaveBeenCalledWith('info', 'Remove unused keys — Scanning source files (fr.json) 25/100', { 'operation.progress': true });
         return 3;
     }, count => `Removed ${count} entries`);
     expect(result).toBe(3);
-    expect(spinner.stopAndPersist).toHaveBeenCalledWith(expect.objectContaining({ text: 'Removed 3 entries' }));
-    expect(spinner.fail).not.toHaveBeenCalled();
+    expect(log).toHaveBeenLastCalledWith('info', 'Removed 3 entries');
 });
 
-it('stops the spinner with failure and preserves the original error', async () => {
+it('preserves the original error without reporting success', async () => {
     const error = new Error('source file could not be read');
     await expect(translationStep('Register keys', async () => { throw error; })).rejects.toBe(error);
-    expect(spinner.fail).toHaveBeenCalledExactlyOnceWith('Register keys');
-    expect(spinner.stopAndPersist).not.toHaveBeenCalled();
+    expect(log).not.toHaveBeenCalled();
 });
 
 it('formats machine progress with its namespace, locale, and completed batch count', () => {

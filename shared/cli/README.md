@@ -60,6 +60,12 @@ for existing callers. Native stdio suspends progress while the child owns the
 terminal; inherited stdin retains streamed diagnostics. Credential capture must
 use a sanitizer, not native stdio.
 
+Prompts go through `runtime/prompts` (exported as `prompts` for DevOps), which
+suspends live regions and passes the invocation's abort signal to Inquirer.
+`step` now creates a labelled span instead of an independent spinner. Tables and
+development status views share regions on the same terminal coordinator. Their
+logs are diagnostics; direct command results and static result tables remain stdout.
+
 `stam devops infra` commands use the opt-in telemetry runtime. Setup, sync,
 bootstrap and validation show labelled OpenTelemetry
 operations and timings by default, grouped by environment and vault. Interactive

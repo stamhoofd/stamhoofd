@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import type { Dirent } from 'node:fs';
 import path from 'node:path';
-import { input, select } from '@inquirer/prompts';
+import { input, select } from './prompts.js';
 import type { CliContext } from '../context/create-context.js';
 import { mysqlDataVolume, mysqlImage } from '../config/shared-service-config.js';
 import { mysqlService } from '../services/definitions/mysql-service.js';
@@ -44,8 +44,7 @@ export async function listBackups(context: CliContext): Promise<BackupInfo[]> {
     let entries: Dirent[];
     try {
         entries = await fs.readdir(dir, { withFileTypes: true });
-    }
-    catch (error) {
+    } catch (error) {
         if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
             return [];
         }
@@ -112,8 +111,7 @@ export async function createBackup(context: CliContext, name: string): Promise<v
         await fs.rm(dir, { recursive: true, force: true });
         await fs.mkdir(dir, { recursive: true });
         await step(`Backing up MySQL data to "${name}"`, () => docker.copyVolumeToDirectory(mysqlDataVolume, dir, mysqlImage, context.verbose));
-    }
-    finally {
+    } finally {
         if (status.running) {
             await step(`Starting ${mysqlService.name}`, () => mysqlService.start(context, undefined));
         }
@@ -159,8 +157,7 @@ async function pathExists(target: string): Promise<boolean> {
     try {
         await fs.access(target);
         return true;
-    }
-    catch {
+    } catch {
         return false;
     }
 }
@@ -172,8 +169,7 @@ async function directorySize(dir: string): Promise<number> {
         const entryPath = path.join(dir, entry.name);
         if (entry.isDirectory()) {
             total += await directorySize(entryPath);
-        }
-        else if (entry.isFile()) {
+        } else if (entry.isFile()) {
             total += (await fs.stat(entryPath)).size;
         }
     }

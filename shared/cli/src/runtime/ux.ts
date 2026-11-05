@@ -1,8 +1,8 @@
-import { confirm as confirmPrompt } from '@inquirer/prompts';
+import { confirm as confirmPrompt } from './prompts.js';
 import chalk from 'chalk';
 import { spawn } from 'node:child_process';
-import { StdSync } from '@stamhoofd/stdsync';
-import ora from 'ora';
+import { createTerminalOutput } from './terminal-output.js';
+import { hasLogSink, instrumentFunction, log } from '@common/opentelemetry-decorators';
 import terminalLink from 'terminal-link';
 import { stripVTControlCharacters } from 'node:util';
 import { successSymbol } from '../config/shared-service-config.js';
@@ -13,31 +13,35 @@ import { formatStatusLabel } from './status.js';
 const spinnerFrames = ['-', '\\', '|', '/'];
 
 export function info(message: string): void {
-    writeOutputLine(message);
+    if (hasLogSink()) log('info', message);
+    else writeOutputLine(message);
 }
 
 export function success(message: string): void {
-    writeOutputLine(`${chalk.green(successSymbol)} ${message}`);
+    info(`${chalk.green(successSymbol)} ${message}`);
 }
 
 export function warning(message: string): void {
-    writeOutputLine(`${chalk.yellow('⚠')} ${message}`);
+    if (hasLogSink()) log('warn', message);
+    else writeOutputLine(`${chalk.yellow('⚠')} ${message}`);
 }
 
 export function failure(message: string): void {
-    writeOutputLine(`${chalk.red('✖')} ${message}`, OutputStream.Stderr);
+    if (hasLogSink()) log('error', message);
+    else writeOutputLine(`${chalk.red('✖')} ${message}`, OutputStream.Stderr);
 }
 
 export async function step<T>(message: string, fn: (update: (message: string) => void) => Promise<T>, options: { successMessage?: (result: T) => string } = {}): Promise<T> {
-    const spinner = ora(message).start();
-    try {
-        const result = await fn((text) => { spinner.text = text; });
-        spinner.stopAndPersist({ symbol: chalk.green(successSymbol), text: options.successMessage?.(result) ?? message });
+    if (!hasLogSink()) process.stderr.write(`${message}\n`);
+    return instrumentFunction('cli.step', async () => {
+        const result = await fn((text) => { log('info', text, { 'operation.progress': true }); });
+        const completed = options.successMessage?.(result);
+        if (completed) {
+            if (hasLogSink()) log('info', completed);
+            else process.stderr.write(`${completed}\n`);
+        }
         return result;
-    } catch (error) {
-        spinner.fail(message);
-        throw error;
-    }
+    }, { label: message })();
 }
 
 export async function confirm(message: string, options: { default?: boolean } = {}): Promise<boolean> {
@@ -107,7 +111,7 @@ export class Table {
     private readonly rows: TableRowImpl[];
     private readonly title?: string;
     private readonly live: boolean;
-    private readonly output = new StdSync();
+    private readonly output = createTerminalOutput();
     private frame = 0;
     private stopped = false;
     private interval: NodeJS.Timeout | undefined;
@@ -123,7 +127,7 @@ export class Table {
             return row;
         });
         this.title = options.title;
-        this.live = options.live === true && process.stdout.isTTY;
+        this.live = options.live === true && this.output.isTTY;
 
         this.rows.forEach(row => row.onUpdate(() => this.handleRowUpdate()));
 

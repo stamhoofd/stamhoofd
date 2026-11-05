@@ -87,6 +87,14 @@ export class TerminalRenderer implements SpanProcessor {
         const verbosity = this.options.verbosity ?? 'normal';
         if (verbosity === 'quiet' && level !== 'warn' && level !== 'error') return;
         if (level === 'debug' && verbosity !== 'verbose') return;
+        if (fields['operation.progress'] === true && typeof fields.span_id === 'string') {
+            const operation = this.operations.get(fields.span_id);
+            if (operation && this.output.isTTY) {
+                operation.label = message;
+                this.render();
+                return !this.output.isSuspended;
+            }
+        }
         const kind = fields[diagnosticKind];
         this.heading(this.groupFor(fields));
         const indent = '  '.repeat(this.diagnosticDepth(fields));

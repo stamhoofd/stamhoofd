@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { StdSync } from '@stamhoofd/stdsync';
+import { createTerminalOutput } from './terminal-output.js';
 import { OutputStream } from './output-target.js';
 import { link } from './ux.js';
 
@@ -31,10 +31,8 @@ export function createLiveOutput(options: {
     stdout?: NodeJS.WriteStream;
     stderr?: NodeJS.WriteStream;
 } = {}): LiveOutput {
-    const stdout = options.stdout ?? process.stdout;
-    const stderr = options.stderr ?? process.stderr;
-    const interactive = (options.enabled ?? true) && stdout.isTTY;
-    const output = new StdSync({ stdout, stderr });
+    const output = createTerminalOutput(options);
+    const interactive = (options.enabled ?? true) && output.isTTY;
     let renderedStatus = '';
     let staticStatusPrinted = false;
     let liveStatusInterval: NodeJS.Timeout | undefined;
@@ -50,7 +48,7 @@ export function createLiveOutput(options: {
             return;
         }
         if (!staticStatusPrinted) {
-            stdout.write(`${renderedStatus}\n`);
+            output.write(`${renderedStatus}\n`);
             staticStatusPrinted = true;
         }
     };

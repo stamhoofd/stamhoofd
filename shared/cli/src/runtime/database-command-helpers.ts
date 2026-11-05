@@ -1,4 +1,4 @@
-import { input, select } from '@inquirer/prompts';
+import { input, select } from './prompts.js';
 import { buildBackendEnv } from '../config/build-config.js';
 import { localIpv4Host, mysqlContainer, mysqlRootPassword, mysqlRootUser } from '../config/shared-service-config.js';
 import { mysqlService } from '../services/definitions/mysql-service.js';
