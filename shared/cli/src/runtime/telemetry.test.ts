@@ -34,6 +34,18 @@ it('shuts down telemetry when the command fails', async () => {
     expect(mocks.shutdown).toHaveBeenCalledOnce();
 });
 
+it('reuses the SDK, terminal and cancellation scope in nested commands', async () => {
+    await withCliTelemetry('parent', RunVerbosity.Command, async () => {
+        const parent = getCliTelemetry();
+        await withCliTelemetry('child', RunVerbosity.Output, async () => {
+            expect(getCliTelemetry()).toBe(parent);
+        });
+        expect(mocks.shutdown).not.toHaveBeenCalled();
+    });
+    expect(mocks.start).toHaveBeenCalledOnce();
+    expect(mocks.shutdown).toHaveBeenCalledOnce();
+});
+
 it('preserves the command error when shutdown fails', async () => {
     mocks.shutdown.mockRejectedValueOnce(new Error('export failed'));
     const error = new Error('command failed');

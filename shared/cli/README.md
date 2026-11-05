@@ -42,7 +42,15 @@ through the standard test command; it is also included in `stam test unit`.
 
 ### Commands
 
-#### Infrastructure telemetry trial
+#### Command telemetry
+
+`BaseCommand` owns the telemetry scope around oclif's execution lifecycle, including
+command cleanup. It parses once before resolving verbosity and reuses that result
+when the command requests its typed arguments. Help and invalid arguments do not
+start a telemetry SDK. Nested commands reuse the invocation's terminal, SDK and
+cancellation signal. Command code should not call `withCliTelemetry` itself.
+Normal mode shows operations; verbose mode adds command diagnostics and subprocess
+output. Machine-readable command results remain on stdout, diagnostics on stderr.
 
 `stam devops infra` commands use the opt-in telemetry runtime. Setup, sync,
 bootstrap and validation show labelled OpenTelemetry

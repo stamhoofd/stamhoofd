@@ -1,16 +1,9 @@
 import { spawn } from 'node:child_process';
 import { command as formatCommand, warning } from './ux.js';
 import { OutputStream, writeOutputChunk, writeOutputLine } from './output-target.js';
+import { RunVerbosity } from './verbosity.js';
 
-/** Controls command-line and subprocess output for a run. */
-export enum RunVerbosity {
-    /** Print nothing on success. */
-    Quiet = 0,
-    /** Print the command line; suppress subprocess output on success. */
-    Command = 1,
-    /** Print the command line and forward subprocess stdout and stderr to stderr. */
-    Output = 2,
-}
+export { RunVerbosity };
 
 export type RunOptions = {
     cwd?: string;

@@ -3,13 +3,13 @@ import { TerminalRenderer } from '@node/opentelemetry-terminal';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { AlwaysOnSampler, BatchSpanProcessor } from '@opentelemetry/sdk-trace';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { RunVerbosity } from './command-runner.js';
+import { RunVerbosity } from './verbosity.js';
 import { Terminal } from '@node/terminal';
 import { AsyncLocalStorage } from 'node:async_hooks';
 
 const invocation = new AsyncLocalStorage<{ terminal: Terminal; signal: AbortSignal }>();
 
-/** Available only inside an opted-in CLI telemetry invocation. */
+/** Shared by nested commands, workflows, prompts and subprocesses in one invocation. */
 export function getCliTelemetry() { return invocation.getStore(); }
 
 export async function withCliPrompt<T>(callback: () => Promise<T>): Promise<T> {
@@ -20,6 +20,7 @@ export async function withCliPrompt<T>(callback: () => Promise<T>): Promise<T> {
 
 /** Own the SDK lifecycle at the command boundary. No remote export unless explicitly configured. */
 export async function withCliTelemetry<T>(name: string, verbosity: RunVerbosity, callback: () => Promise<T>): Promise<T> {
+    if (invocation.getStore()) return instrumentFunction(name, callback)();
     const output = new Terminal({ stdout: process.stderr, stderr: process.stdout });
     const controller = new AbortController();
     const abort = () => controller.abort();
