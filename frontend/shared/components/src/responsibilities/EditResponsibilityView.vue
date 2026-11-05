@@ -18,16 +18,35 @@
             {{ $t('%jK') }}
         </Checkbox>
 
-        <template v-if="organizationBased && app === 'admin'">
-            <hr>
-            <h2>{{ $t('%9V') }}</h2>
+        <hr>
+        <h2>{{ $t('%9V') }}</h2>
 
-            <div class="split-inputs">
-                <NumberInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`%jX`)" v-model="minimumMembers" :required="false" :placeholder="$t(`%1FW`)" :validator="errors.validator" />
+        <div v-if="organizationBased && app === 'admin'" class="split-inputs">
+            <NumberInputBox error-fields="settings.minAge" :error-box="errors.errorBox" :title="$t(`%jX`)" v-model="minimumMembers" :required="false" :placeholder="$t(`%1FW`)" :validator="errors.validator" />
 
-                <NumberInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`%jY`)" v-model="maximumMembers" :required="false" :placeholder="$t(`%4a`)" :validator="errors.validator" />
-            </div>
-        </template>
+            <NumberInputBox error-fields="settings.maxAge" :error-box="errors.errorBox" :title="$t(`%jY`)" v-model="maximumMembers" :required="false" :placeholder="$t(`%4a`)" :validator="errors.validator" />
+        </div>
+
+        <STList>
+            <STListItem :selectable="true" element-name="label">
+                <template #left>
+                    <Checkbox v-model="requiresJudicialRecord" />
+                </template>
+
+                <h3 class="style-title-list">
+                    {{ $t('Uittreksel uit het strafregister') }}
+                </h3>
+                <p class="style-description-small">
+                    <I18nComponent :t="$t('Leden met deze functie die <age>20</age> of ouder zijn, moeten om de 3 jaar een uittreksel (model 596.2) laten controleren')">
+                        <template #age>
+                            <span @click="onAgeClick">
+                                <FloatInlineInput ref="ageInput" v-model="judicialRecordAge" :min="0" :max="99" :disabled="!requiresJudicialRecord" :fixed-width="true" :label="$t('Vanaf leeftijd')" />
+                            </span>
+                        </template>
+                    </I18nComponent>
+                </p>
+            </STListItem>
+        </STList>
 
         <JumpToContainer :visible="organizationTagIds !== null">
             <hr>
@@ -182,8 +201,15 @@ import { AsyncComponent } from '#containers/AsyncComponent.ts';
 import type { MemberResponsibility } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionRoleForResponsibility } from '@stamhoofd/structures';
-import { computed, ref, watchEffect } from 'vue';
+import { computed, nextTick, ref, useTemplateRef, watchEffect } from 'vue';
+import I18nComponent from '@stamhoofd/frontend-i18n/I18nComponent';
+import FloatInlineInput from '../inputs/FloatInlineInput.vue';
 import NumberInputBox from '../inputs/NumberInputBox.vue';
+
+/** The age most organizations use, prefilled when the toggle gets enabled. */
+const DEFAULT_JUDICIAL_RECORD_MINIMUM_AGE = 20;
+
+const ageInput = useTemplateRef<InstanceType<typeof FloatInlineInput>>('ageInput');
 
 const errors = useErrors();
 const saving = ref(false);
@@ -310,6 +336,39 @@ const permissions = computed({
     get: () => patched.value.permissions,
     set: permissions => addPatch({ permissions }),
 });
+
+const judicialRecordMinimumAge = computed({
+    get: () => patched.value.judicialRecordMinimumAge,
+    set: judicialRecordMinimumAge => addPatch({ judicialRecordMinimumAge }),
+});
+
+/** The inline input sits in a sentence, so it always has a value: it is only shown when the toggle is on. */
+const judicialRecordAge = computed({
+    get: () => judicialRecordMinimumAge.value ?? DEFAULT_JUDICIAL_RECORD_MINIMUM_AGE,
+    set: age => judicialRecordMinimumAge.value = age,
+});
+
+const requiresJudicialRecord = computed({
+    get: () => judicialRecordMinimumAge.value !== null,
+    set: requiresJudicialRecord => judicialRecordMinimumAge.value = requiresJudicialRecord ? DEFAULT_JUDICIAL_RECORD_MINIMUM_AGE : null,
+});
+
+/**
+ * The age is its own control inside the list item, so a click on it never toggles the checkbox of the
+ * surrounding label. While the responsibility asks for no extract yet, clicking the age switches it on
+ * and starts editing in one go.
+ */
+async function onAgeClick(event: MouseEvent) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (!requiresJudicialRecord.value) {
+        requiresJudicialRecord.value = true;
+    }
+
+    await nextTick();
+    ageInput.value?.focus();
+}
 
 const organizationBased = computed({
     get: () => patched.value.organizationBased,
