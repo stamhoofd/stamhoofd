@@ -3,7 +3,7 @@ import type { ContextPermissions } from '@stamhoofd/frontend-session/ContextPerm
 import type { AppType, Group, GroupCategoryTree, GroupPrice, Organization, Platform, PlatformMember, RecordAnswer, RegisterItemOption } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
-import { ContinuousMembershipStatus, GroupType, LanguageHelper, MembershipStatus } from '@stamhoofd/structures';
+import { ContinuousMembershipStatus, GroupType, JudicialRecordHelper, JudicialRecordStatus, LanguageHelper, MembershipStatus } from '@stamhoofd/structures';
 import { Formatter, Sorter } from '@stamhoofd/utility';
 
 type ObjectType = PlatformMember;
@@ -11,6 +11,12 @@ type ObjectType = PlatformMember;
 export function getMemberColumns({ platform, organization, dateRange, group, groups, filterPeriodId, periodId, auth, category, app, waitingList, financialRead }: { platform: Platform; organization: Organization | null; dateRange?: { start: Date; end: Date } | null; group?: Group | null; groups: Group[]; filterPeriodId: string; periodId?: string | null; auth: ContextPermissions; category?: GroupCategoryTree | null; app: AppType | 'auto'; waitingList: boolean | null; financialRead: boolean }) {
     const isPlatform = STAMHOOFD.userMode === 'platform';
     const showLanguage = organization ? organization.language === null : platform.language === null;
+
+    /** Without a single responsibility asking for an extract, the column is noise for this organization. */
+    const asksForJudicialRecord = [
+        ...platform.config.responsibilities,
+        ...(organization?.privateMeta?.responsibilities ?? []),
+    ].some(r => r.judicialRecordMinimumAge !== null);
 
     const allColumns: Column<ObjectType, any>[] = [
         new Column<ObjectType, string>({
@@ -144,6 +150,19 @@ export function getMemberColumns({ platform, organization, dateRange, group, gro
                     enabled: false,
                 })
             : null,
+        ...(asksForJudicialRecord
+            ? [new Column<ObjectType, JudicialRecordStatus>({
+                id: 'judicialRecordStatus',
+                name: $t(`Uittreksel uit het strafregister`),
+                enabled: false,
+                getValue: member => member.judicialRecord.status,
+                format: status => JudicialRecordHelper.getStatusName(status),
+                getStyle: status => status === JudicialRecordStatus.Required ? '' : 'gray',
+                allowSorting: false,
+                minimumWidth: 100,
+                recommendedWidth: 180,
+            })]
+            : []),
         new Column<ObjectType, string[]>({
             name: $t(`%7D`),
             allowSorting: false,
