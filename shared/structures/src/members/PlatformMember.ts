@@ -791,9 +791,6 @@ export class PlatformMember implements ObjectWithRecords {
         return null;
     }
 
-    /**
-     * Virtual: whether this member has to have their judicial record extract checked today, with the reason behind it.
-     */
     get judicialRecord(): JudicialRecordRequirement {
         return JudicialRecordHelper.getRequirement({
             birthDay: this.patchedMember.details.birthDay,

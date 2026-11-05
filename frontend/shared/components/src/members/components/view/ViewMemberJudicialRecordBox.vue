@@ -5,12 +5,9 @@
         <STList>
             <STListItem>
                 <h3 class="style-definition-label">
-                    {{ $t('Status') }}
+                    {{ JudicialRecordHelper.getStatusName(judicialRecord.status) }}
                 </h3>
                 <p class="style-definition-text">
-                    {{ JudicialRecordHelper.getStatusName(judicialRecord.status) }}
-                </p>
-                <p class="style-description-small">
                     {{ judicialRecord.description }}
                 </p>
             </STListItem>
