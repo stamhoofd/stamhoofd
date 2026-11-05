@@ -154,7 +154,6 @@ export function getMemberColumns({ platform, organization, dateRange, group, gro
                 getValue: member => member.judicialRecord.status,
                 format: status => JudicialRecordHelper.getStatusName(status),
                 getStyle: status => status === JudicialRecordStatus.Required ? '' : 'gray',
-                allowSorting: false,
                 minimumWidth: 100,
                 recommendedWidth: 180,
             })]
