@@ -8,7 +8,7 @@ it('returns captured output but redacts split credentials in diagnostics and fai
         process.stderr.write('a secret-');
         setTimeout(() => { process.stderr.write('token failure'); process.exitCode = 2; }, 20);
     `], { capture: true, redact: ['secret-token'], log: (_level, message, fields) => { if (fields['diagnostic.kind'] !== 'command') messages.push(message); } });
-    expect(result).toEqual({ code: 2, stdout: 'payload', stderr: 'a [redacted] failure' });
+    expect(result).toMatchObject({ code: 2, stdout: 'payload', stderr: 'a [redacted] failure', signal: null });
     expect(messages.join('')).not.toContain('secret-token');
     expect(messages.join('')).toContain('[redacted]');
 });

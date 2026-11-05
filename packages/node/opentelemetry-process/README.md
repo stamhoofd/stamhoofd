@@ -28,6 +28,22 @@ unknown credentials in command arguments: the command is logged before execution
 
 `env` replaces the child environment when supplied. `input` supplies stdin, but
 tools that require a native pipe may need an explicit template file instead.
+`input` also accepts a Node Readable; pipeline backpressure limits writes to the
+child. `inheritStdin` retains interactive input while capturing/redacting output.
+Do not combine inherited stdin with `input`.
+
+`signal` cancels execution; `timeoutMs` sets a deadline. Both send SIGTERM, followed
+by SIGKILL after `killAfterMs` (default two seconds). `processGroup: true` includes
+descendants on POSIX; Windows terminates the direct child only. The result retains
+the exit `signal` and a `reason` for cancellation, timeout, capture overflow or input
+failure. Cancellation returns code 130; timeout returns 124; other signal exits use
+128 plus the signal number. An already aborted signal starts no process.
+
+Captured/sanitized stdout defaults to 16 MiB of characters (`maxCaptureChars`).
+Overflow terminates the process with code 1 and `reason: 'output-limit'`; never parse
+stdout from a failed result as complete JSON. Streamed diagnostics are capped at
+1 MiB (`maxDiagnosticChars`) with a truncation notice, bounding writes even to a
+slow sink. Pipes continue draining and the redacted stderr tail remains available.
 `inheritStdio` preserves interactive passthrough for legacy callers; it bypasses
 capture, redaction and output events and must not be used for credential reads.
 
