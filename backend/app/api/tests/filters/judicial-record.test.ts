@@ -184,6 +184,7 @@ describe('Judicial record status (structures helper vs backend SQL parity)', () 
             id: member.id,
             // The same inputs PlatformMember passes to the helper in the frontend
             helperStatus: JudicialRecordHelper.getRequirement({
+                firstName: member.details.firstName,
                 birthDay: member.details.birthDay,
                 responsibilities,
             }).status,
