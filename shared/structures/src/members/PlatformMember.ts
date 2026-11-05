@@ -793,6 +793,7 @@ export class PlatformMember implements ObjectWithRecords {
 
     get judicialRecord(): JudicialRecordRequirement {
         return JudicialRecordHelper.getRequirement({
+            firstName: this.patchedMember.details.firstName,
             birthDay: this.patchedMember.details.birthDay,
             responsibilities: this.patchedMember.responsibilities.map(record => ({
                 startDate: record.startDate,
