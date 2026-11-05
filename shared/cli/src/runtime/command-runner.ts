@@ -1,4 +1,4 @@
-import { processError } from '@node/opentelemetry-process';
+import { formatCommandLine, processError } from '@node/opentelemetry-process';
 import { command as formatCommand, warning } from './ux.js';
 import { writeOutputLine } from './output-target.js';
 import { RunVerbosity } from './verbosity.js';
@@ -29,7 +29,7 @@ export async function run(command: string, args: string[], options: RunOptions =
             capture: options.capture,
             inheritStdin: !options.capture && verbosity === RunVerbosity.Output,
             output: verbosity === RunVerbosity.Output ? 'always' : 'verbose',
-            label: verbosity === RunVerbosity.Quiet ? undefined : `Running ${command}`,
+            label: verbosity === RunVerbosity.Quiet ? false : undefined,
             // Quiet probes must remain silent even in a verbose invocation.
             log: verbosity === RunVerbosity.Quiet ? () => false : undefined,
         });
@@ -53,12 +53,4 @@ export function printFailureSuggestion(error: unknown): void {
     if (error.message.includes('caddy')) {
         warning('Caddy failed. Check Caddy installation and retry: stam setup cert');
     }
-}
-
-function formatCommandLine(command: string, args: string[]): string {
-    return [command, ...args].map(quoteArgument).join(' ');
-}
-
-function quoteArgument(argument: string): string {
-    return /^[\w./:=@+-]+$/.test(argument) ? argument : JSON.stringify(argument);
 }

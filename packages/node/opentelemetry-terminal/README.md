@@ -36,7 +36,10 @@ Non-TTY streams receive plain start/completion lines.
 sanitized before reaching this renderer.
 
 Chalk styling uses bold group headings, cyan progress, green/red completion,
-dim commands and timings, and yellow warnings. Process output is indented beneath
+dim commands and timings, and yellow warnings. Labels marked
+`operation.label.kind: 'command'` are dimmed
+in live progress and start/completion lines; descriptive labels keep normal styling.
+Process output is indented beneath
 its labelled ancestor with a muted gutter; stderr is explicitly labelled. Split
 chunks keep their original text together, and incomplete lines are terminated
 before a new diagnostic or completion line. Child output itself is not recolored.

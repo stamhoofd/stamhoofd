@@ -5,8 +5,11 @@ span and returns `{ code, stdout, stderr }`. Nonzero exits mark the span failed;
 the caller decides whether to throw. Spawn failures reject. The application owns
 the OpenTelemetry SDK and any log sink; importing this package configures neither.
 
-Pass `label` to render the process span itself as a labelled operation. Callers do
-not need a second instrumentation wrapper solely to show subprocess progress.
+Process spans default to the full quoted command, redacted before span creation.
+Pass a descriptive `label` to override it, or `label: false` to hide progress.
+Command labels carry `operation.label.kind: 'command'`; descriptions use
+`'description'`. Labels remain plain text; the renderer owns styling.
+`formatCommandLine(command, args, redact?)` exposes the same formatter for callers.
 
 Command diagnostics are debug events. Output defaults to debug (`output:
 'verbose'`); use `'always'` for info-level output needed in normal operation, such

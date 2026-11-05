@@ -24,6 +24,6 @@ export async function execResult(command: string, args: string[], options: Proce
 /** Checked execution for ordinary operations. Use execResult for meaningful nonzero exit codes. */
 export async function exec(command: string, args: string[], options: ProcessOptions = {}): Promise<ProcessResult> {
     const result = await execResult(command, args, options);
-    if (result.code !== 0) throw processError(options.label ?? `${command} failed.`, command, result);
+    if (result.code !== 0) throw processError(options.label || `${command} failed.`, command, result);
     return result;
 }

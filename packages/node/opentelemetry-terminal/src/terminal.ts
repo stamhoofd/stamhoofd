@@ -9,7 +9,7 @@ import chalk, { Chalk, chalkStderr } from 'chalk';
 import type { ChalkInstance } from 'chalk';
 
 export type TerminalVerbosity = 'quiet' | 'normal' | 'verbose';
-type Operation = { label: string; group: string; depth: number; started: number };
+type Operation = { label: string; command: boolean; group: string; depth: number; started: number };
 
 /** An application-owned span processor and scoped log sink. Never registers an SDK. */
 export class TerminalRenderer implements SpanProcessor {
@@ -57,12 +57,12 @@ export class TerminalRenderer implements SpanProcessor {
         while (parent && !this.operations.has(parent)) parent = this.parents.get(parent);
         const group = this.groupFor(span.attributes);
         const depth = parent ? this.operations.get(parent)!.depth + 1 : group ? 1 : 0;
-        const operation = { label, group, depth, started: performance.now() };
+        const operation = { label, command: span.attributes['operation.label.kind'] === 'command', group, depth, started: performance.now() };
         this.operations.set(id, operation);
         this.heading(group);
         if (!this.output.isTTY) {
             this.finishOutputLine();
-            this.output.write(`${'  '.repeat(depth)}${label}...\n`);
+            this.output.write(`${'  '.repeat(depth)}${this.label(operation)}...\n`);
         }
         this.render();
         if (this.output.isTTY && !this.timer) this.timer = setInterval(() => this.render(), 80);
@@ -79,7 +79,7 @@ export class TerminalRenderer implements SpanProcessor {
         this.heading(operation.group);
         const seconds = span.duration[0] + span.duration[1] / 1e9;
         const symbol = span.status.code === SpanStatusCode.ERROR ? this.colors.red('✗') : this.colors.green('✓');
-        this.output.write(`${'  '.repeat(operation.depth)}${symbol} ${operation.label} ${this.colors.dim(`— ${seconds.toFixed(1)}s`)}\n`);
+        this.output.write(`${'  '.repeat(operation.depth)}${symbol} ${this.label(operation)} ${this.colors.dim(`— ${seconds.toFixed(1)}s`)}\n`);
         this.render();
     }
 
@@ -153,8 +153,12 @@ export class TerminalRenderer implements SpanProcessor {
             return;
         }
         const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-        this.region.update([...this.operations.values()].map(operation => `${'  '.repeat(operation.depth)}${this.colors.cyan(frames[this.frame % frames.length])} ${operation.label} ${this.colors.dim(`— ${((performance.now() - operation.started) / 1000).toFixed(1)}s`)}`).join('\n'));
+        this.region.update([...this.operations.values()].map(operation => `${'  '.repeat(operation.depth)}${this.colors.cyan(frames[this.frame % frames.length])} ${this.label(operation)} ${this.colors.dim(`— ${((performance.now() - operation.started) / 1000).toFixed(1)}s`)}`).join('\n'));
         this.frame++;
+    }
+
+    private label(operation: Operation): string {
+        return operation.command ? this.colors.dim(operation.label) : operation.label;
     }
 
     async forceFlush(): Promise<void> {}

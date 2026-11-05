@@ -53,6 +53,9 @@ start a telemetry SDK. Nested commands reuse the invocation's terminal, SDK and
 cancellation signal. Command code should not call `withCliTelemetry` itself.
 Normal mode shows operations; verbose mode adds command diagnostics and subprocess
 output. Machine-readable command results remain on stdout, diagnostics on stderr.
+Subprocess progress shows the full quoted, redacted command in dim text. Explicit
+descriptive labels retain normal styling. `NO_COLOR` disables styling, and
+`label: false` suppresses subprocess progress (used by quiet probes).
 
 Use `exec` for checked subprocesses and `execResult` when nonzero exit codes are
 part of the command's protocol. Both use the invocation signal, process-library

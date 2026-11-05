@@ -8,8 +8,8 @@ import type { LogSink } from '@common/opentelemetry-decorators';
 import { trace } from '@opentelemetry/api';
 
 export type ProcessOptions = {
-    /** Show this process as an operation without an extra wrapper span. */
-    label?: string;
+    /** Defaults to the redacted command line. Use a description to override it, or false to hide progress. */
+    label?: string | false;
     cwd?: string;
     env?: NodeJS.ProcessEnv;
     input?: string | Readable;
@@ -91,18 +91,28 @@ function redactor(secrets: string[], emit: (text: string) => void) {
     };
 }
 
+function redactionValues(values: string[] = []): string[] {
+    return [...new Set(values.filter(Boolean).flatMap(value => [value, JSON.stringify(value).slice(1, -1)]))].sort((a, b) => b.length - a.length);
+}
+
+function sanitize(value: string, secrets: string[]): string {
+    let result = '';
+    redactor(secrets, (text) => { result += text; })(value, true);
+    return stripVTControlCharacters(result);
+}
+
+/** One plain-text representation for progress, diagnostics and traces. Redact before publishing it. */
+export function formatCommandLine(command: string, args: string[], redact: string[] = []): string {
+    return sanitize([command, ...args].map(value => /^[\w./:=@+-]+$/.test(value) ? value : JSON.stringify(value)).join(' '), redactionValues(redact));
+}
+
 export const runProcess = instrumentFunction('process.run', async function (command: string, args: string[], options: ProcessOptions = {}): Promise<ProcessResult> {
     const emit: LogSink = (...event) => {
         try { return (options.log ?? log)(...event); } catch { return false; }
     };
-    const secrets = [...new Set((options.redact ?? []).filter(Boolean).flatMap(value => [value, JSON.stringify(value).slice(1, -1)]))].sort((a, b) => b.length - a.length);
-    const clean = (value: string) => {
-        let result = '';
-        redactor(secrets, (text) => { result += text; })(value, true);
-        return stripVTControlCharacters(result);
-    };
-    const commandLine = [command, ...args].map(value => /^[\w./:=@+-]+$/.test(value) ? value : JSON.stringify(value)).join(' ');
-    diagnostic({ kind: 'command', message: clean(commandLine) }, emit);
+    const secrets = redactionValues(options.redact);
+    const clean = (value: string) => sanitize(value, secrets);
+    diagnostic({ kind: 'command', message: formatCommandLine(command, args, options.redact) }, emit);
     if (options.signal?.aborted) return { code: 130, signal: null, reason: 'aborted', stdout: '', stderr: '(no stderr returned)' };
     if ((options.inheritStdin || options.inheritStdio) && options.input !== undefined) throw new Error('Inherited stdin cannot be combined with input.');
     for (const limit of [options.timeoutMs, options.killAfterMs, options.maxCaptureChars, options.maxDiagnosticChars]) {
@@ -198,4 +208,12 @@ export const runProcess = instrumentFunction('process.run', async function (comm
             } catch (error) { reject(error); }
         });
     });
-}, { fields: ([command, _args, options]) => ({ 'process.executable.name': command, ...(options?.label ? { 'operation.label': options.label } : {}) }) });
+}, { fields: ([command, args, options]) => ({
+    'process.executable.name': command,
+    'operation.label': options?.label === false
+        ? undefined
+        : options?.label === undefined
+            ? formatCommandLine(command, args, options?.redact)
+            : sanitize(options.label, redactionValues(options.redact)),
+    'operation.label.kind': options?.label === undefined ? 'command' : 'description',
+}) });
