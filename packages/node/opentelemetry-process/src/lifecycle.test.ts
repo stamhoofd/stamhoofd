@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream';
-import { expect, it } from 'vitest';
+import { expect, it, vi } from 'vitest';
 import { processError, runProcess } from './process.js';
 
 it('does not spawn for an already aborted signal', async () => {
@@ -19,6 +19,53 @@ it('cancels an active child and retains its signal', async () => {
 it('terminates a hung child at its deadline', async () => {
     const result = await runProcess(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], { timeoutMs: 100 });
     expect(result).toMatchObject({ code: 124, reason: 'timeout' });
+});
+
+it.skipIf(process.platform === 'win32')('escalates group cancellation after the direct child closes its pipes', async () => {
+    const controller = new AbortController();
+    const kill = vi.spyOn(process, 'kill');
+    let group: number | undefined;
+    try {
+        const result = await runProcess(process.execPath, ['-e', `
+            const { spawn } = require('node:child_process');
+            const descendant = spawn(process.execPath, ['-e', \`
+                process.on('SIGTERM', () => {});
+                setInterval(() => {}, 1000);
+                process.send('ready');
+                process.disconnect();
+            \`], { stdio: ['ignore', 'ignore', 'ignore', 'ipc'] });
+            descendant.on('message', () => process.stdout.write('ready\\n'));
+        `], {
+            processGroup: true,
+            signal: controller.signal,
+            killAfterMs: 50,
+            timeoutMs: 3000,
+            log: (_level, message, fields) => {
+                if (fields['diagnostic.kind'] === 'stdout' && message.includes('ready')) controller.abort();
+            },
+        });
+        group = kill.mock.calls.find(([, signal]) => signal === 'SIGTERM')?.[0];
+        expect(result.reason).toBe('aborted');
+        expect(group).toBeLessThan(0);
+        expect(kill).toHaveBeenCalledWith(group, 'SIGKILL');
+    } finally {
+        group ??= kill.mock.calls.find(([, signal]) => signal === 'SIGTERM')?.[0];
+        kill.mockRestore();
+        if (group !== undefined) {
+            try {
+                process.kill(group, 'SIGKILL');
+            } catch (error) {
+                if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
+            }
+        }
+    }
+});
+
+it.each([
+    { inheritStdio: true, capture: true },
+    { inheritStdio: true, sanitizeStdout: (text: string) => text },
+])('rejects incompatible passthrough options before spawning: %j', async (options) => {
+    await expect(runProcess('nonexistent-executable', [], options)).rejects.toThrow('Inherited stdio cannot be combined with capture or stdout sanitization.');
 });
 
 it('fails on capture overflow instead of returning successful truncated JSON', async () => {

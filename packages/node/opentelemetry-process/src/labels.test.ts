@@ -23,3 +23,14 @@ it.each([undefined, 'Planning secret"value', false] as const)('sanitizes labels 
     expect(JSON.stringify(attributes)).not.toContain('\u001b');
     expect(messages.join('')).toContain('tool --token "[redacted]" "two words"');
 });
+
+it('records the exit code and failure status for pre-aborted execution', async () => {
+    const span = trace.wrapSpanContext({ traceId: '1'.repeat(32), spanId: '1'.repeat(16), traceFlags: 1 });
+    const setAttribute = vi.spyOn(span, 'setAttribute');
+    const setStatus = vi.spyOn(span, 'setStatus');
+    vi.spyOn(trace, 'getActiveSpan').mockReturnValue(span);
+    const result = await runProcess('nonexistent-executable', [], { signal: AbortSignal.abort() });
+    expect(result.code).toBe(130);
+    expect(setAttribute).toHaveBeenCalledWith('process.exit.code', 130);
+    expect(setStatus).toHaveBeenCalledWith({ code: 2 });
+});
