@@ -2891,6 +2891,9 @@ importers:
       '@inquirer/prompts':
         specifier: 7.10.1
         version: 7.10.1(@types/node@22.20.4)
+      '@node/opentelemetry-process':
+        specifier: workspace:*
+        version: link:../../packages/node/opentelemetry-process
       '@node/opentelemetry-terminal':
         specifier: workspace:*
         version: link:../../packages/node/opentelemetry-terminal

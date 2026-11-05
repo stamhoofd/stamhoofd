@@ -8,6 +8,8 @@ import type { LogSink } from '@common/opentelemetry-decorators';
 import { trace } from '@opentelemetry/api';
 
 export type ProcessOptions = {
+    /** Show this process as an operation without an extra wrapper span. */
+    label?: string;
     cwd?: string;
     env?: NodeJS.ProcessEnv;
     input?: string | Readable;
@@ -196,4 +198,4 @@ export const runProcess = instrumentFunction('process.run', async function (comm
             } catch (error) { reject(error); }
         });
     });
-}, { fields: ([command]) => ({ 'process.executable.name': command }) });
+}, { fields: ([command, _args, options]) => ({ 'process.executable.name': command, ...(options?.label ? { 'operation.label': options.label } : {}) }) });

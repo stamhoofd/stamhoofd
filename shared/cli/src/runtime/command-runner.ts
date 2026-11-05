@@ -1,7 +1,8 @@
-import { spawn } from 'node:child_process';
+import { processError } from '@node/opentelemetry-process';
 import { command as formatCommand, warning } from './ux.js';
-import { OutputStream, writeOutputChunk, writeOutputLine } from './output-target.js';
+import { writeOutputLine } from './output-target.js';
 import { RunVerbosity } from './verbosity.js';
+import { execResult } from './process.js';
 
 export { RunVerbosity };
 
@@ -16,81 +17,28 @@ export type RunOptions = {
 
 export type RunCaptureResult = { stdout: string; stderr: string; status: number | null };
 
+/** Compatibility adapter: preserves merged environments and the legacy capture result shape. */
 export async function run(command: string, args: string[], options: RunOptions & { capture: true }): Promise<RunCaptureResult>;
 export async function run(command: string, args: string[], options?: RunOptions): Promise<void>;
 export async function run(command: string, args: string[], options: RunOptions = {}): Promise<void | RunCaptureResult> {
     const verbosity = options.verbosity ?? RunVerbosity.Command;
-    if (verbosity !== RunVerbosity.Quiet) {
-        printCommand(command, args);
-    }
-
-    if (options.capture) {
-        return await new Promise<RunCaptureResult>((resolve, reject) => {
-            const child = spawn(command, args, {
-                cwd: options.cwd,
-                env: { ...process.env, ...options.env },
-                stdio: ['ignore', 'pipe', 'pipe'],
-            });
-            let stdout = '';
-            let stderr = '';
-            child.stdout.on('data', (chunk: Buffer) => {
-                stdout += String(chunk);
-                if (verbosity === RunVerbosity.Output) {
-                    writeOutputChunk(chunk, OutputStream.Stdout);
-                }
-            });
-            child.stderr.on('data', (chunk: Buffer) => {
-                stderr += String(chunk);
-                if (verbosity === RunVerbosity.Output) {
-                    writeOutputChunk(chunk, OutputStream.Stderr);
-                }
-            });
-            child.on('error', (error) => {
-                if (options.allowFailure) {
-                    resolve({ stdout, stderr: String(error), status: 1 });
-                    return;
-                }
-                reject(error);
-            });
-            child.on('exit', (status) => {
-                if (status === 0 || options.allowFailure) {
-                    resolve({ stdout, stderr, status });
-                    return;
-                }
-                reject(new Error(`${formatCommandLine(command, args)} exited with status ${status}: ${stderr}`));
-            });
-        });
-    }
-
-    await new Promise<void>((resolve, reject) => {
-        const child = spawn(command, args, {
+    try {
+        const result = await execResult(command, args, {
             cwd: options.cwd,
             env: { ...process.env, ...options.env },
-            stdio: verbosity === RunVerbosity.Output ? ['inherit', 'pipe', 'pipe'] : ['ignore', 'ignore', 'pipe'],
+            capture: options.capture,
+            inheritStdin: !options.capture && verbosity === RunVerbosity.Output,
+            output: verbosity === RunVerbosity.Output ? 'always' : 'verbose',
+            label: verbosity === RunVerbosity.Quiet ? undefined : `Running ${command}`,
+            // Quiet probes must remain silent even in a verbose invocation.
+            log: verbosity === RunVerbosity.Quiet ? () => false : undefined,
         });
-        let stderr = '';
-
-        if (verbosity === RunVerbosity.Output && child.stdout) {
-            child.stdout.on('data', (chunk: Buffer) => writeOutputChunk(chunk, OutputStream.Stdout));
-        }
-        if (child.stderr) {
-            child.stderr.on('data', (chunk: Buffer) => {
-                stderr += String(chunk);
-                if (verbosity === RunVerbosity.Output) {
-                    writeOutputChunk(chunk, OutputStream.Stderr);
-                }
-            });
-        }
-
-        child.on('error', reject);
-        child.on('exit', (code) => {
-            if (code === 0 || options.allowFailure) {
-                resolve();
-                return;
-            }
-            reject(new Error(`${formatCommandLine(command, args)} exited with status ${code}${stderr ? `: ${stderr.trim()}` : ''}`));
-        });
-    });
+        if (result.code !== 0 && !options.allowFailure) throw processError(`${command} failed.`, command, result);
+        if (options.capture) return { stdout: result.stdout, stderr: result.stderr === '(no stderr returned)' ? '' : result.stderr, status: result.code };
+    } catch (error) {
+        if (!options.allowFailure) throw error;
+        if (options.capture) return { stdout: '', stderr: error instanceof Error ? error.message : String(error), status: 1 };
+    }
 }
 
 export function printCommand(command: string, args: string[]): void {
@@ -98,9 +46,7 @@ export function printCommand(command: string, args: string[]): void {
 }
 
 export function printFailureSuggestion(error: unknown): void {
-    if (!(error instanceof Error)) {
-        return;
-    }
+    if (!(error instanceof Error)) return;
     if (error.message.includes('docker') || error.message.includes('podman')) {
         warning('Podman or Docker is not reachable. Start a container runtime and retry: stam setup');
     }

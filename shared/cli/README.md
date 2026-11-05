@@ -52,6 +52,14 @@ cancellation signal. Command code should not call `withCliTelemetry` itself.
 Normal mode shows operations; verbose mode adds command diagnostics and subprocess
 output. Machine-readable command results remain on stdout, diagnostics on stderr.
 
+Use `exec` for checked subprocesses and `execResult` when nonzero exit codes are
+part of the command's protocol. Both use the invocation signal, process-library
+limits and redacted errors. `env` is a complete environment; the transitional
+`run` adapter retains ambient-environment merging and `{ status, stdout, stderr }`
+for existing callers. Native stdio suspends progress while the child owns the
+terminal; inherited stdin retains streamed diagnostics. Credential capture must
+use a sanitizer, not native stdio.
+
 `stam devops infra` commands use the opt-in telemetry runtime. Setup, sync,
 bootstrap and validation show labelled OpenTelemetry
 operations and timings by default, grouped by environment and vault. Interactive

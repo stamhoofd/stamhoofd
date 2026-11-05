@@ -1,130 +1,40 @@
-import { EventEmitter } from 'node:events';
-import { spawn } from 'node:child_process';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import { run, RunVerbosity } from './command-runner.js';
-import { OutputStream, writeOutputChunk, writeOutputLine } from './output-target.js';
+import { execResult } from './process.js';
 
-vi.mock('node:child_process', () => ({
-    spawn: vi.fn(),
-}));
+vi.mock('./process.js', () => ({ execResult: vi.fn(async () => ({ code: 0, stdout: 'value', stderr: '(no stderr returned)' })) }));
+afterEach(() => { vi.clearAllMocks(); vi.unstubAllEnvs(); });
 
-vi.mock('./output-target.js', async (importOriginal) => ({
-    ...await importOriginal<typeof import('./output-target.js')>(),
-    writeOutputLine: vi.fn(),
-    writeOutputChunk: vi.fn(),
-}));
-
-vi.mock('./ux.js', () => ({
-    command: vi.fn((value: string) => value),
-    warning: vi.fn(),
-}));
-
-describe('command runner', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
-
-    afterEach(() => {
-        vi.restoreAllMocks();
-    });
-
-    it('prints commands by default while suppressing child output', async () => {
-        const child = createChild();
-        vi.mocked(spawn).mockReturnValue(child as never);
-
-        const promise = run('git', ['status']);
-        child.stdout.emit('data', 'hidden output');
-        child.emit('exit', 0);
-
-        await expect(promise).resolves.toBeUndefined();
-        expect(writeOutputLine).toHaveBeenCalledWith('  git status');
-        expect(spawn).toHaveBeenCalledWith('git', ['status'], expect.objectContaining({ stdio: ['ignore', 'ignore', 'pipe'] }));
-    });
-
-    it('prints captured output in verbose mode while preserving the result', async () => {
-        const child = createChild();
-        vi.mocked(spawn).mockReturnValue(child as never);
-
-        const promise = run('git', ['status'], { capture: true, verbosity: RunVerbosity.Output });
-        child.stdout.emit('data', 'ok');
-        child.emit('exit', 0);
-
-        await expect(promise).resolves.toEqual({ stdout: 'ok', stderr: '', status: 0 });
-        expect(writeOutputChunk).toHaveBeenCalledWith('ok', OutputStream.Stdout);
-    });
-
-    it('prints captured stderr in verbose mode while preserving the result', async () => {
-        const child = createChild();
-        vi.mocked(spawn).mockReturnValue(child as never);
-
-        const promise = run('security', ['verify-cert'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Output });
-        child.stderr.emit('data', 'certificate not trusted\n');
-        child.emit('exit', 1);
-
-        await expect(promise).resolves.toEqual({ stdout: '', stderr: 'certificate not trusted\n', status: 1 });
-        expect(writeOutputChunk).toHaveBeenCalledWith('certificate not trusted\n', OutputStream.Stderr);
-    });
-
-    it('prints verbose quiet command output and retains stderr in failures', async () => {
-        const child = createChild();
-        vi.mocked(spawn).mockReturnValue(child as never);
-
-        const promise = run('caddy', ['stop'], { verbosity: RunVerbosity.Output });
-        child.stdout.emit('data', 'stopping\n');
-        child.stderr.emit('data', 'failed\n');
-        child.emit('exit', 1);
-
-        await expect(promise).rejects.toThrow('caddy stop exited with status 1: failed');
-        expect(writeOutputChunk).toHaveBeenCalledWith('stopping\n', OutputStream.Stdout);
-        expect(writeOutputChunk).toHaveBeenCalledWith('failed\n', OutputStream.Stderr);
-    });
-
-    it('does not print quiet commands and includes stderr on failure', async () => {
-        const child = createChild();
-        vi.mocked(spawn).mockReturnValue(child as never);
-
-        const promise = run('podman', ['run', 'docker.io/example/image:latest'], { verbosity: RunVerbosity.Quiet });
-        child.stderr.emit('data', 'Error: real failure\n');
-        child.emit('exit', 125);
-
-        await expect(promise).rejects.toThrow('podman run docker.io/example/image:latest exited with status 125: Error: real failure');
-        expect(writeOutputLine).not.toHaveBeenCalled();
-    });
-
-    it('forwards verbose child output through parent stderr for live rendering', async () => {
-        const child = createChild();
-        vi.mocked(spawn).mockReturnValue(child as never);
-        const promise = run('pnpm', ['run', 'build'], { verbosity: RunVerbosity.Output });
-        child.stdout.emit('data', Buffer.from('build started\n'));
-        child.stderr.emit('data', Buffer.from('build warning\n'));
-        child.emit('exit', 0);
-
-        await expect(promise).resolves.toBeUndefined();
-        expect(writeOutputLine).toHaveBeenCalledWith('  pnpm run build');
-        expect(spawn).toHaveBeenCalledWith('pnpm', ['run', 'build'], expect.objectContaining({ stdio: ['inherit', 'pipe', 'pipe'] }));
-        expect(writeOutputChunk).toHaveBeenCalledWith(Buffer.from('build started\n'), OutputStream.Stdout);
-        expect(writeOutputChunk).toHaveBeenCalledWith(Buffer.from('build warning\n'), OutputStream.Stderr);
-    });
-
-    it('returns captured output while forwarding it in verbose mode', async () => {
-        const child = createChild();
-        vi.mocked(spawn).mockReturnValue(child as never);
-        const promise = run('git', ['status'], { capture: true, verbosity: RunVerbosity.Output });
-        child.stdout.emit('data', 'ok');
-        child.stderr.emit('data', 'warning');
-        child.emit('exit', 0);
-
-        await expect(promise).resolves.toEqual({ stdout: 'ok', stderr: 'warning', status: 0 });
-        expect(writeOutputLine).toHaveBeenCalledWith('  git status');
-        expect(writeOutputChunk).toHaveBeenCalledWith('ok', OutputStream.Stdout);
-        expect(writeOutputChunk).toHaveBeenCalledWith('warning', OutputStream.Stderr);
-        expect(spawn).toHaveBeenCalledWith('git', ['status'], expect.objectContaining({ stdio: ['ignore', 'pipe', 'pipe'] }));
-    });
+it('preserves ambient environment and allows explicit overrides', async () => {
+    vi.stubEnv('STAM_TEST_AMBIENT', 'ambient');
+    await run('example', [], { env: { CUSTOM: 'override' } });
+    expect(execResult).toHaveBeenCalledWith('example', [], expect.objectContaining({ env: expect.objectContaining({ STAM_TEST_AMBIENT: 'ambient', CUSTOM: 'override' }), label: 'Running example' }));
 });
 
-function createChild(): EventEmitter & { stdout: EventEmitter; stderr: EventEmitter } {
-    const child = new EventEmitter() as EventEmitter & { stdout: EventEmitter; stderr: EventEmitter };
-    child.stdout = new EventEmitter();
-    child.stderr = new EventEmitter();
-    return child;
-}
+it('preserves captured result shape and empty stderr', async () => {
+    await expect(run('example', [], { capture: true })).resolves.toEqual({ status: 0, stdout: 'value', stderr: '' });
+    expect(execResult).toHaveBeenCalledWith('example', [], expect.objectContaining({ capture: true, inheritStdin: false }));
+});
+
+it('suppresses explicit quiet probes and keeps failed stderr in the error', async () => {
+    vi.mocked(execResult).mockResolvedValueOnce({ code: 2, stdout: '', stderr: 'useful failure', signal: null });
+    await expect(run('example', [], { verbosity: RunVerbosity.Quiet })).rejects.toThrow('useful failure');
+    const options = vi.mocked(execResult).mock.calls[0][2]!;
+    expect(options.label).toBeUndefined();
+    expect(options.log?.('error', 'hidden', {})).toBe(false);
+});
+
+it('retains nonzero codes when failure is explicitly allowed', async () => {
+    vi.mocked(execResult).mockResolvedValueOnce({ code: 2, stdout: 'changes', stderr: '', signal: null });
+    await expect(run('example', [], { capture: true, allowFailure: true })).resolves.toMatchObject({ status: 2, stdout: 'changes' });
+});
+
+it('retains allowed spawn failures for tool availability checks', async () => {
+    vi.mocked(execResult).mockRejectedValueOnce(new Error('ENOENT'));
+    await expect(run('missing', [], { capture: true, allowFailure: true })).resolves.toEqual({ status: 1, stdout: '', stderr: 'ENOENT' });
+});
+
+it('uses coordinated stdin and normal output for output-mode commands', async () => {
+    await run('example', [], { verbosity: RunVerbosity.Output });
+    expect(execResult).toHaveBeenCalledWith('example', [], expect.objectContaining({ inheritStdin: true, output: 'always' }));
+});
