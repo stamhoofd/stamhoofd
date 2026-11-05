@@ -31,5 +31,14 @@ progress with writes. Non-TTY streams receive plain start/completion lines.
 `groupBy` selects context attributes to display as headings. Secrets must be
 sanitized before reaching this renderer.
 
+Chalk styling uses bold group headings, cyan progress, green/red completion,
+dim commands and timings, and yellow warnings. Process output is indented beneath
+its labelled ancestor with a muted gutter; stderr is explicitly labelled. Split
+chunks keep their original text together, and incomplete lines are terminated
+before a new diagnostic or completion line. Child output itself is not recolored.
+Color support follows the destination stream; `NO_COLOR` disables renderer colors.
+Use `color: false` to disable styling or `color: true` to force basic color in an
+embedded renderer. This never adds ANSI codes to log events or exported spans.
+
 Run `pnpm stam test opentelemetry-terminal` for the initial lifecycle smoke test.
 Interactive behavior is being reviewed before broader renderer coverage is added.
