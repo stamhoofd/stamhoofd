@@ -66,11 +66,11 @@
         "test:reset": "pnpm run build:full && pnpm run test"
     },
     "dependencies": {
-        "@aws-sdk/client-s3": "3.1158.0",
-        "@aws-sdk/client-ses": "3.1158.0",
-        "@aws-sdk/client-sesv2": "3.1158.0",
-        "@aws-sdk/client-sqs": "3.1158.0",
-        "@aws-sdk/s3-request-presigner": "3.1158.0",
+        "@aws-sdk/client-s3": "3.1159.0",
+        "@aws-sdk/client-ses": "3.1159.0",
+        "@aws-sdk/client-sesv2": "3.1159.0",
+        "@aws-sdk/client-sqs": "3.1159.0",
+        "@aws-sdk/s3-request-presigner": "3.1159.0",
         "@bwip-js/node": "4.11.4",
         "@common/encoding": "workspace:*",
         "@common/errors": "workspace:*",
@@ -125,7 +125,7 @@
         "@types/mailparser": "3.9.0",
         "@types/node": "22.20.4",
         "nock": "14.0.17",
-        "qs": "6.17.0",
+        "qs": "6.17.1",
         "sinon": "18.0.1",
         "vitest": "4.1.12"
     },
