@@ -202,7 +202,7 @@ describe('shared build orchestration', () => {
         const watch = sharedBuildWatchCommand();
 
         expect(watch).toContain(`rm -f ${readyFile}`);
-        expect(watch).toContain(`--exec 'pnpm run build:shared --output-logs=new-only && touch ${readyFile} || exit 0'`);
+        expect(watch).toContain(`--exec 'node shared/cli/dev/shared-build.mjs ${readyFile}'`);
         expect(watch).toContain('--signal SIGTERM');
         expect(watch).toContain('--watch shared --watch backend/shared');
         expect(watch).toContain('--watch packages/common --watch packages/node --watch packages/browser');
