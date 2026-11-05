@@ -52,3 +52,8 @@ authority, but it is signed, cacheable, and keeps working when the responder doe
 revocation lists, and answers requests out of a stub, so no test touches the network. The signed pdfs
 come from `@stamhoofd/pdf-verify-core/testing/SignedPdfBuilder.js`: a real extract holds someone's
 name, birth date and address, so one is never committed here.
+
+The revocation lookup is tested directly, with the stub client its functions take. `verifyPdf` takes
+no such client — the backend entry point has nothing in it that only a test uses — so the test that
+runs the whole wrapper over a document that passes replaces `fetch` instead. A url that was not put
+in its map fails the test rather than reaching a responder.
