@@ -25,6 +25,9 @@ const CONTENT_TYPE_ATTRIBUTE_OID = '1.2.840.113549.1.9.3';
 const SIGNING_TIME_ATTRIBUTE_OID = '1.2.840.113549.1.9.5';
 const MESSAGE_DIGEST_ATTRIBUTE_OID = '1.2.840.113549.1.9.4';
 const SIGNING_CERTIFICATE_V2_ATTRIBUTE_OID = '1.2.840.113549.1.9.16.2.47';
+const AUTHORITY_INFO_ACCESS_OID = '1.3.6.1.5.5.7.1.1';
+const OCSP_ACCESS_METHOD_OID = '1.3.6.1.5.5.7.48.1';
+const URI_GENERAL_NAME = 6;
 const DATA_OID = '1.2.840.113549.1.7.1';
 const SIGNED_DATA_OID = '1.2.840.113549.1.7.2';
 
@@ -54,6 +57,13 @@ export async function issueCertificate(options: {
     isCertificateAuthority?: boolean;
     /** Issue this certificate on an existing key pair, so two certificates share one public key. */
     reuseKeysOf?: TestCertificate;
+    /**
+     * Where to ask whether this certificate is still valid. Only the package that adds the
+     * revocation lookup on top of this one needs it: a certificate that says nowhere to ask leaves
+     * every status unestablished, so its own verification cannot be run over a chain built here
+     * without one.
+     */
+    ocspUrl?: string;
 }): Promise<TestCertificate> {
     const crypto = pkijs.getCrypto(true);
     const keys = options.reuseKeysOf === undefined
@@ -74,6 +84,19 @@ export async function issueCertificate(options: {
             extnValue: new pkijs.BasicConstraints({ cA: options.isCertificateAuthority ?? false }).toSchema().toBER(false),
         }),
     ];
+
+    if (options.ocspUrl !== undefined) {
+        certificate.extensions.push(new pkijs.Extension({
+            extnID: AUTHORITY_INFO_ACCESS_OID,
+            critical: false,
+            extnValue: new pkijs.InfoAccess({
+                accessDescriptions: [new pkijs.AccessDescription({
+                    accessMethod: OCSP_ACCESS_METHOD_OID,
+                    accessLocation: new pkijs.GeneralName({ type: URI_GENERAL_NAME, value: options.ocspUrl }),
+                })],
+            }).toSchema().toBER(false),
+        }));
+    }
 
     await certificate.subjectPublicKeyInfo.importKey(keys.publicKey, crypto);
     await certificate.sign(options.issuer ? options.issuer.privateKey : keys.privateKey, 'SHA-256', crypto);
@@ -101,7 +124,13 @@ export const TEST_SIGNER_ORGANIZATION_IDENTIFIER = 'VATBE-0123456789';
 export const TEST_SIGNER_COMMON_NAME = 'Signing Authority - Document Service';
 export const TEST_SIGNER_NAME = 'Signing Authority';
 
-export async function createTestChain(options: { signerNotBefore?: Date; signerNotAfter?: Date } = {}): Promise<TestChain> {
+export async function createTestChain(options: {
+    signerNotBefore?: Date;
+    signerNotAfter?: Date;
+    /** Per certificate, since a responder answers about one of them at a time. */
+    signerOcspUrl?: string;
+    intermediateOcspUrl?: string;
+} = {}): Promise<TestChain> {
     const anchor = await issueCertificate({
         subject: [['2.5.4.3', 'Test Document Signing Root'], ['2.5.4.10', 'Test nv-sa']],
         isCertificateAuthority: true,
@@ -111,6 +140,7 @@ export async function createTestChain(options: { signerNotBefore?: Date; signerN
         subject: [['2.5.4.3', 'Test AATL CA'], ['2.5.4.10', 'Test nv-sa']],
         issuer: anchor,
         isCertificateAuthority: true,
+        ocspUrl: options.intermediateOcspUrl,
     });
 
     const signer = await issueCertificate({
@@ -122,6 +152,7 @@ export async function createTestChain(options: { signerNotBefore?: Date; signerN
         issuer: intermediate,
         notBefore: options.signerNotBefore,
         notAfter: options.signerNotAfter,
+        ocspUrl: options.signerOcspUrl,
     });
 
     return {
