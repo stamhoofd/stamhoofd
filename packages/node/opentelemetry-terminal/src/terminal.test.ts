@@ -7,6 +7,22 @@ import { TerminalRenderer } from './terminal.js';
 
 afterEach(() => vi.unstubAllEnvs());
 
+it.each(['normal', 'quiet'] as const)('shows a static interactive marker and no animation in %s mode', async (verbosity) => {
+    vi.stubEnv('NO_COLOR', '1');
+    const stream = Object.assign(new PassThrough(), { isTTY: true, columns: 80, rows: 24 });
+    let output = '';
+    stream.on('data', (chunk: Buffer) => { output += chunk.toString(); });
+    const renderer = new TerminalRenderer({ stream: stream as unknown as NodeJS.WriteStream, verbosity, color: true });
+    await renderer.withInteractiveOperation('sudo install', async (write) => {
+        expect(output).toBe(verbosity === 'quiet' ? '' : '? sudo install\n');
+        write('Password: \n');
+    });
+    expect(output).not.toMatch(/[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]/);
+    if (verbosity === 'quiet') expect(output).toBe('Password: \n');
+    else expect(output).toBe('? sudo install\nPassword: \n\r\x1b[2A\x1b[0J✓ sudo install\n');
+    await renderer.shutdown();
+});
+
 it('keeps plain split output free of gutters and separates stream changes', async () => {
     const stream = new PassThrough();
     let output = '';

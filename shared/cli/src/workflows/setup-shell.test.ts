@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { run, RunVerbosity } from '../runtime/command-runner.js';
-import { exec } from '../runtime/process.js';
+import { execSudo } from '../runtime/process.js';
 import { checkShellShortcut, removeLegacyShellFunction, setupShellShortcut } from './setup-shell.js';
 
 vi.mock(import('../runtime/command-runner.js'), async importOriginal => ({
@@ -14,7 +14,7 @@ vi.mock(import('../runtime/command-runner.js'), async importOriginal => ({
     run: vi.fn<typeof run>(),
 }));
 vi.mock('../runtime/ux.js', () => ({ command: (text: string) => text, info: vi.fn(), success: vi.fn() }));
-vi.mock('../runtime/process.js', () => ({ exec: vi.fn(async () => ({ code: 0, stdout: '', stderr: '', signal: null })) }));
+vi.mock('../runtime/process.js', () => ({ execSudo: vi.fn(async () => ({ code: 0, stdout: '', stderr: '', signal: null })) }));
 
 const execFileAsync = promisify(execFile);
 const script = fileURLToPath(new URL('../../bin/stam', import.meta.url));
@@ -51,12 +51,12 @@ describe('shortcut installation directory', () => {
     beforeEach(() => vi.clearAllMocks());
     afterEach(() => vi.restoreAllMocks());
 
-    it('gives sudo native terminal access during shortcut installation', async () => {
+    it('uses shared sudo prompt handling during shortcut installation', async () => {
         vi.spyOn(fs, 'stat').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
         vi.spyOn(fs, 'readFile').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
         await setupShellShortcut();
-        expect(exec).toHaveBeenNthCalledWith(1, 'sudo', ['mkdir', '-p', '/usr/local/bin'], { inheritStdio: true });
-        expect(exec).toHaveBeenNthCalledWith(2, 'sudo', ['install', '-m', '755', script, '/usr/local/bin/stam'], { inheritStdio: true });
+        expect(execSudo).toHaveBeenNthCalledWith(1, ['mkdir', '-p', '/usr/local/bin']);
+        expect(execSudo).toHaveBeenNthCalledWith(2, ['install', '-m', '755', script, '/usr/local/bin/stam']);
         expect(run).not.toHaveBeenCalled();
     });
 
@@ -65,8 +65,8 @@ describe('shortcut installation directory', () => {
         vi.spyOn(fs, 'stat').mockResolvedValue({ isDirectory: () => true } as never);
         vi.spyOn(fs, 'readFile').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
         await setupShellShortcut();
-        expect(exec).not.toHaveBeenCalledWith('sudo', ['mkdir', '-p', '/usr/local/bin'], expect.anything());
-        expect(exec).toHaveBeenCalledWith('sudo', ['install', '-m', '755', script, '/usr/local/bin/stam'], expect.anything());
+        expect(execSudo).not.toHaveBeenCalledWith(['mkdir', '-p', '/usr/local/bin']);
+        expect(execSudo).toHaveBeenCalledWith(['install', '-m', '755', script, '/usr/local/bin/stam']);
     });
 
     it('creates the directory before installation when missing', async () => {
@@ -74,8 +74,8 @@ describe('shortcut installation directory', () => {
         vi.spyOn(fs, 'stat').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
         vi.spyOn(fs, 'readFile').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
         await setupShellShortcut();
-        expect(exec).toHaveBeenNthCalledWith(1, 'sudo', ['mkdir', '-p', '/usr/local/bin'], expect.anything());
-        expect(exec).toHaveBeenNthCalledWith(2, 'sudo', ['install', '-m', '755', script, '/usr/local/bin/stam'], expect.anything());
+        expect(execSudo).toHaveBeenNthCalledWith(1, ['mkdir', '-p', '/usr/local/bin']);
+        expect(execSudo).toHaveBeenNthCalledWith(2, ['install', '-m', '755', script, '/usr/local/bin/stam']);
     });
 });
 

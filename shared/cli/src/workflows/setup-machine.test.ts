@@ -2,7 +2,7 @@ import dns from 'node:dns/promises';
 import fs from 'node:fs/promises';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { run, RunVerbosity } from '../runtime/command-runner.js';
-import { exec } from '../runtime/process.js';
+import { execSudo } from '../runtime/process.js';
 import { confirm } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
@@ -20,7 +20,7 @@ const dnsResolver = vi.hoisted(() => ({
     setServers: vi.fn(),
 }));
 
-vi.mock('../runtime/process.js', () => ({ exec: vi.fn(async () => ({ code: 0, stdout: '', stderr: '', signal: null })) }));
+vi.mock('../runtime/process.js', () => ({ execSudo: vi.fn(async () => ({ code: 0, stdout: '', stderr: '', signal: null })) }));
 
 vi.mock('node:dns/promises', () => ({
     default: {
@@ -70,18 +70,17 @@ vi.mock('../runtime/devops-plugin.js', () => ({ getOptionalDevopsSetupChecks: vi
 describe('setup machine workflow', () => {
     const platform = process.platform;
 
-    it('gives password-capable sudo repairs exclusive native terminal access', async () => {
+    it('uses shared sudo prompt handling for privileged repairs', async () => {
         setPlatform('linux');
         mockSetupCommands({});
         vi.spyOn(fs, 'writeFile').mockResolvedValue(undefined);
         vi.spyOn(fs, 'rm').mockResolvedValue(undefined);
         await setupDns({ yes: true, dryRun: false });
-        expect(exec).toHaveBeenCalledWith('sudo', ['systemctl', 'restart', 'systemd-resolved'], { inheritStdio: true });
+        expect(execSudo).toHaveBeenCalledWith(['systemctl', 'restart', 'systemd-resolved']);
         vi.mocked(run).mockResolvedValue({ status: 1, stdout: '', stderr: '' } as never);
         await setupPrivilegedPortRedirects({ yes: true, dryRun: false });
-        expect(exec).toHaveBeenCalledWith('sudo', expect.arrayContaining(['iptables', '-A']), { inheritStdio: true });
-        expect(vi.mocked(exec).mock.calls).toHaveLength(7);
-        for (const [, , options] of vi.mocked(exec).mock.calls) expect(options).toEqual({ inheritStdio: true });
+        expect(execSudo).toHaveBeenCalledWith(expect.arrayContaining(['iptables', '-A']));
+        expect(vi.mocked(execSudo).mock.calls).toHaveLength(7);
     });
 
     beforeEach(() => {
@@ -214,8 +213,8 @@ describe('setup machine workflow', () => {
         setPlatform('linux');
         const options = { dns: 'Global: 1.1.1.1\n', domains: 'Global:\n', query: '' };
         mockSetupCommands(options);
-        vi.mocked(exec).mockImplementation(async (command, args) => {
-            if (command === 'sudo' && args[0] === 'systemctl') {
+        vi.mocked(execSudo).mockImplementation(async (args) => {
+            if (args[0] === 'systemctl') {
                 options.dns = 'Global: 127.0.0.1:1053\n';
                 options.domains = 'Global: ~stamhoofd\n';
             }
@@ -566,7 +565,7 @@ describe('setup machine workflow', () => {
         await setupDns({ yes: false, dryRun: false });
 
         expect(confirm).toHaveBeenCalledWith('Overwrite /etc/resolver/stamhoofd?', { default: false });
-        expect(exec).not.toHaveBeenCalledWith('sudo', ['cp', expect.any(String), '/etc/resolver/stamhoofd'], expect.anything());
+        expect(execSudo).not.toHaveBeenCalledWith(['cp', expect.any(String), '/etc/resolver/stamhoofd']);
     });
 
     // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
