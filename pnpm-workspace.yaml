@@ -13,6 +13,8 @@ packages:
   - 'packages/node/endpoints'
   - 'packages/node/database'
   - 'packages/node/logging'
+  - 'packages/node/dev-tools'
+  - 'packages/node/observability'
   - 'packages/node/opentelemetry-terminal'
   - 'packages/node/terminal'
   - 'packages/node/opentelemetry-process'

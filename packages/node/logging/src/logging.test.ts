@@ -14,6 +14,45 @@ function createFakeStream() {
 }
 
 describe('Logging', () => {
+    it('disables debug before formatting while preserving ordinary logs, warnings and errors', () => {
+        const stdout: string[] = [];
+        const stderr: string[] = [];
+        const logger = new Logger({
+            stdout: { write: text => stdout.push(text), clearLine: () => {} },
+            stderr: { write: text => stderr.push(text), clearLine: () => {} },
+        });
+        logger.debug('default debug');
+        logger.debugEnabled = false;
+        const format = vi.fn(() => 'hidden');
+        logger.debug(new StyledText({ toString: format }));
+        expect(format).not.toHaveBeenCalled();
+        logger.log('normal');
+        logger.warn('warning');
+        logger.error(new Error('failure'));
+        expect(stdout).toEqual(['default debug\n', 'normal\n', 'warning\n']);
+        expect(stderr.join('')).toContain('failure');
+        logger.debugEnabled = true;
+        logger.debug('verbose debug');
+        expect(stdout.at(-1)).toBe('verbose debug\n');
+    });
+
+    it('routes console.debug through the current debug setting and context', () => {
+        const original = { log: console.log, warn: console.warn, error: console.error, info: console.info, debug: console.debug };
+        const logger = new Logger({ stdout: createFakeStream(), stderr: process.stderr });
+        try {
+            logger.infectConsole();
+            logger.debugEnabled = false;
+            lastLog = '';
+            console.debug('hidden');
+            expect(lastLog).toBe('');
+            logger.debugEnabled = true;
+            logger.setContext({ prefixes: [new StyledText('[context] ')] }, () => console.debug('visible'));
+            expect(lastLog).toBe('[context] visible\n');
+        } finally {
+            Object.assign(console, original);
+        }
+    });
+
     it('Uses the style', () => {
         const logger = new Logger({
             stdout: createFakeStream(),

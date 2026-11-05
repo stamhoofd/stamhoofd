@@ -1,4 +1,5 @@
 import { CORSPreflightEndpoint, Router, RouterServer } from '@node/endpoints';
+import type { ApplicationLifecycle } from '@node/observability';
 import { I18n } from '@stamhoofd/backend-i18n';
 import { CORSMiddleware, LogMiddleware } from '@stamhoofd/backend-middleware';
 import { loadLogger } from '@stamhoofd/logging';
@@ -21,7 +22,7 @@ if (new Date().getTimezoneOffset() !== 0) {
     throw new Error('Process should always run in UTC timezone');
 }
 
-const start = async () => {
+export const boot = async (lifecycle: ApplicationLifecycle) => {
     console.log('Started Renderer.');
     loadLogger();
     await I18n.load();
@@ -75,6 +76,7 @@ const start = async () => {
         }
 
         // Should not be needed, but added for security as sometimes a promise hangs somewhere
+        await lifecycle.close();
         process.exit(0);
     };
 
@@ -93,9 +95,5 @@ const start = async () => {
             process.exit(1);
         });
     });
+    await lifecycle.ready(routerServer.server);
 };
-
-start().catch((error) => {
-    console.error('unhandledRejection', error);
-    process.exit(1);
-});

@@ -3,6 +3,7 @@ import { BackendApp } from '@stamhoofd/types/BackendApp';
 import chalk from 'chalk';
 import crypto from 'crypto';
 import fs, { promises } from 'fs';
+import { logger } from '@node/logging';
 
 async function fileExists(path: string): Promise<boolean> {
     try {
@@ -13,7 +14,13 @@ async function fileExists(path: string): Promise<boolean> {
     }
 }
 
+/**
+ * Loads backend configuration and maps service-specific connection settings.
+ * @remarks Configures debug verbosity before startup imports or migrations run.
+ * Only managed development sessions suppress debug; unmanaged processes retain it.
+ */
 export async function load(settings?: { path?: string; service?: BackendApp }) {
+    logger.debugEnabled = !process.env.STAM_DEV_SESSION || process.env.STAM_DEV_VERBOSE === '1';
     let env: any;
 
     if (process.env.NODE_ENV && process.env.NODE_ENV === 'test') {

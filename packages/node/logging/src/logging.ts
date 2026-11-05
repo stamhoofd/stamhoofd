@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import chalk from 'chalk';
-import { Direction } from 'node:readline';
+import type { Direction } from 'node:readline';
 
 type Modifier = (typeof chalk.Color | typeof chalk.Modifiers);
 type Writeable = { write: (msg: string) => void; clearLine: (dir: Direction) => void };
@@ -71,7 +71,6 @@ export class StyledText {
                 } else if (this.text === undefined) {
                     text = 'undefined';
                 } else {
-                    // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
                     text = this.text + '';
                 }
             }
@@ -146,6 +145,8 @@ function getStylesForClasses(classes: string[], map: RecursiveClassStyles): Modi
 }
 
 export class Logger {
+    /** Enables debug output before formatting; defaults to true for existing consumers. */
+    debugEnabled = true;
     stdout: Writeable;
     stderr: Writeable;
     asyncLocalStorage = new AsyncLocalStorage<Context>();
@@ -246,6 +247,11 @@ export class Logger {
         this.stdout.write(text.replace(/\n/g, ' '));
     }
 
+    /** Writes routine diagnostics using the current context only when debugEnabled is true. */
+    debug(...args: unknown[]): void {
+        if (this.debugEnabled) this.log(...args);
+    }
+
     log(...args: unknown[]): void {
         const text = this.getText(args, this.getContext());
         if (text === undefined) {
@@ -284,6 +290,6 @@ export class Logger {
         console.warn = (...args: any[]) => this.warn(...args);
         console.error = (...args: any[]) => this.error(...args);
         console.info = (...args: any[]) => this.log(...args);
-        console.debug = (...args: any[]) => this.log(...args);
+        console.debug = (...args: any[]) => this.debug(...args);
     }
 }

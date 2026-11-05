@@ -1,4 +1,5 @@
 import { Column, Database } from '@node/database';
+import { ApplicationLifecycle } from '@node/observability';
 import { startCrons, stopCrons, waitForCrons } from '@stamhoofd/crons';
 import { loadLogger } from '@stamhoofd/logging';
 import { Version } from '@stamhoofd/structures';
@@ -34,7 +35,8 @@ function loadGlobalTranslateFunction() {
     (global as any).$getCountry = () => 'BE';
 }
 
-export const boot = async (options: { killProcess: boolean }) => {
+export const boot = async (options: { killProcess: boolean; lifecycle?: ApplicationLifecycle }) => {
+    const lifecycle = options.lifecycle ?? new ApplicationLifecycle('stats');
     console.log('Started Statistics.');
     loadLogger();
 
@@ -54,6 +56,7 @@ export const boot = async (options: { killProcess: boolean }) => {
         }
 
         // Should not be needed, but added for security as sometimes a promise hangs somewhere
+        await lifecycle.close();
         if (options.killProcess) {
             process.exit(0);
         }
@@ -80,5 +83,6 @@ export const boot = async (options: { killProcess: boolean }) => {
     // This service runs no seeds of its own.
     startCrons(statisticsCronOptions);
 
+    await lifecycle.ready();
     return { shutdown };
 };

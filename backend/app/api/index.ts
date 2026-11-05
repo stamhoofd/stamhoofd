@@ -1,21 +1,17 @@
 import backendEnv from '@stamhoofd/backend-env';
 import { BackendApp } from '@stamhoofd/types/BackendApp';
+import { runApplication } from '@node/observability';
 
 process.title = 'stamhoofd-api';
-backendEnv.load({ service: BackendApp.Api }).catch((error) => {
-    console.error('Failed to load environment:', error);
-    process.exit(1);
-}).then(async () => {
+runApplication('api', async (lifecycle) => {
+    await backendEnv.load({ service: BackendApp.Api });
     if (STAMHOOFD.environment === 'development') {
         const { run } = await import('./src/migrate.js');
         await run();
     }
     const { boot } = await import('./src/boot.js');
 
-    boot({ killProcess: true }).catch((error) => {
-        console.error('unhandledRejection', error);
-        process.exit(1);
-    });
+    await boot({ killProcess: true, lifecycle });
 }).catch((error) => {
     console.error('Failed to start the API:', error);
     process.exit(1);

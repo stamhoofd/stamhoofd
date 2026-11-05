@@ -10,6 +10,10 @@ This is the private Node.js workspace `@node/logging`. Declare it as
 `setContext`. `StyledText` applies styles and tags; the exported `logger` uses
 the process streams. Importing the package does not replace console methods;
 `infectConsole()` does that explicitly.
+`debug(...)` uses the same context and formatting as `log(...)`, but can be disabled
+before formatting with `logger.debugEnabled = false`. It defaults to enabled for
+compatibility. `infectConsole()` routes `console.debug` through this setting;
+ordinary logs, warnings and errors are unaffected.
 
 Run `pnpm stam test node-logging`, `pnpm stam check lint @node/logging`, and
 `pnpm stam check typecheck @node/logging` from the repository root. Builds emit

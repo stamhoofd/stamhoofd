@@ -2,7 +2,7 @@ import { chalkStderr } from 'chalk';
 import type { ChalkInstance } from 'chalk';
 import { stripVTControlCharacters } from 'node:util';
 import { isPortListening } from './port-probe.js';
-import type { DevEvent } from '../../dev/events.mjs';
+import type { DevEvent } from '@node/dev-tools/events';
 
 export type DevAppId = 'dashboard' | 'api' | 'docs' | 'webshop' | 'renderer' | 'stats';
 export type DevApp = { id: DevAppId; label: string; href?: string; port?: number };
@@ -43,9 +43,9 @@ export class DevStatus {
                 ? 'failed'
                 : builds.includes('failed')
                     ? value.state === 'running' ? 'warning' : 'failed'
-                : value.warningUntil > Date.now()
-                    ? 'warning'
-                    : value.missed > 0 || builds.includes('building') ? 'starting' : value.state;
+                    : value.warningUntil > Date.now()
+                        ? 'warning'
+                        : value.missed > 0 || builds.includes('building') ? 'starting' : value.state;
             return { ...app, state };
         });
     }
@@ -141,10 +141,11 @@ export class DevStatus {
         const source = /^\[(apps|docs|shared)\]/.exec(line);
         if (!source) return;
         const message = line.slice(source[0].length).trimStart();
+        const short = /^\[(dashboard|api|webshop|renderer|stats)\] /.exec(message);
         const match = /^@stamhoofd\/([^:]+):dev:/.exec(message);
-        const id = source[1] === 'docs' ? 'docs' : match ? packages.get(match[1]) : undefined;
+        const id = source[1] === 'docs' ? 'docs' : short ? short[1] as DevAppId : match ? packages.get(match[1]) : undefined;
         if (match && !id) return;
-        const text = match ? message.slice(match[0].length).trimStart() : message;
+        const text = short ? message.slice(short[0].length) : match ? message.slice(match[0].length).trimStart() : message;
         const affected = id ? [id] : this.apps.filter(app => source[1] !== 'docs' && app.id !== 'docs').map(app => app.id);
         for (const app of affected) {
             const value = this.states.get(app);

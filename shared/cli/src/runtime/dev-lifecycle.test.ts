@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest';
-import type { DevEvent } from '../../dev/events.mjs';
+import type { DevEvent } from '@node/dev-tools/events';
 import { DevLifecycle } from './dev-lifecycle.js';
 import { DevStatus } from './dev-status.js';
 import { isPortListening } from './port-probe.js';
@@ -67,7 +67,7 @@ it('exports finite spans with explicit parent correlation and distinguishes fail
     sdk.start();
     const lifecycle = new DevLifecycle(() => {});
     try {
-        lifecycle.receive(event('build.started', { cycleId: '1', traceparent: `00-${'a'.repeat(32)}-${'b'.repeat(16)}-01` }));
+        lifecycle.receive(event('build.started', { cycleId: '1', time: (process.hrtime.bigint() - 10_000_000_000n).toString(), traceparent: `00-${'a'.repeat(32)}-${'b'.repeat(16)}-01` }));
         lifecycle.receive(event('build.failed', { cycleId: '1', errors: 1 }));
         lifecycle.receive(event('starting'));
         lifecycle.close();
@@ -76,6 +76,8 @@ it('exports finite spans with explicit parent correlation and distinguishes fail
         expect(build.parentSpanContext?.spanId).toBe('b'.repeat(16));
         expect(build.status.code).toBe(SpanStatusCode.ERROR);
         expect(build.attributes['dev.build.errors']).toBe(1);
+        // Synchronous compilation can delay socket delivery until both events arrive together.
+        expect(build.duration[0]).toBeGreaterThanOrEqual(9);
         expect(startup.status.code).not.toBe(SpanStatusCode.ERROR);
         expect(startup.attributes['dev.outcome']).toBe('cancelled');
     } finally {

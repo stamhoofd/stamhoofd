@@ -15,6 +15,7 @@
         "lint": "eslint --quiet"
     },
     "dependencies": {
+        "@node/logging": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/types": "workspace:*",
         "chalk": "5.6.2"

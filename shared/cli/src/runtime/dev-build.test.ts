@@ -5,8 +5,17 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, it } from 'vitest';
-import type { DevEvent } from '../../dev/events.mjs';
+import type { DevEvent } from '@node/dev-tools/events';
 import { openDevEventChannel } from './dev-event-channel.js';
+
+it('assigns distinct inspector ports to concurrently running backend apps', async () => {
+    const ports = await Promise.all(['api', 'renderer', 'statistics-syncer'].map(async (app) => {
+        const manifest = JSON.parse(await fs.readFile(new URL(`../../../../backend/app/${app}/package.json`, import.meta.url), 'utf8'));
+        return /--inspect=(\d+)/.exec(Object.values(manifest.scripts).join(' '))?.[1];
+    }));
+    expect(ports.every(Boolean)).toBe(true);
+    expect(new Set(ports).size).toBe(3);
+});
 
 it('reports real TypeScript watch failures and recovery without parsing compiler output', async () => {
     const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'stam-build-test-'));
@@ -14,7 +23,7 @@ it('reports real TypeScript watch failures and recovery without parsing compiler
     const channel = await openDevEventChannel(event => events.push(event));
     await fs.writeFile(path.join(directory, 'tsconfig.build.json'), JSON.stringify({ compilerOptions: { composite: true, outDir: 'dist', types: [], skipLibCheck: true }, include: ['index.ts'] }));
     await fs.writeFile(path.join(directory, 'index.ts'), 'export const value: string = 123;');
-    const script = fileURLToPath(new URL('../../dev/watch-typescript.mjs', import.meta.url));
+    const script = fileURLToPath(import.meta.resolve('@node/dev-tools/watch-typescript'));
     const child = spawn(process.execPath, [script, 'api'], { cwd: directory, env: { ...process.env, ...channel.env }, stdio: ['ignore', 'pipe', 'pipe'] });
     let output = '';
     child.stdout.on('data', (chunk: Buffer) => { output += chunk.toString(); });
@@ -22,6 +31,8 @@ it('reports real TypeScript watch failures and recovery without parsing compiler
     try {
         await expect.poll(() => events.some(event => event.event === 'build.failed'), { timeout: 10_000 }).toBe(true);
         expect(output).toContain('TS2322');
+        expect(output).not.toContain('Starting compilation');
+        expect(output).not.toContain('Watching for file changes');
         expect(events.find(event => event.event === 'build.failed')?.errors).toBe(1);
         await fs.writeFile(path.join(directory, 'index.ts'), 'export const value: string = "fixed";');
         await expect.poll(() => events.some(event => event.event === 'build.succeeded'), { timeout: 10_000 }).toBe(true);

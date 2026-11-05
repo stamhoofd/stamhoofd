@@ -1,6 +1,6 @@
 import { context, propagation, SpanStatusCode, trace } from '@opentelemetry/api';
 import type { Span } from '@opentelemetry/api';
-import type { DevEvent } from '../../dev/events.mjs';
+import type { DevEvent } from '@node/dev-tools/events';
 
 type Operation = { generation: bigint; processId: string; time: bigint; cycle?: bigint; phase: string; span?: Span };
 
@@ -13,6 +13,7 @@ type Operation = { generation: bigint; processId: string; time: bigint; cycle?: 
 export class DevLifecycle {
     private readonly operations = new Map<string, Operation>();
     private readonly parent = context.active();
+    private readonly epochOffset = Date.now() - Number(process.hrtime.bigint()) / 1e6;
     private closed = false;
 
     /** @param changed - Receives accepted transitions synchronously; must not throw. */
@@ -32,6 +33,7 @@ export class DevLifecycle {
             this.operations.set(key, operation);
         }
         const time = BigInt(event.time);
+        const eventTime = this.epochOffset + Number(time) / 1e6;
         if (time <= operation.time) return;
         if (build) {
             if (!event.cycleId || !/^\d{1,30}$/.test(event.cycleId)) return;
@@ -50,8 +52,13 @@ export class DevLifecycle {
         operation.time = time;
         operation.phase = event.event;
         if (event.event === 'build.started' || event.event === 'starting') {
+            if (!build && event.startupOwner === 'application') {
+                this.changed(event);
+                return;
+            }
             const parent = propagation.extract(this.parent, { traceparent: event.traceparent });
             operation.span = trace.getTracer('stam.dev').startSpan(`dev.${build ? 'build' : 'startup'}`, {
+                startTime: eventTime,
                 attributes: {
                     'operation.label': `[${event.app}] ${build ? 'Build' : 'Startup'}`,
                     'dev.app': event.app, 'dev.process.id': event.processId,
@@ -60,7 +67,7 @@ export class DevLifecycle {
             }, parent);
         } else {
             if (event.errors !== undefined) operation.span?.setAttribute('dev.build.errors', event.errors);
-            this.end(operation, event.event, event.event === 'build.failed' || event.failed === true);
+            this.end(operation, event.event, event.event === 'build.failed' || event.failed === true, eventTime);
         }
         this.changed(event);
     }
@@ -72,11 +79,11 @@ export class DevLifecycle {
         this.operations.clear();
     }
 
-    private end(operation: Operation | undefined, outcome: string, failed = false): void {
+    private end(operation: Operation | undefined, outcome: string, failed = false, time?: number): void {
         if (!operation?.span) return;
         operation.span.setAttribute('dev.outcome', outcome);
         if (failed) operation.span.setStatus({ code: SpanStatusCode.ERROR });
-        operation.span.end();
+        operation.span.end(time);
         operation.span = undefined;
     }
 }

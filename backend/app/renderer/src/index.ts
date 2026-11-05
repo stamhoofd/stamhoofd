@@ -1,13 +1,13 @@
 import backendEnv from '@stamhoofd/backend-env';
 import { BackendApp } from '@stamhoofd/types/BackendApp';
+import { runApplication } from '@node/observability';
 
 process.title = 'stamhoofd-renderer';
-backendEnv.load({ service: BackendApp.Renderer }).catch((error) => {
-    console.error('Failed to load environment:', error);
-    process.exit(1);
-}).then(async () => {
-    await import('./boot.js');
+runApplication('renderer', async (lifecycle) => {
+    await backendEnv.load({ service: BackendApp.Renderer });
+    const { boot } = await import('./boot.js');
+    await boot(lifecycle);
 }).catch((error) => {
-    console.error('Failed to start the API:', error);
+    console.error('Failed to start the renderer:', error);
     process.exit(1);
 });

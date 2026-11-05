@@ -99,9 +99,10 @@ launchers remain best-effort and are deliberately not tied to the command lifeti
 
 #### Development logs and status
 
-Development lifecycle transport lives in `dev/events.mjs` (with its public types
-beside it). It has no build-time dependencies, so docs and shared-build scripts can
-load it before shared packages exist. `openDevEventChannel` owns a private temporary
+Development lifecycle transport and typed producer adapters live in
+`packages/node/dev-tools`. The CLI bootstrap prepares this independent package;
+docs also prepares it when started directly. Its output survives CLI rebuilds.
+`openDevEventChannel` owns a private temporary
 Unix socket per session. Emitters use `STAM_DEV_SOCKET`, `STAM_DEV_SESSION` and
 `STAM_DEV_TRACEPARENT`; supervised children can share `STAM_DEV_PROCESS_ID` and
 `STAM_DEV_GENERATION`. These are runtime metadata, never build inputs.
@@ -117,15 +118,28 @@ build failures only after success. Old process generations and completed cycles
 cannot overwrite newer state. Structured readiness takes precedence over log
 parsing and listener availability; listener loss remains a fallback failure check.
 Shutdown ends unfinished spans with `dev.outcome=cancelled` rather than ERROR.
+Span durations use producer monotonic timestamps, so synchronous compilation delaying
+socket delivery cannot collapse a long build to zero seconds. Backend inspector
+ports are 5858 (API), 5859 (stats) and 5860 (renderer).
 
-`dev/shared-build.mjs` wraps each normal `pnpm run build:shared` invocation and
+The `shared-build` entry point wraps each normal `pnpm run build:shared` invocation and
 reports its result even when every Turbo task is cached. The ready marker is only
 written after success; failed builds keep the watcher alive for the next edit.
-`dev/watch-typescript.mjs` uses TypeScript's solution-builder watch callbacks to
+The `watch-typescript` entry point uses TypeScript's solution-builder watch callbacks to
 report backend compilation cycles, preserving compiler diagnostics and runtime
 tsconfig semantics. Existing asset preparation remains in package scripts.
 Turbo passes `STAM_DEV_*` through without including their values in cache keys;
 the persistent app tasks retain their existing filters and loose environment mode.
+
+The `supervise` entry point gives each app incarnation an identity and reports its exit even
+when the app crashes before it can emit readiness. Backend boot calls
+the shared `ApplicationLifecycle.ready` after initialization (and HTTP listening where applicable);
+API seeds/background jobs remain asynchronous. Vite reports listener availability,
+not a fictitious whole-app compilation: modules still transform on demand. Nuxt
+reports its explicit build hooks and is ready after the app bundle, Nitro compilation
+and listener are ready. Nitro rebuild failures/recovery use its structured hooks too.
+These independently compiled adapters remain usable while Turbo rebuilds the CLI itself.
+Restart the development session after editing tooling code.
 
 `stam dev all` keeps application logs above one compact footer:
 
@@ -138,24 +152,44 @@ are dimmed; links are underlined OSC-8 hyperlinks. Link destinations follow the
 selected environment and workspace. Colors indicate:
 
 - **Blue:** starting or restarting.
-- **Green:** the local listener is available, or the statistics worker reported startup.
+- **Green:** the app reported readiness (listener checks are a fallback for uninstrumented processes).
 - **Orange:** a warning/error was observed in the last 30 seconds, or shared services are unavailable.
 - **Red:** a reported crash/process failure, or two consecutive missed listener checks after running.
 
 Listener checks run once a second and are availability checks, not full application
-health checks. The CLI observes known Vite/Nuxt/nodemon/Turbo output; warnings are
+health checks. Structured build/readiness events drive instrumented apps. Warnings are
 recognized from explicit warning/error markers, not merely because a tool uses
-stderr. Statistics has no listener: its status follows its startup and supervisor
-messages. Full app-level OpenTelemetry and structured readiness events are not yet
-required. Unrecognized logs still pass through unchanged.
+stderr. Statistics has no listener: its status follows boot and supervisor events.
+The CLI owns its command SDK; application executables own their runtime SDK.
+The supervisor preloads a diagnostics-channel adapter that sends lifecycle events
+without introducing a CLI dependency into application code.
+Unrecognized logs still pass through unchanged.
 
-Output is attributed to `shared`, `apps` or `docs`; Turbo retains package prefixes
-within app logs. Fresh build output (including warnings) is always visible. Cached
-shared-build logs are not replayed unless `--verbose` is supplied. Setup, service
+Output is attributed to `shared`, `apps` or `docs`; normal app logs use short names
+from Turbo's task identity. Shared-build output is spooled to a private temporary
+file and replayed to stderr on failure. Successful builds (including their warnings)
+show only the lifecycle summary; cancellation discards the spool. `--verbose`
+streams all output, including cached shared-build logs. Setup, service
 preparation and route configuration have descriptive spans; their command spans
 are visible only with `--verbose` and remain available in exported traces in either
 mode. A failed supervised command stops sibling processes so the session cannot
 silently remain half-running.
+
+`STAM_DEV_VERBOSE` propagates `--verbose` to owned scripts. The TypeScript watcher
+suppresses routine watch-status text at the source, but always reports diagnostics.
+Application/tool output is never discarded based on matching its rendered text.
+Normal sessions consume Turbo's documented `--json` output: only Turbo-owned
+`info` records are omitted, while task stdout/stderr, Turbo warnings/errors and
+unknown records are forwarded. Turbo strips ANSI styling in this mode; verbose
+sessions retain native tool output. pnpm uses `PNPM_CONFIG_LOGLEVEL=warn` and
+Consola uses `CONSOLA_LEVEL=1`, preserving warnings and errors. Backend environment
+loading disables `@node/logging` debug output before migrations and boot; verbose
+and unmanaged processes retain it.
+Turbo currently labels cache notices as task stdout, so app-task cache notices remain visible.
+Nuxt components that override Consola's level or write directly also retain their
+banners; neither is suppressed through rendered-text matching.
+Supervised Node processes publish debugger discovery through HTTP only in normal
+mode, suppressing the inspector banner while retaining debugger access and errors.
 
 The footer clears on shutdown. Redirected output has plain labels without cursor
 updates or OSC hyperlinks; identical status lines are not repeatedly printed.

@@ -192,6 +192,8 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
                 ...buildBackendEnv(context),
                 ...stripeEnv,
                 ...channel.env,
+                STAM_DEV_VERBOSE: context.verbose ? '1' : '0',
+                ...(!context.verbose ? { PNPM_CONFIG_LOGLEVEL: 'warn', CONSOLA_LEVEL: '1' } : {}),
                 FORCE_COLOR: process.env.FORCE_COLOR ?? '1',
                 npm_config_color: process.env.npm_config_color ?? 'always',
                 npm_config_script_shell: process.env.npm_config_script_shell ?? '/bin/bash',
@@ -254,9 +256,9 @@ export function devApps(target: DevTarget, domains: ReturnType<typeof buildDomai
     return apps;
 }
 
-const backendCommand = 'pnpm exec turbo run dev --env-mode=loose --log-prefix=task --filter=@stamhoofd/backend --filter=@stamhoofd/backend-renderer --filter=@stamhoofd/backend-statistics-syncer';
-const frontendCommand = 'pnpm exec turbo run dev --env-mode=loose --log-prefix=task --filter=@stamhoofd/web-app --filter=@stamhoofd/webshop';
-const fullStackCommand = 'pnpm exec turbo run dev --env-mode=loose --log-prefix=task --filter=@stamhoofd/backend --filter=@stamhoofd/backend-renderer --filter=@stamhoofd/backend-statistics-syncer --filter=@stamhoofd/web-app --filter=@stamhoofd/webshop';
+const backendCommand = 'node packages/node/dev-tools/dist/turbo.js run dev --env-mode=loose --log-prefix=task --filter=@stamhoofd/backend --filter=@stamhoofd/backend-renderer --filter=@stamhoofd/backend-statistics-syncer';
+const frontendCommand = 'node packages/node/dev-tools/dist/turbo.js run dev --env-mode=loose --log-prefix=task --filter=@stamhoofd/web-app --filter=@stamhoofd/webshop';
+const fullStackCommand = 'node packages/node/dev-tools/dist/turbo.js run dev --env-mode=loose --log-prefix=task --filter=@stamhoofd/backend --filter=@stamhoofd/backend-renderer --filter=@stamhoofd/backend-statistics-syncer --filter=@stamhoofd/web-app --filter=@stamhoofd/webshop';
 
 // `--host 0.0.0.0` is required: Caddy runs in Docker and reaches the dev servers
 // through `host.docker.internal`, so the server must listen on all interfaces.

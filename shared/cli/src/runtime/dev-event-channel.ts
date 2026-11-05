@@ -3,8 +3,8 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { isDevEvent, maxEventBytes } from '../../dev/events.mjs';
-import type { DevEvent } from '../../dev/events.mjs';
+import { isDevEvent, maxEventBytes } from '@node/dev-tools/events';
+import type { DevEvent } from '@node/dev-tools/events';
 
 /**
  * Opens a session-isolated, bounded NDJSON receiver on a private local Unix socket.

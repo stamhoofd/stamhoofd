@@ -2,7 +2,7 @@
     "$schema": "https://turborepo.com/schema.json",
     "globalDependencies": ["tsconfig*.json", "shared/tsconfig*.json", "backend/tsconfig*.json", "frontend/tsconfig*.json", "jest-extended.d.ts", "shared/*.d.ts", "backend/*.d.ts", "frontend/*.d.ts", ".nvmrc", "eslint.config.js", "frontend/eslint.config.js", "backend/eslint.config.js"],
     "cacheDir": ".turbo/cache",
-    "globalPassThroughEnv": ["STAM_DEV_*"],
+    "globalPassThroughEnv": ["STAM_DEV_*", "PNPM_CONFIG_LOGLEVEL", "CONSOLA_LEVEL"],
     "tasks": {
         "build": {
             "dependsOn": ["^build", "build:types"],

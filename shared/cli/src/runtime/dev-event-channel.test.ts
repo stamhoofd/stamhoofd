@@ -2,8 +2,8 @@ import net from 'node:net';
 import fs from 'node:fs/promises';
 import { once } from 'node:events';
 import { expect, it } from 'vitest';
-import { createDevEmitter, maxEventBytes } from '../../dev/events.mjs';
-import type { DevEvent } from '../../dev/events.mjs';
+import { createDevEmitter, maxEventBytes } from '@node/dev-tools/events';
+import type { DevEvent } from '@node/dev-tools/events';
 import { openDevEventChannel } from './dev-event-channel.js';
 
 it('delivers ordered events from concurrent producers and removes the socket', async () => {

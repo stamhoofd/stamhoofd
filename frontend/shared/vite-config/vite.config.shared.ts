@@ -1,4 +1,5 @@
 import iconConfig from '@stamhoofd/assets/images/icons/icons.font.js';
+import { devLifecyclePlugin } from '@node/dev-tools/vite';
 import { FrontendApp } from '@stamhoofd/types/FrontendApp';
 import type { FrontendEnvironment } from '@stamhoofd/types/Environment';
 import vue from '@vitejs/plugin-vue';
@@ -31,12 +32,12 @@ export async function buildConfig(options: { name: FrontendApp.WebApp | Frontend
             builder.TestUtils.loadEnvironment();
             loadedEnv = STAMHOOFD;
         } else if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-            console.log('Building env for development...', process.env.NODE_ENV);
+            if (!process.env.STAM_DEV_SESSION || process.env.STAM_DEV_VERBOSE === '1') console.log('Building env for development...', process.env.NODE_ENV);
             const builder = await import('@stamhoofd/cli');
             const builtEnv = await builder.buildDevelopmentEnvironment(process.env.STAMHOOFD_ENV ?? '', {
                 frontend: options.name,
             });
-            console.log('Built env for development.', process.env.NODE_ENV);
+            if (!process.env.STAM_DEV_SESSION || process.env.STAM_DEV_VERBOSE === '1') console.log('Built env for development.', process.env.NODE_ENV);
 
             loadedEnv = builtEnv;
         } else if (process.env.LOAD_ENV) {
@@ -86,6 +87,7 @@ export async function buildConfig(options: { name: FrontendApp.WebApp | Frontend
             ],
         },
         plugins: [
+            options.name === FrontendApp.WebApp ? devLifecyclePlugin('dashboard') : options.name === FrontendApp.Webshop ? devLifecyclePlugin('webshop') : null,
             viteSvgToWebfont({
                 ...iconConfig,
                 context: resolve(frontendDir, './shared/assets/images/icons/'),

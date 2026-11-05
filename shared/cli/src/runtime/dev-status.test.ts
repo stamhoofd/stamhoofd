@@ -14,6 +14,13 @@ const apps = [
     { id: 'stats' as const, label: 'stats' },
 ];
 
+it('attributes short-prefix warnings only to their application', () => {
+    const status = new DevStatus(apps, () => {});
+    status.observe('stdout', '[apps] [dashboard] WARN outdated dependency\n');
+    expect(status.items().map(app => app.state)).toEqual(['warning', 'starting']);
+    status.stop();
+});
+
 it('shows listener readiness, tolerates a missed check, and detects loss and recovery', async () => {
     const status = new DevStatus(apps, () => {});
     expect(status.items()[0].state).toBe('starting');

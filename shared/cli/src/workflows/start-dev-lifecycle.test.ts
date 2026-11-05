@@ -54,6 +54,7 @@ it('reports unexpected process failure after cleanup', async () => {
 it('attributes process logs without swallowing their contents', async () => {
     vi.mocked(execResult).mockImplementationOnce(async (_command, args, options) => {
         expect(args).toEqual(expect.arrayContaining(['--names', 'docs', '--prefix', '[{name}]', '--kill-others-on-fail']));
+        expect(options?.env).toMatchObject({ STAM_DEV_VERBOSE: '0', PNPM_CONFIG_LOGLEVEL: 'warn', CONSOLA_LEVEL: '1' });
         expect(options?.log?.('info', '[docs] WARN example\n', { 'diagnostic.kind': 'stderr' })).toBe(true);
         return { code: 0, stdout: '', stderr: '', signal: null };
     });

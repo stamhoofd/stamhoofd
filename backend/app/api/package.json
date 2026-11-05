@@ -55,9 +55,9 @@
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo .cache/*.tsbuildinfo",
         "copy-assets": "rsync --delete --mkpath --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/ ./dist/src/",
         "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'pnpm run dev:build' \"pnpm run dev:watch\"",
-        "dev:build": "tsc --build tsconfig.build.json --clean && pnpm run copy-assets && node ../../../shared/cli/dev/watch-typescript.mjs api",
+        "dev:build": "tsc --build tsconfig.build.json --clean && pnpm run copy-assets && node ../../../packages/node/dev-tools/dist/watch-typescript.js api",
         "dev:backend": "pnpm run dev",
-        "dev:watch": "wait-on ./dist/index.js && nodemon --quiet --inspect=5858 --watch dist --watch '../../../shared/*/dist/' --watch '../../../shared/*/package.json' --watch '../../shared/*/dist/' --watch '../../shared/*/package.json' --ext .ts,.json,.sql,.js,.html --delay 2000ms --exec 'echo \"Restarting API...\" && exec node --enable-source-maps --use-system-ca ./dist/index.js' --signal SIGTERM",
+        "dev:watch": "wait-on ./dist/index.js && nodemon --quiet --watch dist --watch '../../../shared/*/dist/' --watch '../../../shared/*/package.json' --watch '../../shared/*/dist/' --watch '../../shared/*/package.json' --ext .ts,.json,.sql,.js,.html --delay 2000ms --exec 'node ../../../packages/node/dev-tools/dist/supervise.js api node --inspect=5858 --enable-source-maps --use-system-ca ./dist/index.js' --signal SIGTERM",
         "lint": "eslint --quiet",
         "migrations": "pnpm run build:full && node ./dist/migrations.js",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js",
@@ -67,6 +67,7 @@
         "test:reset": "pnpm run build:full && pnpm run test"
     },
     "dependencies": {
+        "@node/observability": "workspace:*",
         "@aws-sdk/client-s3": "3.1160.0",
         "@aws-sdk/client-ses": "3.1160.0",
         "@aws-sdk/client-sesv2": "3.1160.0",

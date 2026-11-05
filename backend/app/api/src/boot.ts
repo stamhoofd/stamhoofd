@@ -1,4 +1,5 @@
 import { Column, Database, Migration } from '@node/database';
+import { ApplicationLifecycle } from '@node/observability';
 import { CORSPreflightEndpoint, Router, RouterServer } from '@node/endpoints';
 import { CORSMiddleware, LogMiddleware, VersionMiddleware } from '@stamhoofd/backend-middleware';
 import { checkReadOnly } from '@stamhoofd/crons';
@@ -65,7 +66,7 @@ const MAXIMUM_SHUTDOWN_WAIT = 29 * 1000;
 
 const seeds = async (options: { shutdown: () => Promise<void> }) => {
     if (await checkReadOnly()) {
-        console.error(new StyledText(`[SEEDS] `).addClass('migration', 'tag'), new StyledText('MySQL is in read-only mode: Seeds are disabled.').addClass('error'));
+        console.error(new StyledText('[SEEDS] ').addClass('migration', 'tag'), new StyledText('MySQL is in read-only mode: Seeds are disabled.').addClass('error'));
         return;
     }
 
@@ -73,7 +74,7 @@ const seeds = async (options: { shutdown: () => Promise<void> }) => {
         // Internal
         await AuditLogService.disable(async () => {
             if (!await Migration.runAll(import.meta.dirname + '/seeds')) {
-                console.error(new StyledText(`[SEEDS] `).addClass('migration', 'tag'), new StyledText('Seeds failed!').addClass('error'));
+                console.error(new StyledText('[SEEDS] ').addClass('migration', 'tag'), new StyledText('Seeds failed!').addClass('error'));
 
                 if (STAMHOOFD.environment === 'test' || STAMHOOFD.environment === 'development') {
                     await options.shutdown();
@@ -95,7 +96,8 @@ function productionLog(message: string) {
     }
 }
 
-export const boot = async (options: { killProcess: boolean }) => {
+export const boot = async (options: { killProcess: boolean; lifecycle?: ApplicationLifecycle }) => {
+    const lifecycle = options.lifecycle ?? new ApplicationLifecycle('api');
     // Make sure we use the current environment for connecting to the database
     await Database.reload({});
 
@@ -290,6 +292,7 @@ export const boot = async (options: { killProcess: boolean }) => {
         }
 
         // Should not be needed, but added for security as sometimes a promise hangs somewhere
+        await lifecycle.close();
         if (options.killProcess) {
             process.exit(0);
         }
@@ -328,5 +331,6 @@ export const boot = async (options: { killProcess: boolean }) => {
     startCrons();
     seeds({ shutdown }).catch(console.error);
 
+    await lifecycle.ready(routerServer.server);
     return { shutdown };
 };

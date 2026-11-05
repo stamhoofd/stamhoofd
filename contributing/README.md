@@ -65,6 +65,10 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 
 [OpenTelemetry subprocesses](../packages/node/opentelemetry-process/README.md)
 
+[Development lifecycle adapters](../packages/node/dev-tools/README.md)
+
+[Application observability](../packages/node/observability/README.md)
+
 ---
 
 These are guides on how we generally do certain things in the Stamhoofd code base.

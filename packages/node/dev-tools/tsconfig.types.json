@@ -1,0 +1,10 @@
+{
+    "extends": ["../../../tsconfig.base.json", "../../../tsconfig.types.json"],
+    "compilerOptions": {
+        "skipLibCheck": true,
+        "rootDir": "src",
+        "outDir": "dist-types",
+        "tsBuildInfoFile": ".cache/types.tsbuildinfo"
+    },
+    "include": ["src"]
+}

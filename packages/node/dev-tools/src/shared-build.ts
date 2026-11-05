@@ -1,6 +1,6 @@
-import { spawn } from 'node:child_process';
+import { runTurbo } from './turbo.js';
 import fs from 'node:fs/promises';
-import { createDevEmitter } from './events.mjs';
+import { createDevEmitter } from './events.js';
 
 const emitter = createDevEmitter('shared');
 const cycleId = process.hrtime.bigint().toString();
@@ -8,15 +8,11 @@ const marker = process.argv[2];
 if (!/^\.development\/cli\/generated\/shared-build-\d+\.ready$/.test(marker ?? '')) throw new Error('Expected the session shared-build ready marker');
 emitter.emit('build.started', { cycleId });
 const args = ['run', 'build:shared', ...(process.argv.includes('--verbose') ? [] : ['--output-logs=new-only'])];
-const child = spawn('pnpm', args, { stdio: 'inherit' });
 let cancelled = false;
 for (const signal of ['SIGTERM', 'SIGINT']) {
-    process.on(signal, () => { cancelled = true; child.kill(signal); });
+    process.on(signal, () => { cancelled = true; });
 }
-const code = await new Promise((resolve) => {
-    child.once('error', (error) => { console.error(error); resolve(1); });
-    child.once('close', code => resolve(code ?? 1));
-});
+const code = await runTurbo(args, { bufferOutput: true });
 if (!cancelled) {
     emitter.emit(code === 0 ? 'build.succeeded' : 'build.failed', { cycleId });
     if (code === 0) {

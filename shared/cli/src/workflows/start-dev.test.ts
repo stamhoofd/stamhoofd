@@ -432,7 +432,7 @@ describe('commandsForTarget', () => {
         const commands = commandsForTarget(DevTarget.All, ports);
 
         expect(commands).toHaveLength(2);
-        expect(commands[0]).toContain('turbo run dev');
+        expect(commands[0]).toContain('node packages/node/dev-tools/dist/turbo.js run dev');
         expect(commands[0]).toContain('--env-mode=loose');
         expect(commands.some(command => command.includes(`pnpm --dir docs run dev --port ${ports.docs}`))).toBe(true);
     });
@@ -456,7 +456,7 @@ describe('concurrentlyTargets', () => {
     it('starts docs immediately in all while gating the app processes on the shared build', () => {
         const targets = concurrentlyTargets(DevTarget.All, ports);
         const docsTarget = targets.find(target => target.includes('--dir docs run dev'));
-        const appTarget = targets.find(target => target.includes('turbo run dev'));
+        const appTarget = targets.find(target => target.includes('turbo.js run dev'));
 
         // Docs consumes no shared build output, so it must not wait on it...
         expect(docsTarget).toBeDefined();
@@ -469,7 +469,7 @@ describe('concurrentlyTargets', () => {
     it('uses the root shared build graph in the watcher', () => {
         const watcher = concurrentlyTargets(DevTarget.All, ports).find(target => target.includes('nodemon'));
 
-        expect(watcher).toContain("--exec 'node shared/cli/dev/shared-build.mjs ");
+        expect(watcher).toContain("--exec 'node packages/node/dev-tools/dist/shared-build.js ");
         expect(watcher).not.toContain('--verbose');
     });
 

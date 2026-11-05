@@ -1,0 +1,30 @@
+{
+    "name": "@node/observability",
+    "version": "2.158.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": {
+            "types": "./dist-types/index.d.ts",
+            "import": "./dist/index.js"
+        }
+    },
+    "scripts": {
+        "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
+        "lint": "eslint . --quiet",
+        "test": "vitest run"
+    },
+    "dependencies": {
+        "@opentelemetry/api": "1.10.0",
+        "@opentelemetry/sdk-node": "0.300.0",
+        "@opentelemetry/sdk-trace": "3.0.0",
+        "@opentelemetry/sdk-logs": "3.0.0",
+        "@opentelemetry/resources": "3.0.0",
+        "@opentelemetry/exporter-trace-otlp-proto": "0.300.0",
+        "@opentelemetry/exporter-logs-otlp-proto": "0.300.0"
+    },
+    "devDependencies": {
+        "vitest": "4.1.12"
+    }
+}
