@@ -21,19 +21,27 @@ export class Terminal {
     }
 
     get isTTY(): boolean { return this.output.isTTY; }
+    /** Actual destination for live regions and default writes; use for capability detection. */
+    get stream(): NodeJS.WriteStream { return this.output.stream; }
     get isSuspended(): boolean { return this.suspended > 0 || this.disposed; }
 
     createRegion(): TerminalRegion {
         const id = Symbol();
         this.regions.set(id, '');
-        const dispose = () => { this.regions.delete(id); this.render(); };
+        const dispose = () => {
+            this.regions.delete(id);
+            this.render();
+        };
         return {
             update: (content) => {
                 if (!this.regions.has(id) || this.disposed) return;
                 this.regions.set(id, content);
                 this.render();
             },
-            finish: (content) => { dispose(); if (content) this.write(`${content}\n`); },
+            finish: (content) => {
+                dispose();
+                if (content) this.write(`${content}\n`);
+            },
             dispose,
         };
     }
@@ -53,7 +61,12 @@ export class Terminal {
     async withPrompt<T>(callback: (write: (text: string) => boolean) => Promise<T>): Promise<T> {
         this.suspended++;
         this.output.clearLive();
-        try { return await callback((text) => { this.output.write(text); return true; }); } finally {
+        try {
+            return await callback((text) => {
+                this.output.write(text);
+                return true;
+            });
+        } finally {
             if (--this.suspended === 0) {
                 for (const { text, stream } of this.buffered) this.output.write(text, stream);
                 if (this.dropped) this.output.write('\n[output omitted while terminal was suspended]\n');

@@ -8,10 +8,35 @@ import type { TerminalRegion } from '@node/terminal';
 import chalk, { Chalk, chalkStderr } from 'chalk';
 import type { ChalkInstance } from 'chalk';
 
+/** Quiet shows warnings/errors; normal adds labelled spans and info; verbose adds debug diagnostics. */
 export type TerminalVerbosity = 'quiet' | 'normal' | 'verbose';
-type Operation = { label: string; command: boolean; group: string; depth: number; started: number };
 
-/** An application-owned span processor and scoped log sink. Never registers an SDK. */
+/** Presentation settings and ownership of the renderer's output destination. */
+export type TerminalRendererOptions = {
+    /** Defaults to normal. Filtering also determines log delivery acknowledgement. */
+    verbosity?: TerminalVerbosity;
+    /** String-valued span/log attributes used for headings, in this order. */
+    groupBy?: string[];
+    /** Force basic colors or disable them. NO_COLOR always disables renderer styling. */
+    color?: boolean;
+} & ({
+    /** Shared application-owned coordinator. Shutdown disposes only this renderer's region. */
+    terminal: Terminal;
+    stream?: never;
+} | {
+    terminal?: never;
+    /** Destination for an owned coordinator; defaults to process.stderr. */
+    stream?: NodeJS.WriteStream;
+});
+
+type Operation = { label: string; progress?: string; command: boolean; group: string; depth: number; started: number };
+
+/**
+ * Renders labelled span lifetimes and scoped logs through a coordinated terminal.
+ * @remarks Register with an application-owned SDK and pass {@link TerminalRenderer.log}
+ * to `withLogSink`. This class does not initialize an SDK or export telemetry.
+ * Only recording spans produce progress; unlabelled spans establish ancestry only.
+ */
 export class TerminalRenderer implements SpanProcessor {
     private readonly output: Terminal;
     private readonly region: TerminalRegion;
@@ -22,10 +47,12 @@ export class TerminalRenderer implements SpanProcessor {
     private frame = 0;
     private timer?: ReturnType<typeof setInterval>;
     private outputLine?: string;
+    private closed = false;
 
-    constructor(private readonly options: { verbosity?: TerminalVerbosity; groupBy?: string[]; stream?: NodeJS.WriteStream; color?: boolean; terminal?: Terminal } = {}) {
-        const stream = options.stream ?? process.stderr;
-        this.output = options.terminal ?? new Terminal({ stdout: stream, stderr: process.stdout });
+    /** Creates a renderer using either a shared terminal or an owned stream coordinator. */
+    constructor(private readonly options: TerminalRendererOptions = {}) {
+        this.output = options.terminal ?? new Terminal({ stdout: options.stream ?? process.stderr, stderr: process.stdout });
+        const stream = this.output.stream;
         this.region = this.output.createRegion();
         this.colors = new Chalk({ level: options.color === false || process.env.NO_COLOR !== undefined
             ? 0
@@ -37,6 +64,7 @@ export class TerminalRenderer implements SpanProcessor {
     }
 
     private groupFor(fields: Attributes): string {
+        // eslint-disable-next-line security/detect-object-injection -- Configured attribute names are read only for presentation.
         return (this.options.groupBy ?? []).map(key => fields[key]).filter(value => typeof value === 'string').join(' · ');
     }
 
@@ -48,9 +76,12 @@ export class TerminalRenderer implements SpanProcessor {
         this.group = group;
     }
 
+    /** Tracks ancestry and starts labelled progress. SDK notifications after shutdown are ignored. */
     onStart(span: Span): void {
+        if (this.closed) return;
         const id = span.spanContext().spanId;
         this.parents.set(id, span.parentSpanContext?.spanId);
+        // eslint-disable-next-line security/detect-object-injection -- operationLabel is a fixed library constant.
         const label = span.attributes[operationLabel];
         if (typeof label !== 'string' || this.options.verbosity === 'quiet') return;
         let parent = span.parentSpanContext?.spanId;
@@ -68,7 +99,9 @@ export class TerminalRenderer implements SpanProcessor {
         if (this.output.isTTY && !this.timer) this.timer = setInterval(() => this.render(), 80);
     }
 
+    /** Prints the original operation label, failure/success marker and SDK-measured duration. */
     onEnd(span: ReadableSpan): void {
+        if (this.closed) return;
         const id = span.spanContext().spanId;
         const operation = this.operations.get(id);
         this.parents.delete(id);
@@ -83,18 +116,28 @@ export class TerminalRenderer implements SpanProcessor {
         this.render();
     }
 
+    /**
+     * Bound sink suitable for `withLogSink(renderer.log, callback)`.
+     * @returns True when presented outside a suspended prompt; filtered messages
+     * are unacknowledged, and calls after shutdown return false.
+     * @remarks Progress attributes update live detail without replacing the original
+     * label. Redirected progress is printed as ordinary log lines. Subprocess output
+     * preserves split lines and uses gutters unless its style is plain.
+     */
     readonly log: LogSink = (level, message, fields) => {
+        if (this.closed) return false;
         const verbosity = this.options.verbosity ?? 'normal';
         if (verbosity === 'quiet' && level !== 'warn' && level !== 'error') return;
         if (level === 'debug' && verbosity !== 'verbose') return;
         if (fields['operation.progress'] === true && typeof fields.span_id === 'string') {
             const operation = this.operations.get(fields.span_id);
             if (operation && this.output.isTTY) {
-                operation.label = message;
+                operation.progress = message;
                 this.render();
                 return !this.output.isSuspended;
             }
         }
+        // eslint-disable-next-line security/detect-object-injection -- diagnosticKind is a fixed library constant.
         const kind = fields[diagnosticKind];
         this.heading(this.groupFor(fields));
         const indent = '  '.repeat(this.diagnosticDepth(fields));
@@ -139,7 +182,9 @@ export class TerminalRenderer implements SpanProcessor {
     }
 
     private render(): void {
-        try { this.renderProgress(); } catch {
+        try {
+            this.renderProgress();
+        } catch {
             if (this.timer) clearInterval(this.timer);
             this.timer = undefined;
         }
@@ -153,7 +198,7 @@ export class TerminalRenderer implements SpanProcessor {
             return;
         }
         const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-        this.region.update([...this.operations.values()].map(operation => `${'  '.repeat(operation.depth)}${this.colors.cyan(frames[this.frame % frames.length])} ${this.label(operation)} ${this.colors.dim(`— ${((performance.now() - operation.started) / 1000).toFixed(1)}s`)}`).join('\n'));
+        this.region.update([...this.operations.values()].map(operation => `${'  '.repeat(operation.depth)}${this.colors.cyan(frames[this.frame % frames.length])} ${this.label(operation)}${operation.progress ? ` — ${operation.progress}` : ''} ${this.colors.dim(`— ${((performance.now() - operation.started) / 1000).toFixed(1)}s`)}`).join('\n'));
         this.frame++;
     }
 
@@ -161,8 +206,17 @@ export class TerminalRenderer implements SpanProcessor {
         return operation.command ? this.colors.dim(operation.label) : operation.label;
     }
 
-    /** Prompt output is transient on success; ordinary diagnostic records remain buffered until it finishes. */
+    /**
+     * Runs an interactive callback while ordinary diagnostics are buffered.
+     * @param label - Already-redacted command or description for the static marker.
+     * @param callback - Interaction using the supplied writer for prompt output.
+     * @returns The callback's result; application failures propagate unchanged.
+     * @remarks Successful short interactions collapse to a completion line; failures
+     * retain output. Quiet mode omits markers. After shutdown the callback still
+     * executes, but its writer returns false and no terminal output is produced.
+     */
     async withInteractiveOperation<T>(label: string, callback: (write: (text: string) => boolean) => Promise<T>): Promise<T> {
+        if (this.closed) return callback(() => false);
         if (this.options.verbosity === 'quiet') {
             return this.output.withPrompt(callback);
         }
@@ -171,15 +225,31 @@ export class TerminalRenderer implements SpanProcessor {
             success => `${success ? this.colors.green('✓') : this.colors.red('✗')} ${text}`);
     }
 
+    /** No-op: rendering is synchronous; prompt buffering belongs to the shared terminal. */
     async forceFlush(): Promise<void> {}
 
+    /**
+     * Stops animation, terminates partial output and disposes owned resources once.
+     * @remarks Shared terminals remain application-owned. Cleanup is attempted even
+     * when output fails; the failure rejects this call. Later calls are no-ops and
+     * late span notifications/logs cannot restart rendering.
+     */
     async shutdown(): Promise<void> {
+        if (this.closed) return;
+        this.closed = true;
         if (this.timer) clearInterval(this.timer);
         this.timer = undefined;
-        this.finishOutputLine();
-        this.region.dispose();
-        if (!this.options.terminal) this.output.dispose();
         this.operations.clear();
         this.parents.clear();
+        try {
+            this.finishOutputLine();
+        } finally {
+            this.outputLine = undefined;
+            try {
+                this.region.dispose();
+            } finally {
+                if (!this.options.terminal) this.output.dispose();
+            }
+        }
     }
 }

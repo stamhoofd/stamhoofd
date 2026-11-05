@@ -30,6 +30,9 @@ export class StdSync {
         return !!this.stdout.isTTY;
     }
 
+    /** Destination used for live regions and default writes. */
+    get stream(): NodeJS.WriteStream { return this.stdout; }
+
     get columns(): number { return this.stdout.columns || 80; }
     get rows(): number { return this.stdout.rows || 24; }
 

@@ -23,6 +23,8 @@ of attempting an unsafe erase. Password input remains owned by the subprocess.
 Call `dispose()` at the invocation boundary. `StdSync` is the legacy single-block
 API, re-exported by `@stamhoofd/stdsync` for incremental migration. Do not construct
 independent terminal owners over the same streams during one invocation.
+The read-only `stream` property exposes the destination used for live regions and
+default writes, allowing renderers to detect capabilities on the actual output.
 
 Run `pnpm stam test terminal`, `pnpm stam check lint @node/terminal`, and
 `pnpm stam check typecheck @node/terminal`.

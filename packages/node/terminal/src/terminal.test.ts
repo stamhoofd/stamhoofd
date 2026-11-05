@@ -5,7 +5,9 @@ import { Terminal } from './terminal.js';
 function fixture(tty = true) {
     const stream = Object.assign(new PassThrough(), { isTTY: tty, columns: 80 });
     let text = '';
-    stream.on('data', (chunk: Buffer) => { text += chunk.toString(); });
+    stream.on('data', (chunk: Buffer) => {
+        text += chunk.toString();
+    });
     const terminal = new Terminal({ stdout: stream as unknown as NodeJS.WriteStream, stderr: stream as unknown as NodeJS.WriteStream });
     return { terminal, stream, text: () => text };
 }
@@ -42,7 +44,9 @@ it('defers output and redraws latest progress even when a prompt rejects', async
 it('keeps redirected output plain and bounds prompt buffering', async () => {
     const { terminal, text } = fixture(false);
     terminal.createRegion().update('hidden');
-    await terminal.withPrompt(async () => { terminal.write('x'.repeat(65537)); });
+    await terminal.withPrompt(async () => {
+        terminal.write('x'.repeat(65537));
+    });
     expect(text()).toBe('\n[output omitted while terminal was suspended]\n');
     terminal.dispose();
 });
@@ -78,7 +82,9 @@ it('retains failed output, closes partial lines and restores terminal ownership'
 it('accounts for wrapped command and prompt lines', async () => {
     const { terminal, stream, text } = fixture();
     stream.columns = 10;
-    await terminal.withTransientOutput('? sudo install', async (write) => { write('password: \n'); }, () => '✓ done');
+    await terminal.withTransientOutput('? sudo install', async (write) => {
+        write('password: \n');
+    }, () => '✓ done');
     expect(text()).toContain('\r\x1b[3A\x1b[0J✓ done\n');
     terminal.dispose();
 });
