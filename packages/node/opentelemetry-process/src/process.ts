@@ -61,7 +61,9 @@ function redactor(secrets: string[], emit: (text: string) => void) {
 }
 
 export const runProcess = instrumentFunction('process.run', async function (command: string, args: string[], options: ProcessOptions = {}): Promise<ProcessResult> {
-    const emit = options.log ?? log;
+    const emit: LogSink = (...event) => {
+        try { (options.log ?? log)(...event); } catch { /* Diagnostics must not interrupt subprocess draining. */ }
+    };
     const secrets = [...new Set((options.redact ?? []).filter(Boolean).flatMap(value => [value, JSON.stringify(value).slice(1, -1)]))].sort((a, b) => b.length - a.length);
     const clean = (value: string) => {
         let result = '';

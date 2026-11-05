@@ -21,6 +21,9 @@ const sync = instrumentFunction('service.sync', async (name: string) => {
 
 The decorator supports the repository's legacy TypeScript method decorators.
 The wrapper preserves `this`, synchronous returns, Promise results and thrown errors.
+Synchronous sink, attribute-selector and span-processor failures are isolated from
+application results. Sinks are synchronous callbacks; asynchronous transports must
+handle their own rejection and buffering. SDK startup/shutdown remains application-owned.
 Streams, thenables other than native Promises, and generators are not asynchronous
 lifetimes supported by this API. Select attributes explicitly; arguments, return
 values and exception messages are never recorded automatically.

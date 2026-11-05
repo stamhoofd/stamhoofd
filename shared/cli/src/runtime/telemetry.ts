@@ -11,19 +11,33 @@ export async function withCliTelemetry<T>(name: string, verbosity: RunVerbosity,
         verbosity: verbosity === RunVerbosity.Quiet ? 'quiet' : verbosity === RunVerbosity.Output ? 'verbose' : 'normal',
         groupBy: ['environment', 'vault'],
     });
-    const sdk = new NodeSDK({
-        serviceName: 'stam',
-        autoDetectResources: false,
-        logRecordProcessors: [],
-        metricReaders: [],
-        spanProcessors: [terminal, ...(process.env.OTEL_EXPORTER_OTLP_ENDPOINT || process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-            ? [new BatchSpanProcessor({ exporter: new OTLPTraceExporter() })]
-            : [])],
-    });
-    sdk.start();
+    let sdk: NodeSDK | undefined;
+    const warn = () => {
+        try { process.stderr.write('Warning: telemetry unavailable; command result preserved.\n'); } catch { /* The output destination may itself have failed. */ }
+    };
+    try {
+        sdk = new NodeSDK({
+            serviceName: 'stam',
+            autoDetectResources: false,
+            logRecordProcessors: [],
+            metricReaders: [],
+            spanProcessors: [terminal, ...(process.env.OTEL_EXPORTER_OTLP_ENDPOINT || process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+                ? [new BatchSpanProcessor({ exporter: new OTLPTraceExporter() })]
+                : [])],
+        });
+        sdk.start();
+    } catch { warn(); }
     try {
         return await withLogSink(terminal.log, () => instrumentFunction(name, callback)());
     } finally {
-        await sdk.shutdown();
+        // Restore the terminal before waiting for a potentially unavailable exporter.
+        try { await terminal.shutdown(); } catch { warn(); }
+        let timeout: ReturnType<typeof setTimeout> | undefined;
+        try {
+            await Promise.race([
+                Promise.resolve().then(() => sdk?.shutdown()),
+                new Promise<never>((_resolve, reject) => { timeout = setTimeout(() => reject(new Error('Telemetry shutdown deadline')), 2000); }),
+            ]);
+        } catch { warn(); } finally { if (timeout) clearTimeout(timeout); }
     }
 }

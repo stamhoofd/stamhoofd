@@ -58,8 +58,10 @@ instrumentation live in `@node/opentelemetry-terminal` and
 `@node/opentelemetry-process`. The optional DevOps bootstrap depends on their
 builds through the CLI and its explicit process-library task dependency.
 
-The command creates an OpenTelemetry trace and awaits exporter shutdown on success
-and failure. Remote export is opt-in: set `OTEL_EXPORTER_OTLP_ENDPOINT` or
+The command creates an OpenTelemetry trace and allows up to two seconds for exporter
+shutdown on success and failure. Telemetry failures produce a separate warning and
+preserve the command result; terminal cleanup happens before exporter shutdown.
+Remote export is opt-in: set `OTEL_EXPORTER_OTLP_ENDPOINT` or
 `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` for OTLP/HTTP JSON, and optionally
 `OTEL_EXPORTER_OTLP_HEADERS`. Without an endpoint, traces remain local and operation
 diagnostics still work. Other commands retain their existing logging.

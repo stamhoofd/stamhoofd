@@ -9,6 +9,16 @@ beforeAll(() => sdk.start());
 beforeEach(() => exporter.reset());
 afterAll(() => sdk.shutdown());
 
+it('preserves results and application errors when a diagnostic sink throws', async () => {
+    const sink = () => { throw new Error('sink unavailable'); };
+    expect(withLogSink(sink, () => { log('info', 'hello'); return 42; })).toBe(42);
+    const error = new Error('application failure');
+    await expect(withLogSink(sink, () => instrumentFunction('failed', async () => {
+        log('error', 'diagnostic');
+        throw error;
+    })())).rejects.toBe(error);
+});
+
 it('preserves synchronous method results and this with a decorator', () => {
     class Counter {
         value = 2;

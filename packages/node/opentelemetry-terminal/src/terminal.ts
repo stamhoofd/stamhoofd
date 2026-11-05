@@ -130,6 +130,13 @@ export class TerminalRenderer implements SpanProcessor {
     }
 
     private render(): void {
+        try { this.renderProgress(); } catch {
+            if (this.timer) clearInterval(this.timer);
+            this.timer = undefined;
+        }
+    }
+
+    private renderProgress(): void {
         if (!this.operations.size) {
             this.region.update('');
             if (this.timer) clearInterval(this.timer);
