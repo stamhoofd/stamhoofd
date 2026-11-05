@@ -1,5 +1,7 @@
 import chalk from 'chalk';
-import { spawn } from 'node:child_process';
+import { processError } from '@node/opentelemetry-process';
+import { execResult } from '../runtime/process.js';
+import { withCliCleanup } from '../runtime/telemetry.js';
 import { buildBackendEnv, buildDomains } from '../config/build-config.js';
 import { successSymbol } from '../config/shared-service-config.js';
 import type { CliContext } from '../context/create-context.js';
@@ -8,7 +10,7 @@ import type { StatusItem } from '../runtime/live-output.js';
 import { createLiveOutput } from '../runtime/live-output.js';
 import { removeInstanceManifest, writeInstanceManifest } from '../runtime/manifest-store.js';
 import { sharedBuildReadyCommand, sharedBuildWatchCommand } from '../runtime/monorepo-runner.js';
-import { OutputStream, setActiveOutputTarget } from '../runtime/output-target.js';
+import { setActiveOutputTarget } from '../runtime/output-target.js';
 import { openUrl } from '../runtime/ux.js';
 import { CaddyService } from '../services/definitions/caddy-service.js';
 import { startServices, stopServices } from '../services/manager.js';
@@ -18,14 +20,7 @@ import { sharedServicesRunning } from '../services/shared-services.js';
 import { startStripe, stopStripe } from '../services/stripe.js';
 import { checkSetup, isSetupReady, printSetupReport } from './setup-machine.js';
 
-const forceShutdownGraceMs = 750;
 const serviceCheckIntervalMs = 5000;
-
-class ForcedShutdownError extends Error {
-    constructor(readonly exitCode: number) {
-        super('Forced shutdown. Cleanup may be incomplete.');
-    }
-}
 
 export enum DevTarget {
     All = 'all',
@@ -48,6 +43,7 @@ enum MissingPrerequisite {
 export async function runDev(context: CliContext, target: DevTarget, options: { services: boolean; stripe: boolean; open?: boolean }): Promise<void> {
     let startedServices = false;
     let startedStripe = false;
+    let manifestWritten = false;
     const output = createLiveOutput();
     const domains = buildDomains(context);
     const ports = buildPorts(context);
@@ -150,6 +146,7 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
                 webshop: domains.webshop,
             },
         });
+        manifestWritten = true;
 
         if (options.services) {
             await CaddyService.reload(context);
@@ -175,7 +172,7 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
         output.log('Starting app processes...');
         output.log('Press Ctrl+C to stop this session.');
 
-        const child = spawn('pnpm', ['exec', 'concurrently', '-r', ...concurrentlyTargets(target, ports)], {
+        const result = await execResult('pnpm', ['exec', 'concurrently', '-r', ...concurrentlyTargets(target, ports)], {
             cwd: context.rootDir,
             env: {
                 ...process.env,
@@ -185,118 +182,31 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
                 npm_config_color: process.env.npm_config_color ?? 'always',
                 npm_config_script_shell: process.env.npm_config_script_shell ?? '/bin/bash',
             },
-            stdio: ['inherit', 'pipe', 'pipe'],
-            shell: false,
+            label: 'Running development applications',
+            output: 'always',
+            processGroup: true,
+            // This is a continuous log stream, not bounded diagnostic capture.
+            maxDiagnosticChars: Number.MAX_SAFE_INTEGER,
         });
-
-        child.stdout?.on('data', (chunk: string | Buffer) => output.write(chunk, OutputStream.Stdout));
-        child.stderr?.on('data', (chunk: string | Buffer) => output.write(chunk, OutputStream.Stderr));
-
-        await new Promise<void>((resolve, reject) => {
-            let stopping = false;
-            let forceShutdownArmed = false;
-            let forceShutdownTimer: NodeJS.Timeout | undefined;
-            let cleanupPromise: Promise<void> | undefined;
-            let settled = false;
-            const resolveOnce = () => {
-                if (settled) {
-                    return;
-                }
-                settled = true;
-                resolve();
-            };
-            const rejectOnce = (error: unknown) => {
-                if (settled) {
-                    return;
-                }
-                settled = true;
-                reject(error);
-            };
-            const stopSession = async () => {
-                if (cleanupPromise) {
-                    await cleanupPromise;
-                    return;
-                }
-                cleanupPromise = (async () => {
-                    try {
-                        child.kill('SIGTERM');
-                        if (servicesCheckInterval) {
-                            clearInterval(servicesCheckInterval);
-                        }
-                        await removeInstanceManifest(context);
-                        if (startedStripe) {
-                            await stopStripe(context);
-                        }
-                        if (options.services) {
-                            await CaddyService.reload(context);
-                        }
-                        if (startedServices) {
-                            await stopServices(context, sharedServiceDefinitions);
-                            output.stop({ persistStatus: true });
-                            output.log(`${successSymbol} Shared services stopped because this session started them`);
-                        } else {
-                            output.stop({ persistStatus: true });
-                        }
-                        output.log(`${successSymbol} Development session stopped`);
-                    } finally {
-                        if (forceShutdownTimer) {
-                            clearTimeout(forceShutdownTimer);
-                        }
-                        process.off('SIGINT', signalHandler);
-                        process.off('SIGTERM', signalHandler);
-                    }
-                })();
-
-                await cleanupPromise;
-            };
-            const signalHandler = (signal: NodeJS.Signals) => {
-                if (stopping) {
-                    if (!forceShutdownArmed) {
-                        return;
-                    }
-                    // The first duplicate signal window is ignored because pnpm can
-                    // forward Ctrl+C more than once. After that grace period, a
-                    // second signal means the user wants an immediate shutdown.
-                    output.clearStatus();
-                    output.log('! Forced shutdown. Cleanup may be incomplete.');
-                    child.kill('SIGKILL');
-                    rejectOnce(new ForcedShutdownError(signal === 'SIGTERM' ? 143 : 130));
-                    return;
-                }
-                stopping = true;
-                // pnpm can deliver the initial Ctrl+C twice: once from the terminal
-                // process group and once via its own signal forwarding. Only arm the
-                // forced-exit shortcut after that duplicate signal window has passed.
-                forceShutdownTimer = setTimeout(() => {
-                    forceShutdownArmed = true;
-                }, forceShutdownGraceMs);
-                void stopSession().then(resolveOnce, rejectOnce);
-            };
-            process.on('SIGINT', signalHandler);
-            process.on('SIGTERM', signalHandler);
-            child.on('error', rejectOnce);
-            child.on('exit', (code) => {
-                void (async () => {
-                    try {
-                        await stopSession();
-                        if (stopping) {
-                            resolveOnce();
-                            return;
-                        }
-                        if (code && code !== 0) {
-                            rejectOnce(new Error(`Development process exited with status ${code}`));
-                            return;
-                        }
-                        resolveOnce();
-                    } catch (error) {
-                        rejectOnce(error);
-                    }
-                })();
-            });
-        });
+        if (result.code !== 0 && result.reason !== 'aborted') throw processError('Development process failed.', 'pnpm concurrently', result);
     } finally {
-        output.stop({ persistStatus: true });
-        setActiveOutputTarget(undefined);
+        if (servicesCheckInterval) clearInterval(servicesCheckInterval);
+        try {
+            await withCliCleanup(async () => {
+                await servicesCheckPromise;
+                if (manifestWritten) await removeInstanceManifest(context);
+                if (startedStripe) await stopStripe(context);
+                if (manifestWritten && options.services) await CaddyService.reload(context);
+                if (startedServices) {
+                    await stopServices(context, sharedServiceDefinitions);
+                    output.log(`${successSymbol} Shared services stopped because this session started them`);
+                }
+                if (manifestWritten) output.log(`${successSymbol} Development session stopped`);
+            });
+        } finally {
+            output.stop({ persistStatus: true });
+            setActiveOutputTarget(undefined);
+        }
     }
 }
 

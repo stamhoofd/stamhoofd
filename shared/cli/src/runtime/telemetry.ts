@@ -12,6 +12,22 @@ const invocation = new AsyncLocalStorage<{ terminal: Terminal; signal: AbortSign
 /** Shared by nested commands, workflows, prompts and subprocesses in one invocation. */
 export function getCliTelemetry() { return invocation.getStore(); }
 
+/** Cleanup must still run after cancellation; a subsequent interrupt can cancel cleanup itself. */
+export async function withCliCleanup<T>(callback: () => Promise<T>): Promise<T> {
+    const runtime = invocation.getStore();
+    if (!runtime?.signal.aborted) return callback();
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    process.on('SIGINT', abort);
+    process.on('SIGTERM', abort);
+    try {
+        return await invocation.run({ ...runtime, signal: controller.signal }, callback);
+    } finally {
+        process.off('SIGINT', abort);
+        process.off('SIGTERM', abort);
+    }
+}
+
 export async function withCliPrompt<T>(callback: () => Promise<T>): Promise<T> {
     const runtime = invocation.getStore();
     runtime?.signal.throwIfAborted();

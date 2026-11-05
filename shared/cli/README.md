@@ -68,6 +68,13 @@ suspends live regions and passes the invocation's abort signal to Inquirer.
 development status views share regions on the same terminal coordinator. Their
 logs are diagnostics; direct command results and static result tables remain stdout.
 
+Development applications and the statistics syncer use the instrumented process
+runner with continuous output and POSIX process-group cancellation. Ctrl+C stops
+them with SIGTERM and escalates after two seconds. Session teardown and test
+container cleanup use `withCliCleanup`, so an already-cancelled operation does not
+skip cleanup subprocesses; another interrupt can cancel cleanup. Detached browser
+launchers remain best-effort and are deliberately not tied to the command lifetime.
+
 `stam devops infra` commands use the opt-in telemetry runtime. Setup, sync,
 bootstrap and validation show labelled OpenTelemetry
 operations and timings by default, grouped by environment and vault. Interactive

@@ -1,4 +1,6 @@
-import { spawn } from 'node:child_process';
+import { processError } from '@node/opentelemetry-process';
+import { execResult } from './process.js';
+import { withCliCleanup } from './telemetry.js';
 import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -135,41 +137,15 @@ export async function migratePlatformStatistics(context: CliContext): Promise<vo
  * administration. In development every cron tick syncs, so this syncs continuously.
  */
 export async function runPlatformStatisticsSync(context: CliContext): Promise<void> {
-    await new Promise<void>((resolve, reject) => {
-        let stopping = false;
-        const child = spawn('pnpm', ['--dir', statisticsSyncerPackage, 'run', 'start'], {
-            cwd: context.rootDir,
-            env: { ...process.env, ...buildBackendEnv(context) },
-            stdio: 'inherit',
-        });
-
-        // Ctrl+C reaches the syncer through the process group. Wait for it to shut down its database
-        // connections instead of exiting from under it, and treat that exit as a normal stop.
-        const stop = () => {
-            stopping = true;
-            child.kill('SIGTERM');
-        };
-        const detach = () => {
-            process.off('SIGINT', stop);
-            process.off('SIGTERM', stop);
-        };
-
-        process.on('SIGINT', stop);
-        process.on('SIGTERM', stop);
-
-        child.on('error', (error) => {
-            detach();
-            reject(error);
-        });
-        child.on('exit', (code) => {
-            detach();
-            if (stopping || code === 0 || code === null) {
-                resolve();
-                return;
-            }
-            reject(new Error(`The statistics syncer exited with status ${code}`));
-        });
+    const result = await execResult('pnpm', ['--dir', statisticsSyncerPackage, 'run', 'start'], {
+        cwd: context.rootDir,
+        env: { ...process.env, ...buildBackendEnv(context) },
+        label: 'Running statistics syncer',
+        output: 'always',
+        processGroup: true,
+        maxDiagnosticChars: Number.MAX_SAFE_INTEGER,
     });
+    if (result.code !== 0 && result.reason !== 'aborted') throw processError('Statistics syncer failed.', 'pnpm start', result);
 }
 
 export type UnitTestOptions = {
@@ -235,7 +211,7 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
     } finally {
         // Shut down the container after the run; the data volume is kept for the next run.
         if (needsDatabase) {
-            await docker.removeContainer(testMysqlNames(context, 'test').container, context.verbose);
+            await withCliCleanup(() => docker.removeContainer(testMysqlNames(context, 'test').container, context.verbose));
         }
     }
 }
@@ -283,16 +259,18 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
     } finally {
         // Shut down the e2e MySQL container after the run; the data volume is kept for the next run.
         // A MySQL that was already running is left alone: it is not ours to stop.
-        if (mysql.kind === 'container') {
-            await docker.removeContainer(testMysqlNames(context, 'e2e').container, context.verbose);
-        }
-        if (shouldRestoreCaddy) {
-            try {
-                await CaddyService.reload(context);
-            } catch (error) {
-                console.warn(`Failed to restore shared Caddy config: ${error instanceof Error ? error.message : String(error)}`);
+        await withCliCleanup(async () => {
+            if (mysql.kind === 'container') {
+                await docker.removeContainer(testMysqlNames(context, 'e2e').container, context.verbose);
             }
-        }
+            if (shouldRestoreCaddy) {
+                try {
+                    await CaddyService.reload(context);
+                } catch (error) {
+                    console.warn(`Failed to restore shared Caddy config: ${error instanceof Error ? error.message : String(error)}`);
+                }
+            }
+        });
     }
 }
 

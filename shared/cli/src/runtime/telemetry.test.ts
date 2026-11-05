@@ -3,7 +3,7 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import { TerminalRenderer } from '@node/opentelemetry-terminal';
 import { withLogSink } from '@common/opentelemetry-decorators';
 import { RunVerbosity } from './command-runner.js';
-import { getCliTelemetry, withCliPrompt, withCliTelemetry } from './telemetry.js';
+import { getCliTelemetry, withCliCleanup, withCliPrompt, withCliTelemetry } from './telemetry.js';
 
 const mocks = vi.hoisted(() => ({ start: vi.fn(), shutdown: vi.fn(async () => {}), terminalShutdown: vi.fn(async () => {}), log: vi.fn() }));
 vi.mock('@opentelemetry/sdk-node', () => ({ NodeSDK: vi.fn(class {
@@ -81,4 +81,19 @@ it('shares terminal ownership with prompts and scopes signal listeners to the in
     });
     expect(getCliTelemetry()).toBeUndefined();
     expect(process.listenerCount('SIGINT')).toBe(listeners);
+});
+
+it('allows cleanup after cancellation without reviving the cancelled operation', async () => {
+    await withCliTelemetry('test', RunVerbosity.Quiet, async () => {
+        const original = getCliTelemetry()!;
+        process.emit('SIGINT');
+        await withCliCleanup(async () => {
+            expect(getCliTelemetry()?.terminal).toBe(original.terminal);
+            expect(getCliTelemetry()?.signal.aborted).toBe(false);
+            process.emit('SIGINT');
+            expect(getCliTelemetry()?.signal.aborted).toBe(true);
+        });
+        expect(getCliTelemetry()).toBe(original);
+        expect(original.signal.aborted).toBe(true);
+    });
 });
