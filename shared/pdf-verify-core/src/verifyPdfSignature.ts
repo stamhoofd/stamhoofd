@@ -88,20 +88,35 @@ function findSignerCertificate(signedData: pkijs.SignedData, signerInfo: pkijs.S
     return null;
 }
 
+export interface VerifiedPdfSignature {
+    /**
+     * The moment the signature itself says it was made, which is the only date here that is covered
+     * by the signature: it is one of the signed attributes, so it was established along with the
+     * authenticity of the document rather than read off it. The age of the document is judged on
+     * this, and so is the validity of the signer certificate.
+     */
+    signedAt: Date;
+
+    /**
+     * The path that validated, from the signer up to the pinned trust anchor. A caller that looks
+     * certificates up afterwards has to run over these: the certificate set of the container is not
+     * covered by the signature, so picking the chain back out of it by name would not be reading the
+     * chain this validated.
+     */
+    certificatePath: pkijs.Certificate[];
+}
+
 /**
  * Verifies that `bytes` is an unmodified PDF digitally signed by the signer the policy pins.
  *
  * Establishes authenticity only: there is no revocation lookup, and the content of the document is
  * not parsed.
  *
- * Answers with the path it validated, from the signer up to the pinned trust anchor. A caller that
- * looks certificates up afterwards has to run over these: the certificate set of the container is
- * not covered by the signature, so picking the chain back out of it by name would not be reading the
- * chain this validated.
+ * Answers with the signing time the signature carries and the path it validated.
  *
  * Throws a `SimpleError` on every rejection.
  */
-export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignaturePolicy, maximumAgeInDays: number): Promise<pkijs.Certificate[]> {
+export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignaturePolicy, maximumAgeInDays: number): Promise<VerifiedPdfSignature> {
     if (bytes.length > policy.maximumFileSize) {
         throw new SimpleError({
             code: 'file_too_large',
@@ -398,5 +413,5 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         });
     }
 
-    return path;
+    return { signedAt, certificatePath: path };
 }

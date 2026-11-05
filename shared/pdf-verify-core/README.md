@@ -7,7 +7,7 @@ WebCrypto only, so the same code can run in the browser and the backend.
 import { verifyPdfSignature, FOD_JUSTITIE_SIGNATURE_POLICY } from '@stamhoofd/pdf-verify-core';
 
 // Resolves when the signature is valid, throws a SimpleError otherwise.
-await verifyPdfSignature(bytes, FOD_JUSTITIE_SIGNATURE_POLICY, 90);
+const { signedAt } = await verifyPdfSignature(bytes, FOD_JUSTITIE_SIGNATURE_POLICY, 90);
 ```
 
 - `bytes`: the PDF as a `Uint8Array`.
@@ -16,6 +16,10 @@ await verifyPdfSignature(bytes, FOD_JUSTITIE_SIGNATURE_POLICY, 90);
   is the only one so far.
 - `maximumAgeInDays`: how long ago the document may have been signed. This depends on the use, so it
   is a parameter rather than part of the policy.
+
+It answers with `signedAt`, the signing time the signature itself carries — signed along with the
+document, so it is not a date read off the pdf — and `certificatePath`, the chain that validated,
+from the signer up to the pinned anchor.
 
 ## Limitations
 
