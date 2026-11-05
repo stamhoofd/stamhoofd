@@ -1,4 +1,7 @@
 import { hasLogSink, log, markSpanFailed, withSpan } from '@common/opentelemetry-decorators';
+import { context as otelContext, propagation } from '@opentelemetry/api';
+import { openDevEventChannel } from '../runtime/dev-event-channel.js';
+import { DevLifecycle } from '../runtime/dev-lifecycle.js';
 import { processError } from '@node/opentelemetry-process';
 import { execResult } from '../runtime/process.js';
 import { getCliTelemetry, withCliCleanup } from '../runtime/telemetry.js';
@@ -53,6 +56,8 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
         output.setStatus(status.items().map(app => ({ label: formatDevStatus(app, tty) })));
     };
     const status = new DevStatus(devApps(target, domains, ports), setStatus);
+    const lifecycle = new DevLifecycle(event => status.event(event));
+    let channel: Awaited<ReturnType<typeof openDevEventChannel>> | undefined;
 
     const refreshSetupState = (): Promise<boolean> => withSpan('dev.prerequisites', async () => {
         const report = await checkSetup(context);
@@ -175,6 +180,9 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
         output.log('Press Ctrl+C to stop this session.');
 
         monitoring = true;
+        const carrier: Record<string, string> = {};
+        propagation.inject(otelContext.active(), carrier);
+        channel = await openDevEventChannel(event => lifecycle.receive(event), carrier.traceparent);
         status.start();
         const names = target === DevTarget.Docs ? 'docs' : target === DevTarget.All ? 'shared,apps,docs' : 'shared,apps';
         const result = await execResult('pnpm', ['exec', 'concurrently', '--names', names, '--prefix', '[{name}]', '--kill-others-on-fail', ...concurrentlyTargets(target, ports, context.verbose)], {
@@ -183,6 +191,7 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
                 ...process.env,
                 ...buildBackendEnv(context),
                 ...stripeEnv,
+                ...channel.env,
                 FORCE_COLOR: process.env.FORCE_COLOR ?? '1',
                 npm_config_color: process.env.npm_config_color ?? 'always',
                 npm_config_script_shell: process.env.npm_config_script_shell ?? '/bin/bash',
@@ -210,9 +219,11 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
     } finally {
         monitoring = false;
         status.stop();
+        lifecycle.close();
         if (servicesCheckInterval) clearInterval(servicesCheckInterval);
         try {
             await withCliCleanup(async () => {
+                await channel?.close();
                 await servicesCheckPromise;
                 if (manifestWritten) await removeInstanceManifest(context);
                 if (startedStripe) await stopStripe(context);

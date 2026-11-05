@@ -110,6 +110,14 @@ sequence; build events also carry a cycle ID. Frames and emitter queues are boun
 An unavailable receiver never prevents an app from running. Ordinary logs continue
 on stdout/stderr. Call emitter `close()` to drain final events before exiting.
 
+The CLI correlates build and startup spans using the explicit parent trace context.
+Build cycles and server availability are independent: a failed rebuild keeps a
+previously ready server orange; failure before readiness is red. New cycles clear
+build failures only after success. Old process generations and completed cycles
+cannot overwrite newer state. Structured readiness takes precedence over log
+parsing and listener availability; listener loss remains a fallback failure check.
+Shutdown ends unfinished spans with `dev.outcome=cancelled` rather than ERROR.
+
 `stam dev all` keeps application logs above one compact footer:
 
 ```text
