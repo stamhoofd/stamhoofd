@@ -65,8 +65,8 @@ describe('shortcut installation directory', () => {
         vi.spyOn(fs, 'stat').mockResolvedValue({ isDirectory: () => true } as never);
         vi.spyOn(fs, 'readFile').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
         await setupShellShortcut();
-        expect(run).not.toHaveBeenCalledWith('sudo', ['mkdir', '-p', '/usr/local/bin'], expect.anything());
-        expect(run).toHaveBeenCalledWith('sudo', ['install', '-m', '755', script, '/usr/local/bin/stam'], expect.anything());
+        expect(exec).not.toHaveBeenCalledWith('sudo', ['mkdir', '-p', '/usr/local/bin'], expect.anything());
+        expect(exec).toHaveBeenCalledWith('sudo', ['install', '-m', '755', script, '/usr/local/bin/stam'], expect.anything());
     });
 
     it('creates the directory before installation when missing', async () => {
@@ -74,8 +74,8 @@ describe('shortcut installation directory', () => {
         vi.spyOn(fs, 'stat').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
         vi.spyOn(fs, 'readFile').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
         await setupShellShortcut();
-        expect(run).toHaveBeenNthCalledWith(1, 'sudo', ['mkdir', '-p', '/usr/local/bin'], expect.anything());
-        expect(run).toHaveBeenNthCalledWith(2, 'sudo', ['install', '-m', '755', script, '/usr/local/bin/stam'], expect.anything());
+        expect(exec).toHaveBeenNthCalledWith(1, 'sudo', ['mkdir', '-p', '/usr/local/bin'], expect.anything());
+        expect(exec).toHaveBeenNthCalledWith(2, 'sudo', ['install', '-m', '755', script, '/usr/local/bin/stam'], expect.anything());
     });
 });
 
