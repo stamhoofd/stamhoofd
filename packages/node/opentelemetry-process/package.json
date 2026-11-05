@@ -1,0 +1,22 @@
+{
+    "name": "@node/opentelemetry-process",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "main": "./dist/index.js",
+    "types": "./dist-types/index.d.ts",
+    "exports": { ".": { "types": "./dist-types/index.d.ts", "default": "./dist/index.js" } },
+    "scripts": {
+        "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
+        "lint": "eslint . --quiet",
+        "test": "vitest run",
+        "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo"
+    },
+    "dependencies": {
+        "@common/opentelemetry-decorators": "workspace:*",
+        "@opentelemetry/api": "1.10.0",
+        "tslib": "2.8.1"
+    },
+    "devDependencies": { "eslint-plugin-stamhoofd": "workspace:*", "vitest": "4.1.12" }
+}
