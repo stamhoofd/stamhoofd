@@ -47,8 +47,8 @@ through the standard test command; it is also included in `stam test unit`.
 `BaseCommand` owns the telemetry scope around oclif's execution lifecycle, including
 command cleanup. All main CLI commands extend this base, including release and
 translation commands. Common quiet/verbose flags are inherited. It parses once
-before resolving verbosity and reuses that result
-when the command requests its typed arguments. Help and invalid arguments do not
+before resolving verbosity and reuses that result when the command requests its
+typed arguments. Help flags and invalid arguments do not
 start a telemetry SDK. Nested commands reuse the invocation's terminal, SDK and
 cancellation signal. Command code should not call `withCliTelemetry` itself.
 Normal mode shows operations; verbose mode adds command diagnostics and subprocess
@@ -75,7 +75,7 @@ container cleanup use `withCliCleanup`, so an already-cancelled operation does n
 skip cleanup subprocesses; another interrupt can cancel cleanup. Detached browser
 launchers remain best-effort and are deliberately not tied to the command lifetime.
 
-`stam devops infra` commands use the opt-in telemetry runtime. Setup, sync,
+`stam devops infra` uses the same runtime. Setup, apply, sync,
 bootstrap and validation show labelled OpenTelemetry
 operations and timings by default, grouped by environment and vault. Interactive
 stderr gets live progress; redirected output gets plain start/completion lines.
@@ -96,16 +96,16 @@ preserve the command result; terminal cleanup happens before exporter shutdown.
 Remote export is opt-in: set `OTEL_EXPORTER_OTLP_ENDPOINT` or
 `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` for OTLP/HTTP JSON, and optionally
 `OTEL_EXPORTER_OTLP_HEADERS`. Without an endpoint, traces remain local and operation
-diagnostics still work. Other commands retain their existing logging.
+diagnostics still work. Legacy DevOps deployment commands retain their existing logger.
 
-One `@node/terminal` coordinator owns progress for each infrastructure invocation.
+One `@node/terminal` coordinator owns progress for each invocation.
 `withCliPrompt` suspends progress during confirmation/account selection, retaining
-updates and buffering coordinated diagnostics (up to 64 KiB). `infra run` suspends
+updates and buffering coordinated diagnostics (up to 64 KiB). `infra tf` suspends
 progress around native OpenTofu stdio so interactive input and machine-readable
 stdout retain their original behavior; its native output is not verbosity-filtered
 or redacted. Credential reads always use captured, sanitized output.
 
-SIGINT/SIGTERM abort active infrastructure subprocesses, with a two-second grace
+SIGINT/SIGTERM abort active instrumented subprocesses, with a two-second grace
 period before SIGKILL. Noninteractive subprocesses use a POSIX process group.
 Captured output is limited to 16 MiB of characters and diagnostic output to 1 MiB;
 overflowing capture fails rather than returning successful partial JSON. Failure
