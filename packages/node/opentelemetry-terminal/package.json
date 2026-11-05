@@ -18,7 +18,7 @@
         "@common/opentelemetry-decorators": "workspace:*",
         "@opentelemetry/api": "1.10.0",
         "@opentelemetry/sdk-trace": "3.0.0",
-        "@stamhoofd/stdsync": "workspace:*",
+        "@node/terminal": "workspace:*",
         "tslib": "2.8.1"
     },
     "devDependencies": { "eslint-plugin-stamhoofd": "workspace:*", "vitest": "4.1.12", "@opentelemetry/sdk-node": "0.300.0" }

@@ -61,6 +61,8 @@ Please check our [README.md](https://github.com/stamhoofd/stamhoofd)
 
 [OpenTelemetry terminal renderer](../packages/node/opentelemetry-terminal/README.md)
 
+[Terminal coordination](../packages/node/terminal/README.md)
+
 [OpenTelemetry subprocesses](../packages/node/opentelemetry-process/README.md)
 
 ---

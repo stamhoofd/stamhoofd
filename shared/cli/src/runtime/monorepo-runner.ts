@@ -53,6 +53,7 @@ export type UnitTestPackage = {
 // query `Database` from @node/database).
 export const unitTestPackages: UnitTestPackage[] = [
     { name: 'opentelemetry-terminal', path: 'packages/node/opentelemetry-terminal', needsDatabase: false },
+    { name: 'terminal', path: 'packages/node/terminal', needsDatabase: false },
     { name: 'opentelemetry-process', path: 'packages/node/opentelemetry-process', needsDatabase: false },
     { name: 'opentelemetry-decorators', path: 'packages/common/opentelemetry-decorators', needsDatabase: false },
     { name: 'errors', path: 'packages/common/errors', needsDatabase: false },

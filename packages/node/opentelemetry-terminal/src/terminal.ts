@@ -3,7 +3,8 @@ import type { LogSink } from '@common/opentelemetry-decorators';
 import { SpanStatusCode } from '@opentelemetry/api';
 import type { Attributes } from '@opentelemetry/api';
 import type { ReadableSpan, Span, SpanProcessor } from '@opentelemetry/sdk-trace';
-import { StdSync } from '@stamhoofd/stdsync';
+import { Terminal } from '@node/terminal';
+import type { TerminalRegion } from '@node/terminal';
 import chalk, { Chalk, chalkStderr } from 'chalk';
 import type { ChalkInstance } from 'chalk';
 
@@ -12,7 +13,8 @@ type Operation = { label: string; group: string; depth: number; started: number 
 
 /** An application-owned span processor and scoped log sink. Never registers an SDK. */
 export class TerminalRenderer implements SpanProcessor {
-    private readonly output: StdSync;
+    private readonly output: Terminal;
+    private readonly region: TerminalRegion;
     private readonly colors: ChalkInstance;
     private readonly operations = new Map<string, Operation>();
     private readonly parents = new Map<string, string | undefined>();
@@ -21,9 +23,10 @@ export class TerminalRenderer implements SpanProcessor {
     private timer?: ReturnType<typeof setInterval>;
     private outputLine?: string;
 
-    constructor(private readonly options: { verbosity?: TerminalVerbosity; groupBy?: string[]; stream?: NodeJS.WriteStream; color?: boolean } = {}) {
+    constructor(private readonly options: { verbosity?: TerminalVerbosity; groupBy?: string[]; stream?: NodeJS.WriteStream; color?: boolean; terminal?: Terminal } = {}) {
         const stream = options.stream ?? process.stderr;
-        this.output = new StdSync({ stdout: stream, stderr: process.stdout });
+        this.output = options.terminal ?? new Terminal({ stdout: stream, stderr: process.stdout });
+        this.region = this.output.createRegion();
         this.colors = new Chalk({ level: options.color === false || process.env.NO_COLOR !== undefined
             ? 0
             : options.color === true
@@ -72,7 +75,7 @@ export class TerminalRenderer implements SpanProcessor {
         if (!operation) return;
         this.operations.delete(id);
         this.finishOutputLine();
-        this.output.clearLive();
+        this.region.update('');
         this.heading(operation.group);
         const seconds = span.duration[0] + span.duration[1] / 1e9;
         const symbol = span.status.code === SpanStatusCode.ERROR ? this.colors.red('✗') : this.colors.green('✓');
@@ -128,13 +131,13 @@ export class TerminalRenderer implements SpanProcessor {
 
     private render(): void {
         if (!this.operations.size) {
-            this.output.clearLive();
+            this.region.update('');
             if (this.timer) clearInterval(this.timer);
             this.timer = undefined;
             return;
         }
         const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-        this.output.setLive([...this.operations.values()].map(operation => `${'  '.repeat(operation.depth)}${this.colors.cyan(frames[this.frame % frames.length])} ${operation.label} ${this.colors.dim(`— ${((performance.now() - operation.started) / 1000).toFixed(1)}s`)}`).join('\n'));
+        this.region.update([...this.operations.values()].map(operation => `${'  '.repeat(operation.depth)}${this.colors.cyan(frames[this.frame % frames.length])} ${operation.label} ${this.colors.dim(`— ${((performance.now() - operation.started) / 1000).toFixed(1)}s`)}`).join('\n'));
         this.frame++;
     }
 
@@ -144,7 +147,8 @@ export class TerminalRenderer implements SpanProcessor {
         if (this.timer) clearInterval(this.timer);
         this.timer = undefined;
         this.finishOutputLine();
-        this.output.clearLive();
+        this.region.dispose();
+        if (!this.options.terminal) this.output.dispose();
         this.operations.clear();
         this.parents.clear();
     }

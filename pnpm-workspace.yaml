@@ -14,6 +14,7 @@ packages:
   - 'packages/node/database'
   - 'packages/node/logging'
   - 'packages/node/opentelemetry-terminal'
+  - 'packages/node/terminal'
   - 'packages/node/opentelemetry-process'
   - 'packages/browser/navigation'
   - 'tests/*'

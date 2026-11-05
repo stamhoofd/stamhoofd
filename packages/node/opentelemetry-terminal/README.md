@@ -26,8 +26,10 @@ Verbose adds debug messages, including command/output diagnostics. Quiet shows
 warnings and errors. Errors thrown by the application are reported by its command
 boundary; the renderer only marks failed progress lines.
 
-Output defaults to stderr, or the supplied `stream`. `StdSync` coordinates live
-progress with writes. Non-TTY streams receive plain start/completion lines.
+Output defaults to stderr, or the supplied `stream`. Inject a shared `terminal`
+from `@node/terminal` to coordinate multiple renderers and prompts. The renderer
+disposes only its own region; the application disposes the injected coordinator.
+Non-TTY streams receive plain start/completion lines.
 `groupBy` selects context attributes to display as headings. Secrets must be
 sanitized before reaching this renderer.
 
