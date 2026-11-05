@@ -2,7 +2,7 @@ import type { XlsxTransformerColumn, XlsxTransformerSheet } from '@stamhoofd/exc
 import { XlsxBuiltInNumberFormat } from '@stamhoofd/excel-writer';
 import { Platform } from '@stamhoofd/models';
 import type { LimitedFilteredRequest, PlatformMember, Platform as PlatformStruct } from '@stamhoofd/structures';
-import { ExcelExportType, Gender, GroupType, LanguageHelper, MembershipStatus, PlatformFamily, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
+import { ExcelExportType, Gender, GroupType, JudicialRecordHelper, LanguageHelper, MembershipStatus, PlatformFamily, UnencodeablePaginatedResponse } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { ExportToExcelEndpoint } from '../endpoints/global/files/ExportToExcelEndpoint.js';
 import { GetMembersEndpoint } from '../endpoints/global/members/GetMembersEndpoint.js';
@@ -169,6 +169,14 @@ export const getBaseMemberColumns = (platform: PlatformStruct): XlsxTransformerC
                 value: formatMembershipStatus(member.membershipStatus),
             };
         },
+    },
+    {
+        id: 'judicialRecordStatus',
+        name: $t(`Uittreksel uit het strafregister`),
+        width: 30,
+        getValue: (member: PlatformMember) => ({
+            value: JudicialRecordHelper.getStatusName(member.judicialRecord.status),
+        }),
     },
     {
         id: 'organization',

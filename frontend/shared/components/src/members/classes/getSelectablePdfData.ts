@@ -2,7 +2,7 @@ import type { SelectableColumn } from '@stamhoofd/frontend-excel-export/Selectab
 import type { ContextPermissions } from '@stamhoofd/frontend-session/ContextPermissions';
 import type { EmergencyContact, Group, Organization, Parent, Platform, PlatformMember, RecordSettings } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
-import { getFinancialSupportSettingsOrDefault, getGenderName, GroupType, ParentTypeHelper, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordType } from '@stamhoofd/structures';
+import { getFinancialSupportSettingsOrDefault, getGenderName, GroupType, JudicialRecordHelper, ParentTypeHelper, RecordCategory, RecordCheckboxAnswer, RecordChooseOneAnswer, RecordMultipleChoiceAnswer, RecordType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { SelectablePdfData } from '../../export/SelectablePdfData';
 
@@ -130,6 +130,15 @@ export function getSelectablePdfData({ platform, organization, auth, groupColumn
             name: $t(`%wK`),
             getValue: ({ patchedMember: object }: PlatformMember) => object.details.nationalRegisterNumber?.toString() ?? '',
         }), [AccessRight.MemberManageNRN]),
+
+        ...(JudicialRecordHelper.asksForExtract({ platform, organization })
+            ? [new SelectablePdfData<PlatformMember>({
+                    id: 'judicialRecordStatus',
+                    enabled: false,
+                    name: $t(`Uittreksel uit het strafregister`),
+                    getValue: (member: PlatformMember) => JudicialRecordHelper.getStatusName(member.judicialRecord.status),
+                })]
+            : []),
 
         ...(groupColumns ?? []),
 
