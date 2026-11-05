@@ -30,6 +30,7 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
+        "@node/terminal": "workspace:*",
         "@node/opentelemetry-terminal": "workspace:*",
         "@common/opentelemetry-decorators": "workspace:*",
         "@opentelemetry/api": "1.10.0",

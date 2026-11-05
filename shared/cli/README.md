@@ -44,7 +44,8 @@ through the standard test command; it is also included in `stam test unit`.
 
 #### Infrastructure telemetry trial
 
-`stam devops infra sync` and `stam devops infra setup` show labelled OpenTelemetry
+`stam devops infra` commands use the opt-in telemetry runtime. Setup, sync,
+bootstrap and validation show labelled OpenTelemetry
 operations and timings by default, grouped by environment and vault. Interactive
 stderr gets live progress; redirected output gets plain start/completion lines.
 `--verbose` adds command invocations and subprocess output. Credential JSON is
@@ -65,6 +66,20 @@ Remote export is opt-in: set `OTEL_EXPORTER_OTLP_ENDPOINT` or
 `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` for OTLP/HTTP JSON, and optionally
 `OTEL_EXPORTER_OTLP_HEADERS`. Without an endpoint, traces remain local and operation
 diagnostics still work. Other commands retain their existing logging.
+
+One `@node/terminal` coordinator owns progress for each infrastructure invocation.
+`withCliPrompt` suspends progress during confirmation/account selection, retaining
+updates and buffering coordinated diagnostics (up to 64 KiB). `infra run` suspends
+progress around native OpenTofu stdio so interactive input and machine-readable
+stdout retain their original behavior; its native output is not verbosity-filtered
+or redacted. Credential reads always use captured, sanitized output.
+
+SIGINT/SIGTERM abort active infrastructure subprocesses, with a two-second grace
+period before SIGKILL. Noninteractive subprocesses use a POSIX process group.
+Captured output is limited to 16 MiB of characters and diagnostic output to 1 MiB;
+overflowing capture fails rather than returning successful partial JSON. Failure
+summaries repeat stderr only when it was not fully presented (including quiet mode).
+The CLI uses an always-on local sampler; remote export remains opt-in.
 
 | Area        | Command                                | Purpose                                                                    |
 | ----------- | -------------------------------------- | -------------------------------------------------------------------------- |

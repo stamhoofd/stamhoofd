@@ -2894,6 +2894,9 @@ importers:
       '@node/opentelemetry-terminal':
         specifier: workspace:*
         version: link:../../packages/node/opentelemetry-terminal
+      '@node/terminal':
+        specifier: workspace:*
+        version: link:../../packages/node/terminal
       '@oclif/core':
         specifier: 4.14.0
         version: 4.14.0

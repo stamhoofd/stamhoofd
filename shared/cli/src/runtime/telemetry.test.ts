@@ -3,14 +3,14 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import { TerminalRenderer } from '@node/opentelemetry-terminal';
 import { withLogSink } from '@common/opentelemetry-decorators';
 import { RunVerbosity } from './command-runner.js';
-import { withCliTelemetry } from './telemetry.js';
+import { getCliTelemetry, withCliPrompt, withCliTelemetry } from './telemetry.js';
 
-const mocks = vi.hoisted(() => ({ start: vi.fn(), shutdown: vi.fn(async () => {}), log: vi.fn() }));
+const mocks = vi.hoisted(() => ({ start: vi.fn(), shutdown: vi.fn(async () => {}), terminalShutdown: vi.fn(async () => {}), log: vi.fn() }));
 vi.mock('@opentelemetry/sdk-node', () => ({ NodeSDK: vi.fn(class {
     start = mocks.start;
     shutdown = mocks.shutdown;
 }) }));
-vi.mock('@node/opentelemetry-terminal', () => ({ TerminalRenderer: vi.fn(class { log = mocks.log; async shutdown() {} }) }));
+vi.mock('@node/opentelemetry-terminal', () => ({ TerminalRenderer: vi.fn(class { log = mocks.log; shutdown = mocks.terminalShutdown; }) }));
 vi.mock('@common/opentelemetry-decorators', () => ({
     instrumentFunction: (_name: string, callback: () => unknown) => callback,
     withLogSink: vi.fn((_sink: unknown, callback: () => unknown) => callback()),
@@ -21,7 +21,7 @@ it.each([[RunVerbosity.Quiet, 'quiet'], [RunVerbosity.Command, 'normal'], [RunVe
     vi.stubEnv('OTEL_EXPORTER_OTLP_ENDPOINT', '');
     vi.stubEnv('OTEL_EXPORTER_OTLP_TRACES_ENDPOINT', '');
     await expect(withCliTelemetry('test', verbosity, async () => 42)).resolves.toBe(42);
-    expect(TerminalRenderer).toHaveBeenCalledWith({ verbosity: expected, groupBy: ['environment', 'vault'] });
+    expect(TerminalRenderer).toHaveBeenCalledWith(expect.objectContaining({ verbosity: expected, groupBy: ['environment', 'vault'], terminal: expect.anything() }));
     expect(NodeSDK).toHaveBeenCalledWith(expect.objectContaining({ serviceName: 'stam', spanProcessors: [expect.anything()] }));
     expect(withLogSink).toHaveBeenCalledWith(mocks.log, expect.any(Function));
     expect(mocks.start).toHaveBeenCalledOnce();
@@ -53,4 +53,20 @@ it('executes the command once when SDK startup fails', async () => {
     const callback = vi.fn(async () => 42);
     await expect(withCliTelemetry('test', RunVerbosity.Quiet, callback)).resolves.toBe(42);
     expect(callback).toHaveBeenCalledOnce();
+});
+
+it('shares terminal ownership with prompts and scopes signal listeners to the invocation', async () => {
+    const listeners = process.listenerCount('SIGINT');
+    expect(getCliTelemetry()).toBeUndefined();
+    await withCliTelemetry('test', RunVerbosity.Quiet, async () => {
+        const runtime = getCliTelemetry()!;
+        await withCliPrompt(async () => {
+            expect(runtime.terminal.isSuspended).toBe(true);
+        });
+        expect(runtime.terminal.isSuspended).toBe(false);
+        process.emit('SIGINT');
+        expect(runtime.signal.aborted).toBe(true);
+    });
+    expect(getCliTelemetry()).toBeUndefined();
+    expect(process.listenerCount('SIGINT')).toBe(listeners);
 });
