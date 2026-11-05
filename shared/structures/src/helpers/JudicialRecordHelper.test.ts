@@ -1,3 +1,7 @@
+import { MemberResponsibility } from '../MemberResponsibility.js';
+import { Organization } from '../Organization.js';
+import { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
+import { Platform, PlatformConfig } from '../Platform.js';
 import type { JudicialRecordResponsibility } from './JudicialRecordHelper.js';
 import { JudicialRecordHelper, JudicialRecordStatus } from './JudicialRecordHelper.js';
 
@@ -164,5 +168,63 @@ describe('JudicialRecordHelper.getRequirement', () => {
 
         expect(requirement.status).toBe(JudicialRecordStatus.Required);
         expect(requirement.description).toBe('Sinds {date}, de startdatum van de functie.');
+    });
+});
+
+describe('JudicialRecordHelper.asksForExtract', () => {
+    function createResponsibility(judicialRecordMinimumAge: number | null) {
+        return MemberResponsibility.create({
+            name: 'Leiding',
+            judicialRecordMinimumAge,
+        });
+    }
+
+    function createPlatform(responsibilities: MemberResponsibility[]) {
+        return Platform.create({
+            config: PlatformConfig.create({ responsibilities }),
+        });
+    }
+
+    function createOrganization(responsibilities: MemberResponsibility[]) {
+        return Organization.create({
+            privateMeta: OrganizationPrivateMetaData.create({ responsibilities }),
+        });
+    }
+
+    test('false when no responsibility asks for an extract', () => {
+        expect(JudicialRecordHelper.asksForExtract({
+            platform: createPlatform([createResponsibility(null)]),
+            organization: createOrganization([createResponsibility(null)]),
+        })).toBe(false);
+    });
+
+    test('true when a platform responsibility asks for an extract', () => {
+        expect(JudicialRecordHelper.asksForExtract({
+            platform: createPlatform([createResponsibility(18)]),
+            organization: createOrganization([createResponsibility(null)]),
+        })).toBe(true);
+    });
+
+    test('true when a responsibility of the organization asks for an extract', () => {
+        expect(JudicialRecordHelper.asksForExtract({
+            platform: createPlatform([createResponsibility(null)]),
+            organization: createOrganization([createResponsibility(18)]),
+        })).toBe(true);
+    });
+
+    test('the responsibilities of the organization are optional', () => {
+        expect(JudicialRecordHelper.asksForExtract({
+            platform: createPlatform([createResponsibility(18)]),
+        })).toBe(true);
+
+        expect(JudicialRecordHelper.asksForExtract({
+            platform: createPlatform([]),
+            organization: null,
+        })).toBe(false);
+
+        expect(JudicialRecordHelper.asksForExtract({
+            platform: createPlatform([]),
+            organization: Organization.create({}),
+        })).toBe(false);
     });
 });

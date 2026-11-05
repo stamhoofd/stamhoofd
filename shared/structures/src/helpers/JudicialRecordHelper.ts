@@ -1,4 +1,6 @@
 import { Formatter } from '@stamhoofd/utility';
+import type { Organization } from '../Organization.js';
+import type { Platform } from '../Platform.js';
 
 export enum JudicialRecordStatus {
     /** The member doesn't have to have a judicial record extract checked. */
@@ -30,6 +32,19 @@ export interface JudicialRecordResponsibility {
 }
 
 export class JudicialRecordHelper {
+    /**
+     * Whether any responsibility asks for a judicial record extract.
+     *
+     * Without a single one the status is `NotRequired` for every member, so a column or filter built on it is noise.
+     * Organizations can define their own responsibilities next to the platform ones, so both are checked.
+     */
+    static asksForExtract({ platform, organization }: { platform: Platform; organization?: Organization | null }): boolean {
+        return [
+            ...platform.config.responsibilities,
+            ...(organization?.privateMeta?.responsibilities ?? []),
+        ].some(responsibility => responsibility.judicialRecordMinimumAge !== null);
+    }
+
     static getStatusName(status: JudicialRecordStatus): string {
         switch (status) {
             case JudicialRecordStatus.Required:

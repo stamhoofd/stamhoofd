@@ -12,11 +12,7 @@ export function getMemberColumns({ platform, organization, dateRange, group, gro
     const isPlatform = STAMHOOFD.userMode === 'platform';
     const showLanguage = organization ? organization.language === null : platform.language === null;
 
-    /** Without a single responsibility asking for an extract, the column is noise for this organization. */
-    const asksForJudicialRecord = [
-        ...platform.config.responsibilities,
-        ...(organization?.privateMeta?.responsibilities ?? []),
-    ].some(r => r.judicialRecordMinimumAge !== null);
+    const asksForJudicialRecord = JudicialRecordHelper.asksForExtract({ platform, organization });
 
     const allColumns: Column<ObjectType, any>[] = [
         new Column<ObjectType, string>({
