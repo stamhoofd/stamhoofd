@@ -300,10 +300,17 @@ export async function cleanBuild(context: CliContext, options: { dryRun?: boolea
     }
 }
 
+/**
+ * Builds the source-watcher command used by development supervision.
+ * @param verbose - Whether Turbo should replay cached build logs.
+ * @returns A shell command invoking the owned event-emitting runner on each edit.
+ * @remarks Turbo owns package ordering. The session-specific ready marker is
+ * written only after success; compiler failures leave the watcher alive.
+ */
 export function sharedBuildWatchCommand(verbose = false): string {
     // Keep fresh compiler output (including warnings), but avoid replaying old logs on cache hits.
-    const logs = verbose ? '' : ' --output-logs=new-only';
-    return `mkdir -p .development/cli/generated && rm -f ${sharedBuildReadyFile} && pnpm exec nodemon --quiet --signal SIGTERM --watch shared --watch backend/shared --watch packages/common --watch packages/node --watch packages/browser --watch backend/stamhoofd.d.ts --watch turbo.jsonc --watch tsconfig.base.json --watch tsconfig.test.json --watch tsconfig.runtime.json --watch tsconfig.types.json --watch jest-extended.d.ts --ignore './shared/*/dist/' --ignore './backend/shared/*/dist/' --ignore './shared/*/dist-types/' --ignore './backend/shared/*/dist-types/' --ignore './packages/*/*/dist/' --ignore './packages/*/*/dist-types/' --ext .ts,.vue,.scss,.css,.json,.jsonc,.sql,.mjs,.js --exec 'pnpm run build:shared${logs} && touch ${sharedBuildReadyFile} || exit 0'`;
+    const logs = verbose ? ' --verbose' : '';
+    return `mkdir -p .development/cli/generated && rm -f ${sharedBuildReadyFile} && pnpm exec nodemon --quiet --signal SIGTERM --watch shared --watch backend/shared --watch packages/common --watch packages/node --watch packages/browser --watch backend/stamhoofd.d.ts --watch turbo.jsonc --watch tsconfig.base.json --watch tsconfig.test.json --watch tsconfig.runtime.json --watch tsconfig.types.json --watch jest-extended.d.ts --ignore './shared/*/dist/' --ignore './backend/shared/*/dist/' --ignore './shared/*/dist-types/' --ignore './backend/shared/*/dist-types/' --ignore './packages/*/*/dist/' --ignore './packages/*/*/dist-types/' --ext .ts,.vue,.scss,.css,.json,.jsonc,.sql,.mjs,.js --exec 'node shared/cli/dev/shared-build.mjs ${sharedBuildReadyFile}${logs}'`;
 }
 
 export function sharedBuildReadyCommand(): string {

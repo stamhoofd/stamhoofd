@@ -118,6 +118,15 @@ cannot overwrite newer state. Structured readiness takes precedence over log
 parsing and listener availability; listener loss remains a fallback failure check.
 Shutdown ends unfinished spans with `dev.outcome=cancelled` rather than ERROR.
 
+`dev/shared-build.mjs` wraps each normal `pnpm run build:shared` invocation and
+reports its result even when every Turbo task is cached. The ready marker is only
+written after success; failed builds keep the watcher alive for the next edit.
+`dev/watch-typescript.mjs` uses TypeScript's solution-builder watch callbacks to
+report backend compilation cycles, preserving compiler diagnostics and runtime
+tsconfig semantics. Existing asset preparation remains in package scripts.
+Turbo passes `STAM_DEV_*` through without including their values in cache keys;
+the persistent app tasks retain their existing filters and loose environment mode.
+
 `stam dev all` keeps application logs above one compact footer:
 
 ```text
