@@ -580,14 +580,14 @@ async function privilegedPortRedirectCheck(profile: SharedServiceProfile, verbos
 
     return missingRules.length === 0
         ? { ok: true, details: `${localhostPort(caddyHttpPort)} -> ${localhostPort(profile.caddyHttpHostPort)}, ${localhostPort(caddyHttpsPort)} -> ${localhostPort(profile.caddyHttpsHostPort)}` }
-        : { ok: false, details: `${missingRules.length} privileged port redirect${missingRules.length === 1 ? '' : 's'} missing`, manualFix: 'stam setup', automaticFix: { key: SetupAutomaticFixKey.PrivilegedPorts, label: 'Configure privileged port redirects' } };
+        : { ok: false, details: `${missingRules.length} privileged port redirect${missingRules.length === 1 ? '' : 's'} missing`, manualFix: 'stam setup privileged-ports', automaticFix: { key: SetupAutomaticFixKey.PrivilegedPorts, label: 'Configure privileged port redirects' } };
 }
 
 async function caddyCheck(verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<CheckResult> {
     const result = await run('caddy', ['version'], { capture: true, allowFailure: true, verbosity });
     if (result.status !== 0) {
         if (process.platform === 'darwin') {
-            return { ok: false, details: 'caddy not found', manualFix: 'stam setup', automaticFix: { key: SetupAutomaticFixKey.Caddy, label: 'Install Caddy with Homebrew' } };
+            return { ok: false, details: 'caddy not found', manualFix: 'stam setup caddy', automaticFix: { key: SetupAutomaticFixKey.Caddy, label: 'Install Caddy with Homebrew' } };
         }
         return { ok: false, details: 'caddy not found', manualFix: 'Install Caddy, then run stam setup cert' };
     }

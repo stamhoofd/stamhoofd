@@ -125,6 +125,8 @@ The CLI uses an always-on local sampler; remote export remains opt-in.
 | Setup       | `pnpm stam setup pnpm`                 | Repair the pinned pnpm runtime through Corepack.                           |
 | Setup       | `pnpm stam setup vcs`                  | Validate and repair Git and existing JJ repositories.                      |
 | Setup       | `pnpm stam setup dns`                  | Configure local `.stamhoofd` DNS.                                          |
+| Setup       | `pnpm stam setup privileged-ports`     | Configure Linux privileged port redirects with iptables.                   |
+| Setup       | `pnpm stam setup caddy`                | Install Caddy with Homebrew on macOS.                                      |
 | Setup       | `pnpm stam setup cert`                 | Trust the local Caddy HTTPS authority.                                     |
 | Development | `pnpm stam dev all`                    | Start shared services and the full app stack.                              |
 | Development | `pnpm stam dev backend`                | Start backend apps for the current instance.                               |
@@ -172,6 +174,9 @@ The CLI uses an always-on local sampler; remote export remains opt-in.
 | Cleanup     | `pnpm stam clean metabase`             | Stop Metabase and drop its application database after confirmation.        |
 | Cleanup     | `pnpm stam clean services`             | Stop shared services.                                                      |
 | Cleanup     | `pnpm stam clean all`                  | Clean build artifacts and stop shared services.                            |
+
+The `setup privileged-ports` and `setup caddy` actions accept `--dry-run` to preview
+commands and `--yes` to skip confirmation, matching the interactive setup repairs.
 
 ### Translations
 

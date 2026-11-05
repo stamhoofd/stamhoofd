@@ -5,17 +5,19 @@ import { dryRunFlag, yesFlag } from '../../command-flags.js';
 import { getProjectPath } from '../../context/project-path.js';
 import { confirm } from '../../runtime/ux.js';
 import { RunVerbosity } from '../../runtime/command-runner.js';
-import { runSetup, setupCert, setupDns } from '../../workflows/setup-machine.js';
+import { runSetup, setupCaddy, setupCert, setupDns, setupPrivilegedPortRedirects } from '../../workflows/setup-machine.js';
 import { checkNodeVersion, printNodeVersionStatus, setupNodeVersion } from '../../workflows/setup-node.js';
 import { setupPackageManager } from '../../workflows/setup-package-manager.js';
 import { setupShellShortcut } from '../../workflows/setup-shell.js';
 import { setupVcs } from '../../workflows/setup-vcs.js';
 
 export enum SetupAction {
+    Caddy = 'caddy',
     Cert = 'cert',
     Dns = 'dns',
     Node = 'node',
     Pnpm = 'pnpm',
+    PrivilegedPorts = 'privileged-ports',
     Shortcut = 'shortcut',
     Vcs = 'vcs',
 }
@@ -30,6 +32,8 @@ export default class Setup extends BaseCommand {
         'stam setup node',
         'stam setup pnpm',
         'stam setup dns --dry-run',
+        'stam setup privileged-ports --dry-run',
+        'stam setup caddy',
         'stam setup cert --yes --verbose',
         'stam setup shortcut',
         'stam setup vcs --dry-run',
@@ -80,6 +84,16 @@ export default class Setup extends BaseCommand {
 
         if (args.action === SetupAction.Dns) {
             await setupDns({ yes: flags.yes, dryRun: flags['dry-run'] });
+            return;
+        }
+
+        if (args.action === SetupAction.PrivilegedPorts) {
+            await setupPrivilegedPortRedirects({ yes: flags.yes, dryRun: flags['dry-run'] });
+            return;
+        }
+
+        if (args.action === SetupAction.Caddy) {
+            await setupCaddy({ yes: flags.yes, dryRun: flags['dry-run'] });
             return;
         }
 
