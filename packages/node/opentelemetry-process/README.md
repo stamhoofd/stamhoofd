@@ -26,6 +26,9 @@ bounded to its last 8192 characters, with explicit empty/truncated markers.
 streaming redaction holds potential secret prefixes across chunk boundaries.
 Overlapping matches are merged before emission so neither command diagnostics nor
 stream boundaries expose fragments of overlapping credentials.
+The retained raw suffix is bounded by the longest known secret. A redaction marker
+can be emitted before an overlapping match finishes, so repetitive output cannot
+grow the pending buffer indefinitely or delay all diagnostics until process exit.
 No secret discovery or environment-variable classification is performed here.
 
 Use `sanitizeStdout` for credential-bearing structured output. It buffers stdout,
@@ -39,6 +42,9 @@ tools that require a native pipe may need an explicit template file instead.
 `input` also accepts a Node Readable; pipeline backpressure limits writes to the
 child. `inheritStdin` retains interactive input while capturing/redacting output.
 Do not combine inherited stdin with `input`.
+The `ProcessOptions` type separates interactive passthrough, inherited stdin and
+piped input. `inheritStdio: true` cannot be combined with capture or a stdout
+sanitizer; these combinations also reject at runtime for JavaScript callers.
 
 `signal` cancels execution; `timeoutMs` sets a deadline. Both send SIGTERM, followed
 by SIGKILL after `killAfterMs` (default two seconds). `processGroup: true` includes
@@ -46,6 +52,10 @@ descendants on POSIX; Windows terminates the direct child only. The result retai
 the exit `signal` and a `reason` for cancellation, timeout, capture overflow or input
 failure. Cancellation returns code 130; timeout returns 124; other signal exits use
 128 plus the signal number. An already aborted signal starts no process.
+Pre-aborted execution still records exit code 130 and marks its span failed.
+On POSIX, cancellation retains group-wide SIGKILL escalation when descendants
+survive the direct child; the result waits for this escalation if the group still
+exists. On Windows, only the direct child is terminated.
 
 Captured/sanitized stdout defaults to 16 MiB of characters (`maxCaptureChars`).
 Overflow terminates the process with code 1 and `reason: 'output-limit'`; never parse
@@ -55,8 +65,12 @@ slow sink. Pipes continue draining and the redacted stderr tail remains availabl
 `inheritStdio` preserves interactive passthrough for legacy callers; it bypasses
 capture, redaction and output events and must not be used for credential reads.
 
-Run `pnpm stam test opentelemetry-process` for the initial subprocess/redaction
-checks. Broader coverage will follow behavior review.
+Limits count UTF-16 code units rather than bytes. Invalid options and spawn failures
+reject; ordinary nonzero exits and controlled termination return a result for the
+caller to inspect. Invalid options are rejected even if the signal is already aborted.
+
+Run `pnpm stam test opentelemetry-process` for subprocess, redaction, cancellation
+and option-contract checks. Public APIs include TSDoc in `src/process.ts`.
 
 The process runner never reports a final failure itself. The command boundary owns
 that report: throw `processError(context, command, result)` for a failed result.

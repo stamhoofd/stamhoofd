@@ -5,7 +5,10 @@ it('preserves redaction and diagnostic metadata for plain output', async () => {
     const records: { message: string; fields: Record<string, unknown> }[] = [];
     await runProcess(process.execPath, ['-e', "process.stdout.write('secret output')"], {
         output: 'always', outputStyle: 'plain', redact: ['secret'],
-        log: (_level, message, fields) => { records.push({ message, fields }); return true; },
+        log: (_level, message, fields) => {
+            records.push({ message, fields });
+            return true;
+        },
     });
     const output = records.filter(record => record.fields['diagnostic.kind'] === 'stdout');
     expect(output.map(record => record.message).join('')).toBe('[redacted] output');

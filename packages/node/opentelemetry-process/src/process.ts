@@ -7,15 +7,17 @@ import { diagnostic, instrument, log, markSpanFailed } from '@common/opentelemet
 import type { LogSink } from '@common/opentelemetry-decorators';
 import { trace } from '@opentelemetry/api';
 
+/** Execution, cancellation and presentation options for {@link runProcess}. */
 export type ProcessOptions = {
     /** Defaults to the redacted command line. Use a description to override it, or false to hide progress. */
     label?: string | false;
+    /** Child working directory; defaults to the current process directory. */
     cwd?: string;
+    /** Complete child environment, replacing process.env rather than merging it. */
     env?: NodeJS.ProcessEnv;
-    input?: string | Readable;
-    /** Inherit stdin while retaining redacted output diagnostics. */
-    inheritStdin?: boolean;
+    /** Cancellation returns code 130. An already aborted signal prevents spawning. */
     signal?: AbortSignal;
+    /** Deadline in milliseconds; expiry returns code 124. */
     timeoutMs?: number;
     /** Grace period before SIGKILL after cancellation, timeout or capture overflow. */
     killAfterMs?: number;
@@ -25,30 +27,62 @@ export type ProcessOptions = {
     maxCaptureChars?: number;
     /** Maximum streamed diagnostic characters per process. Default 1 MiB. */
     maxDiagnosticChars?: number;
-    /** Raw stdout is returned to the caller; only sanitized diagnostics are emitted. */
-    capture?: boolean;
+    /** Debug output by default; always uses info severity for stdout and stderr. */
     output?: 'verbose' | 'always';
     /** Plain output omits renderer gutters while retaining coordinated, redacted diagnostics. */
     outputStyle?: 'plain' | 'decorated';
-    /** Interactive passthrough; output bypasses diagnostics, capture and redaction. */
-    inheritStdio?: boolean;
+    /** Known secrets to redact from labels, diagnostics and retained stderr, including JSON-escaped forms. */
     redact?: string[];
-    /** Use for structured output containing secrets not known before execution. */
-    sanitizeStdout?: (stdout: string) => string;
     /** Optional destination for applications without a scoped OpenTelemetry log sink. */
     log?: LogSink;
-};
+} & ({
+    /** Interactive passthrough. Output bypasses capture, diagnostics and redaction. */
+    inheritStdio: true;
+    inheritStdin?: never;
+    input?: never;
+    capture?: false;
+    sanitizeStdout?: never;
+} | ({
+    inheritStdio?: false;
+    /** Return raw stdout to the caller; only diagnostics are sanitized. Defaults to false. */
+    capture?: boolean;
+    /** Buffer and sanitize structured stdout before diagnostics; thrown errors withhold output. */
+    sanitizeStdout?: (stdout: string) => string;
+} & ({
+    /** Inherit stdin while retaining output diagnostics; cannot be combined with input. */
+    inheritStdin?: boolean;
+    input?: never;
+} | {
+    inheritStdin?: false;
+    /** Text or a Readable piped with backpressure. Input errors terminate execution. */
+    input?: string | Readable;
+})));
+
+/** Completed execution, including nonzero exits and controlled termination. */
 export type ProcessResult = {
+    /** Exit status, or 130 for cancellation, 124 for timeout, and 1 for input/capture failure. */
     code: number;
+    /** Raw captured stdout, otherwise empty. A failed result may contain incomplete output. */
     stdout: string;
+    /** Redacted final 8192 characters, with empty/truncated markers; never raw stderr. */
     stderr: string;
+    /** Direct child's terminating signal, if any; null when no child was spawned. */
     signal: NodeJS.Signals | null;
+    /** Library-initiated termination cause; ordinary nonzero exits have no reason. */
     reason?: 'aborted' | 'timeout' | 'output-limit' | 'input-error';
     /** True only if every stderr chunk was acknowledged by the presentation sink. */
     stderrReported?: boolean;
 };
 
-/** The command boundary owns reporting; retained stderr remains available for programmatic inspection. */
+/**
+ * Builds an error for a command boundary that chooses to reject a failed result.
+ * @param message - Safe contextual description; no additional redaction is applied.
+ * @param command - Safe command description, e.g. from {@link formatCommandLine}.
+ * @param result - Failed execution whose stderr is included unless fully acknowledged.
+ * @returns An Error containing exit status, signal/reason and unreported stderr.
+ * @remarks This function neither throws nor logs. Retained stderr stays available
+ * on the original result even when omitted from the message to avoid repetition.
+ */
 export function processError(message: string, command: string, result: Pick<ProcessResult, 'code'> & Partial<ProcessResult>): Error {
     const status = `${message}\n  Command: ${command}\n  Exit code: ${result.code}${result.signal ? `\n  Signal: ${result.signal}` : ''}${result.reason ? `\n  Reason: ${result.reason}` : ''}`;
     return new Error(result.stderrReported ? status : `${status}\n\n  ${command.split(' ')[0]} stderr:\n    ${(result.stderr ?? '(no stderr returned)').replaceAll('\n', '\n    ')}`);
@@ -57,11 +91,14 @@ export function processError(message: string, command: string, result: Pick<Proc
 /** Hold potential secret prefixes between chunks, redacting before emitting or truncating. */
 function redactor(secrets: string[], emit: (text: string) => void) {
     let pending = '';
+    let covered = 0;
     const longest = Math.max(0, ...secrets.map(secret => secret.length));
     return (text: string, final = false) => {
         pending += text;
-        let end = final ? pending.length : Math.max(0, pending.length - longest);
+        const end = final ? pending.length : Math.max(0, pending.length - longest);
+        if (end === 0) return;
         const matches: { start: number; end: number }[] = [];
+        if (covered) matches.push({ start: 0, end: covered });
         for (const secret of secrets) {
             let start = pending.indexOf(secret);
             while (start !== -1) {
@@ -69,26 +106,27 @@ function redactor(secrets: string[], emit: (text: string) => void) {
                 start = pending.indexOf(secret, start + 1);
             }
         }
-        // Merge first: shortening the emission boundary for one secret must not
-        // split a previously examined, overlapping secret.
+        // Carry only the covered suffix of an already emitted redaction. Merging
+        // it with new matches lets arbitrarily long overlapping runs stream safely.
         const ranges: { start: number; end: number }[] = [];
         for (const match of matches.sort((a, b) => a.start - b.start)) {
             const previous = ranges.at(-1);
             if (previous && match.start < previous.end) previous.end = Math.max(previous.end, match.end);
             else ranges.push({ ...match });
         }
-        for (const range of ranges) {
-            if (range.start < end && range.end > end) end = range.start;
-        }
         let ready = '';
         let cursor = 0;
+        let nextCovered = 0;
         for (const range of ranges) {
-            if (range.end > end) break;
-            ready += pending.slice(cursor, range.start) + '[redacted]';
-            cursor = range.end;
+            if (range.start >= end) break;
+            ready += pending.slice(cursor, range.start);
+            if (range.start !== 0 || covered === 0) ready += '[redacted]';
+            cursor = Math.min(range.end, end);
+            nextCovered = Math.max(0, range.end - end);
         }
         ready += pending.slice(cursor, end);
         pending = pending.slice(end);
+        covered = nextCovered;
         if (ready) emit(ready);
     };
 }
@@ -99,27 +137,73 @@ function redactionValues(values: string[] = []): string[] {
 
 function sanitize(value: string, secrets: string[]): string {
     let result = '';
-    redactor(secrets, (text) => { result += text; })(value, true);
+    redactor(secrets, (text) => {
+        result += text;
+    })(value, true);
     return stripVTControlCharacters(result);
 }
 
-/** One plain-text representation for progress, diagnostics and traces. Redact before publishing it. */
+/**
+ * Formats a quoted, redacted plain-text command for progress, diagnostics or errors.
+ * @param command - Executable name or path.
+ * @param args - Arguments passed separately to spawn, without shell interpolation.
+ * @param redact - Known secrets, including their JSON-escaped representations.
+ * @returns Display text with terminal escape sequences removed; not a shell script.
+ */
 export function formatCommandLine(command: string, args: string[], redact: string[] = []): string {
     return sanitize([command, ...args].map(value => /^[\w./:=@+-]+$/.test(value) ? value : JSON.stringify(value)).join(' '), redactionValues(redact));
 }
 
+function finishResult(result: ProcessResult): ProcessResult {
+    try {
+        trace.getActiveSpan()?.setAttribute('process.exit.code', result.code);
+    } catch { /* Span processors are best-effort. */ }
+    if (result.code !== 0) markSpanFailed();
+    return result;
+}
+
+/**
+ * Executes a subprocess without a shell inside an active process span.
+ * @param command - Executable name or path.
+ * @param args - Arguments passed verbatim; unknown secrets must not appear here.
+ * @param options - Stdio mode, output limits, redaction and cancellation settings.
+ * @returns Exit status and output. Nonzero exits, cancellation, timeout and capture
+ * overflow resolve with a failed result; they do not throw. Use {@link processError}
+ * at the command boundary when a failed result should become an exception.
+ * @throws For invalid options or spawn failures. Spawn error messages are redacted.
+ * @remarks The application owns the SDK and logging sink. Cancellation sends SIGTERM,
+ * then SIGKILL after the grace period. POSIX process-group escalation is retained
+ * even if the direct child exits first. Captured stdout is raw and may be incomplete
+ * on failure; diagnostics are redacted, and stderr retains only a bounded tail.
+ * Synchronous sink errors cannot change the process result. Limits count UTF-16
+ * code units, not bytes. Interactive passthrough cannot capture or sanitize stdout.
+ *
+ * @example
+ * ```ts
+ * const result = await runProcess('git', ['status', '--porcelain'], {
+ *     capture: true,
+ *     timeoutMs: 10_000,
+ * });
+ * if (result.code !== 0) throw processError('Could not inspect repository.', 'git status', result);
+ * ```
+ */
 export const runProcess = instrument('process.run', async function (command: string, args: string[], options: ProcessOptions = {}): Promise<ProcessResult> {
     const emit: LogSink = (level, message, fields) => {
-        try { return (options.log ?? log)(level, message, { ...fields, 'diagnostic.output.style': options.outputStyle }); } catch { return false; }
+        try {
+            return (options.log ?? log)(level, message, { ...fields, 'diagnostic.output.style': options.outputStyle });
+        } catch {
+            return false;
+        }
     };
     const secrets = redactionValues(options.redact);
     const clean = (value: string) => sanitize(value, secrets);
     diagnostic({ kind: 'command', message: formatCommandLine(command, args, options.redact) }, emit);
-    if (options.signal?.aborted) return { code: 130, signal: null, reason: 'aborted', stdout: '', stderr: '(no stderr returned)' };
     if ((options.inheritStdin || options.inheritStdio) && options.input !== undefined) throw new Error('Inherited stdin cannot be combined with input.');
+    if (options.inheritStdio && (options.capture || options.sanitizeStdout !== undefined)) throw new Error('Inherited stdio cannot be combined with capture or stdout sanitization.');
     for (const limit of [options.timeoutMs, options.killAfterMs, options.maxCaptureChars, options.maxDiagnosticChars]) {
         if (limit !== undefined && (!Number.isFinite(limit) || limit < 0)) throw new Error('Process limits must be finite nonnegative numbers.');
     }
+    if (options.signal?.aborted) return finishResult({ code: 130, signal: null, reason: 'aborted', stdout: '', stderr: '(no stderr returned)' });
     return await new Promise<ProcessResult>((resolve, reject) => {
         const grouped = options.processGroup === true && process.platform !== 'win32';
         const child = spawn(command, args, { cwd: options.cwd, env: options.env ?? process.env, detached: grouped, stdio: options.inheritStdio ? 'inherit' : [options.inheritStdin ? 'inherit' : options.input === undefined ? 'ignore' : 'pipe', 'pipe', 'pipe'] });
@@ -127,6 +211,7 @@ export const runProcess = instrument('process.run', async function (command: str
         let closed = false;
         let timeout: ReturnType<typeof setTimeout> | undefined;
         let escalation: ReturnType<typeof setTimeout> | undefined;
+        let escalated: Promise<void> | undefined;
         const kill = (signal: NodeJS.Signals) => {
             try {
                 if (grouped && child.pid) process.kill(-child.pid, signal);
@@ -137,7 +222,12 @@ export const runProcess = instrument('process.run', async function (command: str
             if (reason || closed) return;
             reason = cause;
             kill('SIGTERM');
-            escalation = setTimeout(() => kill('SIGKILL'), options.killAfterMs ?? 2000);
+            escalated = new Promise<void>((resolve) => {
+                escalation = setTimeout(() => {
+                    kill('SIGKILL');
+                    resolve();
+                }, options.killAfterMs ?? 2000);
+            });
         };
         const abort = () => stop('aborted');
         options.signal?.addEventListener('abort', abort, { once: true });
@@ -175,7 +265,10 @@ export const runProcess = instrument('process.run', async function (command: str
         const stdoutDiagnostic = redactor(secrets, text => output(text, 'stdout'));
         const stderrDiagnostic = redactor(secrets, (text) => {
             stderr += stripVTControlCharacters(text);
-            if (stderr.length > 8192) { truncated = true; stderr = stderr.slice(-8192); }
+            if (stderr.length > 8192) {
+                truncated = true;
+                stderr = stderr.slice(-8192);
+            }
             hasStderr = true;
             stderrReported = output(text, 'stderr') && stderrReported;
         });
@@ -194,20 +287,39 @@ export const runProcess = instrument('process.run', async function (command: str
             cleanup();
             reject(new Error(clean(error.message)));
         });
-        child.once('close', (code: number | null, signal: NodeJS.Signals | null) => {
-            cleanup();
+        const finish = async (code: number | null, signal: NodeJS.Signals | null) => {
+            if (closed) return;
             try {
+                if (grouped && child.pid && escalated) {
+                    let exists = true;
+                    try {
+                        process.kill(-child.pid, 0);
+                    } catch (error) {
+                        if ((error as NodeJS.ErrnoException).code === 'ESRCH') exists = false;
+                    }
+                    if (exists) await escalated;
+                }
+                cleanup();
                 if (options.sanitizeStdout) {
                     let safe: string;
-                    try { safe = reason === 'output-limit' ? '[stdout withheld: capture limit exceeded]\n' : options.sanitizeStdout(stdout); } catch { safe = '[stdout withheld: unable to sanitize structured output]\n'; }
+                    try {
+                        safe = reason === 'output-limit' ? '[stdout withheld: capture limit exceeded]\n' : options.sanitizeStdout(stdout);
+                    } catch {
+                        safe = '[stdout withheld: unable to sanitize structured output]\n';
+                    }
                     stdoutDiagnostic(safe, true);
                 } else stdoutDiagnostic('', true);
                 stderrDiagnostic('', true);
+                // eslint-disable-next-line security/detect-object-injection -- Node supplies the signal name; this reads the OS signal-number table.
                 const status = reason ? reason === 'aborted' ? 130 : reason === 'timeout' ? 124 : 1 : code ?? (signal ? 128 + constants.signals[signal] : 1);
-                try { trace.getActiveSpan()?.setAttribute('process.exit.code', status); } catch { /* Span processors are best-effort. */ }
-                if (status !== 0) markSpanFailed();
-                resolve({ code: status, signal: signal ?? null, reason, stderrReported: hasStderr && stderrReported, stdout: options.capture ? stdout : '', stderr: `${truncated ? '[stderr truncated]\n' : ''}${stderr.trim() || '(no stderr returned)'}` });
-            } catch (error) { reject(error); }
+                resolve(finishResult({ code: status, signal: signal ?? null, reason, stderrReported: hasStderr && stderrReported, stdout: options.capture ? stdout : '', stderr: `${truncated ? '[stderr truncated]\n' : ''}${stderr.trim() || '(no stderr returned)'}` }));
+            } catch (error) {
+                cleanup();
+                reject(error);
+            }
+        };
+        child.once('close', (code: number | null, signal: NodeJS.Signals | null) => {
+            void finish(code, signal);
         });
     });
 }, { fields: ([command, args, options]) => ({

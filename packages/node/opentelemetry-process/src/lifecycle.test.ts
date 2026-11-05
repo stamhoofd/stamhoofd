@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream';
 import { expect, it, vi } from 'vitest';
 import { processError, runProcess } from './process.js';
+import type { ProcessOptions } from './process.js';
 
 it('does not spawn for an already aborted signal', async () => {
     const result = await runProcess('nonexistent-executable', [], { signal: AbortSignal.abort() });
@@ -54,9 +55,7 @@ it.skipIf(process.platform === 'win32')('escalates group cancellation after the 
         if (group !== undefined) {
             try {
                 process.kill(group, 'SIGKILL');
-            } catch (error) {
-                if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
-            }
+            } catch { /* The process group may already have exited. */ }
         }
     }
 });
@@ -65,7 +64,7 @@ it.each([
     { inheritStdio: true, capture: true },
     { inheritStdio: true, sanitizeStdout: (text: string) => text },
 ])('rejects incompatible passthrough options before spawning: %j', async (options) => {
-    await expect(runProcess('nonexistent-executable', [], options)).rejects.toThrow('Inherited stdio cannot be combined with capture or stdout sanitization.');
+    await expect(runProcess('nonexistent-executable', [], options as unknown as ProcessOptions)).rejects.toThrow('Inherited stdio cannot be combined with capture or stdout sanitization.');
 });
 
 it('fails on capture overflow instead of returning successful truncated JSON', async () => {
