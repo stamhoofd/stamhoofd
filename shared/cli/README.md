@@ -64,6 +64,8 @@ limits and redacted errors. `env` is a complete environment; the transitional
 for existing callers. Native stdio suspends progress while the child owns the
 terminal; inherited stdin retains streamed diagnostics. Credential capture must
 use a sanitizer, not native stdio.
+Setup's privileged DNS and port-redirect repairs use native stdio so `sudo` can
+own the terminal for password prompts without progress repainting over them.
 
 Prompts go through `runtime/prompts` (exported as `prompts` for DevOps), which
 suspends live regions and passes the invocation's abort signal to Inquirer.

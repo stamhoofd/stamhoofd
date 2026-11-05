@@ -214,14 +214,12 @@ describe('setup machine workflow', () => {
         setPlatform('linux');
         const options = { dns: 'Global: 1.1.1.1\n', domains: 'Global:\n', query: '' };
         mockSetupCommands(options);
-        const originalRun = vi.mocked(run).getMockImplementation()!;
-        vi.mocked(run).mockImplementation(async (command, args, runOptions) => {
-            const result = await originalRun(command, args, runOptions);
+        vi.mocked(exec).mockImplementation(async (command, args) => {
             if (command === 'sudo' && args[0] === 'systemctl') {
                 options.dns = 'Global: 127.0.0.1:1053\n';
                 options.domains = 'Global: ~stamhoofd\n';
             }
-            return result;
+            return { code: 0, stdout: '', stderr: '', signal: null };
         });
         vi.mocked(corednsService.status).mockResolvedValue({ name: 'CoreDNS', running: false, detail: '127.0.0.1:1053' });
         vi.mocked(runServices).mockImplementation(async () => {
@@ -568,7 +566,7 @@ describe('setup machine workflow', () => {
         await setupDns({ yes: false, dryRun: false });
 
         expect(confirm).toHaveBeenCalledWith('Overwrite /etc/resolver/stamhoofd?', { default: false });
-        expect(run).not.toHaveBeenCalledWith('sudo', ['cp', expect.any(String), '/etc/resolver/stamhoofd'], expect.anything());
+        expect(exec).not.toHaveBeenCalledWith('sudo', ['cp', expect.any(String), '/etc/resolver/stamhoofd'], expect.anything());
     });
 
     // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
