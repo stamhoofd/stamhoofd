@@ -33,6 +33,18 @@ describe('JudicialRecordHelper.getRequirement', () => {
         });
 
         expect(requirement.status).toBe(JudicialRecordStatus.NotRequired);
+        expect(requirement.description).toBe('Dit lid heeft geen functies.');
+    });
+
+    test('a member that only has responsibilities they no longer hold has no functions', () => {
+        const requirement = JudicialRecordHelper.getRequirement({
+            birthDay,
+            responsibilities: [createResponsibility({ endDate: new Date(2025, 0, 1) })],
+            atDate,
+        });
+
+        expect(requirement.status).toBe(JudicialRecordStatus.NotRequired);
+        expect(requirement.description).toBe('Dit lid heeft geen functies.');
     });
 
     test('required since the start of the responsibility for a member that already reached the age', () => {
@@ -43,7 +55,19 @@ describe('JudicialRecordHelper.getRequirement', () => {
         });
 
         expect(requirement.status).toBe(JudicialRecordStatus.Required);
-        expect(requirement.description).toBe('Vereist sinds {date}');
+        expect(requirement.description).toBe('Sinds {date}, de startdatum van de functie.');
+    });
+
+    test('required since the birthday for a member that was too young when the responsibility started', () => {
+        const requirement = JudicialRecordHelper.getRequirement({
+            birthDay,
+            responsibilities: [createResponsibility({ startDate: new Date(2015, 0, 1) })],
+            atDate,
+        });
+
+        // The responsibility started before the 20th birthday (2020-03-10), so that birthday decides
+        expect(requirement.status).toBe(JudicialRecordStatus.Required);
+        expect(requirement.description).toBe('Sinds {date}, de {ordinal} verjaardag van dit lid.');
     });
 
     test('a member that is too young is not required yet, and the reason names the birthday', () => {
@@ -54,7 +78,7 @@ describe('JudicialRecordHelper.getRequirement', () => {
         });
 
         expect(requirement.status).toBe(JudicialRecordStatus.NotRequired);
-        expect(requirement.description).toBe('Vereist vanaf {date} ({ordinal} verjaardag)');
+        expect(requirement.description).toBe('Vanaf {date}, de {ordinal} verjaardag van dit lid.');
     });
 
     test('the earliest date of all responsibilities decides', () => {
@@ -70,7 +94,7 @@ describe('JudicialRecordHelper.getRequirement', () => {
 
         // The 30th birthday (2030-03-10) comes before the 40th, and both are still in the future
         expect(requirement.status).toBe(JudicialRecordStatus.NotRequired);
-        expect(requirement.description).toBe('Vereist vanaf {date} ({ordinal} verjaardag)');
+        expect(requirement.description).toBe('Vanaf {date}, de {ordinal} verjaardag van dit lid.');
     });
 
     test('a responsibility that already requires an extract wins from one that only will later', () => {
@@ -84,7 +108,7 @@ describe('JudicialRecordHelper.getRequirement', () => {
         });
 
         expect(requirement.status).toBe(JudicialRecordStatus.Required);
-        expect(requirement.description).toBe('Vereist sinds {date}');
+        expect(requirement.description).toBe('Sinds {date}, de startdatum van de functie.');
     });
 
     test('required from the day the member reaches the age', () => {
@@ -125,6 +149,6 @@ describe('JudicialRecordHelper.getRequirement', () => {
         });
 
         expect(requirement.status).toBe(JudicialRecordStatus.Required);
-        expect(requirement.description).toBe('Vereist sinds {date}');
+        expect(requirement.description).toBe('Sinds {date}, de startdatum van de functie.');
     });
 });

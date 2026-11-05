@@ -56,42 +56,28 @@ export class JudicialRecordHelper {
     }
 
     /**
-     * Whether this single responsibility requires the member to have an extract checked on `atDate`. The status of a
-     * member is `Required` as soon as one of their responsibilities does.
-     *
-     * THE RULE LIVES HERE. `judicialRecordStatusExpression()` in the API
-     * (`backend/app/api/src/helpers/judicialRecordStatus.ts`) is the SQL mirror of these three conditions, so the
-     * member list filters and sorts on exactly what this says. Change one and you have to change the other;
-     * `backend/app/api/tests/filters/judicial-record.test.ts` runs both over the same members and fails when they
-     * disagree.
+     * Whether this single responsibility requires the member to have an extract checked on `atDate`.
      */
     static requiresExtract({ responsibility, birthDay, atDate = new Date() }: {
         responsibility: JudicialRecordResponsibility;
         birthDay: Date | null;
         atDate?: Date;
     }): boolean {
-        // 1. the responsibility asks for an extract
         if (responsibility.minimumAge === null) {
             return false;
         }
 
-        // 2. the member holds it on atDate
         if (!this.holdsResponsibility(responsibility, atDate)) {
             return false;
         }
 
-        // 3. and has reached its minimum age. Members without a birth day are treated as adults, the same way
-        //    MemberDetails.defaultAge does.
+        // Members without a birth day are treated as adults, the same way MemberDetails.defaultAge does.
         const minimumAgeDate = this.getMinimumAgeDate(birthDay, responsibility.minimumAge);
         return minimumAgeDate === null || minimumAgeDate <= atDate;
     }
 
     /**
-     * The status of the member on `atDate`, with the reason behind it.
-     *
-     * This is derived instead of stored, so it stays correct when the age of a responsibility changes or when a member
-     * gains or loses a responsibility. The status is decided by `requiresExtract`; the reason names the earliest date
-     * an extract is (or becomes) required over all the responsibilities the member holds.
+     * Whether the member has to have their judicial record extract checked on `atDate`, with the reason behind it.
      */
     static getRequirement({ birthDay, responsibilities, atDate = new Date() }: {
         birthDay: Date | null;
@@ -124,28 +110,37 @@ export class JudicialRecordHelper {
         }
 
         if (requiredFrom === null) {
+            if (!responsibilities.some(responsibility => this.holdsResponsibility(responsibility, atDate))) {
+                return {
+                    status,
+                    description: $t(`Dit lid heeft geen functies.`),
+                };
+            }
+
             return {
                 status,
                 description: $t(`Geen enkele functie van dit lid vraagt een uittreksel uit het strafregister.`),
             };
         }
 
-        if (status === JudicialRecordStatus.Required) {
+        const date = Formatter.date(requiredFrom, true);
+
+        if (requiredFromAge !== null) {
+            const ordinal = Formatter.ordinalNumber(requiredFromAge);
+
             return {
                 status,
-                description: $t(`Vereist sinds {date}`, { date: Formatter.date(requiredFrom, true) }),
+                description: status === JudicialRecordStatus.Required
+                    ? $t(`Sinds {date}, de {ordinal} verjaardag van dit lid.`, { date, ordinal })
+                    : $t(`Vanaf {date}, de {ordinal} verjaardag van dit lid.`, { date, ordinal }),
             };
         }
 
-        // Responsibilities that didn't start yet are skipped, so a date in the future can only mean the member is
-        // still too young.
-        const date = Formatter.date(requiredFrom, true);
-
         return {
             status,
-            description: requiredFromAge !== null
-                ? $t(`Vereist vanaf {date} ({ordinal} verjaardag)`, { date, ordinal: Formatter.ordinalNumber(requiredFromAge) })
-                : $t(`Vereist vanaf {date}`, { date }),
+            description: status === JudicialRecordStatus.Required
+                ? $t(`Sinds {date}, de startdatum van de functie.`, { date })
+                : $t(`Vanaf {date}, de startdatum van de functie.`, { date }),
         };
     }
 }
