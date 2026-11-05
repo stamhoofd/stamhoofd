@@ -79,7 +79,9 @@ export class JudicialRecordHelper {
     /**
      * Whether the member has to have their judicial record extract checked on `atDate`, with the reason behind it.
      */
-    static getRequirement({ birthDay, responsibilities, atDate = new Date() }: {
+    static getRequirement({ firstName, birthDay, responsibilities, atDate = new Date() }: {
+        /** Used in the description, so it talks about the member by name. */
+        firstName: string;
         birthDay: Date | null;
         responsibilities: JudicialRecordResponsibility[];
         atDate?: Date;
@@ -113,13 +115,13 @@ export class JudicialRecordHelper {
             if (!responsibilities.some(responsibility => this.holdsResponsibility(responsibility, atDate))) {
                 return {
                     status,
-                    description: $t(`Dit lid heeft geen functies.`),
+                    description: $t(`{name} heeft geen functies.`, { name: firstName }),
                 };
             }
 
             return {
                 status,
-                description: $t(`Geen enkele functie van dit lid vraagt een uittreksel uit het strafregister.`),
+                description: $t(`Geen enkele functie van {name} vraagt een uittreksel uit het strafregister.`, { name: firstName }),
             };
         }
 
@@ -131,8 +133,8 @@ export class JudicialRecordHelper {
             return {
                 status,
                 description: status === JudicialRecordStatus.Required
-                    ? $t(`Sinds {date}, de {ordinal} verjaardag van dit lid.`, { date, ordinal })
-                    : $t(`Vanaf {date}, de {ordinal} verjaardag van dit lid.`, { date, ordinal }),
+                    ? $t(`Sinds {date}, de {ordinal} verjaardag van {name}.`, { date, ordinal, name: firstName })
+                    : $t(`Vanaf {date}, de {ordinal} verjaardag van {name}.`, { date, ordinal, name: firstName }),
             };
         }
 
