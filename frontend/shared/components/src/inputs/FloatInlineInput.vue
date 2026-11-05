@@ -1,24 +1,28 @@
 <template>
     <span class="st-inline-input" :class="{ error: !isValid, disabled: disabled }" @click="focusInput">
-        <span class="field">
-            <span class="sizer">{{ text }}</span>
-            <input
-                ref="input"
-                v-model="text"
-                :disabled="disabled"
-                :aria-label="label ?? undefined"
-                type="text"
-                :inputmode="fractionDigits > 0 ? 'decimal' : 'numeric'"
-                step="any"
-                @focus="onFocus"
-                @keydown.up.prevent="step(1)"
-                @keydown.down.prevent="step(-1)"
-                @keydown.enter.prevent="blurInput"
-                @change="updateModelValue()"
-                @input="updateModelValue({ final: false })"
-            >
+        <!-- Only reserves width, so the value and its line stay as wide as the value itself -->
+        <span v-if="reservedText" class="reserve" aria-hidden="true">{{ reservedText }}</span>
+        <span class="content">
+            <span class="field" :class="{ 'is-empty': !text }">
+                <span class="sizer">{{ text }}</span>
+                <input
+                    ref="input"
+                    v-model="text"
+                    :disabled="disabled"
+                    :aria-label="label ?? undefined"
+                    type="text"
+                    :inputmode="fractionDigits > 0 ? 'decimal' : 'numeric'"
+                    step="any"
+                    @focus="onFocus"
+                    @keydown.up.prevent="step(1)"
+                    @keydown.down.prevent="step(-1)"
+                    @keydown.enter.prevent="blurInput"
+                    @change="updateModelValue()"
+                    @input="updateModelValue({ final: false })"
+                >
+            </span>
+            <span v-if="suffixText" class="affix">{{ suffixText }}</span>
         </span>
-        <span v-if="suffixText" class="affix">{{ suffixText }}</span>
     </span>
 </template>
 
@@ -57,6 +61,13 @@ const props = withDefaults(defineProps<{
      * Describes the value for screen readers, since an inline input has no visible title.
      */
     label?: string | null;
+
+    /**
+     * Keep room for the largest value `min` and `max` allow, so the sentence around the input does not
+     * reflow while typing. The reserved room sits next to the value, not under its line. Needs a `min`
+     * or a `max` to know how much room that is.
+     */
+    fixedWidth?: boolean;
 }>(), {
     min: null,
     max: null,
@@ -67,6 +78,7 @@ const props = withDefaults(defineProps<{
     roundFractionDigits: null,
     selectOnFocus: true,
     label: null,
+    fixedWidth: false,
 });
 
 // A sentence always needs a value, so there is no empty state and no placeholder
@@ -76,6 +88,21 @@ const text = ref<string>(numberInput.numberToString(model.value, { valueIfNaN: '
 const inputElement = useTemplateRef<HTMLInputElement>('input');
 
 const isValid = computed(() => numberInput.validateText(text.value, { valueIfNaN: null }).isValid);
+
+/**
+ * The widest value that is still allowed, with every digit normalised so no digit of the font can be wider.
+ */
+const reservedText = computed(() => {
+    if (!props.fixedWidth) {
+        return '';
+    }
+
+    return [props.min, props.max]
+        .filter(value => value !== null)
+        .map(value => numberInput.numberToString(value, { valueIfNaN: '' }).replace(/\d/g, '0'))
+        .reduce((widest, candidate) => candidate.length > widest.length ? candidate : widest, '');
+});
+
 const suffixText = computed(() => (model.value === numberInput.multipier.value && props.suffixSingular !== null ? props.suffixSingular : props.suffix));
 
 // An out of range or missing value is corrected right away, so the sentence never shows a value the model does not have
@@ -102,6 +129,8 @@ function focusInput() {
     }
     inputElement.value?.focus();
 }
+
+defineExpose({ focus: focusInput });
 
 function blurInput() {
     inputElement.value?.blur();

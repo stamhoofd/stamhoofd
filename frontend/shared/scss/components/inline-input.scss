@@ -3,51 +3,83 @@
 // Chrome for inputs that sit inside a paragraph: no box, the font of the
 // surrounding text and a width that follows the content.
 .st-inline-input {
-    display: inline-flex;
-    align-items: baseline;
+    // The reserved width and the value share one cell, so the box is as wide as the widest of the two
+    // while the line under the value only spans the value itself
+    display: inline-grid;
     max-width: 100%;
     cursor: text;
     color: inherit;
-    border-bottom: $border-width solid $color-border-shade;
+
+    > .reserve, > .content {
+        grid-area: 1 / 1;
+        justify-self: start;
+    }
+
+    > .reserve {
+        white-space: pre;
+        visibility: hidden;
+    }
+
+    > .content {
+        display: inline-flex;
+        align-items: baseline;
+        max-width: 100%;
+        border-bottom: $border-width solid $color-border-shade;
+    }
 
     @media (hover: hover) {
         // The value colors along with the line: a line of one pixel is too little
         // to notice in running text
         &:hover {
-            border-bottom-color: $color-primary-gray-light;
             color: $color-primary-gray-light;
+
+            > .content {
+                border-bottom-color: $color-primary-gray-light;
+            }
         }
     }
 
     &:focus-within {
-        border-bottom-color: $color-primary;
         color: $color-primary;
+
+        > .content {
+            border-bottom-color: $color-primary;
+        }
     }
 
     &.error {
-        border-bottom-color: $color-error-border-shade;
         color: $color-error;
+
+        > .content {
+            border-bottom-color: $color-error-border-shade;
+        }
     }
 
     &.disabled {
         color: $color-gray-1;
         cursor: not-allowed;
-        border-bottom-color: $color-border;
+
+        > .content {
+            border-bottom-color: $color-border;
+        }
     }
 
-    > .affix {
+    .affix {
         flex-shrink: 0;
         white-space: pre;
     }
 
-    > .field {
+    .field {
         // The hidden sizer determines the width, the input is layed out on top of it,
         // so the field is always exactly as wide as the text it contains
         position: relative;
 
         // Keep room for about one character while the input is empty, so the caret stays
-        // visible and the field stays big enough to click
-        min-width: 1ch;
+        // visible and the field stays big enough to click. Only while it is empty: `1ch` is
+        // the width of a zero, and it would stretch the line under a narrower digit like a one.
+        &.is-empty {
+            min-width: 1ch;
+        }
 
         > .sizer {
             display: block;
@@ -84,6 +116,10 @@
                 -webkit-text-fill-color: $color-gray-1;
                 opacity: 1; /* required on iOS */
                 cursor: not-allowed;
+
+                // A disabled input fires no click at all, which would make it a dead spot in
+                // whatever it sits in. Let the click through to the surrounding element instead.
+                pointer-events: none;
             }
         }
     }
