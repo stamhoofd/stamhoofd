@@ -25,6 +25,7 @@ Setup lists the binary shortcut under **Optional**, with its installation comman
 when missing, non-executable, or different from this checkout's current shortcut.
 Run `stam setup shortcut` to replace an outdated copy. Optional checks do not block
 development readiness or appear in recommended fixes.
+Shortcut installation only runs `sudo mkdir` when `/usr/local/bin` is missing.
 
 When the private DevOps checkout is present, a **DevOps** section follows Optional.
 It checks OpenTofu, Scaleway CLI, 1Password CLI and TFLint and shows installation

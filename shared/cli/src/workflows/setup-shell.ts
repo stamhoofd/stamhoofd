@@ -52,15 +52,19 @@ export async function setupShellShortcut(options: { dryRun?: boolean } = {}): Pr
     const source = fileURLToPath(new URL('../../bin/stam', import.meta.url));
     const destination = '/usr/local/bin/stam';
     const rcFiles = ['.zshrc', '.bashrc'].map(name => path.join(os.homedir(), name));
+    const directoryExists = await fs.stat(path.dirname(destination)).then(stat => stat.isDirectory(), (error: NodeJS.ErrnoException) => {
+        if (error.code === 'ENOENT') return false;
+        throw error;
+    });
 
     if (options.dryRun) {
-        info(command('sudo mkdir -p /usr/local/bin'));
+        if (!directoryExists) info(command('sudo mkdir -p /usr/local/bin'));
         info(command(`sudo install -m 755 "${source}" ${destination}`));
         info(`Remove legacy stam shell functions from ${rcFiles.join(' and ')} if present.`);
         return;
     }
 
-    await run('sudo', ['mkdir', '-p', '/usr/local/bin'], { verbosity: RunVerbosity.Output });
+    if (!directoryExists) await run('sudo', ['mkdir', '-p', '/usr/local/bin'], { verbosity: RunVerbosity.Output });
     await run('sudo', ['install', '-m', '755', source, destination], { verbosity: RunVerbosity.Output });
     success(`Installed ${destination}`);
 

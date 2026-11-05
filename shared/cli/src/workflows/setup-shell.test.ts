@@ -56,6 +56,15 @@ describe('shortcut installation directory', () => {
         expect(run).not.toHaveBeenCalledWith('sudo', ['mkdir', '-p', '/usr/local/bin'], expect.anything());
         expect(run).toHaveBeenCalledWith('sudo', ['install', '-m', '755', script, '/usr/local/bin/stam'], expect.anything());
     });
+
+    it('creates the directory before installation when missing', async () => {
+        vi.mocked(run).mockClear();
+        vi.spyOn(fs, 'stat').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
+        vi.spyOn(fs, 'readFile').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
+        await setupShellShortcut();
+        expect(run).toHaveBeenNthCalledWith(1, 'sudo', ['mkdir', '-p', '/usr/local/bin'], expect.anything());
+        expect(run).toHaveBeenNthCalledWith(2, 'sudo', ['install', '-m', '755', script, '/usr/local/bin/stam'], expect.anything());
+    });
 });
 
 describe.skip('setup-shell', () => {
