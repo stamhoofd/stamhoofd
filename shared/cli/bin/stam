@@ -3,7 +3,7 @@
 dir="$PWD"
 while root="$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null)"; do
     if git -C "$root" remote -v | grep -Eq '[@/]github[.]com[:/]stamhoofd/stamhoofd([.]git)?[[:space:]]'; then
-        exec pnpm --dir "$root" --silent run stam "$@"
+        exec node --use-system-ca "$root/.development/stam.mjs" "$@"
     fi
     dir="${root%/*}"
     [ -n "$dir" ] || break

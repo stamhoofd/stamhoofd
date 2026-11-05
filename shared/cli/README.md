@@ -14,6 +14,11 @@ pnpm stam dev all
 
 The bootstrap script installs the Node version from `.nvmrc` and prepares the pnpm version pinned in the root `package.json` through Corepack. If only pnpm needs repair, run `corepack enable` followed by `corepack install`, or run `stam setup pnpm` when the CLI alias is already available.
 
+The installed `stam` shortcut executes the Node launcher directly. After building,
+the launcher runs the CLI in the same process, so Ctrl+C waits for command cleanup
+before returning to the shell. Reinstall older copied shortcuts with
+`pnpm stam setup shortcut` to use this launcher behavior.
+
 Run `pnpm stam setup shortcut` to install `shared/cli/bin/stam` as `/usr/local/bin/stam` using sudo. This removes the need to type `pnpm` or run commands in the project root. Setup also removes the legacy `stam` function blocks from `.zshrc` and `.bashrc`; restart your terminal or run `unset -f stam` if the old function is still loaded. Afterwards, `stam setup` performs the normal setup checks.
 
 Setup lists the binary shortcut under **Optional**, with its installation command when missing. Optional checks do not block development readiness or appear in recommended fixes.

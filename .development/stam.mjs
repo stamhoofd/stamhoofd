@@ -32,4 +32,8 @@ function run(command, args, stdio) {
 
 // Successful bootstrap builds are silent; failures are reported on stderr.
 run('pnpm', ['exec', 'turbo', 'run', ...tasks, '--output-logs=errors-only', '--no-update-notifier'], ['inherit', 'pipe', 'pipe']);
-run(process.execPath, ['--use-system-ca', 'shared/cli/bin/stam.js', ...process.argv.slice(2)], 'inherit');
+// Keep the CLI in the foreground process so Ctrl+C cannot orphan its async cleanup.
+const cli = new URL('../shared/cli/bin/stam.js', import.meta.url);
+process.chdir(root);
+process.argv = [process.execPath, fileURLToPath(cli), ...process.argv.slice(2)];
+await import(cli.href);
