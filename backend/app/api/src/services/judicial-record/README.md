@@ -20,7 +20,9 @@ report.isPassed; // every check has a result and that result passed
 Nothing is stored and nothing is read from the database: the same document delivered twice gives the
 same answer, and a reviewer opening one later has it checked again rather than shown a stored
 verdict. Who may deliver an extract for which member, and what happens with the outcome, belongs to
-the endpoint on top of this.
+the endpoint on top of this: `POST /members/:id/judicial-record`, in
+[`DeliverMemberJudicialRecordEndpoint.ts`](../../endpoints/global/members/DeliverMemberJudicialRecordEndpoint.ts).
+It takes the pdf, answers with this report, and keeps neither.
 
 ## The five checks
 
