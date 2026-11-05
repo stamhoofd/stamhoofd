@@ -469,6 +469,11 @@ describe('concurrentlyTargets', () => {
     it('uses the root shared build graph in the watcher', () => {
         const watcher = concurrentlyTargets(DevTarget.All, ports).find(target => target.includes('nodemon'));
 
+        expect(watcher).toContain("--exec 'pnpm run build:shared --output-logs=new-only && touch ");
+    });
+
+    it('replays all shared build logs only when verbose output is requested', () => {
+        const watcher = concurrentlyTargets(DevTarget.All, ports, true).find(target => target.includes('nodemon'));
         expect(watcher).toContain("--exec 'pnpm run build:shared && touch ");
     });
 });

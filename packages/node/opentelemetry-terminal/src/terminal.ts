@@ -8,7 +8,7 @@ import type { TerminalRegion } from '@node/terminal';
 import chalk, { Chalk, chalkStderr } from 'chalk';
 import type { ChalkInstance } from 'chalk';
 
-/** Quiet shows warnings/errors; normal adds labelled spans and info; verbose adds debug diagnostics. */
+/** Quiet shows warnings/errors; normal adds descriptive spans and info; verbose adds command spans and debug diagnostics. */
 export type TerminalVerbosity = 'quiet' | 'normal' | 'verbose';
 
 /** Presentation settings and ownership of the renderer's output destination. */
@@ -84,6 +84,7 @@ export class TerminalRenderer implements SpanProcessor {
         // eslint-disable-next-line security/detect-object-injection -- operationLabel is a fixed library constant.
         const label = span.attributes[operationLabel];
         if (typeof label !== 'string' || this.options.verbosity === 'quiet') return;
+        if (span.attributes['operation.label.kind'] === 'command' && this.options.verbosity !== 'verbose') return;
         let parent = span.parentSpanContext?.spanId;
         while (parent && !this.operations.has(parent)) parent = this.parents.get(parent);
         const group = this.groupFor(span.attributes);

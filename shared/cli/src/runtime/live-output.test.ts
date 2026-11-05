@@ -41,7 +41,7 @@ describe('createLiveOutput', () => {
         output.log('Starting app processes...');
         output.write('hello\n');
 
-        expect(stdout.writes).toEqual(['instance main\n', 'instance main\n', 'Starting app processes...\n', 'hello\n']);
+        expect(stdout.writes).toEqual(['instance main\n', 'Starting app processes...\n', 'hello\n']);
     });
 
     it('persists status when stopped with persistStatus', () => {

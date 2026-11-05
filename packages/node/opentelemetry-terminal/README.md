@@ -21,7 +21,10 @@ Imports come from `@node/opentelemetry-terminal`, `@opentelemetry/sdk-node`, and
 renderer for remote traces. Progress requires recording spans; a sampler that
 drops spans also removes their progress notifications.
 
-Normal mode shows all labelled operations and info/warning/error messages.
+Normal mode shows descriptively labelled operations and info/warning/error messages.
+Spans with `operation.label.kind: 'command'` are trace-only unless verbosity is
+`verbose`. In verbose mode they appear nested beneath their labelled parent;
+filtering presentation does not discard exported spans or their ancestry.
 Info records with `operation.progress: true` update the active span's live detail
 in a TTY; redirected output receives ordinary progress lines instead. The original
 operation label is retained for completion output:

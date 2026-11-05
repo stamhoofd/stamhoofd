@@ -64,10 +64,12 @@ export function createLiveOutput(options: {
     };
 
     const applyStatus = (items: StatusItem[]) => {
-        renderedStatus = items
+        const nextStatus = items
             .map(item => formatStatusItem(item))
             .filter(Boolean)
             .join('  ');
+        if (nextStatus === renderedStatus) return;
+        renderedStatus = nextStatus;
         staticStatusPrinted = false;
         renderStatus();
     };

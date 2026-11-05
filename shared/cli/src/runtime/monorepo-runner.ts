@@ -300,8 +300,10 @@ export async function cleanBuild(context: CliContext, options: { dryRun?: boolea
     }
 }
 
-export function sharedBuildWatchCommand(): string {
-    return `mkdir -p .development/cli/generated && rm -f ${sharedBuildReadyFile} && pnpm exec nodemon --quiet --signal SIGTERM --watch shared --watch backend/shared --watch packages/common --watch packages/node --watch packages/browser --watch backend/stamhoofd.d.ts --watch turbo.jsonc --watch tsconfig.base.json --watch tsconfig.test.json --watch tsconfig.runtime.json --watch tsconfig.types.json --watch jest-extended.d.ts --ignore './shared/*/dist/' --ignore './backend/shared/*/dist/' --ignore './shared/*/dist-types/' --ignore './backend/shared/*/dist-types/' --ignore './packages/*/*/dist/' --ignore './packages/*/*/dist-types/' --ext .ts,.vue,.scss,.css,.json,.jsonc,.sql,.mjs,.js --exec 'pnpm run build:shared && touch ${sharedBuildReadyFile} || exit 0'`;
+export function sharedBuildWatchCommand(verbose = false): string {
+    // Keep fresh compiler output (including warnings), but avoid replaying old logs on cache hits.
+    const logs = verbose ? '' : ' --output-logs=new-only';
+    return `mkdir -p .development/cli/generated && rm -f ${sharedBuildReadyFile} && pnpm exec nodemon --quiet --signal SIGTERM --watch shared --watch backend/shared --watch packages/common --watch packages/node --watch packages/browser --watch backend/stamhoofd.d.ts --watch turbo.jsonc --watch tsconfig.base.json --watch tsconfig.test.json --watch tsconfig.runtime.json --watch tsconfig.types.json --watch jest-extended.d.ts --ignore './shared/*/dist/' --ignore './backend/shared/*/dist/' --ignore './shared/*/dist-types/' --ignore './backend/shared/*/dist-types/' --ignore './packages/*/*/dist/' --ignore './packages/*/*/dist-types/' --ext .ts,.vue,.scss,.css,.json,.jsonc,.sql,.mjs,.js --exec 'pnpm run build:shared${logs} && touch ${sharedBuildReadyFile} || exit 0'`;
 }
 
 export function sharedBuildReadyCommand(): string {

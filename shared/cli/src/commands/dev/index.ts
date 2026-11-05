@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { Args } from '@oclif/core';
+import { withSpan } from '@common/opentelemetry-decorators';
 import { BaseCommand } from '../../base-command.js';
 import { openFlag, servicesOptionFlag, stripeFlag } from '../../command-flags.js';
 import { getProjectPath } from '../../context/project-path.js';
@@ -50,7 +51,7 @@ export default class Dev extends BaseCommand {
             return;
         }
 
-        const { context } = await this.parseWithContext(Dev, parsed);
+        const { context } = await withSpan('dev.workspace', () => this.parseWithContext(Dev, parsed), { label: 'Resolving development workspace' });
         await runDev(context, target, {
             services: flags.services ?? target !== DevTarget.Frontend,
             stripe: flags.stripe,

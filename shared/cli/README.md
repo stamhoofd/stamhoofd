@@ -60,9 +60,10 @@ before resolving verbosity and reuses that result when the command requests its
 typed arguments. Help flags and invalid arguments do not
 start a telemetry SDK. Nested commands reuse the invocation's terminal, SDK and
 cancellation signal. Command code should not call `withCliTelemetry` itself.
-Normal mode shows operations; verbose mode adds command diagnostics and subprocess
-output. Machine-readable command results remain on stdout, diagnostics on stderr.
-Subprocess progress shows the full quoted, redacted command in dim text. Explicit
+Normal mode shows descriptive operations; `--verbose` adds command child spans,
+command diagnostics and subprocess output. Machine-readable command results remain
+on stdout, diagnostics on stderr. Verbose subprocess progress shows the full quoted,
+redacted command in dim text, nested under its enclosing operation. Explicit
 descriptive labels retain normal styling. `NO_COLOR` disables styling, and
 `label: false` suppresses subprocess progress (used by quiet probes).
 
@@ -95,6 +96,41 @@ URL/status line. Session teardown and test
 container cleanup use `withCliCleanup`, so an already-cancelled operation does not
 skip cleanup subprocesses; another interrupt can cancel cleanup. Detached browser
 launchers remain best-effort and are deliberately not tied to the command lifetime.
+
+#### Development logs and status
+
+`stam dev all` keeps application logs above one compact footer:
+
+```text
+dashboard  api  docs  webshop  renderer  stats
+```
+
+Only apps selected by the target appear. Labels use short application names and
+are dimmed; links are underlined OSC-8 hyperlinks. Link destinations follow the
+selected environment and workspace. Colors indicate:
+
+- **Blue:** starting or restarting.
+- **Green:** the local listener is available, or the statistics worker reported startup.
+- **Orange:** a warning/error was observed in the last 30 seconds, or shared services are unavailable.
+- **Red:** a reported crash/process failure, or two consecutive missed listener checks after running.
+
+Listener checks run once a second and are availability checks, not full application
+health checks. The CLI observes known Vite/Nuxt/nodemon/Turbo output; warnings are
+recognized from explicit warning/error markers, not merely because a tool uses
+stderr. Statistics has no listener: its status follows its startup and supervisor
+messages. Full app-level OpenTelemetry and structured readiness events are not yet
+required. Unrecognized logs still pass through unchanged.
+
+Output is attributed to `shared`, `apps` or `docs`; Turbo retains package prefixes
+within app logs. Fresh build output (including warnings) is always visible. Cached
+shared-build logs are not replayed unless `--verbose` is supplied. Setup, service
+preparation and route configuration have descriptive spans; their command spans
+are visible only with `--verbose` and remain available in exported traces in either
+mode. A failed supervised command stops sibling processes so the session cannot
+silently remain half-running.
+
+The footer clears on shutdown. Redirected output has plain labels without cursor
+updates or OSC hyperlinks; identical status lines are not repeatedly printed.
 
 `stam devops infra` uses the same runtime. Setup, apply, sync,
 bootstrap and validation show labelled OpenTelemetry

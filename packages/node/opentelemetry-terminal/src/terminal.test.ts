@@ -137,7 +137,7 @@ it.each([true, false])('dims command labels throughout their lifetime (TTY: %s)'
     stream.on('data', (chunk: Buffer) => {
         output += chunk.toString();
     });
-    const renderer = new TerminalRenderer({ stream: stream as unknown as NodeJS.WriteStream, color: true });
+    const renderer = new TerminalRenderer({ stream: stream as unknown as NodeJS.WriteStream, color: true, verbosity: 'verbose' });
     const span = { attributes: { 'operation.label': 'git remote get-url origin', 'operation.label.kind': 'command' }, spanContext: () => ({ spanId: 'command' }), duration: [0, 0], status: { code: 0 } };
     try {
         renderer.onStart(span as never);
@@ -167,6 +167,24 @@ it('suppresses command progress in quiet mode', async () => {
     renderer.onEnd(span as never);
     await renderer.shutdown();
     expect(output).toBe('');
+});
+
+it.each(['normal', 'verbose'] as const)('shows command child spans only on request (%s)', async (verbosity) => {
+    const stream = new PassThrough();
+    let output = '';
+    stream.on('data', (chunk: Buffer) => {
+        output += chunk.toString();
+    });
+    const renderer = new TerminalRenderer({ stream: stream as unknown as NodeJS.WriteStream, color: false, verbosity });
+    const parent = { attributes: { 'operation.label': 'Checking prerequisites' }, spanContext: () => ({ spanId: 'parent' }), duration: [0, 0], status: { code: 0 } };
+    const child = { ...parent, attributes: { 'operation.label': 'git --version', 'operation.label.kind': 'command' }, spanContext: () => ({ spanId: 'child' }), parentSpanContext: { spanId: 'parent' } };
+    renderer.onStart(parent as never);
+    renderer.onStart(child as never);
+    renderer.onEnd(child as never);
+    renderer.onEnd(parent as never);
+    await renderer.shutdown();
+    expect(output).toContain('✓ Checking prerequisites');
+    expect(output.includes('  ✓ git --version')).toBe(verbosity === 'verbose');
 });
 
 it('updates the active live operation when progress is reported', async () => {
