@@ -116,7 +116,7 @@ export interface VerifiedPdfSignature {
  *
  * Throws a `SimpleError` on every rejection.
  */
-export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignaturePolicy, maximumAgeInDays: number): Promise<VerifiedPdfSignature> {
+export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignaturePolicy, maxAgeInDays: number): Promise<VerifiedPdfSignature> {
     if (bytes.length > policy.maximumFileSize) {
         throw new SimpleError({
             code: 'file_too_large',
@@ -295,10 +295,10 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         });
     }
 
-    if (signedAt.getTime() < now.getTime() - maximumAgeInDays * 24 * 60 * 60 * 1000) {
+    if (signedAt.getTime() < now.getTime() - maxAgeInDays * 24 * 60 * 60 * 1000) {
         throw new SimpleError({
             code: 'signature_too_old',
-            message: `The signature was made at ${signedAt.toISOString()}, more than ${maximumAgeInDays} days before ${now.toISOString()}.`,
+            message: `The signature was made at ${signedAt.toISOString()}, more than ${maxAgeInDays} days before ${now.toISOString()}.`,
             human: $t('Dit bestand werd te lang geleden ondertekend. Vraag een recenter document aan bij {signerName} en laad dat op.', { signerName: policy.signerName }),
             statusCode: 400,
         });

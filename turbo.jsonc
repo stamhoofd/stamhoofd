@@ -109,7 +109,7 @@
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
             "cache": true
         },
-        "@stamhoofd/pdf-verify-core#build": {
+        "@stamhoofd/signed-pdf#build": {
             "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
             "cache": true
