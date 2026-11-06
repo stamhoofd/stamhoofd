@@ -75,7 +75,9 @@ test('It renders a one page document as a single page', async () => {
 
     // An extract leans on Helvetica without embedding it, so the text of a page only appears if
     // pdf.js substitutes the standard fonts. The fixture does the same.
-    expect(countDarkPixels(canvas)).toBeGreaterThan(500);
+    await vi.waitFor(() => {
+        expect(countDarkPixels(canvas)).toBeGreaterThan(500);
+    }, { timeout: 10_000 });
 
     // A4 at 400 css pixels wide, times the pixel ratio of the screen running the test.
     expect(canvas.width / canvas.height).toBeCloseTo(595 / 842, 2);
@@ -116,7 +118,7 @@ test('It renders a page of a long document once it is scrolled to', async () => 
     await vi.waitFor(() => {
         const canvas = lastPage.querySelector<HTMLCanvasElement>('canvas')!;
         expect(canvas.width).toBeGreaterThan(0);
-        expect(isBlank(canvas)).toBe(false);
+        expect(countDarkPixels(canvas)).toBeGreaterThan(500);
     }, { timeout: 10_000 });
 });
 

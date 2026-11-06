@@ -2432,6 +2432,9 @@ importers:
       '@stamhoofd/scss':
         specifier: workspace:*
         version: link:../scss
+      '@stamhoofd/types':
+        specifier: workspace:*
+        version: link:../../../shared/types
       pdfjs-dist:
         specifier: 6.4.299
         version: 6.4.299
