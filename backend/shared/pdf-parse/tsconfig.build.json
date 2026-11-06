@@ -1,0 +1,18 @@
+{
+    "extends": ["../../../tsconfig.base.json", "../../../tsconfig.runtime.json"],
+    "compilerOptions": {
+        // unpdf declares its optional @napi-rs/canvas renderer in its types; we only read text
+        "skipLibCheck": true,
+        "tsBuildInfoFile": ".cache/build.tsbuildinfo",
+        "rootDir": "src",
+        "outDir": "dist"
+    },
+    "include": [
+        "./src",
+        "../../stamhoofd.d.ts"
+    ],
+    "exclude": [
+        "./src/**/*.spec.ts",
+        "./src/**/*.test.ts"
+    ]
+}
