@@ -15,7 +15,7 @@ export interface PdfSignaturePolicy {
      * order. The path's intermediates must be exactly this set, so a valid certificate issued under
      * another CA under the same anchor is still rejected.
      */
-    intermediateSpkiHashes: string[];
+    intermediateSpkiHashes: readonly string[];
 
     /** Hard limit on the input, checked before anything is parsed. */
     maximumFileSize: number;

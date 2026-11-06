@@ -18,8 +18,8 @@ describe('verifyPdfSignature', () => {
         chain = await createTestChain();
     });
 
-    async function expectFailure(bytes: Uint8Array, code: string, policy = chain.policy, maximumAgeInDays = NO_AGE_LIMIT) {
-        const thrown = await verifyPdfSignature(bytes, policy, maximumAgeInDays).then(() => null, (error: unknown) => error);
+    async function expectFailure(bytes: Uint8Array, code: string, policy = chain.policy, maxAgeInDays = NO_AGE_LIMIT) {
+        const thrown = await verifyPdfSignature(bytes, policy, maxAgeInDays).then(() => null, (error: unknown) => error);
 
         expect(isSimpleError(thrown)).toBe(true);
         expect((thrown as SimpleError).code).toBe(code);

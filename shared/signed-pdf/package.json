@@ -1,5 +1,5 @@
 {
-    "name": "@stamhoofd/pdf-verify-core",
+    "name": "@stamhoofd/signed-pdf",
     "version": "2.157.1",
     "type": "module",
     "main": "./dist/index.js",
