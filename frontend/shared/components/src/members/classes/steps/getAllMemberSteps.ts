@@ -1,6 +1,8 @@
+import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { PlatformMember, RegisterItem } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import type { EditMemberStep } from '../MemberStepManager';
+import { MemberStepManager } from '../MemberStepManager';
 import { MemberDataPermissionStep } from './MemberDataPermissionStep';
 import { MemberEmergencyContactsStep } from './MemberEmergencyContactsStep';
 import { MemberFinancialSupportStep } from './MemberFinancialSupportStep';
@@ -37,4 +39,29 @@ export function getAllMemberSteps(member: PlatformMember, item: RegisterItem | n
     }
 
     return steps;
+}
+
+/**
+ * Whether an admin should complete member data before this item can be added to the cart.
+ * Admins of the organization that owns the group can always register without completing the data.
+ */
+export function hasMissingMemberData(item: RegisterItem, context: SessionContext): boolean {
+    const member = item.member;
+    const family = member.family;
+
+    if (family.checkout.isAdminFromSameOrganization) {
+        return false;
+    }
+
+    // The required data can depend on the item, so it has to be pending while the steps are checked
+    const pendingRegisterItems = family.pendingRegisterItems;
+    family.pendingRegisterItems = [item];
+
+    try {
+        const steps = getAllMemberSteps(member, item, { outdatedTime: null });
+        return new MemberStepManager(context, member, steps, () => {}).getNextStep(null) !== null;
+    }
+    finally {
+        family.pendingRegisterItems = pendingRegisterItems;
+    }
 }

@@ -39,7 +39,9 @@ import type { Group, Organization, PlatformMember, RegisterCheckout } from '@sta
 import { GroupType, RegisterItem } from '@stamhoofd/structures';
 import { computed } from 'vue';
 import { useCheckoutRegisterItem } from '#members/checkout/useCheckoutRegisterItem.ts';
+import { hasMissingMemberData } from '#members/classes/steps/getAllMemberSteps.ts';
 import { useAppContext } from '#context/appContext.ts';
+import { useContext } from '#hooks/useContext.ts';
 
 const props = defineProps<{
     group: Group;
@@ -49,6 +51,7 @@ const props = defineProps<{
 }>();
 
 const app = useAppContext();
+const context = useContext();
 
 // We do some caching here to prevent too many calculations on cart changes
 const inCartRegisterItem = computed(() => props.member.family.checkout.cart.getMemberAndGroup(props.member.id, props.group.id));
@@ -90,7 +93,7 @@ const checked = computed({
             }
         } else {
             const item = registerItem.value;
-            if (app === 'registration' || item.validationError) {
+            if (app === 'registration' || item.validationError || hasMissingMemberData(item, context.value)) {
                 editRegisterItem().catch(console.error);
                 return;
             }
