@@ -6,7 +6,6 @@ import { testE2e } from '../../runtime/monorepo-runner.js';
 import { RunVerbosity } from '../../runtime/command-runner.js';
 
 export default class TestE2e extends BaseCommand {
-    static override verbosity = RunVerbosity.Output;
     static summary = 'Run Playwright browser tests';
     static description = 'Use this when you changed user-facing flows and want to validate the app in a real browser environment.';
     static examples = [

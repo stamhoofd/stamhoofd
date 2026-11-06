@@ -253,7 +253,7 @@ jobs:
                   restore-keys: |
                       turbo-shared-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.nvmrc') }}-
             - name: Build shared packages
-              run: pnpm run build:shared --summarize
+              run: pnpm run build:shared --summarize --output-logs=errors-only
             - name: Upload Turbo build summary
               if: always()
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
@@ -381,7 +381,7 @@ jobs:
               with:
                   name: shared-dist
             - name: Run tests
-              run: pnpm exec turbo run test --filter='./backend/shared/*' --filter='./packages/node/*' --concurrency=1 --env-mode=loose -- --run --bail=1
+              run: pnpm exec turbo run test --filter='./backend/shared/*' --filter='./packages/node/*' --concurrency=1 --env-mode=loose --output-logs=errors-only -- --run --bail=1 --silent=passed-only --reporter=dot
 
     job_test_shared:
         name: "Shared Package Tests"
@@ -396,7 +396,7 @@ jobs:
               with:
                   name: shared-dist
             - name: Run tests
-              run: pnpm exec turbo run test --filter='./shared/*' --filter='./packages/common/*' --filter=i18n-uuid --concurrency=2 --env-mode=loose -- --run --bail=1
+              run: pnpm exec turbo run test --filter='./shared/*' --filter='./packages/common/*' --filter=i18n-uuid --concurrency=2 --env-mode=loose --output-logs=errors-only -- --run --bail=1 --silent=passed-only --reporter=dot
 
     job_boot:
         name: "API boot and shutdown"
@@ -433,7 +433,7 @@ jobs:
               with:
                   name: shared-dist
             - name: Build API
-              run: pnpm exec turbo run build --filter=@stamhoofd/backend
+              run: pnpm exec turbo run build --filter=@stamhoofd/backend --output-logs=errors-only
             - name: Save API Turbo tasks
               if: steps.api-cache.outputs.cache-hit != 'true'
               uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -470,7 +470,7 @@ jobs:
               with:
                   name: shared-dist
             - name: Run type checking
-              run: pnpm run typecheck --summarize
+              run: pnpm run typecheck --summarize --output-logs=errors-only
             - name: Upload typecheck Turbo summary
               if: always()
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
@@ -507,7 +507,7 @@ jobs:
               with:
                   name: shared-dist
             - name: Run type linting
-              run: pnpm run lint --summarize
+              run: pnpm run lint --summarize --output-logs=errors-only
             - name: Upload lint Turbo summary
               if: always()
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
@@ -551,7 +551,7 @@ jobs:
               with:
                   name: shared-dist
             - name: Run frontend shared tests
-              run: pnpm exec turbo run test --filter='./frontend/shared/*' --filter='./packages/browser/*' --concurrency=1 --env-mode=loose -- --run --bail=1
+              run: pnpm exec turbo run test --filter='./frontend/shared/*' --filter='./packages/browser/*' --concurrency=1 --env-mode=loose --output-logs=errors-only -- --run --bail=1 --silent=passed-only --reporter=dot
 
     job_test_playwright_shards:
         name: "Playwright Tests (shard ${{ matrix.shard }}/4)"
@@ -702,7 +702,7 @@ jobs:
               with:
                   name: shared-dist
             - name: Build API
-              run: pnpm exec turbo run build --filter=@stamhoofd/backend
+              run: pnpm exec turbo run build --filter=@stamhoofd/backend --output-logs=errors-only
             - name: Save API Turbo tasks
               if: matrix.shard == 1 && steps.api-cache.outputs.cache-hit != 'true'
               uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0

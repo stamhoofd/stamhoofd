@@ -1,4 +1,5 @@
 import { formatCommandLine, processError } from '@node/opentelemetry-process';
+import type { ProcessOptions } from '@node/opentelemetry-process';
 import { command as formatCommand, warning } from './ux.js';
 import { writeOutputLine } from './output-target.js';
 import { RunVerbosity } from './verbosity.js';
@@ -15,6 +16,8 @@ export type RunOptions = {
     capture?: boolean;
     /** Set false for sudo probes that must share the caller's terminal credential cache. */
     processGroup?: boolean;
+    /** Explicit diagnostic policy for finite validation commands. */
+    output?: ProcessOptions['output'];
 };
 
 export type RunCaptureResult = { stdout: string; stderr: string; status: number | null };
@@ -31,10 +34,10 @@ export async function run(command: string, args: string[], options: RunOptions =
             capture: options.capture,
             processGroup: options.processGroup,
             inheritStdin: !options.capture && verbosity === RunVerbosity.Output,
-            output: verbosity === RunVerbosity.Output ? 'always' : 'verbose',
+            output: options.output ?? (verbosity === RunVerbosity.Output ? 'always' : 'verbose'),
             label: verbosity === RunVerbosity.Quiet ? false : undefined,
             // Quiet probes must remain silent even in a verbose invocation.
-            log: verbosity === RunVerbosity.Quiet ? () => false : undefined,
+            log: verbosity === RunVerbosity.Quiet && options.output !== 'on-failure' ? () => false : undefined,
         });
         if (result.code !== 0 && !options.allowFailure) throw processError(`${command} failed.`, command, result);
         if (options.capture) return { stdout: result.stdout, stderr: result.stderr === '(no stderr returned)' ? '' : result.stderr, status: result.code };

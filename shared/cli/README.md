@@ -590,6 +590,27 @@ pnpm stam clean metabase
 
 ### Tests
 
+Build, lint, typecheck and test commands show descriptive operations and timings by
+default. Subprocess output is retained privately and replayed only on failure;
+successful warnings/debug logs and cached Turbo task logs stay hidden. `--verbose`
+streams commands and diagnostics immediately. `--quiet` hides normal progress but
+still shows failure diagnostics. Interactive Playwright UI mode remains streamed.
+
+Test reporters send versioned NDJSON snapshots over a private, per-run Unix socket,
+separate from stdout/stderr. Local terminals show live completed-test counts;
+totals are shown only when known. Vitest discovers tests while running, so its live
+count has no denominator. Final summaries include passed, failed, skipped, todo,
+flaky and pending counts when nonzero. Retries never count as additional tests.
+Missing events fall back to operation name and elapsed time; exit status, not
+telemetry, determines success. No tool console output is parsed for progress.
+
+Noninteractive output shows operation start/completion lines without repeated
+counter updates. CI jobs invoking Turbo directly use its failure-only task output
+and show Turbo's task summary. Vitest suppresses passing-test console logs even
+when a different test fails. Existing JSON timing reports, coverage files and
+Playwright blob reports/traces remain available. Successful coverage console
+tables, like other subprocess output, require `--verbose`.
+
 `pnpm stam test errors` and `pnpm stam test encoding` run the common library suites without MySQL.
 Networking uses `pnpm stam test common-networking`; `networking` selects the frontend service.
 `pnpm stam test database` runs the database library with managed MySQL and its fixture migrations.

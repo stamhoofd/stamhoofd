@@ -1,4 +1,8 @@
 import { spawn } from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { createInterface } from 'node:readline';
 import { stripVTControlCharacters } from 'node:util';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
@@ -27,8 +31,8 @@ export type ProcessOptions = {
     maxCaptureChars?: number;
     /** Maximum streamed diagnostic characters per process. Default 1 MiB. */
     maxDiagnosticChars?: number;
-    /** Debug output by default; always uses info severity for stdout and stderr. */
-    output?: 'verbose' | 'always';
+    /** Debug by default; always streams at info level; on-failure spools redacted output and replays at error level. */
+    output?: 'verbose' | 'always' | 'on-failure';
     /** Plain output omits renderer gutters while retaining coordinated, redacted diagnostics. */
     outputStyle?: 'plain' | 'decorated';
     /** Known secrets to redact from labels, diagnostics and retained stderr, including JSON-escaped forms. */
@@ -72,6 +76,8 @@ export type ProcessResult = {
     reason?: 'aborted' | 'timeout' | 'output-limit' | 'input-error';
     /** True only if every stderr chunk was acknowledged by the presentation sink. */
     stderrReported?: boolean;
+    /** Redacted NDJSON retained only when the sink could not present the complete failure log. Caller owns removal. */
+    diagnosticsFile?: string;
 };
 
 /**
@@ -84,7 +90,7 @@ export type ProcessResult = {
  * on the original result even when omitted from the message to avoid repetition.
  */
 export function processError(message: string, command: string, result: Pick<ProcessResult, 'code'> & Partial<ProcessResult>): Error {
-    const status = `${message}\n  Command: ${command}\n  Exit code: ${result.code}${result.signal ? `\n  Signal: ${result.signal}` : ''}${result.reason ? `\n  Reason: ${result.reason}` : ''}`;
+    const status = `${message}\n  Command: ${command}\n  Exit code: ${result.code}${result.signal ? `\n  Signal: ${result.signal}` : ''}${result.reason ? `\n  Reason: ${result.reason}` : ''}${result.diagnosticsFile ? `\n  Diagnostics: ${result.diagnosticsFile}` : ''}`;
     return new Error(result.stderrReported ? status : `${status}\n\n  ${command.split(' ')[0]} stderr:\n    ${(result.stderr ?? '(no stderr returned)').replaceAll('\n', '\n    ')}`);
 }
 
@@ -200,10 +206,21 @@ export const runProcess = instrument('process.run', async function (command: str
     diagnostic({ kind: 'command', message: formatCommandLine(command, args, options.redact) }, emit);
     if ((options.inheritStdin || options.inheritStdio) && options.input !== undefined) throw new Error('Inherited stdin cannot be combined with input.');
     if (options.inheritStdio && (options.capture || options.sanitizeStdout !== undefined)) throw new Error('Inherited stdio cannot be combined with capture or stdout sanitization.');
+    if (options.inheritStdio && options.output === 'on-failure') throw new Error('Inherited stdio cannot retain failure diagnostics.');
     for (const limit of [options.timeoutMs, options.killAfterMs, options.maxCaptureChars, options.maxDiagnosticChars]) {
         if (limit !== undefined && (!Number.isFinite(limit) || limit < 0)) throw new Error('Process limits must be finite nonnegative numbers.');
     }
     if (options.signal?.aborted) return finishResult({ code: 130, signal: null, reason: 'aborted', stdout: '', stderr: '(no stderr returned)' });
+    const directory = options.output === 'on-failure' ? fs.mkdtempSync(path.join(os.tmpdir(), 'process-log-')) : undefined;
+    const file = directory ? path.join(directory, 'output.ndjson') : undefined;
+    let fd: number | undefined;
+    let retainSpool = false;
+    try {
+        fd = file ? fs.openSync(file, 'wx', 0o600) : undefined;
+    } catch (error) {
+        if (directory) fs.rmSync(directory, { recursive: true, force: true });
+        throw error;
+    }
     return await new Promise<ProcessResult>((resolve, reject) => {
         const grouped = options.processGroup === true && process.platform !== 'win32';
         const child = spawn(command, args, { cwd: options.cwd, env: options.env ?? process.env, detached: grouped, stdio: options.inheritStdio ? 'inherit' : [options.inheritStdin ? 'inherit' : options.input === undefined ? 'ignore' : 'pipe', 'pipe', 'pipe'] });
@@ -252,7 +269,17 @@ export const runProcess = instrument('process.run', async function (command: str
         let diagnosticLimit = false;
         let stderrReported = true;
         let hasStderr = false;
+        let spoolError: unknown;
         const output = (text: string, kind: 'stdout' | 'stderr') => {
+            if (fd !== undefined) {
+                try {
+                    fs.writeSync(fd, JSON.stringify({ kind, text }) + '\n');
+                } catch (error) {
+                    spoolError = error;
+                    stop('output-limit');
+                }
+                return false;
+            }
             if (diagnosticLimit) return false;
             diagnosticSize += text.length;
             if (diagnosticSize > (options.maxDiagnosticChars ?? 1024 * 1024)) {
@@ -312,7 +339,18 @@ export const runProcess = instrument('process.run', async function (command: str
                 stderrDiagnostic('', true);
                 // eslint-disable-next-line security/detect-object-injection -- Node supplies the signal name; this reads the OS signal-number table.
                 const status = reason ? reason === 'aborted' ? 130 : reason === 'timeout' ? 124 : 1 : code ?? (signal ? 128 + constants.signals[signal] : 1);
-                resolve(finishResult({ code: status, signal: signal ?? null, reason, stderrReported: hasStderr && stderrReported, stdout: options.capture ? stdout : '', stderr: `${truncated ? '[stderr truncated]\n' : ''}${stderr.trim() || '(no stderr returned)'}` }));
+                if (spoolError) throw new Error(`Could not retain process diagnostics: ${clean(spoolError instanceof Error ? spoolError.message : 'Unknown write error')}`);
+                if (file && status !== 0 && reason !== 'aborted') {
+                    stderrReported = true;
+                    const lines = createInterface({ input: fs.createReadStream(file), crlfDelay: Infinity });
+                    for await (const line of lines) {
+                        const record = JSON.parse(line) as { kind: 'stdout' | 'stderr'; text: string };
+                        const reported = emit('error', record.text, { 'diagnostic.kind': record.kind });
+                        if (reported !== true) retainSpool = true;
+                        if (record.kind === 'stderr') stderrReported = reported === true && stderrReported;
+                    }
+                }
+                resolve(finishResult({ code: status, signal: signal ?? null, reason, stderrReported: (hasStderr || !!file && status !== 0 && reason !== 'aborted') && stderrReported, diagnosticsFile: retainSpool ? file : undefined, stdout: options.capture ? stdout : '', stderr: `${truncated ? '[stderr truncated]\n' : ''}${stderr.trim() || '(no stderr returned)'}` }));
             } catch (error) {
                 cleanup();
                 reject(error);
@@ -321,6 +359,9 @@ export const runProcess = instrument('process.run', async function (command: str
         child.once('close', (code: number | null, signal: NodeJS.Signals | null) => {
             void finish(code, signal);
         });
+    }).finally(() => {
+        if (fd !== undefined) fs.closeSync(fd);
+        if (directory && !retainSpool) fs.rmSync(directory, { recursive: true, force: true });
     });
 }, { fields: ([command, args, options]) => ({
     'process.executable.name': command,

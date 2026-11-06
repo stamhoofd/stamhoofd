@@ -1,31 +1,74 @@
-import { expect, it } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 import { runProcess } from './process.js';
 
+afterEach(() => vi.unstubAllEnvs());
+
+it('retains a redacted failure log when the sink cannot present it', async () => {
+    const result = await runProcess(process.execPath, ['-e', "process.stdout.write('secret failure'); process.exitCode = 1"], {
+        output: 'on-failure', redact: ['secret'], log: () => false,
+    });
+    expect(result.diagnosticsFile).toBeDefined();
+    try {
+        const text = await fs.readFile(result.diagnosticsFile!, 'utf8');
+        expect(text).toContain('[redacted]');
+        expect(text).not.toContain('secret');
+    } finally {
+        await fs.rm(path.dirname(result.diagnosticsFile!), { recursive: true, force: true });
+    }
+});
+
+it.each([0, 2, 'abort', 'spawn-error'] as const)('removes private diagnostic spools after %s', async (exit) => {
+    const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'process-spool-test-'));
+    vi.stubEnv('TMPDIR', directory);
+    const controller = new AbortController();
+    try {
+        const promise = runProcess(exit === 'spawn-error' ? '/nonexistent-stam-process' : process.execPath, ['-e', exit === 'abort' ? "process.stdout.write('started'); setInterval(() => {}, 1000)" : `process.stdout.write('output'); process.exitCode = ${exit}`], {
+            output: 'on-failure', signal: controller.signal,
+            log: (_level, _message, fields) => {
+                if (fields['diagnostic.kind'] !== 'command') expect(exit).toBe(2);
+                return true;
+            },
+        });
+        if (exit === 'abort') controller.abort();
+        if (exit === 'spawn-error') await expect(promise).rejects.toThrow();
+        else expect((await promise).code).toBe(exit === 'abort' ? 130 : exit);
+        expect(await fs.readdir(directory)).toEqual([]);
+    } finally {
+        controller.abort();
+        await fs.rm(directory, { recursive: true, force: true });
+    }
+});
+
 it.each([0, 2])('only presents failure diagnostics after exit (code %s)', async (code) => {
-    const messages: string[] = [];
+    const messages: { kind: unknown; text: string }[] = [];
     const result = await runProcess(process.execPath, ['-e', `
         process.stdout.write('stdout secret');
         setTimeout(() => { process.stderr.write('stderr secret'); process.exitCode = ${code}; }, 20);
     `], {
-        output: 'on-failure' as any,
+        output: 'on-failure',
         redact: ['secret'],
         log: (level, message, fields) => {
             if (fields['diagnostic.kind'] !== 'command') {
                 expect(level).toBe('error');
-                messages.push(message);
+                messages.push({ kind: fields['diagnostic.kind'], text: message });
             }
             return true;
         },
     });
     expect(result.code).toBe(code);
-    expect(messages.join('')).toBe(code === 0 ? '' : 'stdout [redacted]stderr [redacted]');
+    for (const kind of ['stdout', 'stderr']) {
+        expect(messages.filter(message => message.kind === kind).map(message => message.text).join('')).toBe(code === 0 ? '' : `${kind} [redacted]`);
+    }
     if (code !== 0) expect(result.stderrReported).toBe(true);
 });
 
 it('retains stdout failures beyond the streaming diagnostic limit', async () => {
     const messages: string[] = [];
     const result = await runProcess(process.execPath, ['-e', "process.stdout.write('x'.repeat(20000) + 'THE FAILURE'); process.exitCode = 1;"], {
-        output: 'on-failure' as any,
+        output: 'on-failure',
         maxDiagnosticChars: 10,
         log: (_level, message, fields) => {
             if (fields['diagnostic.kind'] === 'stdout') messages.push(message);

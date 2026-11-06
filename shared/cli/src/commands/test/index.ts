@@ -2,11 +2,9 @@ import { Args, Flags } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
 import { ciFlag } from '../../command-flags.js';
 import { coverageTestPackages, runUnitTests, unitTestPackages } from '../../runtime/monorepo-runner.js';
-import { RunVerbosity } from '../../runtime/command-runner.js';
 import { showHelp } from '../../runtime/show-help.js';
 
 export default class Test extends BaseCommand {
-    static override verbosity = RunVerbosity.Output;
     static summary = 'Run unit tests';
     static description = [
         'The first argument selects what to run: `unit` for every package, `coverage` for package coverage, or a single package name',

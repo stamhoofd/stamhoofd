@@ -11,14 +11,15 @@ vi.mock('../context/create-context.js', () => ({ createContext: vi.fn(async () =
 describe('build command verbosity', () => {
     beforeEach(() => vi.clearAllMocks());
 
-    it('only offers a quiet modifier', async () => {
+    it('offers mutually exclusive quiet and verbose modifiers', async () => {
         await expect(Parser.parse(['--quiet'], { flags: Build.flags })).resolves.toMatchObject({ flags: { quiet: true } });
-        await expect(Parser.parse(['-v'], { flags: Build.flags })).rejects.toThrow();
+        await expect(Parser.parse(['-v'], { flags: Build.flags })).resolves.toMatchObject({ flags: { verbose: true } });
+        await expect(Parser.parse(['--quiet', '-v'], { flags: Build.flags })).rejects.toThrow();
     });
 
     it.each([
-        [false, RunVerbosity.Output],
-        [true, RunVerbosity.Command],
+        [false, RunVerbosity.Command],
+        [true, RunVerbosity.Quiet],
     ])('resolves quiet=%s to %s', async (quiet, verbosity) => {
         const command = new Build([], {} as never);
         (command as any).parse = vi.fn(async () => ({ flags: { quiet }, raw: [] }));

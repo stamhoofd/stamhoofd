@@ -14,6 +14,12 @@ Use `--grep @tag` to select tests, and add `--skip-build` only when the applicat
 
 Database names and successful migration logs are hidden by default, including on CI. Use `stam test e2e --verbose` to show them (`PLAYWRIGHT_VERBOSE=1` when CI invokes the package directly). Failures show their errors and captured migration output. This does not change manual or production migration logging.
 
+Normal runs use the compact dot reporter; verbose runs use the line reporter.
+The additional progress reporter publishes counters through `@stamhoofd/cli/test-events`
+when started by `stam`, without mixing protocol records into console output. Retries
+are counted once and final summaries distinguish flaky tests from failures. Direct
+CI runs retain the console summary and blob reporter without requiring a receiver.
+
 On environment problems such as DNS failures, SSL errors, or blank pages, stop and ask for help rather than provisioning alternative test infrastructure.
 
 In CI, `shared/cli/bin/ci-mysql.mjs` starts pulling and provisioning the pinned MySQL image immediately after checkout, alongside dependency installation and app setup. The workflow waits for an authenticated TCP query before running Playwright. The GitHub-hosted runner is discarded at job completion, so MySQL needs no explicit cleanup. The job summary reports total provisioning time and the remaining wait; the `playwright-mysql-startup-<shard>` artifact contains startup logs and status. This bootstrap uses only Node built-ins because dependencies and the compiled CLI are not available yet. Local test database ownership is unchanged.

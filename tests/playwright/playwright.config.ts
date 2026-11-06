@@ -18,7 +18,11 @@ export default defineConfig({
     /* Must match the number of slots the global setup reserves, see WorkerCount. */
     workers: getWorkerCount(),
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-    reporter: process.env.CI ? [['line'], ['blob']] : 'line',
+    reporter: [
+        [process.env.PLAYWRIGHT_VERBOSE ? 'line' : 'dot'],
+        ...(process.env.CI ? [['blob'] as ['blob']] : []),
+        ['./src/reporters/progress.js'],
+    ],
 
     // Suppress logs in tests
     quiet: true,

@@ -27,7 +27,7 @@ describe('shared build orchestration', () => {
     it('uses the canonical shared build command once', async () => {
         await buildShared(context);
 
-        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', ['run', 'build:shared'], { cwd: '/repo', verbosity: RunVerbosity.Output });
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', ['run', 'build:shared'], expect.objectContaining({ cwd: '/repo', verbosity: RunVerbosity.Output, output: 'always' }));
     });
 
     it.each([undefined, '3/4'])('passes shard %s to Playwright without changing its reserved worker count', async (shard) => {
@@ -48,13 +48,13 @@ describe('shared build orchestration', () => {
 
         expect(run).toHaveBeenCalledWith('pnpm', expect.any(Array), expect.objectContaining({
             env: expect.objectContaining({ PLAYWRIGHT_VERBOSE: verbose ? '1' : undefined }),
-            verbosity: RunVerbosity.Output,
+            verbosity: verbose ? RunVerbosity.Output : RunVerbosity.Command,
         }));
     });
 
-    it.each([RunVerbosity.Command, RunVerbosity.Quiet])('preserves migration failure output in reduced-output mode %s', async (verbosity) => {
+    it.each([RunVerbosity.Command, RunVerbosity.Quiet])('propagates captured migration failures in reduced-output mode %s', async (verbosity) => {
         vi.mocked(isPortListening).mockResolvedValue(true);
-        vi.mocked(run).mockResolvedValueOnce({ stdout: '[Migration] Running broken.sql\n', stderr: 'Invalid SQL', status: 1 } as any);
+        vi.mocked(run).mockRejectedValueOnce(new Error('[Migration] Running broken.sql\nInvalid SQL'));
 
         await expect(testE2e({ ...context, verbose: false, verbosity }, { ci: false, clear: false, ui: false, skipBuild: true, localDb: true }))
             .rejects.toThrow('[Migration] Running broken.sql\nInvalid SQL');
@@ -71,7 +71,7 @@ describe('shared build orchestration', () => {
     it('builds app packages with explicit Turbo filters and the selected environment', async () => {
         await buildAll(context);
 
-        expect(run).toHaveBeenNthCalledWith(1, 'pnpm', ['run', 'build:shared'], { cwd: '/repo', verbosity: RunVerbosity.Output });
+        expect(run).toHaveBeenNthCalledWith(1, 'pnpm', ['run', 'build:shared'], expect.objectContaining({ cwd: '/repo', verbosity: RunVerbosity.Output }));
         expect(run).toHaveBeenNthCalledWith(2, 'pnpm', [
             'exec',
             'turbo',
@@ -83,7 +83,7 @@ describe('shared build orchestration', () => {
             '--filter=@stamhoofd/backend-statistics-syncer',
             '--filter=@stamhoofd/web-app',
             '--filter=@stamhoofd/webshop',
-        ], { cwd: '/repo', env: { STAMHOOFD_ENV: 'stamhoofd' }, verbosity: RunVerbosity.Output });
+        ], expect.objectContaining({ cwd: '/repo', env: { STAMHOOFD_ENV: 'stamhoofd' }, verbosity: RunVerbosity.Output }));
     });
 
     it('uses the canonical migration command and propagates failures', async () => {
@@ -127,11 +127,11 @@ describe('shared build orchestration', () => {
             coverage: true,
         });
 
-        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', ['exec', 'vitest', 'run', '--coverage'], {
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', expect.arrayContaining(['exec', 'vitest', 'run', '--coverage', '--reporter=default']), expect.objectContaining({
             cwd: '/repo/shared/utility',
-            env: { CI: undefined, DB_PORT: undefined },
+            env: expect.objectContaining({ CI: undefined, DB_PORT: undefined, STAM_TEST_SOCKET: expect.any(String) }),
             verbosity: RunVerbosity.Output,
-        });
+        }));
     });
 
     it('forwards unit sharding', async () => {
@@ -141,9 +141,9 @@ describe('shared build orchestration', () => {
             shard: '2/2',
         });
 
-        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', [
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', expect.arrayContaining([
             'exec', 'vitest', 'run', '--shard', '2/2',
-        ], expect.objectContaining({ cwd: '/repo/shared/utility' }));
+        ]), expect.objectContaining({ cwd: '/repo/shared/utility' }));
     });
 
     it('forwards JSON reporting while retaining console output', async () => {
@@ -153,9 +153,9 @@ describe('shared build orchestration', () => {
             jsonReport: '/reports/api.json',
         });
 
-        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', [
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', expect.arrayContaining([
             'exec', 'vitest', 'run', '--reporter=default', '--reporter=json', '--outputFile=/reports/api.json',
-        ], expect.objectContaining({ cwd: '/repo/shared/utility' }));
+        ]), expect.objectContaining({ cwd: '/repo/shared/utility' }));
     });
 
     it('rejects a shared JSON report path for multiple packages before building or starting services', async () => {
@@ -173,7 +173,20 @@ describe('shared build orchestration', () => {
     it('runs unit tests without typechecking', async () => {
         const pkg = unitTestPackages.find(pkg => pkg.name === 'structures')!;
         await runUnitTests(context, { packages: [pkg], skipBuild: true });
-        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', ['exec', 'vitest', 'run'], expect.anything());
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', expect.arrayContaining(['exec', 'vitest', 'run']), expect.anything());
+    });
+
+    it('keeps normal test output failure-only while retaining structured progress and JSON reports', async () => {
+        await runUnitTests({ ...context, verbose: false }, {
+            packages: [{ name: 'utility', path: 'shared/utility', needsDatabase: false }],
+            skipBuild: true,
+            jsonReport: '/reports/utility.json',
+        });
+        const [, args, options] = vi.mocked(run).mock.calls[0];
+        expect(args).toEqual(expect.arrayContaining(['--silent=passed-only', '--reporter=dot', '--reporter=json', '--outputFile=/reports/utility.json']));
+        expect(args.some(arg => arg.includes('vitest-progress-reporter.js'))).toBe(true);
+        expect(args).not.toContain('--reporter=default');
+        expect(options).toMatchObject({ verbosity: RunVerbosity.Command, output: 'on-failure', env: { STAM_TEST_SOCKET: expect.any(String) } });
     });
 
     it.each([
@@ -183,7 +196,7 @@ describe('shared build orchestration', () => {
         vi.mocked(run).mockRejectedValueOnce(new Error('Check failed'));
 
         await expect(check(context)).rejects.toThrow('Check failed');
-        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', ['run', script], { cwd: '/repo', verbosity: RunVerbosity.Output });
+        expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', ['run', script], expect.objectContaining({ cwd: '/repo', verbosity: RunVerbosity.Output }));
     });
 
     it.each([
@@ -194,7 +207,7 @@ describe('shared build orchestration', () => {
 
         expect(run).toHaveBeenCalledExactlyOnceWith('pnpm', [
             'run', script, '--filter=@stamhoofd/mobile', '--filter=./backend/shared/*',
-        ], { cwd: '/repo', verbosity: RunVerbosity.Output });
+        ], expect.objectContaining({ cwd: '/repo', verbosity: RunVerbosity.Output }));
     });
 
     it('only publishes readiness after a successful build and keeps watching after errors', () => {

@@ -1,10 +1,8 @@
 import { Args, Flags } from '@oclif/core';
 import { BaseCommand } from '../../base-command.js';
 import { typecheck } from '../../runtime/monorepo-runner.js';
-import { RunVerbosity } from '../../runtime/command-runner.js';
 
 export default class CheckTypecheck extends BaseCommand {
-    static override verbosity = RunVerbosity.Output;
     static summary = 'Run TypeScript checks';
     static description = 'Use this when you changed shared types or want to verify cross-package type safety before running heavier checks.';
     static examples = [

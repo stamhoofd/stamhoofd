@@ -8,6 +8,22 @@ import { Terminal } from '@node/terminal';
 
 afterEach(() => vi.unstubAllEnvs());
 
+it('keeps high-frequency progress out of CI output and includes final span summaries', async () => {
+    const stream = new PassThrough();
+    let output = '';
+    stream.on('data', (chunk: Buffer) => { output += chunk.toString(); });
+    const renderer = new TerminalRenderer({ stream: stream as unknown as NodeJS.WriteStream, color: false });
+    const span = { attributes: { 'operation.label': 'Tests: api', 'operation.summary': '42 passed' }, spanContext: () => ({ spanId: 'tests' }), duration: [1, 0], status: { code: 0 } };
+    try {
+        renderer.onStart(span as never);
+        renderer.log('info', '20 completed', { 'span_id': 'tests', 'operation.progress': true, 'operation.progress.liveOnly': true });
+        renderer.onEnd(span as never);
+        expect(output).toBe('Tests: api...\n✓ Tests: api — 42 passed — 1.0s\n');
+    } finally {
+        await renderer.shutdown();
+    }
+});
+
 it('ignores late spans and logs after repeated shutdown without restarting timers', async () => {
     vi.useFakeTimers();
     const stream = Object.assign(new PassThrough(), { isTTY: true });

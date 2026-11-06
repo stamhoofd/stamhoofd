@@ -15,6 +15,8 @@ import { CaddyService } from '../services/definitions/caddy-service.js';
 import * as docker from '../services/docker.js';
 import { startSharedServices } from '../services/shared-services.js';
 import { run, RunVerbosity } from './command-runner.js';
+import { runValidation } from './validation.js';
+import { step } from './ux.js';
 import { isPortListening } from './port-probe.js';
 
 /**
@@ -101,22 +103,26 @@ export const coverageTestPackages: UnitTestPackage[] = [
 ];
 const sharedBuildReadyFile = `.development/cli/generated/shared-build-${process.pid}.ready`;
 
+function turboOutputArgs(context: CliContext): string[] {
+    return (context.verbosity ?? (context.verbose ? RunVerbosity.Output : RunVerbosity.Command)) === RunVerbosity.Output ? [] : ['--output-logs=errors-only'];
+}
+
 export async function buildShared(context: CliContext): Promise<void> {
-    await run('pnpm', ['run', 'build:shared'], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
+    await runValidation(context, 'Shared build', ['run', 'build:shared', ...turboOutputArgs(context)]);
 }
 
 export async function buildAll(context: CliContext): Promise<void> {
     await buildShared(context);
-    await run('pnpm', ['exec', 'turbo', 'run', 'build', '--env-mode=loose', '--filter=@stamhoofd/backend', '--filter=@stamhoofd/backend-renderer', '--filter=@stamhoofd/backend-statistics-syncer', '--filter=@stamhoofd/web-app', '--filter=@stamhoofd/webshop'], { cwd: context.rootDir, env: { STAMHOOFD_ENV: context.env }, verbosity: context.verbosity ?? RunVerbosity.Output });
+    await runValidation(context, 'Application builds', ['exec', 'turbo', 'run', 'build', '--env-mode=loose', '--filter=@stamhoofd/backend', '--filter=@stamhoofd/backend-renderer', '--filter=@stamhoofd/backend-statistics-syncer', '--filter=@stamhoofd/web-app', '--filter=@stamhoofd/webshop', ...turboOutputArgs(context)], { env: { STAMHOOFD_ENV: context.env } });
 }
 
 export async function lint(context: CliContext, filters: string[] = [], fix = false): Promise<void> {
     // Fixes modify source files, which Turbo's check cache does not restore.
-    await run('pnpm', ['run', 'lint', ...filters.map(filter => `--filter=${filter}`), ...(fix ? ['--cache=local:,remote:', '--', '--fix'] : [])], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
+    await runValidation(context, 'Lint', ['run', 'lint', ...filters.map(filter => `--filter=${filter}`), ...turboOutputArgs(context), ...(fix ? ['--cache=local:,remote:', '--', '--fix'] : [])]);
 }
 
 export async function typecheck(context: CliContext, filters: string[] = []): Promise<void> {
-    await run('pnpm', ['run', 'typecheck', ...filters.map(filter => `--filter=${filter}`)], { cwd: context.rootDir, verbosity: context.verbosity ?? RunVerbosity.Output });
+    await runValidation(context, 'Typecheck', ['run', 'typecheck', ...filters.map(filter => `--filter=${filter}`), ...turboOutputArgs(context)]);
 }
 
 export async function migrate(context: CliContext): Promise<void> {
@@ -192,11 +198,14 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
     try {
         for (const pkg of packages) {
             const args = ['exec', 'vitest', 'run'];
+            const verbose = (context.verbosity ?? (context.verbose ? RunVerbosity.Output : RunVerbosity.Command)) === RunVerbosity.Output;
+            if (!verbose) args.push('--silent=passed-only', '--reporter=dot');
+            args.push(`--reporter=${fileURLToPath(new URL('./vitest-progress-reporter.js', import.meta.url))}`);
             if (options.shard !== undefined) {
                 args.push('--shard', options.shard);
             }
             if (options.jsonReport !== undefined) {
-                args.push('--reporter=default', '--reporter=json', `--outputFile=${options.jsonReport}`);
+                args.push(...(verbose ? ['--reporter=default'] : []), '--reporter=json', `--outputFile=${options.jsonReport}`);
             }
             if (options.coverage) {
                 args.push('--coverage');
@@ -208,12 +217,13 @@ export async function runUnitTests(context: CliContext, options: UnitTestOptions
                 args.push('-t', options.testNamePattern);
             }
             args.push(...(options.fileFilters ?? []));
-            await run('pnpm', args, { cwd: path.join(context.rootDir, pkg.path), env: { CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, verbosity: context.verbosity ?? RunVerbosity.Output });
+            if (verbose && options.jsonReport === undefined) args.push('--reporter=default');
+            await runValidation(context, `Tests: ${pkg.name}`, args, { cwd: path.join(context.rootDir, pkg.path), env: { CI: options.ci ? 'true' : undefined, DB_PORT: dbPort }, tests: true });
         }
     } finally {
         // Shut down the container after the run; the data volume is kept for the next run.
         if (needsDatabase) {
-            await withCliCleanup(() => docker.removeContainer(testMysqlNames(context, 'test').container, context.verbose));
+            await withCliCleanup(() => step('Test database cleanup', () => docker.removeContainer(testMysqlNames(context, 'test').container, context.verbose)));
         }
     }
 }
@@ -233,9 +243,8 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
         await startSharedServices(context, { skipMysql: mysql.kind === 'local' });
         shouldRestoreCaddy = true;
         if (!options.skipBuild) {
-            await run('pnpm', ['--dir', 'backend/app/api', 'run', 'build:playwright:pre'], { cwd: context.rootDir, env: databaseEnv, verbosity: context.verbosity ?? RunVerbosity.Output });
+            await runValidation(context, 'E2E backend preparation', ['--dir', 'backend/app/api', 'run', 'build:playwright:pre'], { env: databaseEnv });
         }
-        const verbosity = context.verbosity ?? RunVerbosity.Output;
         const args = ['--dir', 'tests/playwright', 'run', 'test', ...(options.ui ? ['--ui'] : []), ...(options.grep === undefined ? [] : ['--grep', options.grep]), ...(options.workers === undefined ? [] : ['--workers', String(options.workers)]), ...(options.shard === undefined ? [] : ['--shard', options.shard])];
         const runOptions = {
             cwd: context.rootDir,
@@ -248,20 +257,16 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
                 PLAYWRIGHT_VERBOSE: context.verbose ? '1' : undefined,
                 STAMHOOFD_SKIP_FRONTEND_BUILD: options.skipBuild ? 'true' : undefined,
             },
-            verbosity,
         };
-        if (verbosity === RunVerbosity.Output) {
-            await run('pnpm', args, runOptions);
+        if (options.ui) {
+            await run('pnpm', args, { ...runOptions, verbosity: RunVerbosity.Output });
         } else {
-            const result = await run('pnpm', args, { ...runOptions, capture: true, allowFailure: true });
-            if (result.status !== 0) {
-                throw new Error(`Playwright exited with status ${result.status}\n${result.stdout}${result.stderr}`);
-            }
+            await runValidation(context, 'E2E tests', args, { ...runOptions, tests: true });
         }
     } finally {
         // Shut down the e2e MySQL container after the run; the data volume is kept for the next run.
         // A MySQL that was already running is left alone: it is not ours to stop.
-        await withCliCleanup(async () => {
+        await withCliCleanup(() => step('E2E cleanup', async () => {
             if (mysql.kind === 'container') {
                 await docker.removeContainer(testMysqlNames(context, 'e2e').container, context.verbose);
             }
@@ -272,7 +277,7 @@ export async function testE2e(context: CliContext, options: { ci: boolean; clear
                     console.warn(`Failed to restore shared Caddy config: ${error instanceof Error ? error.message : String(error)}`);
                 }
             }
-        });
+        }));
     }
 }
 
@@ -382,10 +387,7 @@ async function ensureTestMysql(context: CliContext, names: { container: string; 
 async function startTestMysql(context: CliContext, kind: TestMysqlKind, clear: boolean): Promise<string> {
     const names = testMysqlNames(context, kind);
     const label = testMysqlKinds[kind];
-    console.log(clear ? `Starting fresh ${label} (${names.container})...` : `Starting ${label} (${names.container})...`);
-    const dbPort = await ensureTestMysql(context, names, clear);
-    console.log(`Mapped ${label} to ${localIpv4Host}:${dbPort}.`);
-    return dbPort;
+    return step(clear ? `Preparing fresh ${label}` : `Preparing ${label}`, () => ensureTestMysql(context, names, clear));
 }
 
 /**

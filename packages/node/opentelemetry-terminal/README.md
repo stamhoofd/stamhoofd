@@ -42,6 +42,10 @@ await withSpan('files.scan', async () => {
 
 The live line is replaced on completion by `✓ Scanning files — 1.0s`
 (actual durations vary), or `✗` if the span failed.
+Set the span attribute `operation.summary` to append a final result to that
+completion line, for example `✓ Tests: api — 42 passed — 1.0s`. Progress events
+with `operation.progress.liveOnly: true` update TTY progress but do not print
+intermediate lines in redirected/CI output. Neither replaces the operation label.
 Verbose adds debug messages, including command/output diagnostics. Quiet shows
 warnings and errors. Errors thrown by the application are reported by its command
 boundary; the renderer only marks failed progress lines.

@@ -7,6 +7,10 @@
     "types": "./dist-types/index.d.ts",
     "sideEffects": false,
     "exports": {
+        "./test-events": {
+            "types": "./dist-types/runtime/test-events.d.ts",
+            "import": "./dist/runtime/test-events.js"
+        },
         ".": {
             "types": "./dist-types/index.d.ts",
             "import": "./dist/index.js",

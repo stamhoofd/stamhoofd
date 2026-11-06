@@ -20,6 +20,17 @@ as span attributes or events.
 Use `outputStyle: 'plain'` for continuous logs without renderer gutters or
 indentation. Redaction, verbosity filtering and terminal coordination still apply.
 
+Use `output: 'on-failure'` for finite validation commands. Redacted diagnostics
+are spooled to an owner-only temporary NDJSON file, before the streamed diagnostic
+limit. Successful commands and cancellation discard it; other failures replay both
+streams at error severity through the scoped sink, then remove it. If the sink
+cannot acknowledge the complete replay, `diagnosticsFile` retains the redacted
+NDJSON path for the caller to inspect and remove; `processError` includes that path.
+Replay is not
+subject to the streaming limit. Output is never parsed as tool-specific text.
+Disk failures fail the operation rather than silently losing diagnostics. Native
+inherited stdio cannot use this mode. Select `always` instead for verbose streaming.
+
 `capture: true` returns raw stdout for the caller to parse. Stderr is redacted and
 bounded to its last 8192 characters, with explicit empty/truncated markers.
 `redact` supplies known secret values, including JSON-escaped representations;

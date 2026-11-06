@@ -1,10 +1,9 @@
 import { BaseCommand } from '../../base-command.js';
 import { fixFlag } from '../../command-flags.js';
 import { buildAll, lint, testE2e, testUnit, typecheck } from '../../runtime/monorepo-runner.js';
-import { RunVerbosity } from '../../runtime/command-runner.js';
+import { success } from '../../runtime/ux.js';
 
 export default class CheckAll extends BaseCommand {
-    static override verbosity = RunVerbosity.Output;
     static summary = 'Run all validation checks';
     static description = 'Use this before pushing when you want roughly the same broad safety net as the main automated checks.';
     static examples = [
@@ -21,5 +20,6 @@ export default class CheckAll extends BaseCommand {
         await typecheck(context);
         await testUnit(context, true);
         await testE2e(context, { ci: true, clear: false, ui: false });
+        success('All checks passed');
     }
 }

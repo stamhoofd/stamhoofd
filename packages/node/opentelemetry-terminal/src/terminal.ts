@@ -113,7 +113,8 @@ export class TerminalRenderer implements SpanProcessor {
         this.heading(operation.group);
         const seconds = span.duration[0] + span.duration[1] / 1e9;
         const symbol = span.status.code === SpanStatusCode.ERROR ? this.colors.red('✗') : this.colors.green('✓');
-        this.output.write(`${'  '.repeat(operation.depth)}${symbol} ${this.label(operation)} ${this.colors.dim(`— ${seconds.toFixed(1)}s`)}\n`);
+        const summary = span.attributes['operation.summary'];
+        this.output.write(`${'  '.repeat(operation.depth)}${symbol} ${this.label(operation)}${typeof summary === 'string' ? ` — ${summary}` : ''} ${this.colors.dim(`— ${seconds.toFixed(1)}s`)}\n`);
         this.render();
     }
 
@@ -137,6 +138,7 @@ export class TerminalRenderer implements SpanProcessor {
                 this.render();
                 return !this.output.isSuspended;
             }
+            if (fields['operation.progress.liveOnly'] === true) return true;
         }
         // eslint-disable-next-line security/detect-object-injection -- diagnosticKind is a fixed library constant.
         const kind = fields[diagnosticKind];
