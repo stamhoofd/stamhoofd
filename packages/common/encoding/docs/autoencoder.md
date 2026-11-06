@@ -47,8 +47,9 @@ class MyClass extends AutoEncoder {
 - **nullable**: This makes sure we allow null values when decoding data.
 - **optional**: Optional properties won’t throw an error when a key is missing but will use the default value.
 - **field**: Your object has a property name, but you can also specify a different key name for the encoded version of your property. E.g. you want to use accessKey in your code, but stored or over the network, you want to use access_key. This is most often used when we want to minimize data and use shorter key names in data that is repeated a lot (e.g. a seating plan of a webshop).
-- **upgrade**: This method is called when data has an older version. The old (decoded) data is passed as an argument. The method should convert the old data to the new data structure. Always use this in combination with version.
+- **upgrade**: This method is called when data has an older version. The old (decoded) data is passed as an argument. The method should convert the old data to the new data structure. Always use this in combination with version. See [Upgrade and downgrade](versioning.md#upgrade-and-downgrade).
 - **downgrade**: Same as upgrade, but in reverse.
+- **upgradePatch** / **downgradePatch**: Same, but for patches of fields whose patch looks different than the value.
 - **defaultValue**: Alternative for assigning a default value in TypeScript.
 
 ## Usage
