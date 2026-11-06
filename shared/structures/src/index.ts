@@ -160,6 +160,7 @@ export * from './files/Resolution.js';
 export * from './files/ResolutionRequest.js';
 export * from './members/EmergencyContact.js';
 export * from './members/Gender.js';
+export * from './members/JudicialRecordCheck.js';
 export * from './members/Member.js';
 export * from './members/MemberDetails.js';
 export * from './members/MemberWithRegistrationsBlob.js';
