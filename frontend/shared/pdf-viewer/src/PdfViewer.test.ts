@@ -1,3 +1,4 @@
+import { GlobalWorkerOptions } from 'pdfjs-dist';
 import { expect, test, vi } from 'vitest';
 import { render } from 'vitest-browser-vue';
 import PdfViewer from './PdfViewer.vue';
@@ -146,4 +147,43 @@ test('It reports a document it cannot open', async () => {
     expect(onError).toHaveBeenCalledOnce();
     expect(onError.mock.calls[0][0]).toBeInstanceOf(Error);
     expect(pageElements()).toHaveLength(0);
+});
+
+/**
+ * pdf.js 6 calls `AbortSignal.any`, which iOS below 17.4 does not have, but only from its
+ * annotation editor and its touch manager. The viewer paints pages onto a canvas and mounts
+ * neither, so it needs no polyfill. This keeps that true.
+ */
+test('It renders without AbortSignal.any, which iOS below 17.4 lacks', async () => {
+    const any = vi.spyOn(AbortSignal, 'any');
+
+    try {
+        renderViewer(createTestPdf({ pageCount: 3 }));
+
+        await vi.waitFor(() => {
+            expect(countDarkPixels(paintedCanvases()[0])).toBeGreaterThan(500);
+        }, { timeout: 10_000 });
+
+        expect(any).not.toHaveBeenCalled();
+    }
+    finally {
+        any.mockRestore();
+    }
+});
+
+/**
+ * pdf.js assigns `globalThis.pdfjsWorker` at module scope of its worker build, and any consumer
+ * that imports that module on the main thread sends every other consumer in the bundle to the main
+ * thread with it. The viewer bundles the worker as a worker and hands pdf.js the port, so it
+ * neither sets that global nor depends on `GlobalWorkerOptions`.
+ */
+test('It renders on a real worker it brings itself', async () => {
+    renderViewer(createTestPdf({ pageCount: 1 }));
+
+    await vi.waitFor(() => {
+        expect(countDarkPixels(paintedCanvases()[0])).toBeGreaterThan(500);
+    }, { timeout: 10_000 });
+
+    expect((globalThis as any).pdfjsWorker).toBeUndefined();
+    expect(GlobalWorkerOptions.workerSrc).toBeFalsy();
 });
