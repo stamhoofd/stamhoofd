@@ -113,6 +113,11 @@
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
             "cache": true
         },
+        "@stamhoofd/judicial-record-check#build": {
+            "dependsOn": ["^build", "build:types"],
+            "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
+            "cache": true
+        },
         "@stamhoofd/object-differ#build": {
             "dependsOn": ["^build", "build:types"],
             "outputs": ["dist/**", ".cache/build.tsbuildinfo"],
