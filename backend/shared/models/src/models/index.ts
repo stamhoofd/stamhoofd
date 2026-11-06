@@ -56,6 +56,7 @@ export * from './Platform.js';
 
 export * from './AuditLog.js';
 export * from './CachedBalance.js';
+export * from './DataRetentionPolicy.js';
 export * from './Email.js';
 export * from './EmailRecipient.js';
 export * from './Event.js';
