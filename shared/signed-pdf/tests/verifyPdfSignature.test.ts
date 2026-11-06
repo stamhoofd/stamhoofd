@@ -377,4 +377,74 @@ describe('verifyPdfSignature', () => {
 
         await expectFailure(broken, 'malformed_signature_container');
     });
+
+    /**
+     * The CMS certificate set sits inside `/Contents`, which the byte range leaves out, so it is the
+     * one part of a genuine document that can be edited without breaking the signature. Nothing here
+     * may therefore be believed because it is present and looks right: what counts is the path that
+     * validated to the pinned anchor.
+     */
+    describe('a decoy certificate in the signature container', () => {
+        async function expectGenuinePath(bytes: Uint8Array) {
+            const { certificatePath } = await verifyPdfSignature(bytes, chain.policy, NO_AGE_LIMIT);
+
+            expect(await Promise.all(certificatePath.map(certificate => getSpkiHash(certificate)))).toEqual([
+                await getSpkiHash(chain.signer.certificate),
+                await getSpkiHash(chain.intermediate.certificate),
+                await getSpkiHash(chain.anchor.certificate),
+            ]);
+        }
+
+        test('cannot displace the real intermediate by carrying its subject', async () => {
+            // The real intermediate's name on a key of its own, ahead of the real one in the set, so
+            // picking an issuer by name rather than by signature would pick this.
+            const decoy = await issueCertificate({
+                subject: [['2.5.4.3', 'Test AATL CA'], ['2.5.4.10', 'Test nv-sa']],
+                isCertificateAuthority: true,
+            });
+
+            await expectGenuinePath(await createSignedPdf({
+                chain,
+                embedCertificates: [chain.signer.certificate, decoy.certificate, chain.intermediate.certificate, chain.anchor.certificate],
+            }));
+        });
+
+        test('cannot displace the real intermediate by being a self-signed authority of its own', async () => {
+            // Self-issued, so it is its own anchor. A walk that stops at the first self-signed
+            // certificate it reaches would end here instead of at the pinned anchor.
+            const decoy = await issueCertificate({
+                subject: [['2.5.4.3', 'Test Rogue Root'], ['2.5.4.10', 'Test nv-sa']],
+                isCertificateAuthority: true,
+            });
+
+            await expectGenuinePath(await createSignedPdf({
+                chain,
+                embedCertificates: [chain.signer.certificate, decoy.certificate, chain.intermediate.certificate, chain.anchor.certificate],
+            }));
+        });
+
+        test('cannot displace the signer by carrying the signer public key under another issuer', async () => {
+            // The one decoy the signature itself cannot tell apart from the real signer: the same
+            // public key, so the signature verifies against it too. What separates them is the issuer
+            // and serial the container names, and the signing-certificate attribute.
+            const rogueRoot = await issueCertificate({
+                subject: [['2.5.4.3', 'Test Rogue Root'], ['2.5.4.10', 'Test nv-sa']],
+                isCertificateAuthority: true,
+            });
+            const decoy = await issueCertificate({
+                subject: [
+                    ['2.5.4.3', TEST_SIGNER_COMMON_NAME],
+                    ['2.5.4.10', TEST_SIGNER_ORGANIZATION],
+                    ['2.5.4.97', TEST_SIGNER_ORGANIZATION_IDENTIFIER],
+                ],
+                issuer: rogueRoot,
+                reuseKeysOf: chain.signer,
+            });
+
+            await expectGenuinePath(await createSignedPdf({
+                chain,
+                embedCertificates: [decoy.certificate, rogueRoot.certificate, chain.signer.certificate, chain.intermediate.certificate, chain.anchor.certificate],
+            }));
+        });
+    });
 });
