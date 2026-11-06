@@ -36,6 +36,17 @@ Open the dashboard URL printed by the CLI, or run `pnpm stam status` to see acti
 
 Run `pnpm stam --help` or `pnpm stam <topic> --help` for command help.
 
+`stam setup` offers available repairs for failed required checks and rechecks them
+after confirmation. This includes reapplying Linux DNS configuration when resolution
+fails, repairing mismatched macOS resolver contents (with overwrite confirmation),
+and restarting shared services when macOS CoreDNS or Caddy container ports are unhealthy.
+Each repair runs at most once per invocation; unresolved checks retain their guidance.
+
+Setup check failures must declare a `remediation`: a registered action, or manual
+instructions with a reason automation is unavailable. The action registry in
+`src/workflows/setup-machine.ts` owns each repair's displayed command, label, and
+execution so a runnable command cannot accidentally be omitted from recommendations.
+
 The CLI build clears its own compiled output before compiling so commands removed or renamed between revisions cannot remain discoverable by oclif.
 
 ## For CLI Users

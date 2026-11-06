@@ -16,6 +16,7 @@ import { CliStatus } from '../runtime/status.js';
 import { command, confirm, statusCell, step, success, table, Table, warning } from '../runtime/ux.js';
 import type { TableCellInput, TableRow } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
+import { restartSharedServicesInteractive } from '../services/shared-services.js';
 import * as docker from '../services/docker.js';
 import { runServices } from './start-services.js';
 import { checkNodeVersion, setupNodeVersion } from './setup-node.js';
@@ -46,6 +47,7 @@ export enum SetupAutomaticFixKey {
     Dns = 'dns',
     PrivilegedPorts = 'privileged-ports',
     Services = 'services',
+    RestartServices = 'restart-services',
     Caddy = 'caddy',
     Cert = 'cert',
 }
@@ -56,12 +58,30 @@ export type AutomaticFix = {
 };
 
 export type CheckResult = {
-    ok: boolean;
     optional?: boolean;
     details: string;
-    manualFix?: string;
-    automaticFix?: AutomaticFix;
+} & ({ ok: true } | { ok: false; remediation: SetupRemediation });
+
+/** Every failed check must explicitly choose a runnable repair or explain why it is manual. */
+type SetupRemediation = { action: SetupAutomaticFixKey; label?: string } | { instructions: string; reason: string };
+
+const setupActions: Record<SetupAutomaticFixKey, { command: string; label: string; run: (context: CliContext) => Promise<void> }> = {
+    [SetupAutomaticFixKey.Node]: { command: 'stam setup node', label: 'Install required Node.js version', run: context => setupNodeVersion(context.rootDir) },
+    [SetupAutomaticFixKey.Pnpm]: { command: 'stam setup pnpm', label: 'Install required pnpm version with Corepack', run: context => setupPackageManager(context.rootDir) },
+    [SetupAutomaticFixKey.Vcs]: { command: 'stam setup vcs', label: 'Configure Git / JJ push destinations', run: context => setupVcs(context.rootDir, { yes: true, dryRun: false, verbosity: context.verbosity }) },
+    [SetupAutomaticFixKey.Dns]: { command: 'stam setup dns', label: 'Configure local DNS', run: () => setupDns({ yes: true, dryRun: false, confirmOverwrite: true }) },
+    [SetupAutomaticFixKey.PrivilegedPorts]: { command: 'stam setup privileged-ports', label: 'Configure privileged port redirects', run: () => setupPrivilegedPortRedirects({ yes: true, dryRun: false }) },
+    [SetupAutomaticFixKey.Services]: { command: 'stam services up', label: 'Start shared services', run: runServices },
+    [SetupAutomaticFixKey.RestartServices]: { command: 'stam services restart', label: 'Restart shared services', run: restartSharedServicesInteractive },
+    [SetupAutomaticFixKey.Caddy]: { command: 'stam setup caddy', label: 'Install Caddy with Homebrew', run: () => setupCaddy({ yes: true, dryRun: false }) },
+    [SetupAutomaticFixKey.Cert]: { command: 'stam setup cert', label: 'Trust local HTTPS certificates', run: context => setupCert(context, { yes: true, dryRun: false }) },
 };
+
+function optionalManualCheck(result: { ok: boolean; details: string; manualFix?: string }): CheckResult {
+    return result.ok
+        ? { ok: true, details: result.details, optional: true }
+        : { ok: false, details: result.details, optional: true, remediation: { instructions: result.manualFix ?? result.details, reason: 'Optional setup is managed separately.' } };
+}
 
 function setupCheckDefinitions(context: CliContext): { key: keyof SetupReport; label: string; optional?: boolean; check: () => Promise<CheckResult> }[] {
     const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
@@ -77,7 +97,7 @@ function setupCheckDefinitions(context: CliContext): { key: keyof SetupReport; l
         { key: 'cert', label: 'Caddy local CA', check: () => certCheck(context.verbosity) },
         { key: 'shell', label: 'Binary shortcut', optional: true, check: async () => {
             const result = await checkShellShortcut();
-            return { ...result, ...(!result.ok ? { manualFix: 'pnpm stam setup shortcut' } : {}) };
+            return optionalManualCheck({ ...result, manualFix: 'pnpm stam setup shortcut' });
         } },
     ];
 }
@@ -85,7 +105,7 @@ function setupCheckDefinitions(context: CliContext): { key: keyof SetupReport; l
 export async function checkSetup(context: CliContext): Promise<SetupReport> {
     const results = await Promise.all(setupCheckDefinitions(context).map(async ({ key, optional, check }) => [key, { ...await check(), optional }]));
     const devops = await getOptionalDevopsSetupChecks(path.join(context.rootDir, 'devops'));
-    return { ...Object.fromEntries(results), devops: await Promise.all(devops.map(async ({ label, check }) => ({ label, result: { ...await check(), optional: true } }))) } as SetupReport;
+    return { ...Object.fromEntries(results), devops: await Promise.all(devops.map(async ({ label, check }) => ({ label, result: optionalManualCheck(await check()) }))) } as SetupReport;
 }
 
 export async function checkSetupWithTable(context: CliContext, options: { live: boolean }): Promise<SetupReport> {
@@ -114,7 +134,7 @@ export async function checkSetupWithTable(context: CliContext, options: { live: 
     const results = await Promise.allSettled([...checks.map(async ({ key, label, optional, check, row }) => [
         key,
         { ...await runSetupCheck(row, label, check()), optional },
-    ]), Promise.all(devops.map(async ({ label, check, row }) => ({ label, result: { ...await runSetupCheck(row, label, check()), optional: true } }))).then(results => ['devops', results])]);
+    ]), Promise.all(devops.map(async ({ label, check, row }) => ({ label, result: await runSetupCheck(row, label, check().then(optionalManualCheck)) }))).then(results => ['devops', results])]);
 
     await liveTable.wait();
 
@@ -173,24 +193,10 @@ export async function runSetup(context: CliContext): Promise<void> {
             return;
         }
         for (const fix of fixes) {
+            await setupActions[fix.key].run(context);
             if (fix.key === SetupAutomaticFixKey.Node) {
-                await setupNodeVersion(context.rootDir);
                 console.log('\nActivate the new version in this terminal, then run stam setup again.');
                 return;
-            } else if (fix.key === SetupAutomaticFixKey.Pnpm) {
-                await setupPackageManager(context.rootDir);
-            } else if (fix.key === SetupAutomaticFixKey.Vcs) {
-                await setupVcs(context.rootDir, { yes: true, dryRun: false, verbosity: context.verbosity });
-            } else if (fix.key === SetupAutomaticFixKey.Dns) {
-                await setupDns({ yes: true, dryRun: false });
-            } else if (fix.key === SetupAutomaticFixKey.PrivilegedPorts) {
-                await setupPrivilegedPortRedirects({ yes: true, dryRun: false });
-            } else if (fix.key === SetupAutomaticFixKey.Services) {
-                await runServices(context);
-            } else if (fix.key === SetupAutomaticFixKey.Caddy) {
-                await setupCaddy({ yes: true, dryRun: false });
-            } else {
-                await setupCert(context, { yes: true, dryRun: false });
             }
             attemptedFixes.add(fix.key);
         }
@@ -204,11 +210,14 @@ export function getRecommendedSetupFixes(report: SetupReport): AutomaticFix[] {
         if (check.ok || check.optional) {
             continue;
         }
-        if (!check.automaticFix) {
+        if (!('action' in check.remediation)) {
             break;
         }
-        fixes.push(check.automaticFix);
-        if (check.automaticFix.key === SetupAutomaticFixKey.Node) {
+        const key = check.remediation.action;
+        if (!fixes.some(fix => fix.key === key)) {
+            fixes.push({ key, label: check.remediation.label ?? setupActions[key].label });
+        }
+        if (key === SetupAutomaticFixKey.Node) {
             break;
         }
     }
@@ -240,8 +249,9 @@ async function vcsCheck(context: CliContext): Promise<CheckResult> {
     return {
         ok: false,
         details: missing.map(check => check.label).join(', '),
-        manualFix: 'stam setup vcs',
-        ...(missing.every(check => check.repairs.length > 0) ? { automaticFix: { key: SetupAutomaticFixKey.Vcs, label: 'Configure Git / JJ push destinations' } } : {}),
+        remediation: missing.every(check => check.repairs.length > 0)
+            ? { action: SetupAutomaticFixKey.Vcs }
+            : { instructions: 'stam setup vcs', reason: 'Some repository checks have no automatic repair.' },
     };
 }
 
@@ -254,9 +264,8 @@ async function nodeCheck(context: CliContext): Promise<CheckResult> {
     return {
         ok: false,
         details: check.details,
-        manualFix: 'stam setup node',
-        automaticFix: {
-            key: SetupAutomaticFixKey.Node,
+        remediation: {
+            action: SetupAutomaticFixKey.Node,
             label: `Install Node.js ${check.expected}`,
         },
     };
@@ -271,9 +280,8 @@ async function packageManagerCheck(context: CliContext): Promise<CheckResult> {
     return {
         ok: false,
         details: check.details,
-        manualFix: 'stam setup pnpm',
-        automaticFix: {
-            key: SetupAutomaticFixKey.Pnpm,
+        remediation: {
+            action: SetupAutomaticFixKey.Pnpm,
             label: `Install pnpm ${check.expected} with Corepack`,
         },
     };
@@ -305,7 +313,7 @@ function privilegedRedirectRules(profile: SharedServiceProfile): IptablesRedirec
     ];
 }
 
-export async function setupDns(options: { yes: boolean; dryRun: boolean }): Promise<void> {
+export async function setupDns(options: { yes: boolean; dryRun: boolean; confirmOverwrite?: boolean }): Promise<void> {
     const profile = await currentSharedServiceProfile();
     if (profile.dnsSetupKind === SharedServiceDnsSetupKind.MacosResolver) {
         await setupMacosDns(options);
@@ -344,7 +352,7 @@ export async function setupDns(options: { yes: boolean; dryRun: boolean }): Prom
     });
 }
 
-async function setupMacosDns(options: { yes: boolean; dryRun: boolean }): Promise<void> {
+async function setupMacosDns(options: { yes: boolean; dryRun: boolean; confirmOverwrite?: boolean }): Promise<void> {
     const domain = process.env.STAMHOOFD_DOMAIN ?? defaultDomain;
     const resolverPath = macosResolverPath(domain);
     const content = macosResolverContent();
@@ -370,7 +378,7 @@ async function setupMacosDns(options: { yes: boolean; dryRun: boolean }): Promis
         warning('Dry run: DNS configuration was not changed.');
         return;
     }
-    if (existing !== undefined && existing !== content && !options.yes && !(await confirm(`Overwrite ${resolverPath}?`, { default: false }))) {
+    if (existing !== undefined && existing !== content && (!options.yes || options.confirmOverwrite) && !(await confirm(`Overwrite ${resolverPath}?`, { default: false }))) {
         warning('DNS setup skipped.');
         return;
     }
@@ -475,7 +483,7 @@ async function dnsCheck(context: CliContext, profile: SharedServiceProfile): Pro
     }
 
     if (!(await dnsConfigurationCheck(domain, profile, context.verbosity))) {
-        return { ok: false, details: `Local DNS is not configured for .${domain}`, manualFix: 'stam setup dns', automaticFix: { key: SetupAutomaticFixKey.Dns, label: 'Configure local DNS' } };
+        return { ok: false, details: `Local DNS is not configured for .${domain}`, remediation: { action: SetupAutomaticFixKey.Dns } };
     }
 
     const result = await run('resolvectl', ['query', `dashboard.${domain}`], { capture: true, allowFailure: true, verbosity: context.verbosity ?? RunVerbosity.Quiet });
@@ -485,32 +493,32 @@ async function dnsCheck(context: CliContext, profile: SharedServiceProfile): Pro
 
     const corednsStatus = await corednsService.status(context);
     if (!corednsStatus.running) {
-        return { ok: false, details: 'Local DNS is configured, but CoreDNS is not running', manualFix: 'stam services up', automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' } };
+        return { ok: false, details: 'Local DNS is configured, but CoreDNS is not running', remediation: { action: SetupAutomaticFixKey.Services } };
     }
 
-    return { ok: false, details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${localIpv4Host}`, manualFix: 'stam setup dns' };
+    return { ok: false, details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${localIpv4Host}`, remediation: { action: SetupAutomaticFixKey.Dns } };
 }
 
 async function macosDnsCheck(context: CliContext, domain: string): Promise<CheckResult> {
     const resolverPath = macosResolverPath(domain);
     const content = await readFileIfExists(resolverPath);
     if (content === undefined) {
-        return { ok: false, details: `${resolverPath} does not exist`, manualFix: 'stam setup dns', automaticFix: { key: SetupAutomaticFixKey.Dns, label: 'Configure local DNS' } };
+        return { ok: false, details: `${resolverPath} does not exist`, remediation: { action: SetupAutomaticFixKey.Dns } };
     }
     if (content !== macosResolverContent()) {
-        return { ok: false, details: `${resolverPath} exists with unexpected contents`, manualFix: 'stam setup dns' };
+        return { ok: false, details: `${resolverPath} exists with unexpected contents`, remediation: { action: SetupAutomaticFixKey.Dns } };
     }
 
     const corednsStatus = await corednsService.status(context);
     if (!corednsStatus.running) {
-        return { ok: false, details: 'Local DNS is configured, but CoreDNS is not running', manualFix: 'stam services up', automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' } };
+        return { ok: false, details: 'Local DNS is configured, but CoreDNS is not running', remediation: { action: SetupAutomaticFixKey.Services } };
     }
 
     if (await directCorednsCheck(domain)) {
         return { ok: true, details: `dashboard.${domain} resolves to ${localIpv4Host}` };
     }
 
-    return { ok: false, details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${process.env.PUBLIC_IP || localIpv4Host}`, manualFix: 'stam setup dns' };
+    return { ok: false, details: `Local DNS is configured and CoreDNS is running, but dashboard.${domain} does not resolve to ${process.env.PUBLIC_IP || localIpv4Host}`, remediation: { action: SetupAutomaticFixKey.RestartServices } };
 }
 
 async function directCorednsCheck(domain: string): Promise<boolean> {
@@ -541,12 +549,12 @@ async function certCheck(verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<
     try {
         await fs.access(certPath);
     } catch {
-        return { ok: false, details: 'Caddy local CA not found', manualFix: 'stam setup cert', automaticFix: { key: SetupAutomaticFixKey.Cert, label: 'Trust local HTTPS certificates' } };
+        return { ok: false, details: 'Caddy local CA not found', remediation: { action: SetupAutomaticFixKey.Cert } };
     }
     if (process.platform === 'darwin') {
         const result = await run('security', ['verify-cert', '-c', certPath, '-p', 'ssl', '-l', '-L', '-q'], { capture: true, allowFailure: true, verbosity });
         if (result.status !== 0) {
-            return { ok: false, details: 'Caddy local CA is not trusted by macOS', manualFix: 'stam setup cert', automaticFix: { key: SetupAutomaticFixKey.Cert, label: 'Trust local HTTPS certificates' } };
+            return { ok: false, details: 'Caddy local CA is not trusted by macOS', remediation: { action: SetupAutomaticFixKey.Cert } };
         }
     }
     return { ok: true, details: certPath };
@@ -558,7 +566,7 @@ async function privilegedPortRedirectCheck(profile: SharedServiceProfile, verbos
     }
 
     if (process.platform !== 'linux') {
-        return { ok: false, details: 'Privileged port redirects require Linux with iptables', manualFix: 'Configure privileged port redirects' };
+        return { ok: false, details: 'Privileged port redirects require Linux with iptables', remediation: { instructions: 'Configure privileged port redirects', reason: 'Automatic port redirects require Linux with iptables.' } };
     }
 
     let caddyRunning: boolean;
@@ -571,7 +579,7 @@ async function privilegedPortRedirectCheck(profile: SharedServiceProfile, verbos
     if (caddyRunning) {
         const highPortsReady = await portAcceptsConnection(profile.caddyHttpHostPort) && await portAcceptsConnection(profile.caddyHttpsHostPort);
         if (!highPortsReady) {
-            return { ok: false, details: `Caddy is running, but ${localhostPort(profile.caddyHttpHostPort)} or ${localhostPort(profile.caddyHttpsHostPort)} is not reachable`, manualFix: 'stam services restart' };
+            return { ok: false, details: `Caddy is running, but ${localhostPort(profile.caddyHttpHostPort)} or ${localhostPort(profile.caddyHttpsHostPort)} is not reachable`, remediation: { action: SetupAutomaticFixKey.RestartServices } };
         }
 
         if (await portAcceptsConnection(caddyHttpPort) && await portAcceptsConnection(caddyHttpsPort)) {
@@ -588,16 +596,16 @@ async function privilegedPortRedirectCheck(profile: SharedServiceProfile, verbos
 
     return missingRules.length === 0
         ? { ok: true, details: `${localhostPort(caddyHttpPort)} -> ${localhostPort(profile.caddyHttpHostPort)}, ${localhostPort(caddyHttpsPort)} -> ${localhostPort(profile.caddyHttpsHostPort)}` }
-        : { ok: false, details: `${missingRules.length} privileged port redirect${missingRules.length === 1 ? '' : 's'} missing`, manualFix: 'stam setup privileged-ports', automaticFix: { key: SetupAutomaticFixKey.PrivilegedPorts, label: 'Configure privileged port redirects' } };
+        : { ok: false, details: `${missingRules.length} privileged port redirect${missingRules.length === 1 ? '' : 's'} missing`, remediation: { action: SetupAutomaticFixKey.PrivilegedPorts } };
 }
 
 async function caddyCheck(verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<CheckResult> {
     const result = await run('caddy', ['version'], { capture: true, allowFailure: true, verbosity });
     if (result.status !== 0) {
         if (process.platform === 'darwin') {
-            return { ok: false, details: 'caddy not found', manualFix: 'stam setup caddy', automaticFix: { key: SetupAutomaticFixKey.Caddy, label: 'Install Caddy with Homebrew' } };
+            return { ok: false, details: 'caddy not found', remediation: { action: SetupAutomaticFixKey.Caddy } };
         }
-        return { ok: false, details: 'caddy not found', manualFix: 'Install Caddy, then run stam setup cert' };
+        return { ok: false, details: 'caddy not found', remediation: { instructions: 'Install Caddy, then run stam setup cert', reason: 'Automatic Caddy installation is only supported on macOS.' } };
     }
     return { ok: true, details: result.stdout.trim() };
 }
@@ -678,7 +686,7 @@ async function dockerCheck(verbosity: RunVerbosity = RunVerbosity.Quiet): Promis
         const runtime = await docker.getContainerRuntime(verbosity);
         return { ok: true, details: runtime === docker.ContainerRuntime.Podman ? 'podman ready' : 'docker daemon reachable' };
     } catch (error) {
-        return { ok: false, details: error instanceof Error ? error.message : 'container runtime not reachable', manualFix: 'Start Podman or Docker, then run stam setup' };
+        return { ok: false, details: error instanceof Error ? error.message : 'container runtime not reachable', remediation: { instructions: 'Start Podman or Docker, then run stam setup', reason: 'The container runtime must be installed and started externally.' } };
     }
 }
 
@@ -706,5 +714,6 @@ function row(label: string, result: CheckResult): string[] {
 }
 
 function setupRow(label: string, result: CheckResult): TableCellInput[] {
-    return [label, statusCell(result.ok ? CliStatus.Ready : CliStatus.Missing), result.manualFix ? `${result.details} (${result.manualFix})` : result.details];
+    const fix = result.ok ? undefined : 'action' in result.remediation ? setupActions[result.remediation.action].command : result.remediation.instructions;
+    return [label, statusCell(result.ok ? CliStatus.Ready : CliStatus.Missing), fix ? `${result.details} (${fix})` : result.details];
 }

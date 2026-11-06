@@ -1,10 +1,13 @@
 import dns from 'node:dns/promises';
 import fs from 'node:fs/promises';
+import net from 'node:net';
+import { EventEmitter } from 'node:events';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { run, RunVerbosity } from '../runtime/command-runner.js';
 import { execSudo } from '../runtime/process.js';
 import { confirm } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
+import { restartSharedServicesInteractive } from '../services/shared-services.js';
 import * as docker from '../services/docker.js';
 import type { CheckResult, SetupReport } from './setup-machine.js';
 import { checkSetup, checkSetupWithTable, getRecommendedSetupFixes, isSetupReady, printSetupReport, runSetup, SetupAutomaticFixKey, setupCaddy, setupDns, setupPrivilegedPortRedirects } from './setup-machine.js';
@@ -25,7 +28,7 @@ vi.mock('../runtime/process.js', () => ({ execSudo: vi.fn(async () => ({ code: 0
 vi.mock('node:dns/promises', () => ({
     default: {
         lookup: vi.fn(),
-        Resolver: vi.fn(() => dnsResolver),
+        Resolver: vi.fn(function () { return dnsResolver; }),
     },
 }));
 
@@ -62,6 +65,7 @@ vi.mock('./setup-package-manager.js', () => ({
 vi.mock('./start-services.js', () => ({
     runServices: vi.fn(),
 }));
+vi.mock('../services/shared-services.js', () => ({ restartSharedServicesInteractive: vi.fn() }));
 
 vi.mock('./setup-vcs.js', () => ({ checkVcs: vi.fn(), setupVcs: vi.fn() }));
 vi.mock('./setup-shell.js', () => ({ checkShellShortcut: vi.fn() }));
@@ -178,7 +182,7 @@ describe('setup machine workflow', () => {
         expect(setupVcs).not.toHaveBeenCalled();
         expect(confirm).not.toHaveBeenCalled();
         const report = await checkSetup({ rootDir: '/repo', verbose: false } as any);
-        expect(report.vcs).toMatchObject({ ok: false, optional: true, manualFix: 'stam setup vcs' });
+        expect(report.vcs).toMatchObject({ ok: false, optional: true, remediation: { action: SetupAutomaticFixKey.Vcs } });
         expect(isSetupReady(report)).toBe(true);
         expect(getRecommendedSetupFixes(report)).toEqual([]);
     });
@@ -252,6 +256,66 @@ describe('setup machine workflow', () => {
         expect(runServices).not.toHaveBeenCalled();
     });
 
+    it.each([true, false])('offers Linux DNS repair and respects confirmation (%s)', async (approved) => {
+        setPlatform('linux');
+        const options = { dns: 'Global: 127.0.0.1:1053\n', domains: 'Global: ~stamhoofd\n', query: '' };
+        mockSetupCommands(options);
+        vi.spyOn(fs, 'access').mockResolvedValue(undefined);
+        vi.mocked(confirm).mockResolvedValue(approved);
+        vi.mocked(execSudo).mockImplementation(async (args) => {
+            if (args[0] === 'systemctl') options.query = 'dashboard.stamhoofd: 127.0.0.1\n';
+            return { code: 0, stdout: '', stderr: '', signal: null };
+        });
+
+        await runSetup({ rootDir: '/repo', verbosity: RunVerbosity.Quiet } as any);
+
+        expect(confirm).toHaveBeenCalledWith('Run recommended fixes now?', { default: true });
+        expect(execSudo).toHaveBeenCalledTimes(approved ? 3 : 0);
+        expect(checkPackageManager).toHaveBeenCalledTimes(approved ? 2 : 1);
+    });
+
+    it('rechecks macOS DNS after restarting unhealthy shared services', async () => {
+        setPlatform('darwin');
+        mockSetupCommands({ resolver: 'nameserver 127.0.0.1\n' });
+        vi.spyOn(fs, 'access').mockResolvedValue(undefined);
+        dnsResolver.resolve4.mockResolvedValue([]);
+        vi.mocked(confirm).mockResolvedValue(true);
+        vi.mocked(restartSharedServicesInteractive).mockImplementation(async () => {
+            dnsResolver.resolve4.mockResolvedValue(['127.0.0.1']);
+        });
+
+        await runSetup({ rootDir: '/repo', verbosity: RunVerbosity.Quiet } as any);
+
+        expect(restartSharedServicesInteractive).toHaveBeenCalledOnce();
+        expect(checkPackageManager).toHaveBeenCalledTimes(2);
+        expect(confirm).toHaveBeenCalledOnce();
+    });
+
+    it('offers a service restart when Caddy container ports are unreachable', async () => {
+        setPlatform('linux');
+        mockSetupCommands({ dns: 'Global: 127.0.0.1:1053\n', domains: 'Global: ~stamhoofd\n' });
+        vi.mocked(docker.containerIsRunning).mockResolvedValue(true);
+        const socket = Object.assign(new EventEmitter(), { destroy: vi.fn(), setTimeout: vi.fn() });
+        const connect = vi.spyOn(net, 'createConnection').mockImplementation(() => {
+            queueMicrotask(() => socket.emit('error', new Error('Connection refused')));
+            return socket as unknown as net.Socket;
+        });
+        try {
+            const report = await checkSetup({ rootDir: '/repo', verbosity: RunVerbosity.Quiet } as any);
+            expect(getRecommendedSetupFixes(report)).toContainEqual({ key: SetupAutomaticFixKey.RestartServices, label: 'Restart shared services' });
+        } finally {
+            connect.mockRestore();
+        }
+    });
+
+    it('only recommends a shared repair once when multiple checks need it', () => {
+        const report = setupReport({
+            privilegedPorts: missingAutomatic(SetupAutomaticFixKey.RestartServices, 'Restart shared services'),
+            dns: missingAutomatic(SetupAutomaticFixKey.RestartServices, 'Restart shared services'),
+        });
+        expect(getRecommendedSetupFixes(report)).toEqual([{ key: SetupAutomaticFixKey.RestartServices, label: 'Restart shared services' }]);
+    });
+
     it('does not recommend automatic fixes after a missing manual prerequisite', () => {
         const report = setupReport({
             caddy: missingManual('caddy not found'),
@@ -282,7 +346,7 @@ describe('setup machine workflow', () => {
         const report = setupReport({
             docker: { ...missingManual('docker missing'), optional: true },
             dns: { ...missingAutomatic(SetupAutomaticFixKey.Dns, 'Configure local DNS'), optional: true },
-            shell: { ok: false, optional: true, details: 'stam not installed', manualFix: 'pnpm stam setup shortcut' },
+            shell: { ...missingManual('stam not installed'), optional: true },
         });
         expect(isSetupReady(report)).toBe(true);
         expect(getRecommendedSetupFixes(report)).toEqual([]);
@@ -320,7 +384,7 @@ describe('setup machine workflow', () => {
             if (mode === 'static') {
                 printSetupReport(report);
             }
-            expect(report.shell).toEqual({ ok: false, optional: true, details: 'stam not installed in /usr/local/bin', manualFix: 'pnpm stam setup shortcut' });
+            expect(report.shell).toMatchObject({ ok: false, optional: true, details: 'stam not installed in /usr/local/bin', remediation: { instructions: 'pnpm stam setup shortcut' } });
             const output = log.mock.calls.flat().join('\n');
             expect(output.indexOf('Optional')).toBeGreaterThan(output.indexOf('Caddy local CA'));
             expect(output.indexOf('Binary shortcut')).toBeGreaterThan(output.indexOf('Optional'));
@@ -348,8 +412,7 @@ describe('setup machine workflow', () => {
 
         expect(report.dns).toMatchObject({
             ok: false,
-            manualFix: 'stam setup dns',
-            automaticFix: { key: SetupAutomaticFixKey.Dns, label: 'Configure local DNS' },
+            remediation: { action: SetupAutomaticFixKey.Dns },
         });
         expect(corednsService.status).not.toHaveBeenCalled();
     });
@@ -390,8 +453,8 @@ describe('setup machine workflow', () => {
         expect(run).toHaveBeenCalledWith('resolvectl', ['query', 'dashboard.stamhoofd'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Output });
     });
 
-    // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
-    it.skip('recommends starting all shared services when DNS is configured but CoreDNS is stopped', async () => {
+    it('recommends starting all shared services when DNS is configured but CoreDNS is stopped', async () => {
+        setPlatform('linux');
         mockSetupCommands({
             dns: 'Global: 127.0.0.1:1053\n',
             domains: 'Global: ~stamhoofd\n',
@@ -403,13 +466,12 @@ describe('setup machine workflow', () => {
 
         expect(report.dns).toMatchObject({
             ok: false,
-            manualFix: 'stam services up',
-            automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' },
+            remediation: { action: SetupAutomaticFixKey.Services },
         });
     });
 
-    // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
-    it.skip('does not recommend DNS setup when DNS is configured and CoreDNS is running but resolution still fails', async () => {
+    it('recommends DNS setup when DNS is configured and CoreDNS is running but resolution still fails', async () => {
+        setPlatform('linux');
         mockSetupCommands({
             dns: 'Global: 127.0.0.1:1053\n',
             domains: 'Global: ~stamhoofd\n',
@@ -421,9 +483,9 @@ describe('setup machine workflow', () => {
 
         expect(report.dns).toMatchObject({
             ok: false,
-            manualFix: 'stam setup dns',
+            remediation: { action: SetupAutomaticFixKey.Dns },
         });
-        expect(report.dns.automaticFix).toBeUndefined();
+        expect(getRecommendedSetupFixes(report)).toContainEqual({ key: SetupAutomaticFixKey.Dns, label: 'Configure local DNS' });
     });
 
     it('asks to run recommended fixes with yes as the default', async () => {
@@ -450,8 +512,8 @@ describe('setup machine workflow', () => {
         expect(messages).not.toContain('?');
     });
 
-    // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
-    it.skip('requires privileged port redirects on Linux for Docker', async () => {
+    it('requires privileged port redirects on Linux for Docker', async () => {
+        setPlatform('linux');
         mockSetupCommands({
             dns: 'Global: 127.0.0.1:1053\n',
             domains: 'Global: ~stamhoofd\n',
@@ -462,12 +524,12 @@ describe('setup machine workflow', () => {
 
         expect(report.privilegedPorts).toMatchObject({
             ok: false,
-            automaticFix: { key: SetupAutomaticFixKey.PrivilegedPorts, label: 'Configure privileged port redirects' },
+            remediation: { action: SetupAutomaticFixKey.PrivilegedPorts },
         });
     });
 
-    // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
-    it.skip('requires privileged port redirects on Linux for Podman', async () => {
+    it('requires privileged port redirects on Linux for Podman', async () => {
+        setPlatform('linux');
         vi.mocked(docker.getContainerRuntime).mockResolvedValue(docker.ContainerRuntime.Podman);
         mockSetupCommands({
             dns: 'Global: 127.0.0.1:1053\n',
@@ -479,12 +541,11 @@ describe('setup machine workflow', () => {
 
         expect(report.privilegedPorts).toMatchObject({
             ok: false,
-            automaticFix: { key: SetupAutomaticFixKey.PrivilegedPorts, label: 'Configure privileged port redirects' },
+            remediation: { action: SetupAutomaticFixKey.PrivilegedPorts },
         });
     });
 
-    // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
-    it.skip('skips privileged port redirects on macOS', async () => {
+    it('skips privileged port redirects on macOS', async () => {
         setPlatform('darwin');
         mockSetupCommands({
             resolver: 'nameserver 127.0.0.1\n',
@@ -495,8 +556,7 @@ describe('setup machine workflow', () => {
         expect(report.privilegedPorts).toEqual({ ok: true, details: 'not needed for docker' });
     });
 
-    // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
-    it.skip('checks macOS resolver contents', async () => {
+    it('checks macOS resolver contents', async () => {
         setPlatform('darwin');
         mockSetupCommands({
             resolver: 'nameserver 127.0.0.1\n',
@@ -522,15 +582,13 @@ describe('setup machine workflow', () => {
 
         expect(report.dns).toMatchObject({
             ok: false,
-            manualFix: 'stam services up',
-            automaticFix: { key: SetupAutomaticFixKey.Services, label: 'Start shared services' },
+            remediation: { action: SetupAutomaticFixKey.Services },
         });
         expect(dns.lookup).not.toHaveBeenCalled();
         expect(dnsResolver.resolve4).not.toHaveBeenCalled();
     });
 
-    // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
-    it.skip('reports macOS direct CoreDNS query failures without OS resolver lookup', async () => {
+    it('offers service restart for macOS direct CoreDNS query failures without OS resolver lookup', async () => {
         setPlatform('darwin');
         mockSetupCommands({
             resolver: 'nameserver 127.0.0.1\n',
@@ -542,12 +600,12 @@ describe('setup machine workflow', () => {
 
         expect(report.dns).toMatchObject({
             ok: false,
-            manualFix: 'stam setup dns',
+            remediation: { action: SetupAutomaticFixKey.RestartServices },
         });
         expect(dns.lookup).not.toHaveBeenCalled();
     });
 
-    it('reports mismatching macOS resolver contents as manual DNS problem', async () => {
+    it('offers repair for mismatching macOS resolver contents', async () => {
         setPlatform('darwin');
         mockSetupCommands({
             resolver: 'nameserver 10.0.0.1\n',
@@ -557,9 +615,9 @@ describe('setup machine workflow', () => {
 
         expect(report.dns).toMatchObject({
             ok: false,
-            manualFix: 'stam setup dns',
+            remediation: { action: SetupAutomaticFixKey.Dns },
         });
-        expect(report.dns.automaticFix).toBeUndefined();
+        expect(getRecommendedSetupFixes(report)).toContainEqual({ key: SetupAutomaticFixKey.Dns, label: 'Configure local DNS' });
     });
 
     it('asks before overwriting mismatching macOS resolver contents', async () => {
@@ -575,8 +633,27 @@ describe('setup machine workflow', () => {
         expect(execSudo).not.toHaveBeenCalledWith(['cp', expect.any(String), '/etc/resolver/stamhoofd'], { label: false });
     });
 
-    // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.
-    it.skip('offers Homebrew Caddy installation on macOS only', async () => {
+    it.each([true, false])('retains overwrite confirmation during recommended macOS DNS repair (%s)', async (overwrite) => {
+        setPlatform('darwin');
+        const options = { resolver: 'nameserver 10.0.0.1\n' };
+        mockSetupCommands(options);
+        vi.spyOn(fs, 'access').mockResolvedValue(undefined);
+        vi.mocked(confirm).mockResolvedValueOnce(true).mockResolvedValueOnce(overwrite);
+        vi.mocked(execSudo).mockImplementation(async (args) => {
+            if (args[0] === 'cp') options.resolver = 'nameserver 127.0.0.1\n';
+            return { code: 0, stdout: '', stderr: '', signal: null };
+        });
+
+        await runSetup({ rootDir: '/repo', verbosity: RunVerbosity.Quiet } as any);
+
+        expect(confirm).toHaveBeenNthCalledWith(1, 'Run recommended fixes now?', { default: true });
+        expect(confirm).toHaveBeenNthCalledWith(2, 'Overwrite /etc/resolver/stamhoofd?', { default: false });
+        expect(confirm).toHaveBeenCalledTimes(2);
+        expect(execSudo).toHaveBeenCalledTimes(overwrite ? 2 : 0);
+        expect(checkPackageManager).toHaveBeenCalledTimes(2);
+    });
+
+    it('offers Homebrew Caddy installation on macOS only', async () => {
         setPlatform('darwin');
         mockSetupCommands({
             resolver: 'nameserver 127.0.0.1\n',
@@ -584,7 +661,7 @@ describe('setup machine workflow', () => {
         });
 
         const macReport = await checkSetup({ rootDir: '/repo', verbose: false } as any);
-        expect(macReport.caddy).toMatchObject({ automaticFix: { key: SetupAutomaticFixKey.Caddy, label: 'Install Caddy with Homebrew' } });
+        expect(macReport.caddy).toMatchObject({ remediation: { action: SetupAutomaticFixKey.Caddy } });
 
         setPlatform('linux');
         mockSetupCommands({
@@ -594,7 +671,7 @@ describe('setup machine workflow', () => {
         });
 
         const linuxReport = await checkSetup({ rootDir: '/repo', verbose: false } as any);
-        expect(linuxReport.caddy.automaticFix).toBeUndefined();
+        expect(linuxReport.caddy).toMatchObject({ remediation: { instructions: 'Install Caddy, then run stam setup cert' } });
     });
 
     it('installs Caddy through Homebrew on macOS', async () => {
@@ -623,7 +700,7 @@ describe('setup machine workflow', () => {
 
         const report = await checkSetup({ rootDir: '/repo', generatedDir: '/repo' } as any);
 
-        expect(report.cert).toMatchObject({ ok: false, manualFix: 'stam setup cert' });
+        expect(report.cert).toMatchObject({ ok: false, remediation: { action: SetupAutomaticFixKey.Cert } });
         expect(run).toHaveBeenCalledWith('security', ['verify-cert', '-c', expect.any(String), '-p', 'ssl', '-l', '-L', '-q'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Quiet });
     });
 
@@ -668,11 +745,11 @@ function ok(): CheckResult {
 }
 
 function missingManual(details: string): CheckResult {
-    return { ok: false, details, manualFix: 'manual fix' };
+    return { ok: false, details, remediation: { instructions: 'manual fix', reason: 'No automatic repair available.' } };
 }
 
 function missingAutomatic(key: SetupAutomaticFixKey, label: string): CheckResult {
-    return { ok: false, details: 'missing', manualFix: `stam setup ${key}`, automaticFix: { key, label } };
+    return { ok: false, details: 'missing', remediation: { action: key, label } };
 }
 
 function mockSetupCommands(options: { dns?: string; domains?: string; query?: string; resolver?: string; missingRedirects?: boolean; caddyMissing?: boolean }): void {
