@@ -1,8 +1,9 @@
 import { JudicialRecordCheck, JudicialRecordCheckReport, JudicialRecordCheckStatus, judicialRecordChecksInOrder } from '@stamhoofd/structures';
 
 /**
- * Who is looking at the checklist. It changes the message under the list, and whether the blank
- * check is on it at all - never the rows themselves: those say what the backend said they say.
+ * Who is looking at the checklist. It changes only the message under the list - never which rows
+ * are on it, nor what they say: those say what the backend said they say. A reviewer is told what
+ * to do with the document; the member is told what happens next.
  */
 export type JudicialRecordCheckAudience = 'member' | 'reviewer';
 

@@ -2,9 +2,6 @@ import { ArrayDecoder, AutoEncoder, EnumDecoder, field, StringDecoder } from '@c
 
 /**
  * The automatic checks we run on a delivered judicial record extract, in the order they are shown.
- *
- * Five of them, but the person who delivered the extract only ever sees the first four: whether a
- * record is blank is between them and a reviewer.
  */
 export enum JudicialRecordCheck {
     /**
@@ -90,16 +87,9 @@ export class JudicialRecordCheckReport extends AutoEncoder {
         return this.checks.find(result => result.check === check) ?? null;
     }
 
-    /**
-     * Returns the results in display order, leaving out the checks there is no result for. Pass
-     * `includeBlank: false` for the member themselves.
-     */
-    getChecks(includeBlank: boolean): JudicialRecordCheckResult[] {
-        const order = includeBlank
-            ? judicialRecordChecksInOrder
-            : judicialRecordChecksInOrder.filter(check => check !== JudicialRecordCheck.Blank);
-
-        return order.flatMap(check => this.get(check) ?? []);
+    /** Returns the results in display order, leaving out the checks there is no result for. */
+    getChecks(): JudicialRecordCheckResult[] {
+        return judicialRecordChecksInOrder.flatMap(check => this.get(check) ?? []);
     }
 
     /** Every check has a result and that result passed. */
@@ -108,6 +98,6 @@ export class JudicialRecordCheckReport extends AutoEncoder {
     }
 
     get failedChecks(): JudicialRecordCheckResult[] {
-        return this.getChecks(true).filter(result => result.isFailed);
+        return this.getChecks().filter(result => result.isFailed);
     }
 }

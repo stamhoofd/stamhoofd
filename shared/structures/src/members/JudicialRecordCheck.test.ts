@@ -20,15 +20,15 @@ describe('JudicialRecordCheckReport', () => {
             [JudicialRecordCheck.Authentic]: JudicialRecordCheckStatus.Passed,
         });
 
-        expect(unordered.getChecks(true).map(result => result.check)).toEqual([
+        expect(unordered.getChecks().map(result => result.check)).toEqual([
             JudicialRecordCheck.Authentic,
             JudicialRecordCheck.Identity,
             JudicialRecordCheck.Blank,
         ]);
     });
 
-    test('keeps the blank check from the member', () => {
-        expect(report(allPassed).getChecks(false).map(result => result.check)).not.toContain(JudicialRecordCheck.Blank);
+    test('shows every check, the blank one included: there is no reader we hide a row from', () => {
+        expect(report(allPassed).getChecks().map(result => result.check)).toEqual([...judicialRecordChecksInOrder]);
     });
 
     test('passes only when every check has a result that passed', () => {
