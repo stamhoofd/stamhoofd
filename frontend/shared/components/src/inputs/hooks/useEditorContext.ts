@@ -1,10 +1,10 @@
 import { languages } from '@stamhoofd/locales';
-import type { TranslatedRichText, TranslatedString } from '@stamhoofd/structures';
+import type { TranslatedPlainText, TranslatedRichText, TranslatedString } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import type { Raw, Ref} from 'vue';
 import { inject, markRaw, onBeforeUnmount, provide, reactive, ref, watch } from 'vue';
 
-export type TranslateableValue = TranslatedString | TranslatedRichText;
+export type TranslateableValue = TranslatedString | TranslatedPlainText | TranslatedRichText;
 
 export class TranslateableComponent {
     latestValue: TranslateableValue | null = null;

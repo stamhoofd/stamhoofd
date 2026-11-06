@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import { LanguageHelper, RichText, TranslatedRichText, TranslatedString } from '@stamhoofd/structures';
+import { LanguageHelper, RichText, TranslatedPlainText, TranslatedRichText, TranslatedString } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import type { TranslateableValue } from './hooks/useEditorContext';
 import { ContextMenu, ContextMenuItem } from '../overlays/ContextMenu';
@@ -16,10 +16,15 @@ const value = defineModel<TranslateableValue>({ required: true });
 const { hasLanguages } = useSwitchLanguage();
 
 function untranslated(): TranslateableValue {
-    if (value.value instanceof TranslatedRichText) {
-        return new TranslatedRichText(value.value.toRichText());
+    const v = value.value;
+    if (v instanceof TranslatedRichText) {
+        return new TranslatedRichText(v.toRichText());
     }
-    return new TranslatedString(value.value.toString());
+    if (v instanceof TranslatedPlainText) {
+        // Keep the type of the value, so the field keeps its input and its view
+        return v.patch(v.toString());
+    }
+    return new TranslatedString(v.toString());
 }
 
 function withLanguage(lang: Language): TranslateableValue {
