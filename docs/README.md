@@ -51,3 +51,8 @@ After deployment, verify the service/environment/release in Better Stack, reques
 a normal page and a missing page, and verify startup and request traces. Confirm
 SIGTERM flushes pending telemetry and that a telemetry outage does not stop the
 server. Automated protocol/privacy coverage runs with `pnpm stam test observability`.
+
+To check the built image with Podman, run
+`STAM_OBSERVABILITY_IMAGE=docs:<tag> pnpm stam test observability image`.
+This checks successful and missing pages, runtime authentication headers, payload
+privacy, and lifecycle flushing on SIGTERM against a local OTLP receiver.
