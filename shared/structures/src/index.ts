@@ -120,6 +120,7 @@ export * from './endpoints/CheckMollieResponse.js';
 export * from './endpoints/CreateOrganization.js';
 export * from './endpoints/EmailRequest.js';
 export * from './endpoints/ForgotPasswordRequest.js';
+export * from './endpoints/JudicialRecordDeliveryResponse.js';
 export * from './endpoints/OrganizationAdmins.js';
 export * from './endpoints/OrganizationDomains.js';
 export * from './endpoints/PayableBalanceCollection.js';

@@ -9,7 +9,7 @@ import { JudicialRecordService } from '../services/judicial-record/JudicialRecor
 const status = await JudicialRecordService.deliver({
     member,
     data: pdfBytes,
-    maxAgeInDays: 31,
+    maxAgeInDays: 30,
 });
 
 status; // JudicialRecordDeliveryStatus.AutoOk or .Manual
@@ -19,6 +19,14 @@ The five automatic checks themselves are
 [`@stamhoofd/judicial-record-check`](../../../../../../shared/judicial-record-check/README.md), which
 the frontend runs as well: authenticity, identity, model, age and blank, each with a sentence saying
 why. What is left here is what only the backend can do.
+
+Who may deliver an extract for which member, and what is done with the outcome, belongs to the
+endpoint on top of this: `POST /members/:id/judicial-record`, in
+[`DeliverMemberJudicialRecordEndpoint.ts`](../../endpoints/global/members/DeliverMemberJudicialRecordEndpoint.ts).
+That endpoint is the final submit of the member portal flow: the browser already ran these same five
+checks and showed the member what held, so the response is a `JudicialRecordDeliveryResponse` with
+the status on it and not the checklist. It runs them again here because a request cannot prove the
+browser did.
 
 ## 1. The member has to deliver an extract at all
 
