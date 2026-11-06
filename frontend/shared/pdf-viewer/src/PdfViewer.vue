@@ -6,9 +6,9 @@
 
         <template v-else-if="pdf">
             <PdfViewerPage
-                v-for="pageNumber in pdf.numPages"
+                v-for="pageNumber in pdf.document.numPages"
                 :key="pageNumber"
-                :document="pdf"
+                :document="pdf.document"
                 :page-number="pageNumber"
                 :width="width"
                 :default-aspect-ratio="defaultAspectRatio"
@@ -20,9 +20,9 @@
 </template>
 
 <script lang="ts" setup>
-import type { PDFDocumentProxy } from 'pdfjs-dist';
 import { onBeforeUnmount, onMounted, ref, shallowRef, useTemplateRef, watch } from 'vue';
 import PdfViewerPage from './PdfViewerPage.vue';
+import type { LoadedPdf } from './loadPdfDocument.ts';
 import { loadPdfDocument } from './loadPdfDocument.ts';
 
 const props = defineProps<{
@@ -43,7 +43,7 @@ const el = useTemplateRef<HTMLElement>('el');
 
 // pdf.js hands out class instances with their own internals; making them deeply reactive would
 // both cost and break them.
-const pdf = shallowRef<PDFDocumentProxy | null>(null);
+const pdf = shallowRef<LoadedPdf | null>(null);
 
 const width = ref<number | null>(null);
 const defaultAspectRatio = ref(a4AspectRatio);
@@ -60,7 +60,7 @@ async function unload() {
     pdf.value = null;
 
     if (previous) {
-        await previous.loadingTask.destroy();
+        await previous.destroy();
     }
 }
 
@@ -73,16 +73,16 @@ async function load(data: Uint8Array) {
         const loaded = await loadPdfDocument(data);
 
         if (current !== generation) {
-            await loaded.loadingTask.destroy();
+            await loaded.destroy();
             return;
         }
 
         // The first page sets the height every other page holds until it is loaded itself.
-        const firstPage = await loaded.getPage(1);
+        const firstPage = await loaded.document.getPage(1);
         const viewport = firstPage.getViewport({ scale: 1 });
 
         if (current !== generation) {
-            await loaded.loadingTask.destroy();
+            await loaded.destroy();
             return;
         }
 
