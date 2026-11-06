@@ -3,6 +3,11 @@ import type { CliContext } from './create-context.js';
 import { buildPorts } from './ports.js';
 
 describe('buildPorts', () => {
+    it('allocates distinct debugger ports in the instance port range', () => {
+        const instance = context();
+        instance.instance.portOffset = 1200;
+        expect(buildPorts(instance)).toMatchObject({ apiInspector: 7058, statsInspector: 7059, rendererInspector: 7060 });
+    });
     afterEach(() => {
         delete process.env.MYSQL_PORT;
     });
