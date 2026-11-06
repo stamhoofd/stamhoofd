@@ -4,7 +4,7 @@ import { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableW
 import type { ContextPermissions } from '@stamhoofd/frontend-session/ContextPermissions';
 import type { Group, Organization, Platform } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
-import { getFinancialSupportSettingsOrDefault, GroupType, RecordCategory } from '@stamhoofd/structures';
+import { getFinancialSupportSettingsOrDefault, GroupType, JudicialRecordHelper, RecordCategory } from '@stamhoofd/structures';
 
 export function getSelectableWorkbook(platform: Platform, organization: Organization | null, groups: Group[] = [], auth: ContextPermissions) {
     const groupColumns: SelectableColumn[] = [];
@@ -155,6 +155,13 @@ export function getSelectableWorkbook(platform: Platform, organization: Organiza
             name: $t(`%1Ny`),
             enabled: false,
         }),
+        ...(JudicialRecordHelper.asksForExtract({ platform, organization })
+            ? [new SelectableColumn({
+                    id: 'member.judicialRecordStatus',
+                    name: $t(`Uittreksel uit het strafregister`),
+                    enabled: false,
+                })]
+            : []),
         groups.some(group => group.type === GroupType.EventRegistration && group.settings.allowRegistrationsByOrganization)
             ? new SelectableColumn({
                     id: 'groupRegistration',

@@ -4,7 +4,7 @@ import { SelectableWorkbook } from '@stamhoofd/frontend-excel-export/SelectableW
 import type { ContextPermissions } from '@stamhoofd/frontend-session/ContextPermissions';
 import type { Group, Organization, Platform } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
-import { getFinancialSupportSettingsOrDefault, RecordCategory } from '@stamhoofd/structures';
+import { getFinancialSupportSettingsOrDefault, JudicialRecordHelper, RecordCategory } from '@stamhoofd/structures';
 
 export function getSelectableColumns({ platform, organization, auth, groupColumns }: { platform: Platform; organization: Organization | null; auth: ContextPermissions; groupColumns?: SelectableColumn[] }) {
     const recordCategories = [
@@ -103,6 +103,13 @@ export function getSelectableColumns({ platform, organization, auth, groupColumn
             id: 'nationalRegisterNumber',
             name: $t(`%wK`),
         }), [AccessRight.MemberManageNRN]),
+        ...(JudicialRecordHelper.asksForExtract({ platform, organization })
+            ? [new SelectableColumn({
+                    id: 'judicialRecordStatus',
+                    name: $t(`Uittreksel uit het strafregister`),
+                    enabled: false,
+                })]
+            : []),
 
         // group
         ...(groupColumns ?? []),
