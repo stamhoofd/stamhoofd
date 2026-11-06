@@ -151,7 +151,7 @@ describe('checkJudicialRecord', () => {
         });
 
         expect(report.isPassed).toBe(false);
-        expect(report.getChecks(true).map(result => result.check)).toEqual([...judicialRecordChecksInOrder]);
+        expect(report.getChecks().map(result => result.check)).toEqual([...judicialRecordChecksInOrder]);
 
         // Nothing was established about a chain, so there is none to look certificates up in
         expect(certificatePath).toBeNull();

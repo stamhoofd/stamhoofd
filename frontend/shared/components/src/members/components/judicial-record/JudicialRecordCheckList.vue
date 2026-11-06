@@ -51,7 +51,7 @@ const props = withDefaults(
 
 const { getTitle } = useJudicialRecordCheckTranslations();
 
-/** Whether the record is blank is between the member and a reviewer, so only one of them sees it. */
+/** Only the message under the list differs; the rows are the same ones for everybody. */
 const isReviewer = computed(() => props.audience === 'reviewer');
 
 /**
@@ -60,10 +60,10 @@ const isReviewer = computed(() => props.audience === 'reviewer');
  */
 const checks = computed((): JudicialRecordCheckResult[] => {
     if (props.report === null) {
-        return visibleChecks.value.map(check => JudicialRecordCheckResult.create({ check, status: JudicialRecordCheckStatus.Pending }));
+        return judicialRecordChecksInOrder.map(check => JudicialRecordCheckResult.create({ check, status: JudicialRecordCheckStatus.Pending }));
     }
 
-    return props.report.getChecks(isReviewer.value);
+    return props.report.getChecks();
 });
 
 /**
@@ -81,12 +81,6 @@ const rows = computed((): { result: JudicialRecordCheckResult; reason: string | 
 
         return { result, reason };
     });
-});
-
-const visibleChecks = computed((): JudicialRecordCheck[] => {
-    return isReviewer.value
-        ? [...judicialRecordChecksInOrder]
-        : judicialRecordChecksInOrder.filter(check => check !== JudicialRecordCheck.Blank);
 });
 
 const outcome = computed(() => props.report === null ? null : getJudicialRecordCheckOutcome(props.report));
@@ -149,7 +143,7 @@ const outcomeDescription = computed(() => {
         case JudicialRecordCheckOutcome.NotBlank:
             return isReviewer.value
                 ? $t('Alle andere automatische checks slaagden. Bekijk het document en ken een status toe.')
-                : $t('Een controleur van de koepel bekijkt het en neemt indien nodig contact met je op. Je document wordt verwijderd zodra het beoordeeld is.');
+                : $t('Je strafregister is niet blanco. Een controleur van de koepel bekijkt het en neemt indien nodig contact met je op. Je document wordt verwijderd zodra het beoordeeld is.');
 
         case JudicialRecordCheckOutcome.Failed:
             return isReviewer.value
