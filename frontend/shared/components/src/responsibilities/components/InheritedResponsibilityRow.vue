@@ -26,6 +26,7 @@
         </p>
 
         <template #right>
+            <JudicialRecordIcon :minimum-age="responsibility.judicialRecordMinimumAge" />
             <span class="icon arrow-right-small gray" />
         </template>
     </STListItem>
@@ -37,6 +38,7 @@ import type { Group, MemberResponsibility, PermissionRoleForResponsibility } fro
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { LoadedPermissions } from '@stamhoofd/structures';
 import { computed } from 'vue';
+import JudicialRecordIcon from './JudicialRecordIcon.vue';
 
 const props = defineProps<{
     responsibility: MemberResponsibility;
