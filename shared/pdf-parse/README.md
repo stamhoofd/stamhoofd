@@ -78,27 +78,29 @@ only, and the app ships into whatever WebView the device happens to have; `legac
 transpiled down, with the core-js polyfills that go with it, and it is also the build pdf.js
 documents for Node. That makes one build for all three environments rather than one per environment.
 
-The worker runs on the calling thread. `src/pdfjs.ts` imports `pdf.worker.mjs` and hands pdf.js the
-handler it exports, which is what lets a consumer import this package and be done. Left to itself
-pdf.js reaches for `GlobalWorkerOptions.workerSrc` - a url it either spawns a `Worker` from or
-imports dynamically - and that url is something every consumer would have to produce for its own
-bundler, with no good answer at all inside a Capacitor WebView. With the handler already in place
-pdf.js never looks for it, so nothing in the setup depends on an origin, a public path or a bundler
-plugin. The cost is that a parse holds the thread it was called on. In Node that is what pdf.js does
-regardless, and reading a one-page extract takes about 20 ms, which is not work worth a thread. A
-caller that *renders* pdfs weighs that differently and should set up a real worker of its own.
+The parse runs on the calling thread. Left to itself pdf.js reaches for
+`GlobalWorkerOptions.workerSrc` - a url it either spawns a `Worker` from or imports dynamically -
+and that url is something every consumer would have to produce for its own bundler, with no good
+answer at all inside a Capacitor WebView. `createMainThreadWorker` sidesteps it by building both
+ends of a `MessageChannel` here and setting pdf.js's own `WorkerMessageHandler` up on one of them,
+so pdf.js drives a worker that happens to live on this thread and nothing in the setup depends on
+an origin, a public path or a bundler plugin. Reading a one-page extract takes about 25 ms, which is
+not work worth a thread, and in Node pdf.js stays on the calling thread regardless.
 
-Two things a consumer should know:
+The important part is that it is a worker **per document**. Loading `pdf.worker.mjs` announces its
+handler on `globalThis`, and pdf.js consults that global for every document *anyone* opens - so
+simply importing this package would have taken a pdf viewer in the same bundle off its worker and
+put its rendering on the main thread, silently. `src/pdfjs.ts` therefore puts the global back down
+after the import and passes a worker to `getDocument` instead. A consumer that renders pdfs keeps
+its own real worker, and `tests/pdfjs.test.ts` holds that line.
+
+One more thing a consumer should know:
 
 - It is large. In a production Vite build, pdf.js and its worker together are about 1.8 MB
   minified, 550 kB gzipped, and tree shaking does not help: the worker is one bundle by
   construction. Import this package from a route or a view that is already code split, and if a
   second package in the app also needs pdf.js, the two should share one copy rather than each
   depend on `pdfjs-dist` on its own.
-- pdf.js 6 calls `Promise.withResolvers`, which arrived in Safari 17.4, and the legacy build does
-  not polyfill it. That sits above the browsers a default Vite build targets, so on an iOS WebView
-  older than 17.4 a parse throws a `TypeError` rather than one of the errors below. It is contained
-  to the parse, not to loading the app.
 
 ## Tests
 

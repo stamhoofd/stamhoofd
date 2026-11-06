@@ -1,12 +1,18 @@
 import { SimpleError } from '@common/errors';
 
-import { getDocument, VerbosityLevel } from './pdfjs.js';
+import { createMainThreadWorker, getDocument, VerbosityLevel } from './pdfjs.js';
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const MAX_PAGES = 10;
 
 /** Items closer together than this on the y axis belong to the same line. */
 const LINE_TOLERANCE = 2;
+
+/**
+ * A malformed upload is answered with a SimpleError the member reads, so pdf.js writing its own
+ * account of the same file to the console adds noise and no reader.
+ */
+const VERBOSITY = VerbosityLevel.ERRORS;
 
 /** A text item of a page, reduced to what placing it on a line needs. */
 interface TextItem {
@@ -68,33 +74,40 @@ export async function extractPdfLines(data: Uint8Array): Promise<string[]> {
 }
 
 async function readPages(data: Uint8Array): Promise<TextItem[][]> {
-    // pdf.js takes ownership of the buffer it is given, so it gets a copy of its own
-    const pdf = await loadDocument(new Uint8Array(data));
+    const { worker, close } = createMainThreadWorker(VERBOSITY);
 
     try {
-        if (pdf.numPages > MAX_PAGES) {
-            throw new SimpleError({
-                code: 'pdf_too_many_pages',
-                message: `More than ${MAX_PAGES} pages.`,
-                human: $t('Dit document bevat te veel pagina\'s. Laad een document van maximaal {pages} pagina\'s op.', { pages: MAX_PAGES.toString() }),
-                statusCode: 400,
-            });
-        }
+        // pdf.js takes ownership of the buffer it is given, so it gets a copy of its own
+        const pdf = await loadDocument(new Uint8Array(data), worker);
 
-        return await extractItems(pdf);
+        try {
+            if (pdf.numPages > MAX_PAGES) {
+                throw new SimpleError({
+                    code: 'pdf_too_many_pages',
+                    message: `More than ${MAX_PAGES} pages.`,
+                    human: $t('Dit document bevat te veel pagina\'s. Laad een document van maximaal {pages} pagina\'s op.', { pages: MAX_PAGES.toString() }),
+                    statusCode: 400,
+                });
+            }
+
+            return await extractItems(pdf);
+        } finally {
+            await pdf.loadingTask.destroy();
+        }
     } finally {
-        // Destroying the loading task is what releases the worker as well as the document
-        await pdf.loadingTask.destroy();
+        // pdf.js only tears down a worker it created itself, and this one was created here. The
+        // channel has to be closed as well, or Node keeps the event loop alive on the open port
+        worker.destroy();
+        close();
     }
 }
 
-async function loadDocument(data: Uint8Array) {
+async function loadDocument(data: Uint8Array, worker: ReturnType<typeof createMainThreadWorker>['worker']) {
     try {
         return await getDocument({
             data,
-            // A malformed upload is answered with a SimpleError the member reads, so pdf.js writing
-            // its own account of the same file to the console adds noise and no reader
-            verbosity: VerbosityLevel.ERRORS,
+            worker,
+            verbosity: VERBOSITY,
             // This package reads text and never renders, so an untrusted document has no business
             // installing font faces into the page it is read on
             disableFontFace: true,
