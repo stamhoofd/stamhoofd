@@ -1,0 +1,26 @@
+{
+    "name": "@node/nuxt-observability",
+    "version": "2.158.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": {
+            "types": "./dist-types/module.d.ts",
+            "import": "./dist/module.js"
+        }
+    },
+    "scripts": {
+        "build": "tsc --build tsconfig.build.json",
+        "build:types": "tsc --project tsconfig.types.json",
+        "lint": "eslint . --quiet"
+    },
+    "dependencies": {
+        "@node/observability": "workspace:*",
+        "@node/dev-tools": "workspace:*"
+    },
+    "devDependencies": {
+        "@nuxt/schema": "4.6.3",
+        "nitropack": "2.13.5",
+        "h3": "1.15.11"
+    }
+}

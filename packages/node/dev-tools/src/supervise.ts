@@ -16,7 +16,7 @@ if (process.env.STAM_DEV_SOCKET) {
     });
 }
 const emitter = createDevEmitter(app as DevApp, env);
-emitter.emit('starting', ['api', 'renderer', 'stats'].includes(app) ? { startupOwner: 'application' } : {});
+emitter.emit('starting', ['api', 'renderer', 'stats', 'docs'].includes(app) ? { startupOwner: 'application' } : {});
 const child = spawn(command, args, { env, stdio: 'inherit' });
 let cancelled = false;
 let deadline: NodeJS.Timeout | undefined;

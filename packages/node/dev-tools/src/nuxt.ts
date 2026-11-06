@@ -8,30 +8,35 @@ import { createDevEmitter } from './events.js';
  * @remarks Ready requires build:done, Nitro compilation and listen. This describes server
  * startup, not completion of every on-demand browser transform. No production events.
  */
-export const devLifecycleModule: NuxtModule = (_options, nuxt) => {
-    if (!nuxt.options.dev || !process.env.STAM_DEV_SOCKET) return;
+export const devLifecycleModule: NuxtModule<{ lifecycle?: { ready(): Promise<void>; failed(): void; close(): Promise<void> } }> = (options, nuxt) => {
+    if (!nuxt.options.dev) return;
     const emitter = createDevEmitter('docs');
     let listening = false;
     let built = false;
     let serverBuilt = false;
     let cycleId: string | undefined;
-    const ready = () => { if (listening && built && serverBuilt) emitter.emit('ready'); };
+    const ready = async () => {
+        if (listening && built && serverBuilt) {
+            if (options.lifecycle) await options.lifecycle.ready();
+            else emitter.emit('ready');
+        }
+    };
     emitter.emit('starting');
     nuxt.hook('build:before', () => {
         built = false;
         cycleId = process.hrtime.bigint().toString();
         emitter.emit('build.started', { cycleId });
     });
-    nuxt.hook('build:done', () => {
+    nuxt.hook('build:done', async () => {
         built = true;
         if (cycleId) emitter.emit('build.succeeded', { cycleId });
-        ready();
+        await ready();
     });
     nuxt.hook('build:error', () => {
         built = false;
         if (cycleId) emitter.emit('build.failed', { cycleId });
     });
-    nuxt.hook('listen', () => { listening = true; ready(); });
+    nuxt.hook('listen', async () => { listening = true; await ready(); });
     nuxt.hook('nitro:init', (nitro) => {
         let serverCycle: string | undefined;
         nitro.hooks.hook('dev:start', () => {
@@ -39,15 +44,18 @@ export const devLifecycleModule: NuxtModule = (_options, nuxt) => {
             serverCycle = process.hrtime.bigint().toString();
             emitter.emit('build.started', { cycleId: serverCycle });
         });
-        nitro.hooks.hook('dev:reload', () => {
+        nitro.hooks.hook('dev:reload', async () => {
             serverBuilt = true;
             if (serverCycle) emitter.emit('build.succeeded', { cycleId: serverCycle });
-            ready();
+            await ready();
         });
         nitro.hooks.hook('dev:error', () => {
             serverBuilt = false;
             if (serverCycle) emitter.emit('build.failed', { cycleId: serverCycle });
         });
     });
-    nuxt.hook('close', () => emitter.close());
+    nuxt.hook('close', async () => {
+        await options.lifecycle?.close();
+        await emitter.close();
+    });
 };

@@ -15,6 +15,7 @@ packages:
   - 'packages/node/logging'
   - 'packages/node/dev-tools'
   - 'packages/node/observability'
+  - 'packages/node/nuxt-observability'
   - 'packages/node/opentelemetry-terminal'
   - 'packages/node/terminal'
   - 'packages/node/opentelemetry-process'

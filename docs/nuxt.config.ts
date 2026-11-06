@@ -8,7 +8,7 @@ const iconsDir = resolve(dirname(fileURLToPath(import.meta.url)), '../frontend/s
 export default defineNuxtConfig({
     extends: ['docus'],
     modules: [
-        ...(process.env.STAM_DEV_SOCKET ? [(await import('@node/dev-tools/nuxt')).devLifecycleModule] : []),
+        '@node/nuxt-observability',
         (_, nuxt) => {
             nuxt.hook('vite:extendConfig', (config) => {
                 if (config.optimizeDeps?.include) {

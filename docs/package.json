@@ -4,12 +4,15 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "nuxt build",
-        "dev": "pnpm --filter @node/dev-tools run build && node ../packages/node/dev-tools/dist/supervise.js docs nuxt dev",
-        "generate": "nuxt generate",
+        "prepare:observability": "pnpm --filter @node/nuxt-observability... run build:types && pnpm --filter @node/nuxt-observability... run build",
+        "build": "pnpm run prepare:observability && nuxt build",
+        "dev": "pnpm run prepare:observability && node ../packages/node/dev-tools/dist/supervise.js docs nuxt dev",
+        "generate": "pnpm run prepare:observability && nuxt generate",
         "preview": "nuxt preview"
     },
     "dependencies": {
+        "@node/nuxt-observability": "workspace:*",
+        "@node/observability": "workspace:*",
         "@nuxt/content": "3.16.2",
         "@stamhoofd/assets": "workspace:*",
         "@stamhoofd/scss": "workspace:*",

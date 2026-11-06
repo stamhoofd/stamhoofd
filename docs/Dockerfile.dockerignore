@@ -1,8 +1,14 @@
-# Keep workspace manifests for the frozen install, but only copy docs sources.
+# Keep workspace manifests for the frozen install and the docs runtime's shared sources.
 **
 !**/package.json
 !pnpm-lock.yaml
 !pnpm-workspace.yaml
+!tsconfig.base.json
+!tsconfig.runtime.json
+!tsconfig.types.json
+!packages/node/dev-tools/**
+!packages/node/observability/**
+!packages/node/nuxt-observability/**
 !docs/**
 !frontend/shared/assets/**
 !frontend/shared/scss/**
