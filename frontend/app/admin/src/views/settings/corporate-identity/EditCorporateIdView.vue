@@ -88,17 +88,13 @@
 
         <ImageComponent v-if="coverBottomLeftOverlayImage" :image="coverBottomLeftOverlayImage" :auto-height="true" :style="'width: ' + coverBottomLeftOverlayWidth + 'px'" />
 
-        <hr><h2>{{ $t('%M') }}</h2>
+        <hr>
 
-        <STInputBox error-fields="footerText" :error-box="errors.errorBox" class="max">
-            <WYSIWYGTextInput v-model="footerText" editor-class="gray subtle-links" :placeholder="$t(`%Hi`)" />
-        </STInputBox>
+        <TWYSIWYGTextInput v-model="footerText" :title="$t(`%M`)" editor-class="gray subtle-links" :placeholder="$t(`%Hi`)" error-fields="footerText" :error-box="errors.errorBox" class="max" />
 
-        <hr><h2>{{ $t('%1Z') }}</h2>
+        <hr>
 
-        <STInputBox error-fields="shopFooterText" :error-box="errors.errorBox" class="max">
-            <WYSIWYGTextInput v-model="shopFooterText" editor-class="gray subtle-links" :placeholder="$t(`%Hi`)" />
-        </STInputBox>
+        <TWYSIWYGTextInput v-model="shopFooterText" :title="$t(`%1Z`)" editor-class="gray subtle-links" :placeholder="$t(`%Hi`)" error-fields="shopFooterText" :error-box="errors.errorBox" class="max" />
     </SaveView>
 </template>
 
@@ -115,14 +111,14 @@ import ImageInput from '@stamhoofd/components/inputs/ImageInput.vue';
 import NumberInputBox from '@stamhoofd/components/inputs/NumberInputBox.vue';
 import STInputBox from '@stamhoofd/components/inputs/STInputBox.vue';
 import UploadButton from '@stamhoofd/components/inputs/UploadButton.vue';
-import WYSIWYGTextInput from '@stamhoofd/components/inputs/WYSIWYGTextInput.vue';
+import TWYSIWYGTextInput from '@stamhoofd/components/inputs/TWYSIWYGTextInput.vue';
 import { CenteredMessage } from '@stamhoofd/components/overlays/CenteredMessage.ts';
 import { Toast } from '@stamhoofd/components/overlays/Toast.ts';
 import ImageComponent from '@stamhoofd/components/views/ImageComponent.vue';
 import LogoEditor from '@stamhoofd/components/views/LogoEditor.vue';
 import { I18nController } from '@stamhoofd/frontend-i18n/I18nController';
 import type { Image } from '@stamhoofd/structures';
-import { DarkMode, LanguageHelper, Platform, PlatformConfig, ResolutionFit, ResolutionRequest } from '@stamhoofd/structures';
+import { DarkMode, LanguageHelper, Platform, PlatformConfig, ResolutionFit, ResolutionRequest, TranslatedRichText } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import { computed, ref } from 'vue';
 
@@ -165,12 +161,12 @@ const coverBottomLeftOverlayImage = computed({
 
 const footerText = computed({
     get: () => patched.value.config.footerText,
-    set: value => addPatch(Platform.patch({ config: PlatformConfig.patch({ footerText: value }) })),
+    set: value => addPatch(Platform.patch({ config: PlatformConfig.patch({ footerText: TranslatedRichText.createPatch(patched.value.config.footerText, value) }) })),
 });
 
 const shopFooterText = computed({
     get: () => patched.value.config.shopFooterText,
-    set: value => addPatch(Platform.patch({ config: PlatformConfig.patch({ shopFooterText: value }) })),
+    set: value => addPatch(Platform.patch({ config: PlatformConfig.patch({ shopFooterText: TranslatedRichText.createPatch(patched.value.config.shopFooterText, value) }) })),
 });
 
 const logoDocuments = computed({

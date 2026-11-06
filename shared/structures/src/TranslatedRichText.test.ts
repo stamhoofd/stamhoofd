@@ -3,6 +3,7 @@ import { Language } from '@stamhoofd/types/Language';
 
 import { RichText } from './RichText.js';
 import { TranslatedRichText, TranslatedRichTextDecoder, TranslatedRichTextPatch } from './TranslatedRichText.js';
+import { TranslatedString } from './TranslatedString.js';
 
 const dutch = RichText.create({ html: '<p>Hallo</p>', text: 'Hallo' });
 const french = RichText.create({ html: '<p>Bonjour</p>', text: 'Bonjour' });
@@ -213,5 +214,20 @@ describe('TranslatedRichText.field', () => {
         });
         const encoded = patch.encode({ version: 425 }) as Record<string, unknown>;
         expect(encoded.description).toBeUndefined();
+    });
+});
+
+describe('TranslatedRichText.fromTranslatedString', () => {
+    it('keeps an untranslated string untranslated', () => {
+        const converted = TranslatedRichText.fromTranslatedString(new TranslatedString('Hallo\nWereld'));
+        expect(converted.isDefault).toBe(true);
+        expect(converted.html).toBe('<p>Hallo</p><p>Wereld</p>');
+    });
+
+    it('converts every language', () => {
+        const converted = TranslatedRichText.fromTranslatedString(new TranslatedString({ [Language.Dutch]: 'Hallo', [Language.French]: 'Bonjour' }));
+        expect(converted.languages.sort()).toEqual([Language.Dutch, Language.French].sort());
+        expect(converted.get(Language.Dutch).html).toBe('<p>Hallo</p>');
+        expect(converted.get(Language.French).text).toBe('Bonjour');
     });
 });

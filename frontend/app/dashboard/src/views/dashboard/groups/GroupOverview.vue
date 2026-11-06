@@ -212,10 +212,10 @@ import { useGetGroupsById } from '@stamhoofd/components/hooks/networking/useGetG
 import { useGetPeriods } from '@stamhoofd/components/hooks/networking/useGetPeriods';
 import { usePatchOrganizationPeriod } from '@stamhoofd/components/hooks/networking/usePatchOrganizationPeriod';
 import { useOrganizationManager } from '@stamhoofd/frontend-application/OrganizationManager';
-import type { Group, MemberResponsibility, Organization, OrganizationRegistrationPeriod, RegistrationPeriod, TranslatedString } from '@stamhoofd/structures';
+import type { Group, MemberResponsibility, Organization, OrganizationRegistrationPeriod, RegistrationPeriod } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, GroupType, NamedObject, RichText } from '@stamhoofd/structures';
+import { EmailTemplateType, Event, EventLocation, EventMeta, GroupStatus, GroupType, NamedObject, TranslatedRichText } from '@stamhoofd/structures';
 
 import { SimpleError } from '@common/errors';
 
@@ -663,16 +663,6 @@ async function createEventFromGroup(group: Group, organization: Organization) {
         });
     }
 
-    function descriptionToRichtText(description: TranslatedString) {
-        const text = description.toString();
-        const html = text.split('\n').map(split => `<p>${Formatter.escapeHtml(split)}</p>`).join('');
-
-        return RichText.create({
-            text,
-            html,
-        });
-    }
-
     async function requireGroupIdsToNamedObjects(requireGroupIds: string[]): Promise<NamedObject[]> {
         // first try to find the group in the current period
         const groupsInPeriod = organization.period.groups;
@@ -766,7 +756,7 @@ async function createEventFromGroup(group: Group, organization: Organization) {
         endDate: group.settings.endDate,
         meta: EventMeta.create({
             visible: true,
-            description: descriptionToRichtText(group.settings.description),
+            description: TranslatedRichText.fromTranslatedString(group.settings.description),
             location: group.settings.location ? EventLocation.create({ name: group.settings.location }) : null,
             groups: groupNamedObjects.length === 0 ? undefined : groupNamedObjects,
             coverPhoto: group.settings.coverPhoto,
