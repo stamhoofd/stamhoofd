@@ -81,6 +81,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'queues', path: 'backend/shared/queues', needsDatabase: false },
     { name: 'logging', path: 'backend/shared/logging', needsDatabase: false },
     { name: 'models', path: 'backend/shared/models', needsDatabase: true },
+    { name: 'certificate-revocation', path: 'backend/shared/certificate-revocation', needsDatabase: false },
     { name: 'vies', path: 'backend/shared/vies', needsDatabase: true },
     { name: 'sql', path: 'backend/shared/sql', needsDatabase: true },
     { name: 'renderer', path: 'backend/app/renderer', needsDatabase: false },
