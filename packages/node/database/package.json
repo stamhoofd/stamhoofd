@@ -41,7 +41,7 @@
         "@common/errors": "workspace:*",
         "@stamhoofd/test-utils": "workspace:*",
         "@stamhoofd/types": "workspace:*",
-        "tsdown": "0.23.3",
+        "tsdown": "0.23.4",
         "eslint-plugin-stamhoofd": "workspace:*",
         "vitest": "4.1.12"
     }
