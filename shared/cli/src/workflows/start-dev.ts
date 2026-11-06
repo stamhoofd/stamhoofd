@@ -187,7 +187,7 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
         channel = await openDevEventChannel(event => lifecycle.receive(event), carrier.traceparent);
         status.start();
         const names = target === DevTarget.Docs ? 'docs' : target === DevTarget.All ? 'shared,apps,docs' : 'shared,apps';
-        const result = await execResult('pnpm', ['exec', 'concurrently', '--names', names, '--prefix', '[{name}]', '--kill-others-on-fail', ...concurrentlyTargets(context.rootDir, target, ports, context.verbose)], {
+        const result = await execResult('pnpm', ['exec', 'node', devToolPath(context.rootDir, 'concurrently'), names, ...concurrentlyTargets(context.rootDir, target, ports, context.verbose)], {
             cwd: context.rootDir,
             env: {
                 ...process.env,
@@ -275,7 +275,7 @@ function appCommand(rootDir: string, target: DevTarget): string {
         }
     }
     const commands = apps.map(app => `pnpm --dir ${shellQuote(join(rootDir, app.path))} exec sh -c ${shellQuote(app.command)}`);
-    return `pnpm exec concurrently --names ${apps.map(app => app.name).join(',')} --prefix '[{name}]' --kill-others-on-fail ${commands.map(shellQuote).join(' ')}`;
+    return `pnpm exec node ${shellQuote(devToolPath(rootDir, 'concurrently'))} ${apps.map(app => app.name).join(',')} ${commands.map(shellQuote).join(' ')}`;
 }
 
 // `--host 0.0.0.0` is required: Caddy runs in Docker and reaches the dev servers

@@ -8,7 +8,7 @@ export function shellQuote(value: string): string {
 export type BackendDevApp = 'api' | 'renderer' | 'stats';
 
 /** Resolves a development executable independently of the application's working directory. */
-export function devToolPath(rootDir: string, tool: 'supervise' | 'watch-typescript'): string {
+export function devToolPath(rootDir: string, tool: 'supervise' | 'watch-typescript' | 'concurrently'): string {
     return join(rootDir, 'packages/node/dev-tools/dist', `${tool}.js`);
 }
 

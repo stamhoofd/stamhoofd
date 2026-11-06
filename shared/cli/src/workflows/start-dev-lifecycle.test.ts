@@ -53,7 +53,7 @@ it('reports unexpected process failure after cleanup', async () => {
 
 it('attributes process logs without swallowing their contents', async () => {
     vi.mocked(execResult).mockImplementationOnce(async (_command, args, options) => {
-        expect(args).toEqual(expect.arrayContaining(['--names', 'docs', '--prefix', '[{name}]', '--kill-others-on-fail']));
+        expect(args).toEqual(expect.arrayContaining(['/repo/packages/node/dev-tools/dist/concurrently.js', 'docs']));
         expect(options?.env).toMatchObject({ STAM_DEV_VERBOSE: '0', PNPM_CONFIG_LOGLEVEL: 'warn', CONSOLA_LEVEL: '1' });
         expect(options?.env).toMatchObject({ STAM_DEV_API_INSPECT_PORT: '7058', STAM_DEV_STATS_INSPECT_PORT: '7059', STAM_DEV_RENDERER_INSPECT_PORT: '7060' });
         expect(options?.log?.('info', '[docs] WARN example\n', { 'diagnostic.kind': 'stderr' })).toBe(true);

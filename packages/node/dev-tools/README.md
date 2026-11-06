@@ -1,7 +1,7 @@
 # Development integration
 
 `@node/dev-tools` owns the typed Stam development protocol and producer adapters.
-It depends on Node built-ins and TypeScript; importing an emitter does not load the
+It uses Node built-ins, TypeScript and concurrently; importing an emitter does not load the
 CLI, a telemetry SDK, Vite, or Nuxt. Framework dependencies provide adapter types.
 
 The CLI's dependency graph builds this package before starting development
@@ -21,6 +21,7 @@ environment requirements, working directories, and lifecycle cleanup.
 - `application`: supervisor-injected bridge from application diagnostics to development events.
 - `vite` and `nuxt`: framework hooks translated into build/readiness transitions.
 - `supervise`: executable wrapper reporting process incarnation and exit.
+- `concurrently`: named process runner preserving application output and errors while shortening exit notices and suppressing expected shutdown notices. Application selection and command construction remain in the CLI.
 - `watch-typescript`: compiler watch callbacks translated into build cycles.
 - `shared-build`: one shared build and its session-ready marker.
 - `turbo`: structured Turbo log forwarding and failed shared-build log replay.

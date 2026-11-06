@@ -114,6 +114,13 @@ container cleanup use `withCliCleanup`, so an already-cancelled operation does n
 skip cleanup subprocesses; another interrupt can cancel cleanup. Detached browser
 launchers remain best-effort and are deliberately not tied to the command lifetime.
 
+The development orchestrator in `packages/node/dev-tools/src/concurrently.ts` keeps application prefixes
+and all stdout/stderr, including shutdown errors. During cancellation it suppresses
+expected signal/success exit notices and repeated SIGTERM announcements. Nonzero
+exit codes and unexpected signals remain visible with short process names;
+`--verbose` retains full orchestration diagnostics. The wrapper lives outside
+the CLI's `dist` so shared CLI rebuilds cannot remove it before the apps start.
+
 #### Development logs and status
 
 Development lifecycle transport and typed producer adapters live in

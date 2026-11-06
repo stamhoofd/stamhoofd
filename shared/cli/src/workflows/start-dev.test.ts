@@ -432,7 +432,7 @@ describe('commandsForTarget', () => {
         const commands = commandsForTarget(context.rootDir, DevTarget.All, ports);
 
         expect(commands).toHaveLength(2);
-        expect(commands[0]).toContain('--names api,renderer,stats,dashboard,webshop');
+        expect(commands[0]).toContain("packages/node/dev-tools/dist/concurrently.js' api,renderer,stats,dashboard,webshop");
         expect(commands[0]).toContain('--kill-others-on-fail');
         expect(commands[0]).not.toContain('run dev');
         expect(commands.some(command => command.includes(`supervise.js' docs nuxt dev --port ${ports.docs}`))).toBe(true);
@@ -457,7 +457,7 @@ describe('concurrentlyTargets', () => {
     it('starts docs immediately in all while gating the app processes on the shared build', () => {
         const targets = concurrentlyTargets(context.rootDir, DevTarget.All, ports);
         const docsTarget = targets.find(target => target.includes('run prepare:observability'));
-        const appTarget = targets.find(target => target.includes('--names api,renderer,stats,dashboard,webshop'));
+        const appTarget = targets.find(target => target.includes("concurrently.js' api,renderer,stats,dashboard,webshop"));
 
         // Docs consumes no shared build output, so it must not wait on it...
         expect(docsTarget).toBeDefined();
