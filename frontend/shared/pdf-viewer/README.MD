@@ -37,6 +37,18 @@ Most documents we show are a single page, but nothing may assume that.
 - A page is rendered to fit the width of the viewer at the pixel density of the screen, capped at
   the largest canvas browsers reliably allocate. See `getRenderScale.ts`.
 
+## Two things pdf.js makes easy to get wrong
+
+- **The worker is bundled, not referenced by url.** pdf.js ships it as `pdf.worker.min.mjs`, and a
+  static host that serves `.mjs` as `application/octet-stream` makes the browser refuse the module
+  script; pdf.js then falls back to its fake worker and never opens the document. The viewer also
+  hands pdf.js the port itself rather than going through `GlobalWorkerOptions`, so importing
+  `@stamhoofd/pdf-parse` — whose worker module sets `globalThis.pdfjsWorker` at module scope —
+  cannot drag rendering onto the main thread.
+- **No `AbortSignal.any` polyfill is needed here.** pdf.js 6 calls it, but only from its annotation
+  editor and its touch manager, neither of which the viewer mounts. That matters because the app
+  still supports Safari 15.4 and `AbortSignal.any` arrived in 17.4. A test keeps it true.
+
 ## Tests
 
 `pnpm stam test pdf-viewer`, in vitest browser mode because the whole point is a real canvas. The
