@@ -11,7 +11,7 @@ const output = vi.hoisted(() => ({ setStatus: vi.fn(), stop: vi.fn(), log: vi.fn
 
 vi.mock('../runtime/process.js', () => ({ execResult: vi.fn(async () => ({ code: 0, stdout: '', stderr: '', signal: null })) }));
 vi.mock('../config/build-config.js', () => ({ buildBackendEnv: () => ({}), buildDomains: () => ({ docs: 'docs.stamhoofd', dashboard: 'dashboard.stamhoofd', api: 'api.stamhoofd' }) }));
-vi.mock('../context/ports.js', () => ({ buildPorts: () => ({ docs: 3000 }) }));
+vi.mock('../context/ports.js', () => ({ buildPorts: () => ({ docs: 3000, apiInspector: 7058, statsInspector: 7059, rendererInspector: 7060 }) }));
 vi.mock('../runtime/port-probe.js', () => ({ isPortListening: vi.fn(async () => false) }));
 vi.mock('../runtime/manifest-store.js', () => ({ writeInstanceManifest: vi.fn(), removeInstanceManifest: vi.fn() }));
 vi.mock('../services/definitions/caddy-service.js', () => ({ CaddyService: { buildRouteOptions: () => ({}), reload: vi.fn() } }));
@@ -55,6 +55,7 @@ it('attributes process logs without swallowing their contents', async () => {
     vi.mocked(execResult).mockImplementationOnce(async (_command, args, options) => {
         expect(args).toEqual(expect.arrayContaining(['--names', 'docs', '--prefix', '[{name}]', '--kill-others-on-fail']));
         expect(options?.env).toMatchObject({ STAM_DEV_VERBOSE: '0', PNPM_CONFIG_LOGLEVEL: 'warn', CONSOLA_LEVEL: '1' });
+        expect(options?.env).toMatchObject({ STAM_DEV_API_INSPECT_PORT: '7058', STAM_DEV_STATS_INSPECT_PORT: '7059', STAM_DEV_RENDERER_INSPECT_PORT: '7060' });
         expect(options?.log?.('info', '[docs] WARN example\n', { 'diagnostic.kind': 'stderr' })).toBe(true);
         return { code: 0, stdout: '', stderr: '', signal: null };
     });

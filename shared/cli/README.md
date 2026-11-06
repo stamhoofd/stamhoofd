@@ -120,7 +120,10 @@ parsing and listener availability; listener loss remains a fallback failure chec
 Shutdown ends unfinished spans with `dev.outcome=cancelled` rather than ERROR.
 Span durations use producer monotonic timestamps, so synchronous compilation delaying
 socket delivery cannot collapse a long build to zero seconds. Backend inspector
-ports are 5858 (API), 5859 (stats) and 5860 (renderer).
+ports are allocated by `buildPorts` with the instance offset, starting at 5858
+(API), 5859 (stats) and 5860 (renderer). They participate in availability checks
+and session reservations. The supervisor receives them through `STAM_DEV_*_INSPECT_PORT`.
+VS Code attaches using its Node process picker, so it also works with shifted ports.
 
 The `shared-build` entry point wraps each normal `pnpm run build:shared` invocation and
 reports its result even when every Turbo task is cached. The ready marker is only

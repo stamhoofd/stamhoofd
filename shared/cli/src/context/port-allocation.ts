@@ -12,9 +12,12 @@ enum AppPortName {
     Renderer = 'renderer',
     Sso = 'sso',
     Docs = 'docs',
+    ApiInspector = 'apiInspector',
+    StatsInspector = 'statsInspector',
+    RendererInspector = 'rendererInspector',
 }
 
-const appPortNames: AppPortName[] = [AppPortName.WebApp, AppPortName.Webshop, AppPortName.Api, AppPortName.Renderer, AppPortName.Sso, AppPortName.Docs];
+const appPortNames: AppPortName[] = [AppPortName.WebApp, AppPortName.Webshop, AppPortName.Api, AppPortName.Renderer, AppPortName.Sso, AppPortName.Docs, AppPortName.ApiInspector, AppPortName.StatsInspector, AppPortName.RendererInspector];
 
 export async function resolvePortOffset(context: CliContext): Promise<CliContext> {
     if (process.env.STAMHOOFD_PORT_OFFSET_LOCKED === '1') {

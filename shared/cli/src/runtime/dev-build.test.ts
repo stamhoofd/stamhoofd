@@ -7,12 +7,12 @@ import { fileURLToPath } from 'node:url';
 import { expect, it } from 'vitest';
 import type { DevEvent } from '@node/dev-tools/events';
 import { openDevEventChannel } from './dev-event-channel.js';
+import { buildPorts } from '../context/ports.js';
+import type { CliContext } from '../context/create-context.js';
 
-it('assigns distinct inspector ports to concurrently running backend apps', async () => {
-    const ports = await Promise.all(['api', 'renderer', 'statistics-syncer'].map(async (app) => {
-        const manifest = JSON.parse(await fs.readFile(new URL(`../../../../backend/app/${app}/package.json`, import.meta.url), 'utf8'));
-        return /--inspect=(\d+)/.exec(Object.values(manifest.scripts).join(' '))?.[1];
-    }));
+it('assigns distinct inspector ports to concurrently running backend apps', () => {
+    const allocated = buildPorts({ instance: { portOffset: 1200 } } as CliContext);
+    const ports = [allocated.apiInspector, allocated.rendererInspector, allocated.statsInspector];
     expect(ports.every(Boolean)).toBe(true);
     expect(new Set(ports).size).toBe(3);
 });

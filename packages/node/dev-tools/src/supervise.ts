@@ -5,8 +5,12 @@ import { createDevEmitter } from './events.js';
 
 const [app, command, ...args] = process.argv.slice(2);
 if (!app || !command) throw new Error('Expected app and command to supervise');
-if (command === 'node' && process.env.STAM_DEV_SESSION && process.env.STAM_DEV_VERBOSE !== '1') {
-    args.unshift('--inspect-publish-uid=http');
+if (command === 'node' || command === process.execPath) {
+    const inspectorPort = process.env[`STAM_DEV_${app.toUpperCase()}_INSPECT_PORT`];
+    if (inspectorPort) args.unshift(`--inspect=127.0.0.1:${inspectorPort}`);
+    if (process.env.STAM_DEV_SESSION && process.env.STAM_DEV_VERBOSE !== '1') {
+        args.unshift('--inspect-publish-uid=http');
+    }
 }
 const env = { ...process.env, STAM_DEV_PROCESS_ID: randomUUID(), STAM_DEV_GENERATION: process.hrtime.bigint().toString() };
 if (process.env.STAM_DEV_SOCKET) {

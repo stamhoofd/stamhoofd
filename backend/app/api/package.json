@@ -57,7 +57,7 @@
         "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'pnpm run dev:build' \"pnpm run dev:watch\"",
         "dev:build": "tsc --build tsconfig.build.json --clean && pnpm run copy-assets && node ../../../packages/node/dev-tools/dist/watch-typescript.js api",
         "dev:backend": "pnpm run dev",
-        "dev:watch": "wait-on ./dist/index.js && nodemon --quiet --watch dist --watch '../../../shared/*/dist/' --watch '../../../shared/*/package.json' --watch '../../shared/*/dist/' --watch '../../shared/*/package.json' --ext .ts,.json,.sql,.js,.html --delay 2000ms --exec 'node ../../../packages/node/dev-tools/dist/supervise.js api node --inspect=5858 --enable-source-maps --use-system-ca ./dist/index.js' --signal SIGTERM",
+        "dev:watch": "wait-on ./dist/index.js && nodemon --quiet --watch dist --watch '../../../shared/*/dist/' --watch '../../../shared/*/package.json' --watch '../../shared/*/dist/' --watch '../../shared/*/package.json' --ext .ts,.json,.sql,.js,.html --delay 2000ms --exec 'node ../../../packages/node/dev-tools/dist/supervise.js api node --enable-source-maps --use-system-ca ./dist/index.js' --signal SIGTERM",
         "lint": "eslint --quiet",
         "migrations": "pnpm run build:full && node ./dist/migrations.js",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js",

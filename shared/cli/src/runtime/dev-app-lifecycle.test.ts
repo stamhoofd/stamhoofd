@@ -8,6 +8,21 @@ import { devLifecycleModule } from '@node/dev-tools/nuxt';
 import { devLifecyclePlugin } from '@node/dev-tools/vite';
 import { openDevEventChannel } from './dev-event-channel.js';
 
+it.each(['api', 'stats', 'renderer'])('uses the allocated debugger port for %s', async (app) => {
+    const supervisor = fileURLToPath(import.meta.resolve('@node/dev-tools/supervise'));
+    const child = spawn(process.execPath, [supervisor, app, process.execPath, '-e', 'console.log(JSON.stringify(process.execArgv))'], {
+        env: { ...process.env, [`STAM_DEV_${app.toUpperCase()}_INSPECT_PORT`]: '0', STAM_DEV_SESSION: 'test', STAM_DEV_VERBOSE: '0' },
+        stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    let stdout = '';
+    let stderr = '';
+    child.stdout.on('data', chunk => stdout += chunk);
+    child.stderr.on('data', chunk => stderr += chunk);
+    expect((await once(child, 'close'))[0]).toBe(0);
+    expect(JSON.parse(stdout)).toContain('--inspect=127.0.0.1:0');
+    expect(stderr).not.toContain('Debugger listening');
+});
+
 it('reports readiness and crashes with the same supervised identity, then assigns a new incarnation', async () => {
     const events: DevEvent[] = [];
     const channel = await openDevEventChannel(event => events.push(event));

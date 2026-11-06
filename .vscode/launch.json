@@ -9,7 +9,7 @@
             "type": "node",
             "request": "attach",
             "restart": true,
-            "port": 5858,
+            "processId": "${command:PickProcess}",
             "outFiles": [],
             "sourceMaps": true,
             "cwd": "${workspaceFolder}/backend/app/api",

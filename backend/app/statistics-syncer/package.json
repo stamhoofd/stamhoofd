@@ -23,7 +23,7 @@
         "build:watch": "mkdir -p ./dist/src/migrations && rsync --delete --exclude='*.ts' --exclude='*.js' --exclude='*.map' -r --checksum ./src/migrations/ ./dist/src/migrations/ && node ../../../packages/node/dev-tools/dist/watch-typescript.js stats",
         "build:full": "pnpm run clear && pnpm run build",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo .cache/*.tsbuildinfo",
-        "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'pnpm run build:watch' \"wait-on ./dist/index.js && nodemon --quiet --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node ../../../packages/node/dev-tools/dist/supervise.js stats node --inspect=5859 --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
+        "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'pnpm run build:watch' \"wait-on ./dist/index.js && nodemon --quiet --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node ../../../packages/node/dev-tools/dist/supervise.js stats node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
         "lint": "eslint --quiet",
         "migrations": "pnpm run build:full && node ./dist/migrations.js",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js",

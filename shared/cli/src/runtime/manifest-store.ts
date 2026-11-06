@@ -76,7 +76,7 @@ export async function writeInstanceManifest(context: CliContext, options: { doma
         ports,
         // Only the ports this instance owns: the shared services (MySQL, MailDev, ...) are used by
         // every instance at once, so claiming them would block anyone else from starting.
-        reservedPorts: [ports.webApp, ports.webshop, ports.api, ports.renderer, ports.sso],
+        reservedPorts: [ports.webApp, ports.webshop, ports.api, ports.renderer, ports.sso, ports.apiInspector, ports.statsInspector, ports.rendererInspector],
         caddy: options?.caddy,
     };
     await fs.mkdir(instanceDir(context), { recursive: true });
