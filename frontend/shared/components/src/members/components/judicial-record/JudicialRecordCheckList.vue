@@ -15,7 +15,7 @@
         </p>
 
         <template v-else>
-            <p class="icon" :class="[boxClass, boxIcon]">
+            <p v-if="showOutcome" class="icon" :class="[boxClass, boxIcon]" data-testid="judicial-record-outcome">
                 <span>
                     <strong>{{ outcomeTitle }}</strong>
                     <span>{{ outcomeDescription }}</span>
@@ -43,9 +43,18 @@ const props = withDefaults(
         /** The automatic control, or null while the request that produces it is still running. */
         report: JudicialRecordCheckReport | null;
         audience?: JudicialRecordCheckAudience;
+
+        /**
+         * Whether to draw the message under the rows. Off for a caller that already says what the
+         * report adds up to - the delivery flow puts its own summary above the list, and two
+         * conclusions about one report on one screen is one too many. The rows, the loading state
+         * and the actions slot are unaffected.
+         */
+        showOutcome?: boolean;
     }>(),
     {
         audience: 'member',
+        showOutcome: true,
     },
 );
 
