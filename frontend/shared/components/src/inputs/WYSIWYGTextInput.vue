@@ -40,6 +40,7 @@ import { DataValidator } from '@stamhoofd/utility';
 import Placeholder from '@tiptap/extension-placeholder';
 import Typography from '@tiptap/extension-typography';
 import StarterKit from '@tiptap/starter-kit';
+import type { JSONContent } from '@tiptap/vue-3';
 import { Editor, EditorContent } from '@tiptap/vue-3';
 import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
 import type { Ref } from 'vue';
@@ -109,11 +110,20 @@ onBeforeUnmount(() => {
     editor.value?.destroy();
 });
 
-function buildEditor() {
-    let content = model.value.html;
+function hasJSON(json: unknown): json is JSONContent {
+    return !!json && typeof json === 'object' && Object.keys(json).length > 0;
+}
 
-    if (!content && model.value.text) {
+function buildEditor() {
+    // Content stored before json existed only has html
+    let content: JSONContent | string = model.value.html;
+
+    if (hasJSON(model.value.json)) {
+        content = model.value.json;
+    }
+    else if (!content && model.value.text) {
         // Special conversion operation
+        content = '';
         const splitted = model.value.text.split('\n');
         for (const split of splitted) (
             content += `<p>${escapeHtml(split)}</p>`
@@ -149,7 +159,7 @@ function buildEditor() {
             }
         },
         onUpdate: ({ editor: e }) => {
-            model.value = RichText.create({ html: e.getHTML(), text: e.getText() });
+            model.value = RichText.create({ html: e.getHTML(), text: e.getText(), json: e.getJSON() });
         },
         editorProps: {
             attributes: {
