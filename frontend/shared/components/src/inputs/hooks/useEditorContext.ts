@@ -1,11 +1,13 @@
 import { languages } from '@stamhoofd/locales';
-import type { TranslatedString } from '@stamhoofd/structures';
+import type { TranslatedRichText, TranslatedString } from '@stamhoofd/structures';
 import type { Language } from '@stamhoofd/types/Language';
 import type { Raw, Ref} from 'vue';
 import { inject, markRaw, onBeforeUnmount, provide, reactive, ref, watch } from 'vue';
 
+export type TranslateableValue = TranslatedString | TranslatedRichText;
+
 export class TranslateableComponent {
-    latestValue: TranslatedString | null = null;
+    latestValue: TranslateableValue | null = null;
 }
 
 export class EditorContext {
@@ -24,7 +26,7 @@ export class EditorContext {
 
     hasLanguage(language: Language) {
         for (const component of this.translateableComponents) {
-            if (component.latestValue && component.latestValue.getIfExists(language)) {
+            if (component.latestValue?.getIfExists(language)?.toString()) {
                 return true;
             }
         }
@@ -41,7 +43,7 @@ export class EditorContext {
     getLanguageCount(language: Language) {
         let c = 0;
         for (const component of this.translateableComponents) {
-            if (component.latestValue && component.latestValue.getIfExists(language)) {
+            if (component.latestValue?.getIfExists(language)?.toString()) {
                 c += 1;
             }
         }
@@ -72,7 +74,7 @@ export function useEditorContext() {
     return editorContext;
 }
 
-export function registerTranslateableComponent(ref: Readonly<Ref<TranslatedString>>) {
+export function registerTranslateableComponent(ref: Readonly<Ref<TranslateableValue>>) {
     const editorContext = useEditorContext();
     const instance = reactive(new TranslateableComponent());
 
