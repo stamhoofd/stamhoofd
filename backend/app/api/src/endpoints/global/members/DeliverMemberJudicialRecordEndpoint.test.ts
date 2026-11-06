@@ -119,14 +119,14 @@ describe('Endpoint.DeliverMemberJudicialRecord', () => {
             memberId: member.id,
         }));
 
-        expect(response.body.getChecks(true).map(result => result.check)).toEqual([...judicialRecordChecksInOrder]);
+        expect(response.body.getChecks().map(result => result.check)).toEqual([...judicialRecordChecksInOrder]);
         expect(response.body.isPassed).toBe(false);
 
         // A document we cannot place as one of FOD Justitie is never read, so only the signature has a verdict
         expect(response.body.get(JudicialRecordCheck.Authentic)!.isFailed).toBe(true);
         expect(response.body.get(JudicialRecordCheck.Identity)!.status).toBe(JudicialRecordCheckStatus.Pending);
 
-        for (const result of response.body.getChecks(true)) {
+        for (const result of response.body.getChecks()) {
             expect(result.reason, result.check).not.toBe('');
         }
     });

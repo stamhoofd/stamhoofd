@@ -149,7 +149,7 @@ describe('JudicialRecordService.check', () => {
         });
 
         expect(report.isPassed).toBe(false);
-        expect(report.getChecks(true).map(result => result.check)).toEqual([...judicialRecordChecksInOrder]);
+        expect(report.getChecks().map(result => result.check)).toEqual([...judicialRecordChecksInOrder]);
 
         const authentic = report.get(JudicialRecordCheck.Authentic)!;
         expect(authentic.isFailed).toBe(true);
