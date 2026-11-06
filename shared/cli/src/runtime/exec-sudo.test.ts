@@ -57,3 +57,8 @@ it('hands the terminal to sudo without redrawing commands already previewed by t
     expect(withCliPrompt).toHaveBeenCalledOnce();
     expect(runProcess).toHaveBeenCalledWith('sudo', ['iptables', '-A'], expect.objectContaining({ inheritStdio: true, processGroup: false, label: false }));
 });
+
+it('identifies the failed command when per-command progress is disabled', async () => {
+    vi.mocked(runProcess).mockResolvedValueOnce({ code: 1, stdout: '', stderr: 'denied', signal: null });
+    await expect(execSudo(['install', 'private value'], { label: false, redact: ['private value'] })).rejects.toThrow('Failed: sudo install "[redacted]"');
+});

@@ -8,8 +8,8 @@ export async function execResult(command: string, args: string[], options: Proce
     const runtime = getCliTelemetry();
     const execute = () => runProcess(command, args, {
         signal: runtime?.signal,
-        processGroup: !options.inheritStdin && !options.inheritStdio,
         ...options,
+        processGroup: options.processGroup ?? (!options.inheritStdin && !options.inheritStdio),
         log: options.log ?? (hasLogSink()
             ? undefined
             : (level, message) => {
@@ -28,8 +28,13 @@ export async function exec(command: string, args: string[], options: ProcessOpti
     return result;
 }
 
-/** For short sudo setup operations. Sudo owns password input; only redacted output passes through the CLI. */
-export async function execSudo(args: string[], options: Pick<ProcessOptions, 'cwd' | 'env' | 'redact'> = {}): Promise<ProcessResult> {
+/** For short sudo setup operations. Use label: false when the task already previews its commands; sudo then owns native terminal IO. */
+export async function execSudo(args: string[], options: Pick<ProcessOptions, 'cwd' | 'env' | 'redact'> & { label?: false } = {}): Promise<ProcessResult> {
+    if (options.label === false) {
+        const result = await execResult('sudo', args, { ...options, inheritStdio: true });
+        if (result.code !== 0) throw processError(`Failed: ${formatCommandLine('sudo', args, options.redact)}`, 'sudo', result);
+        return result;
+    }
     if (!process.stdin.isTTY) return exec('sudo', args, { ...options, inheritStdio: true });
     return withCliInteractiveOperation(formatCommandLine('sudo', args, options.redact), write => exec('sudo', ['-S', ...args], {
         ...options,

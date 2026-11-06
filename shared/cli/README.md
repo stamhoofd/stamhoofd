@@ -81,6 +81,12 @@ stderr while reading inherited terminal stdin with echo disabled; the CLI never
 reads the password. Command labels and output retain credential redaction.
 Without interactive stdin it uses native stdio. DNS, port-redirect and shortcut
 installation share this helper; general interactive subprocesses retain `exec`.
+DNS and port-redirect setup preview their sudo commands once before confirmation,
+then pass `label: false` to `execSudo`. In this mode sudo owns native terminal IO
+with live rendering suspended, and the enclosing task produces one completion line.
+Failures identify the command. Port redirects are checked before completion; sudo
+probes stay in the caller's terminal session so they can reuse cached credentials.
+Installing DNS configuration does not imply that CoreDNS is running.
 
 Prompts go through `runtime/prompts` (exported as `prompts` for DevOps), which
 suspends live regions and passes the invocation's abort signal to Inquirer.

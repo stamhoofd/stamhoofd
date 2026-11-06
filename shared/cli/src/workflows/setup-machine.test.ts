@@ -76,11 +76,18 @@ describe('setup machine workflow', () => {
         vi.spyOn(fs, 'writeFile').mockResolvedValue(undefined);
         vi.spyOn(fs, 'rm').mockResolvedValue(undefined);
         await setupDns({ yes: true, dryRun: false });
-        expect(execSudo).toHaveBeenCalledWith(['systemctl', 'restart', 'systemd-resolved']);
-        vi.mocked(run).mockResolvedValue({ status: 1, stdout: '', stderr: '' } as never);
+        expect(execSudo).toHaveBeenCalledWith(['systemctl', 'restart', 'systemd-resolved'], { label: false });
+        vi.mocked(run).mockResolvedValue({ status: 0, stdout: '', stderr: '' } as never);
+        for (let index = 0; index < 4; index++) vi.mocked(run).mockResolvedValueOnce({ status: 1, stdout: '', stderr: '' } as never);
         await setupPrivilegedPortRedirects({ yes: true, dryRun: false });
-        expect(execSudo).toHaveBeenCalledWith(expect.arrayContaining(['iptables', '-A']));
+        expect(execSudo).toHaveBeenCalledWith(expect.arrayContaining(['iptables', '-A']), { label: false });
         expect(vi.mocked(execSudo).mock.calls).toHaveLength(7);
+    });
+
+    it('fails the port redirect task when successful sudo commands did not install the rules', async () => {
+        setPlatform('linux');
+        vi.mocked(run).mockResolvedValue({ status: 1, stdout: '', stderr: '' } as never);
+        await expect(setupPrivilegedPortRedirects({ yes: true, dryRun: false })).rejects.toThrow('Port redirect verification failed: sudo iptables -t nat -C PREROUTING');
     });
 
     beforeEach(() => {
@@ -360,7 +367,7 @@ describe('setup machine workflow', () => {
         expect(run).toHaveBeenCalledWith('caddy', ['version'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Output });
         expect(run).toHaveBeenCalledWith('resolvectl', ['dns'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Output });
         expect(run).toHaveBeenCalledWith('resolvectl', ['domain'], { capture: true, allowFailure: true, verbosity: RunVerbosity.Output });
-        expect(run).toHaveBeenCalledWith('sudo', expect.arrayContaining(['iptables', '-C']), { capture: true, allowFailure: true, verbosity: RunVerbosity.Output });
+        expect(run).toHaveBeenCalledWith('sudo', expect.arrayContaining(['iptables', '-C']), { capture: true, allowFailure: true, verbosity: RunVerbosity.Output, processGroup: false });
     });
 
     it('uses the setup command verbosity for DNS and certificate verification', async () => {
@@ -565,7 +572,7 @@ describe('setup machine workflow', () => {
         await setupDns({ yes: false, dryRun: false });
 
         expect(confirm).toHaveBeenCalledWith('Overwrite /etc/resolver/stamhoofd?', { default: false });
-        expect(execSudo).not.toHaveBeenCalledWith(['cp', expect.any(String), '/etc/resolver/stamhoofd']);
+        expect(execSudo).not.toHaveBeenCalledWith(['cp', expect.any(String), '/etc/resolver/stamhoofd'], { label: false });
     });
 
     // Skipped: pre-existing failure on main, unrelated to this PR. The shared/cli suite is not run in CI.

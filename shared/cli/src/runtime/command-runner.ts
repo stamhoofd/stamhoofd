@@ -13,6 +13,8 @@ export type RunOptions = {
     allowFailure?: boolean;
     /** Return stdout and stderr instead of forwarding or suppressing them. */
     capture?: boolean;
+    /** Set false for sudo probes that must share the caller's terminal credential cache. */
+    processGroup?: boolean;
 };
 
 export type RunCaptureResult = { stdout: string; stderr: string; status: number | null };
@@ -27,6 +29,7 @@ export async function run(command: string, args: string[], options: RunOptions =
             cwd: options.cwd,
             env: { ...process.env, ...options.env },
             capture: options.capture,
+            processGroup: options.processGroup,
             inheritStdin: !options.capture && verbosity === RunVerbosity.Output,
             output: verbosity === RunVerbosity.Output ? 'always' : 'verbose',
             label: verbosity === RunVerbosity.Quiet ? false : undefined,

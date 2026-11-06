@@ -13,7 +13,7 @@ import { run, RunVerbosity } from '../runtime/command-runner.js';
 import { execSudo } from '../runtime/process.js';
 import { sharedDir } from '../runtime/manifest-store.js';
 import { CliStatus } from '../runtime/status.js';
-import { command, confirm, statusCell, success, table, Table, warning } from '../runtime/ux.js';
+import { command, confirm, statusCell, step, success, table, Table, warning } from '../runtime/ux.js';
 import type { TableCellInput, TableRow } from '../runtime/ux.js';
 import { corednsService } from '../services/definitions/coredns-service.js';
 import * as docker from '../services/docker.js';
@@ -321,7 +321,7 @@ export async function setupDns(options: { yes: boolean; dryRun: boolean }): Prom
     console.log(`This will configure temporary split DNS for .${domain}.`);
     console.log('\nFile: /run/systemd/resolved.conf.d/stamhoofd.conf');
     console.log(content.trim());
-    console.log('\nCommands:');
+    console.log('\nCommands requiring sudo:');
     console.log(command('  sudo mkdir -p /run/systemd/resolved.conf.d'));
     console.log(command('  sudo cp <tempfile> /run/systemd/resolved.conf.d/stamhoofd.conf'));
     console.log(command('  sudo systemctl restart systemd-resolved'));
@@ -335,12 +335,13 @@ export async function setupDns(options: { yes: boolean; dryRun: boolean }): Prom
         return;
     }
 
-    await fs.writeFile(tempPath, content);
-    await execSudo(['mkdir', '-p', '/run/systemd/resolved.conf.d']);
-    await execSudo(['cp', tempPath, '/run/systemd/resolved.conf.d/stamhoofd.conf']);
-    await fs.rm(tempPath, { force: true });
-    await execSudo(['systemctl', 'restart', 'systemd-resolved']);
-    success('DNS configured.');
+    await step('Install DNS configuration', async () => {
+        await fs.writeFile(tempPath, content);
+        await execSudo(['mkdir', '-p', '/run/systemd/resolved.conf.d'], { label: false });
+        await execSudo(['cp', tempPath, '/run/systemd/resolved.conf.d/stamhoofd.conf'], { label: false });
+        await fs.rm(tempPath, { force: true });
+        await execSudo(['systemctl', 'restart', 'systemd-resolved'], { label: false });
+    });
 }
 
 async function setupMacosDns(options: { yes: boolean; dryRun: boolean }): Promise<void> {
@@ -353,7 +354,7 @@ async function setupMacosDns(options: { yes: boolean; dryRun: boolean }): Promis
     console.log(`This will configure .${domain} DNS through the macOS resolver.`);
     console.log(`\nFile: ${resolverPath}`);
     console.log(content.trim());
-    console.log('\nCommands:');
+    console.log('\nCommands requiring sudo:');
     console.log(command('  sudo mkdir -p /etc/resolver'));
     console.log(command(`  sudo cp <tempfile> ${resolverPath}`));
 
@@ -378,11 +379,12 @@ async function setupMacosDns(options: { yes: boolean; dryRun: boolean }): Promis
         return;
     }
 
-    await fs.writeFile(tempPath, content);
-    await execSudo(['mkdir', '-p', '/etc/resolver']);
-    await execSudo(['cp', tempPath, resolverPath]);
-    await fs.rm(tempPath, { force: true });
-    success('DNS configured.');
+    await step('Install DNS configuration', async () => {
+        await fs.writeFile(tempPath, content);
+        await execSudo(['mkdir', '-p', '/etc/resolver'], { label: false });
+        await execSudo(['cp', tempPath, resolverPath], { label: false });
+        await fs.rm(tempPath, { force: true });
+    });
 }
 
 export async function setupPrivilegedPortRedirects(options: { yes: boolean; dryRun: boolean }): Promise<void> {
@@ -393,7 +395,7 @@ export async function setupPrivilegedPortRedirects(options: { yes: boolean; dryR
     const rules = privilegedRedirectRules(profile);
 
     console.log('This will redirect local HTTP/HTTPS traffic to the unprivileged ports used by local containers.');
-    console.log('\nCommands:');
+    console.log('\nCommands requiring sudo:');
     for (const rule of rules) {
         console.log(command(`  ${formatIptablesCommand(IptablesAction.Append, rule)}`));
     }
@@ -407,13 +409,19 @@ export async function setupPrivilegedPortRedirects(options: { yes: boolean; dryR
         return;
     }
 
-    for (const rule of rules) {
-        if (!(await iptablesRuleExists(rule))) {
-            await execSudo(iptablesArgs(IptablesAction.Append, rule));
+    await step('Configure and verify port redirects', async (update) => {
+        for (const [index, rule] of rules.entries()) {
+            update(`${index + 1}/${rules.length}`);
+            if (!(await iptablesRuleExists(rule))) {
+                await execSudo(iptablesArgs(IptablesAction.Append, rule), { label: false });
+            }
         }
-    }
-
-    success('Privileged port redirects configured.');
+        for (const rule of rules) {
+            if (!(await iptablesRuleExists(rule))) {
+                throw new Error(`Port redirect verification failed: ${formatIptablesCommand(IptablesAction.Check, rule)}`);
+            }
+        }
+    });
 }
 
 export async function setupCaddy(options: { yes: boolean; dryRun: boolean }): Promise<void> {
@@ -624,7 +632,7 @@ async function readFileIfExists(filePath: string): Promise<string | undefined> {
 }
 
 async function iptablesRuleExists(rule: IptablesRedirectRule, verbosity: RunVerbosity = RunVerbosity.Quiet): Promise<boolean> {
-    const result = await run('sudo', ['-n', ...iptablesArgs(IptablesAction.Check, rule)], { capture: true, verbosity, allowFailure: true });
+    const result = await run('sudo', ['-n', ...iptablesArgs(IptablesAction.Check, rule)], { capture: true, verbosity, allowFailure: true, processGroup: false });
     return result.status === 0;
 }
 
