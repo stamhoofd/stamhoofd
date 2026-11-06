@@ -14,6 +14,13 @@ export interface LoadedPdf {
 }
 
 export async function loadPdfDocument(data: Uint8Array): Promise<LoadedPdf> {
+    // Handing over a port keeps this off GlobalWorkerOptions.workerSrc on purpose. A port routes
+    // through pdf.js's #initializeFromPort, which never consults the global config and never
+    // reaches the globalThis.pdfjsWorker check that sends a consumer to the main thread - a global
+    // that @stamhoofd/pdf-parse sets while importing the same worker module elsewhere in this
+    // bundle. Setting workerSrc here reads as the tidier way to do it and would bring back a
+    // silent fallback to pdf.js's fake worker, where nothing renders and nothing throws.
+    //
     // A worker passed in belongs to the caller: pdf.js only terminates the one it creates itself.
     const worker = PDFWorker.create({ port: new PdfJsWorker() });
 
