@@ -41,5 +41,5 @@ host, or process capture is enabled. This is not a sanitizer for arbitrary exist
 application logging; broader instrumentation requires extending and testing the
 explicit export contract.
 
-Run `pnpm stam check lint --filter @node/observability` and
+Run `pnpm stam test observability`, `pnpm stam check lint --filter @node/observability`, and
 `pnpm stam check typecheck --filter @node/observability` from the repository root.

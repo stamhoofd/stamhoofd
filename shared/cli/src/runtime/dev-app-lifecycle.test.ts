@@ -52,6 +52,28 @@ it('emits Vite readiness only when its HTTP listener opens', async () => {
     }
 });
 
+it('preloads lifecycle observation without an application dependency on the CLI', async () => {
+    const events: DevEvent[] = [];
+    const channel = await openDevEventChannel(event => events.push(event));
+    const supervisor = fileURLToPath(import.meta.resolve('@node/dev-tools/supervise'));
+    const application = new URL('../../../../packages/node/observability/dist/index.js', import.meta.url).href;
+    try {
+        const child = spawn(process.execPath, [supervisor, 'api', process.execPath, '--input-type=module', '-e', `
+            import { runApplication } from '${application}';
+            await runApplication('api', async lifecycle => {
+                await lifecycle.ready();
+                await lifecycle.close();
+            });
+        `], { env: { ...process.env, ...channel.env }, stdio: 'ignore' });
+        expect((await once(child, 'close'))[0]).toBe(0);
+        await expect.poll(() => events.map(event => event.event)).toEqual(['starting', 'ready', 'stopped']);
+        expect(new Set(events.map(event => event.processId)).size).toBe(1);
+        expect(events[0].startupOwner).toBe('application');
+    } finally {
+        await channel.close();
+    }
+});
+
 it('reports supervised cancellation without a process failure', async () => {
     const events: DevEvent[] = [];
     const channel = await openDevEventChannel(event => events.push(event));

@@ -1,8 +1,10 @@
 {
     "extends": "./tsconfig.types.json",
     "compilerOptions": {
+        "rootDir": ".",
         "noEmit": true,
         "emitDeclarationOnly": false
     },
+    "include": ["src", "vitest.config.ts"],
     "exclude": []
 }
