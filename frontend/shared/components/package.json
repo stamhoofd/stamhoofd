@@ -37,6 +37,7 @@
         "@stamhoofd/locales": "workspace:*",
         "@stamhoofd/networking": "workspace:*",
         "@stamhoofd/object-differ": "workspace:*",
+        "@stamhoofd/pdf-verify-core": "workspace:*",
         "@stamhoofd/scss": "workspace:*",
         "@stamhoofd/structures": "workspace:*",
         "@stamhoofd/ticket-builder": "workspace:*",
