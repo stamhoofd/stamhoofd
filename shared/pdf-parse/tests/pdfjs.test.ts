@@ -49,3 +49,27 @@ describe('the pdf.js setup', () => {
         }
     });
 });
+
+describe('an engine without Promise.withResolvers', () => {
+    // pdf.js 6 uses it throughout and the legacy build does not polyfill it, while it arrived only
+    // in Safari 17.4 and IPHONEOS_DEPLOYMENT_TARGET is 15.0
+    test('is polyfilled by the time pdf.js runs', () => {
+        expect(typeof Promise.withResolvers).toBe('function');
+    });
+
+    test('hands back a promise and the two functions that settle it', async () => {
+        const { promise, resolve } = Promise.withResolvers<string>();
+
+        resolve('JANSSENS');
+
+        await expect(promise).resolves.toBe('JANSSENS');
+    });
+
+    test('rejects through the reject it handed back', async () => {
+        const { promise, reject } = Promise.withResolvers<string>();
+
+        reject(new Error('nope'));
+
+        await expect(promise).rejects.toThrow('nope');
+    });
+});
