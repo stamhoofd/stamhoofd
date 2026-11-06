@@ -605,7 +605,7 @@ CLI-managed test MySQL disables binary logging and uses `innodb_flush_log_at_trx
 ```bash
 pnpm stam test unit                                 # every unit package (excludes Playwright)
 pnpm stam test coverage                             # package coverage with the same isolated MySQL lifecycle
-pnpm stam test api                                  # one package (api, models, vies, sql, statistics-syncer, filters, structures, signed-pdf, renderer, redirecter, queues, utility, sgv, object-differ, eslint, vite-config, metabase, i18n-uuid, cli, components, networking, sgv-frontend)
+pnpm stam test api                                  # one package (api, models, vies, sql, statistics-syncer, filters, structures, signed-pdf, renderer, redirecter, queues, utility, sgv, object-differ, eslint, vite-config, metabase, i18n-uuid, cli, components, networking, sgv-frontend, pdf-viewer)
 pnpm stam test api --coverage                       # collect coverage for one package
 pnpm stam test unit SomeFile                         # filter by filename across all packages
 pnpm stam test structures bundle-discounts           # package + filename filter
@@ -621,7 +621,7 @@ pnpm stam test notifications                         # shared toast service
 pnpm stam test application                           # login and session coordination
 ```
 
-`components`, `networking`, and `sgv-frontend` run in vitest browser mode and need a Playwright Chromium (`pnpm exec playwright install chromium`); they are part of `stam test unit` too.
+`components`, `networking`, `sgv-frontend`, and `pdf-viewer` run in vitest browser mode and need a Playwright Chromium (`pnpm exec playwright install chromium`); they are part of `stam test unit` too.
 
 Use `stam test unit` and `stam test coverage` directly. Coverage runs serially and is uncached.
 
