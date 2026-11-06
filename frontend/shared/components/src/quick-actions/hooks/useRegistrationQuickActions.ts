@@ -5,7 +5,7 @@ import type { MemberManager } from '@stamhoofd/frontend-application/MemberManage
 import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { Group, MemberRegistrationInvitation, Organization, PlatformFamily, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
-import { Event, getActivePeriodIds, GroupStatus, GroupType, LimitedFilteredRequest, PaginatedResponseDecoder, PayableBalanceCollection, SortItemDirection, WebshopStatus } from '@stamhoofd/structures';
+import { Event, getActivePeriodIds, GroupStatus, GroupType, JudicialRecordStatus, LimitedFilteredRequest, PaginatedResponseDecoder, PayableBalanceCollection, SortItemDirection, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, onActivated, onMounted, ref } from 'vue';
@@ -27,6 +27,7 @@ import cartSvg from '@stamhoofd/assets/images/illustrations/cart.svg';
 import emailWarningSvg from '@stamhoofd/assets/images/illustrations/email-warning.svg';
 import missingDataSvg from '@stamhoofd/assets/images/illustrations/missing-data.svg';
 import outstandingAmountSvg from '@stamhoofd/assets/images/illustrations/outstanding-amount.svg';
+import privacyPolicySvg from '@stamhoofd/assets/images/illustrations/privacy-policy.svg';
 
 import EventIcon from '../../events/components/EventIcon.vue';
 import { useVisibilityChange } from '../../hooks/useVisibilityChange.js';
@@ -79,6 +80,18 @@ export function useRegistrationQuickActions(): QuickActions {
         }
 
         return [];
+    }));
+
+    /**
+     * The members of this family that have to have an extract from the judicial record checked. The
+     * same question the dashboard answers in their member detail, asked here for the family: a
+     * responsibility they hold asks for an extract, and they are old enough for it to be required.
+     *
+     * Nothing is stored about a delivery yet, so the action stays on the portal after a member
+     * delivered one. It disappears once the status of the extract itself lands.
+     */
+    const membersNeedingJudicialRecord = computed(() => activeMembers.value.filter((member) => {
+        return member.judicialRecord.status === JudicialRecordStatus.Required;
     }));
 
     const membersWithoutMissingData = computed(() => activeMembers.value.filter((member) => {
@@ -164,6 +177,18 @@ export function useRegistrationQuickActions(): QuickActions {
                     action: async () => {
                         await $navigate('payments');
                     },
+                });
+            }
+
+            for (const member of membersNeedingJudicialRecord.value) {
+                arr.push({
+                    illustration: privacyPolicySvg,
+                    prefix: $t('Verplicht voor jouw functie'),
+                    title: $t('Upload het uittreksel uit het strafregister van {member}', { member: member.patchedMember.firstName }),
+                    description: $t('Als leiding moet je om de 3 jaar een uittreksel (model 596.2) laten controleren'),
+                    // Through the route, like the payments action above, so the flow has the same
+                    // url here as it does when a member arrives on it from an e-mail
+                    action: () => $navigate('judicialRecord', { params: { id: member.id } }),
                 });
             }
 

@@ -169,6 +169,7 @@ import { useUser } from '@stamhoofd/components/hooks/useUser';
 import { useChooseGroupForMember } from '@stamhoofd/components/members/checkout/useCheckoutRegisterItem.ts';
 import MemberIcon from '@stamhoofd/components/members/components/MemberIcon.vue';
 import { useAddMember } from '@stamhoofd/components/members/hooks/useAddMember.ts';
+import { judicialRecordDeliveryFlowFirstStep } from '@stamhoofd/components/judicial-record/judicialRecordDeliveryFlow.ts';
 import { Toast, ToastButton } from '@stamhoofd/components/overlays/Toast';
 import QuickActionsBox from '@stamhoofd/components/quick-actions/QuickActionsBox.vue';
 import { useRegistrationQuickActions } from '@stamhoofd/components/quick-actions/hooks/useRegistrationQuickActions.ts';
@@ -188,6 +189,7 @@ enum Routes {
     CheckData = 'checkData',
     ViewMember = 'viewMember',
     Payments = 'payments',
+    JudicialRecord = 'judicialRecord',
 }
 
 const auth = useAuth();
@@ -232,6 +234,48 @@ defineRoute({
         throw new Error('member not found');
     },
 
+    propsToParams(props) {
+        return {
+            params: {
+                id: props.member.id,
+            },
+        };
+    },
+});
+
+/**
+ * The delivery flow has a url of its own, so a button in an e-mail opens the portal straight on the
+ * first step of it. Which view that is, what number it carries and how it reaches the next step are
+ * not this route's business: it asks the flow for its first step and mounts what it gets.
+ */
+defineRoute({
+    name: Routes.JudicialRecord,
+    ...getUrls(buildTranslatedUrl({ nl: 'strafregister/@id', fr: 'casier-judiciaire/@id', en: 'judicial-record/@id' })),
+    component: async () => (await judicialRecordDeliveryFlowFirstStep.component()).default as any,
+    show: true,
+    params: {
+        id: String,
+    },
+    paramsToProps: async (params) => {
+        const member = members.value.find(m => m.id === params.id);
+        if (!member) {
+            Toast.error($t(`%EO`)).show();
+            throw new Error('member not found');
+        }
+
+        return judicialRecordDeliveryFlowFirstStep.props({
+            member,
+
+            // The steps were pushed onto this tab's stack, so leaving the flow is coming back here
+            dismissHandler: async (navigate) => {
+                if (navigate.navigationController) {
+                    await navigate.navigationController.popToRoot({ force: true });
+                    return;
+                }
+                await navigate.pop({ force: true });
+            },
+        });
+    },
     propsToParams(props) {
         return {
             params: {
