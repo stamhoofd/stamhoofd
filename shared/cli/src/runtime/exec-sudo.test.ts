@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { runProcess } from '@node/opentelemetry-process';
 import { execSudo } from './process.js';
-import { withCliInteractiveOperation } from './telemetry.js';
+import { withCliInteractiveOperation, withCliPrompt } from './telemetry.js';
 
 const write = vi.hoisted(() => vi.fn(() => true));
 vi.mock('./telemetry.js', () => ({
     getCliTelemetry: () => undefined,
-    withCliPrompt: (callback: () => Promise<unknown>) => callback(),
+    withCliPrompt: vi.fn((callback: () => Promise<unknown>) => callback()),
     withCliInteractiveOperation: vi.fn((_label: string, callback: (writer: typeof write) => Promise<unknown>) => callback(write)),
 }));
 vi.mock('@node/opentelemetry-process', async importOriginal => ({
@@ -49,4 +49,11 @@ it('retains native sudo behavior without terminal stdin', async () => {
     await execSudo(['install']);
     expect(runProcess).toHaveBeenCalledWith('sudo', ['install'], expect.objectContaining({ inheritStdio: true }));
     expect(withCliInteractiveOperation).not.toHaveBeenCalled();
+});
+
+it('hands the terminal to sudo without redrawing commands already previewed by the task', async () => {
+    await execSudo(['iptables', '-A'], { label: false });
+    expect(withCliInteractiveOperation).not.toHaveBeenCalled();
+    expect(withCliPrompt).toHaveBeenCalledOnce();
+    expect(runProcess).toHaveBeenCalledWith('sudo', ['iptables', '-A'], expect.objectContaining({ inheritStdio: true, processGroup: false, label: false }));
 });

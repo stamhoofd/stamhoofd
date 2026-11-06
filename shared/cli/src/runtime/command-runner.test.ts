@@ -38,3 +38,8 @@ it('uses coordinated stdin and normal output for output-mode commands', async ()
     await run('example', [], { verbosity: RunVerbosity.Output });
     expect(execResult).toHaveBeenCalledWith('example', [], expect.objectContaining({ inheritStdin: true, output: 'always' }));
 });
+
+it('keeps sudo probes in the terminal session that owns the cached credentials', async () => {
+    await run('sudo', ['-n', 'iptables', '-C'], { capture: true, processGroup: false });
+    expect(vi.mocked(execResult).mock.calls[0][2]?.processGroup).toBe(false);
+});
