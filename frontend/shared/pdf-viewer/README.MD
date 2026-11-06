@@ -45,9 +45,11 @@ Most documents we show are a single page, but nothing may assume that.
   hands pdf.js the port itself rather than going through `GlobalWorkerOptions`, so importing
   `@stamhoofd/pdf-parse` — whose worker module sets `globalThis.pdfjsWorker` at module scope —
   cannot drag rendering onto the main thread.
-- **No `AbortSignal.any` polyfill is needed here.** pdf.js 6 calls it, but only from its annotation
-  editor and its touch manager, neither of which the viewer mounts. That matters because the app
-  still supports Safari 15.4 and `AbortSignal.any` arrived in 17.4. A test keeps it true.
+- **No `AbortSignal.any` polyfill is needed here, until someone adds a text or annotation layer.**
+  pdf.js 6 calls it, but only from its annotation editor and its touch manager, neither of which
+  the viewer mounts. That matters because the app still supports Safari 15.4 and `AbortSignal.any`
+  arrived in 17.4. Mount any of those layers and this package needs the polyfill; a test fails the
+  moment a render reaches for it.
 
 ## Tests
 
