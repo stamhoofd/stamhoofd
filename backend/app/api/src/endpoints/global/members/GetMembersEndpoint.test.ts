@@ -1,12 +1,13 @@
 import type { Endpoint } from '@node/endpoints';
 import { Request } from '@node/endpoints';
 import type { Group, Member, MemberWithUsersRegistrationsAndGroups, Organization, RegistrationPeriod, Token, User } from '@stamhoofd/models';
-import { CachedBalance, EventFactory, GroupFactory, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecordFactory, OrganizationFactory, OrganizationTagFactory, Platform, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
+import { CachedBalance, EventFactory, GroupFactory, MemberFactory, MemberPlatformMembership, MemberResponsibilityRecordFactory, OrganizationFactory, OrganizationTagFactory, Platform, PlatformResponsibilityFactory, RecordCategoryFactory, RegistrationFactory, RegistrationPeriodFactory, UserFactory } from '@stamhoofd/models';
 import type { SortList, StamhoofdFilter } from '@stamhoofd/structures';
 import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
-import { CountFilteredRequest, EventMeta, GroupStatus, GroupType, LimitedFilteredRequest, NamedObject, OrganizationTag, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ReceivableBalanceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection, STPackageBundle, STPackageType } from '@stamhoofd/structures';
+import type { MemberResponsibility } from '@stamhoofd/structures';
+import { CountFilteredRequest, EventMeta, GroupStatus, GroupType, JudicialRecordStatus, LimitedFilteredRequest, MemberDetails, NamedObject, OrganizationTag, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ReceivableBalanceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection, STPackageBundle, STPackageType } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
@@ -3569,6 +3570,181 @@ describe('Endpoint.GetMembersEndpoint', () => {
                     headers: noAccessHeaders,
                 }))).rejects.toThrow(STExpect.errorWithCode('permission_denied'));
             }
+        });
+    });
+    describe('Judicial record extracts', () => {
+        const platformHost = 'platform.stamhoofd.app';
+
+        /** A member only needs an extract once they hold a responsibility that asks for one and reach its age. */
+        let withAge: MemberResponsibility;
+        let withoutAge: MemberResponsibility;
+        let originalResponsibilities: MemberResponsibility[];
+
+        beforeAll(async () => {
+            const platform = await Platform.getForEditing();
+            originalResponsibilities = platform.config.responsibilities;
+
+            withAge = await new PlatformResponsibilityFactory({ name: 'Judicial record needed', judicialRecordMinimumAge: 20 }).create();
+            withoutAge = await new PlatformResponsibilityFactory({ name: 'No judicial record needed' }).create();
+        });
+
+        afterAll(async () => {
+            const platform = await Platform.getForEditing();
+            platform.config.responsibilities = originalResponsibilities;
+            await platform.save();
+        });
+
+        const responsibilityStart = new Date(2024, 0, 1);
+
+        /** The birth day of a member that turns `age` in `inDays` days. */
+        function birthDayOfSomeoneTurning(age: number, inDays: number): { year: number; month: number; day: number } {
+            const date = new Date();
+            date.setDate(date.getDate() + inDays);
+
+            return { year: date.getFullYear() - age, month: date.getMonth() + 1, day: date.getDate() };
+        }
+
+        /**
+         * Creates one member per scenario, all with a responsibility in the same organization,
+         * and returns a platform admin to fetch them with.
+         */
+        async function setupMembers() {
+            const organization = await new OrganizationFactory({ period }).create();
+
+            async function createMember(options: { birthDay?: { year: number; month: number; day: number }; responsibility: MemberResponsibility; endDate?: Date | null }) {
+                const member = options.birthDay
+                    ? await new MemberFactory({ birthDay: options.birthDay }).create()
+                    : await new MemberFactory({ details: MemberDetails.create({ firstName: 'No birth day' }), generateData: false }).create();
+
+                await new MemberResponsibilityRecordFactory({
+                    member,
+                    organizationId: organization.id,
+                    responsibility: options.responsibility,
+                    startDate: responsibilityStart,
+                    endDate: options.endDate ?? null,
+                }).create();
+
+                return member;
+            }
+
+            const members = {
+                // Turned 20 long before the responsibility started
+                adult: await createMember({ birthDay: { year: 1990, month: 3, day: 10 }, responsibility: withAge }),
+                // Turns 20 on 2035-06-15, well after the responsibility started
+                child: await createMember({ birthDay: { year: 2015, month: 6, day: 15 }, responsibility: withAge }),
+                // Turns 20 today, which is the first day an extract is required
+                turnsTwentyToday: await createMember({ birthDay: birthDayOfSomeoneTurning(20, 0), responsibility: withAge }),
+                // Turns 20 tomorrow, so not required yet
+                turnsTwentyTomorrow: await createMember({ birthDay: birthDayOfSomeoneTurning(20, 1), responsibility: withAge }),
+                // Treated as an adult, just like MemberDetails.defaultAge does
+                withoutBirthDay: await createMember({ responsibility: withAge }),
+                // Their only responsibility never asks for an extract
+                otherResponsibility: await createMember({ birthDay: { year: 1990, month: 3, day: 10 }, responsibility: withoutAge }),
+                // No longer holds the responsibility
+                former: await createMember({ birthDay: { year: 1990, month: 3, day: 10 }, responsibility: withAge, endDate: new Date(2025, 0, 1) }),
+            };
+
+            const user = await new UserFactory({ globalPermissions: Permissions.create({ level: PermissionLevel.Full }) }).create();
+            const token = await SessionService.createSession(user);
+
+            return { token, members, memberIds: Object.values(members).map(m => m.id) };
+        }
+
+        /** Follows the endpoint's own `next` request, so this covers the full sort + pagination flow. */
+        async function fetchAllPages({ token, sort, limit, filter }: { token: Token; sort: SortList; limit: number; filter?: StamhoofdFilter }) {
+            const ids: string[] = [];
+            let query: LimitedFilteredRequest | undefined = new LimitedFilteredRequest({ sort, limit, filter });
+            let pages = 0;
+
+            while (query) {
+                const response = await testServer.test(endpoint, Request.get({
+                    path: baseUrl,
+                    host: platformHost,
+                    query,
+                    headers: { authorization: 'Bearer ' + token.accessToken },
+                }));
+                expect(response.status).toBe(200);
+
+                ids.push(...response.body.results.members.map(m => m.id));
+                query = response.body.next;
+                pages += 1;
+
+                if (pages > 20) {
+                    throw new Error('Pagination did not terminate');
+                }
+            }
+
+            return ids;
+        }
+
+        async function fetchMemberIds({ token, filter, sort, limit = 100 }: { token: Token; filter?: StamhoofdFilter; sort?: SortList; limit?: number }) {
+            const response = await testServer.test(endpoint, Request.get({
+                path: baseUrl,
+                host: platformHost,
+                query: new LimitedFilteredRequest({ filter, sort: sort ?? [{ key: 'id', order: SortItemDirection.ASC }], limit }),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+            }));
+            expect(response.status).toBe(200);
+            return response.body.results.members.map(m => m.id);
+        }
+
+        test('Lists the members that need an extract', async () => {
+            const { token, members, memberIds } = await setupMembers();
+
+            const ids = await fetchMemberIds({
+                token,
+                filter: { id: { $in: memberIds }, judicialRecordStatus: { $in: [JudicialRecordStatus.Required] } },
+            });
+
+            expect(ids).toIncludeSameMembers([members.adult.id, members.withoutBirthDay.id, members.turnsTwentyToday.id]);
+        });
+
+        test('Lists the members that do not need an extract', async () => {
+            const { token, members, memberIds } = await setupMembers();
+
+            const ids = await fetchMemberIds({
+                token,
+                filter: { id: { $in: memberIds }, judicialRecordStatus: { $in: [JudicialRecordStatus.NotRequired] } },
+            });
+
+            expect(ids).toIncludeSameMembers([members.child.id, members.turnsTwentyTomorrow.id, members.otherResponsibility.id, members.former.id]);
+        });
+
+        test('Lists the members of several statuses at once', async () => {
+            const { token, memberIds } = await setupMembers();
+
+            const ids = await fetchMemberIds({
+                token,
+                filter: { id: { $in: memberIds }, judicialRecordStatus: { $in: [JudicialRecordStatus.Required, JudicialRecordStatus.NotRequired] } },
+            });
+
+            expect(ids).toIncludeSameMembers(memberIds);
+        });
+
+        test('Sorts members by their status, across all pages', async () => {
+            const { token, members, memberIds } = await setupMembers();
+            const filter = { id: { $in: memberIds } };
+
+            // A limit lower than the total forces the endpoint to build a next page filter from getValue
+            const ascending = await fetchAllPages({
+                token,
+                sort: [{ key: 'judicialRecordStatus', order: SortItemDirection.ASC }, { key: 'id', order: SortItemDirection.ASC }],
+                limit: 2,
+                filter,
+            });
+
+            expect(ascending).toHaveLength(7);
+            expect(ascending.slice(0, 4)).toIncludeSameMembers([members.child.id, members.turnsTwentyTomorrow.id, members.otherResponsibility.id, members.former.id]);
+            expect(ascending.slice(4)).toIncludeSameMembers([members.adult.id, members.withoutBirthDay.id, members.turnsTwentyToday.id]);
+
+            const descending = await fetchAllPages({
+                token,
+                sort: [{ key: 'judicialRecordStatus', order: SortItemDirection.DESC }, { key: 'id', order: SortItemDirection.DESC }],
+                limit: 2,
+                filter,
+            });
+
+            expect(descending).toEqual([...ascending].reverse());
         });
     });
 });
