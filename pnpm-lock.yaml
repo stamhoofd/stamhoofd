@@ -539,6 +539,9 @@ importers:
       '@stamhoofd/backend-middleware':
         specifier: workspace:*
         version: link:../../shared/middleware
+      '@stamhoofd/certificate-revocation':
+        specifier: workspace:*
+        version: link:../../shared/certificate-revocation
       '@stamhoofd/crons':
         specifier: workspace:*
         version: link:../../shared/crons
@@ -551,6 +554,9 @@ importers:
       '@stamhoofd/filters':
         specifier: workspace:*
         version: link:../../../shared/filters
+      '@stamhoofd/judicial-record-check':
+        specifier: workspace:*
+        version: link:../../../shared/judicial-record-check
       '@stamhoofd/logging':
         specifier: workspace:*
         version: link:../../shared/logging
