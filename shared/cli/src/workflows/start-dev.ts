@@ -9,6 +9,8 @@ import { buildBackendEnv, buildDomains } from '../config/build-config.js';
 import { successSymbol } from '../config/shared-service-config.js';
 import type { CliContext } from '../context/create-context.js';
 import { buildPorts } from '../context/ports.js';
+import { join } from 'node:path';
+import { backendDevCommand, devToolPath, shellQuote } from '../runtime/dev-commands.js';
 import type { DevApp } from '../runtime/dev-status.js';
 import { DevStatus, formatDevStatus } from '../runtime/dev-status.js';
 import { createLiveOutput } from '../runtime/live-output.js';
@@ -185,7 +187,7 @@ export async function runDev(context: CliContext, target: DevTarget, options: { 
         channel = await openDevEventChannel(event => lifecycle.receive(event), carrier.traceparent);
         status.start();
         const names = target === DevTarget.Docs ? 'docs' : target === DevTarget.All ? 'shared,apps,docs' : 'shared,apps';
-        const result = await execResult('pnpm', ['exec', 'concurrently', '--names', names, '--prefix', '[{name}]', '--kill-others-on-fail', ...concurrentlyTargets(target, ports, context.verbose)], {
+        const result = await execResult('pnpm', ['exec', 'concurrently', '--names', names, '--prefix', '[{name}]', '--kill-others-on-fail', ...concurrentlyTargets(context.rootDir, target, ports, context.verbose)], {
             cwd: context.rootDir,
             env: {
                 ...process.env,
@@ -259,43 +261,57 @@ export function devApps(target: DevTarget, domains: ReturnType<typeof buildDomai
     return apps;
 }
 
-const backendCommand = 'node packages/node/dev-tools/dist/turbo.js run dev --env-mode=loose --log-prefix=task --filter=@stamhoofd/backend --filter=@stamhoofd/backend-renderer --filter=@stamhoofd/backend-statistics-syncer';
-const frontendCommand = 'node packages/node/dev-tools/dist/turbo.js run dev --env-mode=loose --log-prefix=task --filter=@stamhoofd/web-app --filter=@stamhoofd/webshop';
-const fullStackCommand = 'node packages/node/dev-tools/dist/turbo.js run dev --env-mode=loose --log-prefix=task --filter=@stamhoofd/backend --filter=@stamhoofd/backend-renderer --filter=@stamhoofd/backend-statistics-syncer --filter=@stamhoofd/web-app --filter=@stamhoofd/webshop';
+function appCommand(rootDir: string, target: DevTarget): string {
+    const apps: { name: string; path: string; command: string }[] = [];
+    if (target !== DevTarget.Frontend) {
+        for (const app of ['api', 'renderer', 'stats'] as const) {
+            apps.push({ name: app, path: `backend/app/${app === 'stats' ? 'statistics-syncer' : app}`, command: backendDevCommand(rootDir, app) });
+        }
+    }
+    if (target !== DevTarget.Backend) {
+        for (const app of ['dashboard', 'webshop']) {
+            const command = `NODE_ENV=development ENV_FILE=${shellQuote(join(rootDir, 'frontend/.env.json'))} node ${shellQuote(devToolPath(rootDir, 'supervise'))} ${app} vite`;
+            apps.push({ name: app, path: `frontend/app/${app === 'dashboard' ? 'web-app' : app}`, command });
+        }
+    }
+    const commands = apps.map(app => `pnpm --dir ${shellQuote(join(rootDir, app.path))} exec sh -c ${shellQuote(app.command)}`);
+    return `pnpm exec concurrently --names ${apps.map(app => app.name).join(',')} --prefix '[{name}]' --kill-others-on-fail ${commands.map(shellQuote).join(' ')}`;
+}
 
 // `--host 0.0.0.0` is required: Caddy runs in Docker and reaches the dev servers
 // through `host.docker.internal`, so the server must listen on all interfaces.
 // Nuxt otherwise binds the loopback address only (`::1`), which the Caddy
 // container cannot reach, and every request to docs.<instance>.stamhoofd 502s.
-function docsCommand(ports: ReturnType<typeof buildPorts>): string {
-    return `pnpm --dir docs run dev --port ${ports.docs} --host 0.0.0.0`;
+function docsCommand(rootDir: string, ports: ReturnType<typeof buildPorts>): string {
+    const pnpm = `pnpm --dir ${shellQuote(join(rootDir, 'docs'))}`;
+    return `${pnpm} run prepare:observability && ${pnpm} exec node ${shellQuote(devToolPath(rootDir, 'supervise'))} docs nuxt dev --port ${ports.docs} --host 0.0.0.0`;
 }
 
-export function commandsForTarget(target: DevTarget, ports: ReturnType<typeof buildPorts>): string[] {
+export function commandsForTarget(rootDir: string, target: DevTarget, ports: ReturnType<typeof buildPorts>): string[] {
     if (target === DevTarget.Docs) {
-        return [docsCommand(ports)];
+        return [docsCommand(rootDir, ports)];
     }
     if (target === DevTarget.Backend) {
-        return [backendCommand];
+        return [appCommand(rootDir, target)];
     }
     if (target === DevTarget.Frontend) {
-        return [frontendCommand];
+        return [appCommand(rootDir, target)];
     }
     if (target === DevTarget.All) {
-        return [fullStackCommand, docsCommand(ports)];
+        return [appCommand(rootDir, target), docsCommand(rootDir, ports)];
     }
-    return [fullStackCommand];
+    return [appCommand(rootDir, target)];
 }
 
 // The docs site does not consume any @stamhoofd/* build output, so it never
 // waits for the shared build: a docs-only session skips the watcher entirely,
 // and in `all` the docs server starts immediately while the app processes
 // wait for the shared build to be ready.
-export function concurrentlyTargets(target: DevTarget, ports: ReturnType<typeof buildPorts>, verbose = false): string[] {
-    const commands = commandsForTarget(target, ports);
+export function concurrentlyTargets(rootDir: string, target: DevTarget, ports: ReturnType<typeof buildPorts>, verbose = false): string[] {
+    const commands = commandsForTarget(rootDir, target, ports);
     if (target === DevTarget.Docs) {
         return commands;
     }
-    const docs = docsCommand(ports);
+    const docs = docsCommand(rootDir, ports);
     return [sharedBuildWatchCommand(verbose), ...commands.map(command => command === docs ? command : `${sharedBuildReadyCommand()} && ${command}`)];
 }

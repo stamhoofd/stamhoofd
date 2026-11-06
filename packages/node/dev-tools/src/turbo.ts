@@ -46,6 +46,9 @@ export function forwardTurboLine(line: string, write: (stream: 'stdout' | 'stder
  * Buffered output is spooled to a private temporary file, replayed to stderr on
  * failure, and removed on completion. Success (including warnings) and cancellation
  * discard it. Verbose/unmanaged output always streams, regardless of this option.
+ * Inherits cwd and environment: callers must select the workspace owning the command.
+ * STAM_DEV_SESSION enables managed output unless STAM_DEV_VERBOSE=1. No shell is used.
+ * Executable usage: `node turbo.js <turbo args>`; importing does not launch a process.
  */
 export async function runTurbo(args: string[], { bufferOutput = false }: { bufferOutput?: boolean } = {}): Promise<number> {
     const quiet = !!process.env.STAM_DEV_SESSION && process.env.STAM_DEV_VERBOSE !== '1';

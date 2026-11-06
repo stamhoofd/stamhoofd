@@ -22,7 +22,6 @@
         "build:types": "tsc --project tsconfig.types.json",
         "build:full": "pnpm run clear && pnpm run build",
         "clear": "rm -rf ./dist && rm -f *.tsbuildinfo .cache/*.tsbuildinfo",
-        "dev": "wait-on ../../shared/middleware/dist/index.js && concurrently -r 'node ../../../packages/node/dev-tools/dist/watch-typescript.js renderer' \"wait-on ./dist/index.js && nodemon --quiet --watch dist --watch '../../../shared/*/dist/' --watch '../../shared/*/dist/' --ext .ts,.json,.sql,.js --watch .env.json --delay 1000ms --exec 'node ../../../packages/node/dev-tools/dist/supervise.js renderer node --enable-source-maps ./dist/index.js' --signal SIGTERM\"",
         "lint": "eslint --quiet",
         "start": "pnpm run build && node --enable-source-maps ./dist/index.js",
         "typecheck": "tsc --project tsconfig.test.json --noEmit --composite false --incremental --tsBuildInfoFile .cache/typecheck.tsbuildinfo",

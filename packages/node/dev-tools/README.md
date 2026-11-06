@@ -6,12 +6,19 @@ CLI, a telemetry SDK, Vite, or Nuxt. Framework dependencies provide adapter type
 
 The CLI's dependency graph builds this package before starting development
 processes. Its output is independent of the CLI's `dist`, which is cleared during
-CLI rebuilds. The standalone docs development script prepares this package too.
+CLI rebuilds. `stam dev docs` prepares the docs observability dependency graph too.
 Restart the development session after changing tooling code.
+
+Application selection, asset preparation, and watch-command construction belong to
+`shared/cli/src/runtime/dev-commands.ts` and `shared/cli/src/workflows/start-dev.ts`.
+They resolve repository paths from the CLI context; this package owns the executable
+adapters and transport, not application orchestration. Entry-point TSDoc describes
+environment requirements, working directories, and lifecycle cleanup.
 
 ## Entry points
 
 - `events`: validated versioned messages and bounded, best-effort socket emission.
+- `application`: supervisor-injected bridge from application diagnostics to development events.
 - `vite` and `nuxt`: framework hooks translated into build/readiness transitions.
 - `supervise`: executable wrapper reporting process incarnation and exit.
 - `watch-typescript`: compiler watch callbacks translated into build cycles.

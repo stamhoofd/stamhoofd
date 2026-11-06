@@ -3,10 +3,13 @@ import { createDevEmitter } from './events.js';
 
 /**
  * Registers Nuxt's explicit development build and listener lifecycle callbacks.
- * @param _options - Nuxt module options (unused).
+ * @param options - Optional application lifecycle owner. When supplied, ready and
+ * close are delegated to it; build events still use the development emitter.
  * @param nuxt - Instance owning the hooks and cleanup.
  * @remarks Ready requires build:done, Nitro compilation and listen. This describes server
  * startup, not completion of every on-demand browser transform. No production events.
+ * Uses the supervisor's STAM_DEV_* environment through createDevEmitter. Nuxt's
+ * close hook drains the emitter; the supervisor reports process exit. No cwd assumptions.
  */
 export const devLifecycleModule: NuxtModule<{ lifecycle?: { ready(): Promise<void>; failed(): void; close(): Promise<void> } }> = (options, nuxt) => {
     if (!nuxt.options.dev) return;

@@ -413,33 +413,34 @@ describe('commandsForTarget', () => {
     const ports = buildPorts(context);
 
     it('runs the standalone Nuxt docs server for the docs target', () => {
-        const commands = commandsForTarget(DevTarget.Docs, ports);
+        const commands = commandsForTarget(context.rootDir, DevTarget.Docs, ports);
 
         expect(commands).toHaveLength(1);
-        expect(commands[0]).toContain(`pnpm --dir docs run dev --port ${ports.docs}`);
+        expect(commands[0]).toContain(`supervise.js' docs nuxt dev --port ${ports.docs}`);
         // Must bind all interfaces so the Dockerised Caddy can reach it via
         // host.docker.internal; a loopback-only bind makes the proxy 502.
         expect(commands[0]).toContain('--host 0.0.0.0');
     });
 
     it('does not install docs dependencies when starting docs', () => {
-        expect(commandsForTarget(DevTarget.Docs, ports)).toEqual([
-            `pnpm --dir docs run dev --port ${ports.docs} --host 0.0.0.0`,
+        expect(commandsForTarget(context.rootDir, DevTarget.Docs, ports)).toEqual([
+            `pnpm --dir '${context.rootDir}/docs' run prepare:observability && pnpm --dir '${context.rootDir}/docs' exec node '${context.rootDir}/packages/node/dev-tools/dist/supervise.js' docs nuxt dev --port ${ports.docs} --host 0.0.0.0`,
         ]);
     });
 
     it('starts docs alongside the full stack for the all target', () => {
-        const commands = commandsForTarget(DevTarget.All, ports);
+        const commands = commandsForTarget(context.rootDir, DevTarget.All, ports);
 
         expect(commands).toHaveLength(2);
-        expect(commands[0]).toContain('node packages/node/dev-tools/dist/turbo.js run dev');
-        expect(commands[0]).toContain('--env-mode=loose');
-        expect(commands.some(command => command.includes(`pnpm --dir docs run dev --port ${ports.docs}`))).toBe(true);
+        expect(commands[0]).toContain('--names api,renderer,stats,dashboard,webshop');
+        expect(commands[0]).toContain('--kill-others-on-fail');
+        expect(commands[0]).not.toContain('run dev');
+        expect(commands.some(command => command.includes(`supervise.js' docs nuxt dev --port ${ports.docs}`))).toBe(true);
     });
 
     it('does not start docs for backend or frontend targets', () => {
-        expect(commandsForTarget(DevTarget.Backend, ports).some(command => command.includes('--dir docs'))).toBe(false);
-        expect(commandsForTarget(DevTarget.Frontend, ports).some(command => command.includes('--dir docs'))).toBe(false);
+        expect(commandsForTarget(context.rootDir, DevTarget.Backend, ports).some(command => command.includes('nuxt dev'))).toBe(false);
+        expect(commandsForTarget(context.rootDir, DevTarget.Frontend, ports).some(command => command.includes('nuxt dev'))).toBe(false);
     });
 });
 
@@ -447,16 +448,16 @@ describe('concurrentlyTargets', () => {
     const ports = buildPorts(context);
 
     it('runs the docs-only session without the shared build watcher', () => {
-        const targets = concurrentlyTargets(DevTarget.Docs, ports);
+        const targets = concurrentlyTargets(context.rootDir, DevTarget.Docs, ports);
 
         expect(targets).toHaveLength(1);
         expect(targets.some(target => target.includes('nodemon') || target.includes('wait-on'))).toBe(false);
     });
 
     it('starts docs immediately in all while gating the app processes on the shared build', () => {
-        const targets = concurrentlyTargets(DevTarget.All, ports);
-        const docsTarget = targets.find(target => target.includes('--dir docs run dev'));
-        const appTarget = targets.find(target => target.includes('turbo.js run dev'));
+        const targets = concurrentlyTargets(context.rootDir, DevTarget.All, ports);
+        const docsTarget = targets.find(target => target.includes('run prepare:observability'));
+        const appTarget = targets.find(target => target.includes('--names api,renderer,stats,dashboard,webshop'));
 
         // Docs consumes no shared build output, so it must not wait on it...
         expect(docsTarget).toBeDefined();
@@ -467,14 +468,14 @@ describe('concurrentlyTargets', () => {
     });
 
     it('uses the root shared build graph in the watcher', () => {
-        const watcher = concurrentlyTargets(DevTarget.All, ports).find(target => target.includes('nodemon'));
+        const watcher = concurrentlyTargets(context.rootDir, DevTarget.All, ports).find(target => target.includes('nodemon'));
 
         expect(watcher).toContain("--exec 'node packages/node/dev-tools/dist/shared-build.js ");
         expect(watcher).not.toContain('--verbose');
     });
 
     it('replays all shared build logs only when verbose output is requested', () => {
-        const watcher = concurrentlyTargets(DevTarget.All, ports, true).find(target => target.includes('nodemon'));
+        const watcher = concurrentlyTargets(context.rootDir, DevTarget.All, ports, true).find(target => target.includes('nodemon'));
         expect(watcher).toContain(" --verbose'");
     });
 });

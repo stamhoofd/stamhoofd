@@ -2,6 +2,15 @@ import { runTurbo } from './turbo.js';
 import fs from 'node:fs/promises';
 import { createDevEmitter } from './events.js';
 
+/**
+ * Executable entry point: `node shared-build.js <marker> [--verbose]` from the repo root.
+ * @remarks The marker must be `.development/cli/generated/shared-build-<digits>.ready`.
+ * Runs the root build:shared graph once and writes the marker only on uncancelled
+ * success. The CLI owns marker removal between sessions. Reports one build cycle
+ * through STAM_DEV_*; runTurbo owns output buffering and signal forwarding.
+ * Compiler failures deliberately exit zero so the outer nodemon watcher can recover.
+ * Importing this module runs the build; it is not a library entry point.
+ */
 const emitter = createDevEmitter('shared');
 const cycleId = process.hrtime.bigint().toString();
 const marker = process.argv[2];

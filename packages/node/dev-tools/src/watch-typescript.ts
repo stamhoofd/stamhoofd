@@ -9,7 +9,13 @@ import { createDevEmitter } from './events.js';
  * @param config - Runtime tsconfig path, relative to the package cwd.
  * @returns Watcher owner; close stops file watchers and drains events.
  * @remarks Compiler diagnostics remain on stdout. Numeric status diagnostics are
- * compiler API notifications, not parsed terminal text. Turbo still orders packages.
+ * compiler API notifications, not parsed terminal text. The CLI prepares shared
+ * dependencies before starting this watcher. Compilation failures emit build.failed
+ * and keep watching. STAM_DEV_SESSION suppresses routine status text unless
+ * STAM_DEV_VERBOSE=1; diagnostics are always reported. Transport uses createDevEmitter.
+ *
+ * Executable usage: `node watch-typescript.js <app>` from the application directory.
+ * SIGINT/SIGTERM close the watcher and drain events; importing does not start it.
  */
 export function watchTypeScript(app: DevApp, config = 'tsconfig.build.json') {
     const emitter = createDevEmitter(app);

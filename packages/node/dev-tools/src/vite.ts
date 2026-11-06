@@ -8,6 +8,9 @@ import { createDevEmitter } from './events.js';
  * @returns A development-only plugin; no work in production builds.
  * @remarks The supervisor supplies the process identity. A config reload starts
  * another startup phase within that identity; the supervisor reports actual exits.
+ * Uses createDevEmitter's STAM_DEV_* environment and has no cwd assumptions.
+ * Readiness means the HTTP server is listening; middleware mode without an HTTP
+ * server does not emit ready. Server close/closeBundle drain the emitter.
  */
 export function devLifecyclePlugin(app: DevApp) {
     let emitter: ReturnType<typeof createDevEmitter> | undefined;

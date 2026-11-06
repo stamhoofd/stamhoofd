@@ -6,7 +6,6 @@
     "scripts": {
         "prepare:observability": "pnpm --filter @node/nuxt-observability... run build:types && pnpm --filter @node/nuxt-observability... run build",
         "build": "pnpm run prepare:observability && nuxt build",
-        "dev": "pnpm run prepare:observability && node ../packages/node/dev-tools/dist/supervise.js docs nuxt dev",
         "generate": "pnpm run prepare:observability && nuxt generate",
         "preview": "nuxt preview"
     },

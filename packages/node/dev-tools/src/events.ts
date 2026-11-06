@@ -4,7 +4,13 @@ import { randomUUID } from 'node:crypto';
 /** Application owners understood by the development footer. */
 export type DevApp = 'shared' | 'dashboard' | 'api' | 'docs' | 'webshop' | 'renderer' | 'stats';
 export type DevEventName = 'build.started' | 'build.succeeded' | 'build.failed' | 'starting' | 'ready' | 'stopped';
-/** Sequence is emitter-local; producer time orders supervisor and child events. */
+/**
+ * Versioned NDJSON message shared by development producers and the CLI receiver.
+ * @remarks `generation` and `time` are decimal monotonic nanoseconds, not wall-clock
+ * timestamps. Sequence numbers are emitter-local; supervisor and child share a
+ * process identity but have separate sequences. Build events require a cycleId;
+ * other events must omit it. `startupOwner` delegates startup reporting to the application.
+ */
 export type DevEvent = {
     version: 1;
     app: DevApp;
@@ -21,11 +27,16 @@ export type DevEvent = {
     startupOwner?: 'application';
 };
 
+/** Maximum UTF-8 frame size, including the trailing newline. */
 export const maxEventBytes = 16 * 1024;
 const apps = ['shared', 'dashboard', 'api', 'docs', 'webshop', 'renderer', 'stats'];
 const events = ['build.started', 'build.succeeded', 'build.failed', 'starting', 'ready', 'stopped'];
 
-/** Validate the wire format before handing it to status/telemetry consumers. */
+/**
+ * Validates decoded wire fields before handing events to status/telemetry consumers.
+ * @param value - Parsed JSON; frame-size and session checks belong to the receiver.
+ * @returns Whether the value satisfies version 1 of the development protocol.
+ */
 export function isDevEvent(value: unknown): value is DevEvent {
     if (value === null || typeof value !== 'object') return false;
     const record = value as Record<string, unknown>;
@@ -48,9 +59,16 @@ function validateDevEvent(value: Record<string, unknown>): boolean {
 }
 
 /**
- * Development-only, ordered NDJSON channel. Importable before any shared build.
- * A missing/closed receiver disables delivery without affecting the application.
- * Each emitter owns one bounded connection; close() drains it with a deadline.
+ * Creates a development-only, best-effort NDJSON emitter with a lazy Unix socket.
+ * @param app - Owner displayed by the CLI's development status.
+ * @param env - Requires STAM_DEV_SOCKET and STAM_DEV_SESSION to deliver events.
+ * STAM_DEV_PROCESS_ID and STAM_DEV_GENERATION share a supervisor's identity;
+ * otherwise fresh values are generated. STAM_DEV_TRACEPARENT supplies trace context.
+ * @returns An emitter whose close method must be awaited during graceful shutdown.
+ * @remarks Missing configuration makes emission a no-op. Socket failure or a queued
+ * backlog above four frames permanently disables this emitter; oversized frames
+ * are dropped. There is no retry or acknowledgement. The socket is unreferenced
+ * so telemetry cannot keep an application alive. No working-directory requirement.
  */
 export function createDevEmitter(app: DevApp, env: NodeJS.ProcessEnv = process.env) {
     const identity = {
@@ -63,6 +81,11 @@ export function createDevEmitter(app: DevApp, env: NodeJS.ProcessEnv = process.e
     let socket: net.Socket | undefined;
     let closed = false;
     return {
+        /**
+         * Queues an event without waiting for delivery.
+         * @param event - Lifecycle transition to report.
+         * @param fields - Build events must supply cycleId; other events must omit it.
+         */
         emit(event: DevEventName, fields: Pick<DevEvent, 'cycleId' | 'errors' | 'failed' | 'startupOwner'> = {}) {
             if (closed || !env.STAM_DEV_SOCKET || !env.STAM_DEV_SESSION) return;
             const line = JSON.stringify({ ...fields, ...identity, event, time: process.hrtime.bigint().toString(), sequence: ++sequence }) + '\n';
@@ -80,6 +103,7 @@ export function createDevEmitter(app: DevApp, env: NodeJS.ProcessEnv = process.e
             }
             socket.write(line);
         },
+        /** Stops further emission and drains the connection, destroying it after 250 ms. */
         async close() {
             closed = true;
             if (!socket || socket.destroyed) return;
