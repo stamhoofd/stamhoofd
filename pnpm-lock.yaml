@@ -2097,6 +2097,9 @@ importers:
       '@stamhoofd/frontend-pdf-builder':
         specifier: workspace:*
         version: link:../pdf-builder
+      '@stamhoofd/frontend-pdf-viewer':
+        specifier: workspace:*
+        version: link:../pdf-viewer
       '@stamhoofd/frontend-platform':
         specifier: workspace:*
         version: link:../platform
@@ -2106,6 +2109,9 @@ importers:
       '@stamhoofd/frontend-storage':
         specifier: workspace:*
         version: link:../storage
+      '@stamhoofd/judicial-record-check':
+        specifier: workspace:*
+        version: link:../../../shared/judicial-record-check
       '@stamhoofd/locales':
         specifier: workspace:*
         version: link:../../../shared/locales
@@ -2181,6 +2187,9 @@ importers:
       pdfkit:
         specifier: 0.20.2
         version: 0.20.2
+      qr-scanner:
+        specifier: 1.4.2
+        version: 1.4.2
       qrcode:
         specifier: 1.5.4
         version: 1.5.4
