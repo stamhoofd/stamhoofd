@@ -1,4 +1,5 @@
-// first import nock
+// Defines STAMHOOFD before @stamhoofd/structures is evaluated, so Version runs at ReleasedVersion + 1
+import '@stamhoofd/test-utils/environment';
 
 import { Column } from '@node/database';
 import { Request } from '@node/endpoints';

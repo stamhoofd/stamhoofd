@@ -37,6 +37,7 @@
         "@stamhoofd/utility": "workspace:*"
     },
     "devDependencies": {
+        "@stamhoofd/test-utils": "workspace:*",
         "vitest": "4.1.12"
     },
     "license": "UNLICENSED",

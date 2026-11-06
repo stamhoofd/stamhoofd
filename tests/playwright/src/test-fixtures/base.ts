@@ -1,3 +1,6 @@
+// Defines STAMHOOFD before any hoisted import evaluates @stamhoofd/structures
+import '@stamhoofd/test-utils/environment';
+
 // Setup environment + register beforeAll/before/... hooks with Playwright
 import { test as base, expect } from '@playwright/test';
 import { TestUtils } from '@stamhoofd/test-utils';
