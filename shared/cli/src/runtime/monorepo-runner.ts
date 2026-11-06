@@ -87,6 +87,7 @@ export const unitTestPackages: UnitTestPackage[] = [
     { name: 'platform', path: 'frontend/shared/platform', needsDatabase: false },
     { name: 'session', path: 'frontend/shared/session', needsDatabase: false },
     { name: 'application', path: 'frontend/shared/application', needsDatabase: false },
+    { name: 'pdf-viewer', path: 'frontend/shared/pdf-viewer', needsDatabase: false },
 ];
 export const coverageTestPackages: UnitTestPackage[] = [
     { name: 'i18n-uuid', path: '.development/i18n-uuid', needsDatabase: false },
