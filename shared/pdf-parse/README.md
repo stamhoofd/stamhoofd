@@ -94,13 +94,20 @@ put its rendering on the main thread, silently. `src/pdfjs.ts` therefore puts th
 after the import and passes a worker to `getDocument` instead. A consumer that renders pdfs keeps
 its own real worker, and `tests/pdfjs.test.ts` holds that line.
 
-One more thing a consumer should know:
+Two more things a consumer should know:
 
 - It is large. In a production Vite build, pdf.js and its worker together are about 1.8 MB
   minified, 550 kB gzipped, and tree shaking does not help: the worker is one bundle by
   construction. Import this package from a route or a view that is already code split, and if a
   second package in the app also needs pdf.js, the two should share one copy rather than each
   depend on `pdfjs-dist` on its own.
+- `src/polyfills.ts` supplies `Promise.withResolvers`, which pdf.js 6 uses throughout and the
+  legacy build does not polyfill, because it arrived in Safari 17.4 while
+  `IPHONEOS_DEPLOYMENT_TARGET` is 15.0. That file also records what an audit of the rest of the
+  build turned up and why none of it needs the same treatment - the short version being that
+  `Object.hasOwn`, `Array.prototype.at` and `structuredClone` are Safari 15.4 and this frontend
+  already uses all three, while `AbortSignal.any` is real but sits in pdf.js's editor and touch
+  layers, which reading text never reaches.
 
 ## Tests
 

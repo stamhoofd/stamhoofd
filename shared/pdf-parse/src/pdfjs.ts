@@ -16,6 +16,9 @@
  * worker, and `createMainThreadWorker` hands pdf.js a worker for one document instead of leaving a
  * mark on `globalThis` that would answer for every document in the bundle.
  */
+// Before pdf.js, which is the whole point of it
+import './polyfills.js';
+
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { WorkerMessageHandler } from 'pdfjs-dist/legacy/build/pdf.worker.mjs';
 
