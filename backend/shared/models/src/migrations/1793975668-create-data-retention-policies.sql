@@ -1,0 +1,20 @@
+CREATE TABLE `data_retention_policies` (
+  `id` varchar(36) NOT NULL,
+  `tenantId` varchar(36) NOT NULL,
+  `organizationId` varchar(36) DEFAULT NULL,
+  `scopeId` varchar(36) NOT NULL,
+  `category` varchar(36) NOT NULL,
+  `anonymizeAfterMonths` int DEFAULT NULL,
+  `deleteAfterMonths` int DEFAULT NULL,
+  `protectedPeriods` int DEFAULT NULL,
+  `pendingAnonymizeAfterMonths` int DEFAULT NULL,
+  `pendingDeleteAfterMonths` int DEFAULT NULL,
+  `pendingProtectedPeriods` int DEFAULT NULL,
+  `pendingFrom` datetime DEFAULT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tenant_scope_category` (`tenantId`, `scopeId`, `category`),
+  KEY `organizationId` (`organizationId`),
+  CONSTRAINT `data_retention_policies_ibfk_1` FOREIGN KEY (`organizationId`) REFERENCES `organizations` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
