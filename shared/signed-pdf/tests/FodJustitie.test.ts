@@ -4,11 +4,10 @@ import { describe, expect, test } from 'vitest';
 
 import { verifyPdfFromFodJustitie } from '../src/FodJustitie.js';
 
-const MAX_AGE_IN_DAYS = 31;
 
 describe('verifyPdfFromFodJustitie', () => {
     async function expectFailure(bytes: Uint8Array, code: string) {
-        const thrown = await verifyPdfFromFodJustitie(bytes, MAX_AGE_IN_DAYS).then(() => null, (error: unknown) => error);
+        const thrown = await verifyPdfFromFodJustitie(bytes).then(() => null, (error: unknown) => error);
 
         expect(isSimpleError(thrown)).toBe(true);
         expect((thrown as SimpleError).code).toBe(code);
