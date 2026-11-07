@@ -112,11 +112,14 @@ export interface VerifiedPdfSignature {
  * Establishes authenticity only: there is no revocation lookup, and the content of the document is
  * not parsed.
  *
- * Answers with the signing time the signature carries and the path it validated.
+ * Answers with the signing time the signature carries and the path it validated. How old a document
+ * may be is not judged here: the signing time is handed back so the caller can weigh it against its
+ * own limit, which differs per caller. A signature dated in the future is still refused, since that
+ * is the signature failing to be coherent rather than a limit being exceeded.
  *
  * Throws a `SimpleError` on every rejection.
  */
-export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignaturePolicy, maxAgeInDays: number): Promise<VerifiedPdfSignature> {
+export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignaturePolicy): Promise<VerifiedPdfSignature> {
     if (bytes.length > policy.maximumFileSize) {
         throw new SimpleError({
             code: 'file_too_large',
@@ -282,8 +285,9 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         });
     }
 
-    // Only now that the signature holds are the signed attributes worth believing, so this is where
-    // the signing time they carry can be judged.
+    // Only now that the signature holds is the signing time it carries worth believing. How old a
+    // document may be is the caller's policy, not this package's, so the only thing judged here is
+    // that the time is coherent: a signature cannot have been made after now.
     const now = new Date();
 
     if (signedAt.getTime() > now.getTime() + CLOCK_TOLERANCE_IN_MS) {
@@ -291,15 +295,6 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
             code: 'signed_in_the_future',
             message: `The signature claims to be made at ${signedAt.toISOString()}, which is after ${now.toISOString()}.`,
             human: $t('Volgens de digitale ondertekening werd dit bestand in de toekomst ondertekend. Laad het originele pdf-bestand op dat je van {signerName} kreeg.', { signerName: policy.signerName }),
-            statusCode: 400,
-        });
-    }
-
-    if (signedAt.getTime() < now.getTime() - maxAgeInDays * 24 * 60 * 60 * 1000) {
-        throw new SimpleError({
-            code: 'signature_too_old',
-            message: `The signature was made at ${signedAt.toISOString()}, more than ${maxAgeInDays} days before ${now.toISOString()}.`,
-            human: $t('Dit bestand werd te lang geleden ondertekend. Vraag een recenter document aan bij {signerName} en laad dat op.', { signerName: policy.signerName }),
             statusCode: 400,
         });
     }

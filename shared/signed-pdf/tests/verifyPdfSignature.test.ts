@@ -8,7 +8,6 @@ import type { TestChain } from '../src/testing/SignedPdfBuilder.js';
 import { TEST_SIGNER_COMMON_NAME, TEST_SIGNER_NAME, TEST_SIGNER_ORGANIZATION, TEST_SIGNER_ORGANIZATION_IDENTIFIER, createSignedPdf, createTestChain, issueCertificate, toPem } from '../src/testing/SignedPdfBuilder.js';
 
 const SIGNED_AT = new Date('2026-11-02T17:02:46Z');
-const NO_AGE_LIMIT = 100 * 365;
 
 describe('verifyPdfSignature', () => {
     let chain: TestChain;
@@ -18,8 +17,8 @@ describe('verifyPdfSignature', () => {
         chain = await createTestChain();
     });
 
-    async function expectFailure(bytes: Uint8Array, code: string, policy = chain.policy, maxAgeInDays = NO_AGE_LIMIT) {
-        const thrown = await verifyPdfSignature(bytes, policy, maxAgeInDays).then(() => null, (error: unknown) => error);
+    async function expectFailure(bytes: Uint8Array, code: string, policy = chain.policy) {
+        const thrown = await verifyPdfSignature(bytes, policy).then(() => null, (error: unknown) => error);
 
         expect(isSimpleError(thrown)).toBe(true);
         expect((thrown as SimpleError).code).toBe(code);
@@ -30,7 +29,7 @@ describe('verifyPdfSignature', () => {
     }
 
     async function expectFailureWithMessage(bytes: Uint8Array, code: string, message: string) {
-        const thrown = await verifyPdfSignature(bytes, chain.policy, NO_AGE_LIMIT).then(() => null, (error: unknown) => error);
+        const thrown = await verifyPdfSignature(bytes, chain.policy).then(() => null, (error: unknown) => error);
 
         expect(isSimpleError(thrown)).toBe(true);
         expect((thrown as SimpleError).code).toBe(code);
@@ -42,7 +41,7 @@ describe('verifyPdfSignature', () => {
     test('accepts a document signed by the pinned signer, and answers with the path it validated', async () => {
         const bytes = await createSignedPdf({ chain, signedAt: SIGNED_AT });
 
-        const { certificatePath } = await verifyPdfSignature(bytes, chain.policy, NO_AGE_LIMIT);
+        const { certificatePath } = await verifyPdfSignature(bytes, chain.policy);
 
         // What a caller that looks certificates up afterwards has to run over, so it is part of the
         // contract rather than a detail: the signer, then its issuer, up to the pinned anchor. By key
@@ -59,7 +58,7 @@ describe('verifyPdfSignature', () => {
         // trustworthy as the rest of what this establishes.
         const bytes = await createSignedPdf({ chain, signedAt: SIGNED_AT });
 
-        const { signedAt } = await verifyPdfSignature(bytes, chain.policy, NO_AGE_LIMIT);
+        const { signedAt } = await verifyPdfSignature(bytes, chain.policy);
 
         expect(signedAt).toEqual(SIGNED_AT);
     });
@@ -259,7 +258,7 @@ describe('verifyPdfSignature', () => {
     test('accepts a signing-certificate-v2 attribute that names the signer', async () => {
         const bytes = await createSignedPdf({ chain, signedAt: SIGNED_AT, signingCertificate: chain.signer.certificate });
 
-        await expect(verifyPdfSignature(bytes, chain.policy, NO_AGE_LIMIT)).resolves.toHaveProperty('certificatePath.length', 3);
+        await expect(verifyPdfSignature(bytes, chain.policy)).resolves.toHaveProperty('certificatePath.length', 3);
     });
 
     test('rejects a signing-certificate-v2 attribute that names another certificate', async () => {
@@ -276,15 +275,15 @@ describe('verifyPdfSignature', () => {
     });
 
     test('rejects a signature carrying two signing times', async () => {
-        // One inside the age the caller allows and one far outside it. Reading whichever comes first
-        // would make the order of the attributes decide whether the document is too old.
+        // Two wildly different dates. Reading whichever comes first would let the order of the
+        // attributes decide which date the caller is handed, and the caller judges the age on it.
         const bytes = await createSignedPdf({
             chain,
             signedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
             secondSignedAt: new Date(Date.now() - 900 * 24 * 60 * 60 * 1000),
         });
 
-        await expectFailure(bytes, 'missing_signing_time', chain.policy, 90);
+        await expectFailure(bytes, 'missing_signing_time');
     });
 
     test('rejects a signer certificate naming its organization identifier twice', async () => {
@@ -335,22 +334,18 @@ describe('verifyPdfSignature', () => {
         // Rounded to the second, since that is all a UTCTime signing time holds.
         const signedAt = new Date(Math.floor((Date.now() + 60 * 1000) / 1000) * 1000);
 
-        await expect(verifyPdfSignature(await createSignedPdf({ chain, signedAt }), chain.policy, NO_AGE_LIMIT)).resolves.toHaveProperty('signedAt', signedAt);
+        await expect(verifyPdfSignature(await createSignedPdf({ chain, signedAt }), chain.policy)).resolves.toHaveProperty('signedAt', signedAt);
     });
 
-    test('rejects a signature older than the caller allows', async () => {
-        const bytes = await createSignedPdf({ chain, signedAt: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000) });
+    test('does not judge how old a signature is, and answers the date so a caller can', async () => {
+        // Rounded to the second, since that is all a UTCTime signing time holds.
+        const signedAt = new Date(Math.floor((Date.now() - 900 * 24 * 60 * 60 * 1000) / 1000) * 1000);
+        const bytes = await createSignedPdf({ chain, signedAt });
 
-        await expectFailure(bytes, 'signature_too_old', chain.policy, 90);
-    });
-
-    test('accepts a signature within the age the caller allows', async () => {
-        const bytes = await createSignedPdf({ chain, signedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) });
-
-        await expect(verifyPdfSignature(bytes, chain.policy, 90)).resolves.toHaveProperty('certificatePath.length', 3);
-
-        // The age is the caller's to set, so the same document fails a stricter requirement.
-        await expectFailure(bytes, 'signature_too_old', chain.policy, 7);
+        // Years old and still authentic: it was signed by the pinned signer and has not been
+        // touched since. Whether that is recent enough is the caller's policy, and differs per
+        // caller, so the only thing this package owes them is the date it established.
+        await expect(verifyPdfSignature(bytes, chain.policy)).resolves.toHaveProperty('signedAt', signedAt);
     });
 
     test('rejects a trust anchor that does not match its pin', async () => {
@@ -386,7 +381,7 @@ describe('verifyPdfSignature', () => {
      */
     describe('a decoy certificate in the signature container', () => {
         async function expectGenuinePath(bytes: Uint8Array) {
-            const { certificatePath } = await verifyPdfSignature(bytes, chain.policy, NO_AGE_LIMIT);
+            const { certificatePath } = await verifyPdfSignature(bytes, chain.policy);
 
             expect(await Promise.all(certificatePath.map(certificate => getSpkiHash(certificate)))).toEqual([
                 await getSpkiHash(chain.signer.certificate),

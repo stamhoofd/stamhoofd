@@ -7,22 +7,24 @@ WebCrypto only, so the same code can run in the browser and the backend.
 import { verifyPdfFromFodJustitie, verifyPdfSignature, FOD_JUSTITIE_SIGNATURE_POLICY } from '@stamhoofd/signed-pdf';
 
 // Resolves when the signature is valid, throws a SimpleError otherwise.
-const { signedAt, certificatePath } = await verifyPdfFromFodJustitie(bytes, 90);
+const { signedAt, certificatePath } = await verifyPdfFromFodJustitie(bytes);
 
 // The same thing, for a signer this package does not pin a shorthand for.
-const verified = await verifyPdfSignature(bytes, FOD_JUSTITIE_SIGNATURE_POLICY, 90);
+const verified = await verifyPdfSignature(bytes, FOD_JUSTITIE_SIGNATURE_POLICY);
 ```
 
 - `bytes`: the PDF as a `Uint8Array`.
 - `policy`: the signer to accept, its pinned trust anchor and intermediates, and a file size cap. See
   `PdfSignaturePolicy`. `FOD_JUSTITIE_SIGNATURE_POLICY` (Belgian *uittreksel uit het strafregister*)
   is the only one so far, and `verifyPdfFromFodJustitie` is the shorthand that pins it.
-- `maxAgeInDays`: how long ago the document may have been signed. This depends on the use, so it
-  is a parameter rather than part of the policy.
-
 It answers with `signedAt`, the signing time the signature itself carries — signed along with the
 document, so it is not a date read off the pdf — and `certificatePath`, the chain that validated,
 from the signer up to the pinned anchor.
+
+**How old a document may be is not checked here.** That limit differs per caller — a delivery and a
+later review do not want the same number — so this package hands back `signedAt` and the caller
+weighs it. A signature dated in the future is still refused: that is the signature failing to be
+coherent rather than a limit being exceeded.
 
 ## Limitations
 
