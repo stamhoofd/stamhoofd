@@ -435,7 +435,7 @@ Useful environment variables:
 - `STAMHOOFD_MYSQL_SORT_BUFFER_SIZE` tunes the MySQL container sort buffer size (e.g. `8M`), defaulting to `2M`.
 - `METABASE_PORT` overrides the local Metabase host port, defaulting to `3030`.
 - `METABASE_ADMIN_EMAIL` and `METABASE_ADMIN_PASSWORD` override the Metabase admin account the CLI signs in with, for an instance that was set up by hand (see Local Metabase).
-- `PUBLIC_IP`: Publish DNS records to your computers public IP address, and make Caddy listen on 0.0.0.0 instead of localhost. Useful for testing on local devices. E.g. `PUBLIC_IP=192.168.1.7 stam services restart` `PUBLIC_IP=192.168.1.7 stam dev all`
+- `PUBLIC_IP`: Publish DNS records to your computers public IP address, and make Caddy listen on 0.0.0.0 instead of localhost. Useful for testing on local devices. E.g. `PUBLIC_IP=192.168.1.7 stam services restart` `PUBLIC_IP=192.168.1.7 stam dev all` See Testing On A Phone Or Another Device for the device-side setup.
 
 The primary `stamhoofd` instance uses base ports. With Git, the primary instance is the first worktree in `git worktree list --porcelain`. With jj, it is the `default` workspace, falling back to the first workspace when `default` is absent. Shared service configuration and route manifests live in that primary workspace. Other worktrees and workspaces get deterministic offsets based on the workspace name so multiple workspaces can run on the same machine without changing databases when branches change.
 
@@ -447,6 +447,39 @@ STAMHOOFD_MYSQL_SORT_BUFFER_SIZE=64M \
 STAMHOOFD_MYSQL_INNODB_BUFFER_POOL_SIZE=16G \
 stam services restart
 ```
+
+### Testing On A Phone Or Another Device
+
+Start the stack with `PUBLIC_IP` set to the IP of your machine on the local network, on both
+commands:
+
+```
+PUBLIC_IP=192.168.1.7 stam services restart
+PUBLIC_IP=192.168.1.7 stam dev all
+```
+
+CoreDNS then answers the whole `.stamhoofd` zone with that address and forwards everything else, and
+Caddy and the shared services listen on `0.0.0.0` instead of localhost.
+
+On the device:
+
+- Point its DNS at your machine. Android has no DNS-only field, so switch the Wi-Fi network to a
+  static IP and use your machine's IP as DNS 1. Leave DNS 2 empty: a public resolver there can be
+  picked for a query and never resolves `.stamhoofd`. Make sure Private DNS is off, because
+  DNS-over-TLS to a provider bypasses CoreDNS.
+- Install the Caddy root CA from `~/Library/Application Support/Caddy/pki/authorities/local/root.crt`
+  (`$XDG_DATA_HOME/caddy/...` on Linux), or every request fails on an untrusted certificate. Android
+  only installs a CA through Settings, not by opening the file. Firefox for Android ignores the
+  system CA store entirely and needs an exception accepted per host, including the API and files
+  domains, because `fetch` cannot prompt for one.
+- On Android 16 and later, grant the browser the **Local network devices** permission under
+  Settings > Apps > `<browser>` > Permissions. Without it Chrome fails every connection to a LAN
+  address at the socket with `ERR_LOCAL_NETWORK_PERMISSION_MISSING`, retries, and reports
+  `ERR_TOO_MANY_RETRIES`. Nothing leaves the device, so a packet capture on the host stays empty and
+  it looks like a DNS or network fault; `chrome://net-export` on the device names the real cause.
+
+The IP usually comes from DHCP, so after a reconnect check it again (`ipconfig getifaddr en0` on
+macOS) and restart with the new value.
 
 ### Shared Services
 

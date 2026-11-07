@@ -205,6 +205,7 @@ type CaddyConfig = {
             servers: {
                 stamhoofd: {
                     listen: string[];
+                    protocols?: string[];
                     routes: CaddyRoute[];
                     automatic_https?: { disable_redirects: boolean };
                 };
@@ -228,7 +229,7 @@ type CaddyConfig = {
     };
 };
 
-export async function writeCaddyConfig(context: CliContext, options: { httpPort?: number; httpsPort?: number; disableRedirects?: boolean; proxyHost?: string; listenHost?: string; adminListenHost?: string; adminOrigin?: string } = {}): Promise<string> {
+export async function writeCaddyConfig(context: CliContext, options: { httpPort?: number; httpsPort?: number; disableRedirects?: boolean; proxyHost?: string; listenHost?: string; adminListenHost?: string; adminOrigin?: string; protocols?: string[] } = {}): Promise<string> {
     const configPath = path.join(sharedDir(context), 'caddy.json');
     await writeReadableConfig(configPath, JSON.stringify(await buildCaddyConfig(context, options), null, 4));
     return configPath;
@@ -356,7 +357,7 @@ export function buildCaddyRouteOptions(context: CliContext, options: { proxyHost
     };
 }
 
-export async function buildCaddyConfig(context: CliContext, options: { setup?: boolean; httpPort?: number; httpsPort?: number; disableRedirects?: boolean; proxyHost?: string; listenHost?: string; adminListenHost?: string; adminOrigin?: string } = {}): Promise<CaddyConfig> {
+export async function buildCaddyConfig(context: CliContext, options: { setup?: boolean; httpPort?: number; httpsPort?: number; disableRedirects?: boolean; proxyHost?: string; listenHost?: string; adminListenHost?: string; adminOrigin?: string; protocols?: string[] } = {}): Promise<CaddyConfig> {
     const domains = buildDomains(context);
     const ports = buildPorts(context);
     const activeManifests = await listActiveRouteManifests(context);
@@ -398,6 +399,7 @@ export async function buildCaddyConfig(context: CliContext, options: { setup?: b
                         listen: options.setup
                             ? [listenPort(caddySetupHttpsPort), listenPort(caddySetupHttpPort)]
                             : [listenPort(options.httpsPort ?? caddyHttpsPort), listenPort(options.httpPort ?? caddyHttpPort)],
+                        protocols: options.protocols,
                         routes,
                         automatic_https: (options.setup || options.disableRedirects)
                             ? { disable_redirects: true }
