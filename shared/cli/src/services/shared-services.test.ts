@@ -1,6 +1,9 @@
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { caddyAdminPort, caddyHttpPort, caddyHttpsPort, caddyUnprivilegedHttpPort, caddyUnprivilegedHttpsPort, defaultMysqlInnodbBufferPoolSize, defaultMysqlSortBufferSize, localFilesAccessKey, localFilesSecretKey, localhostPort, localhostPortMapping, maildevPassword, maildevUsername, maildevInternalHttpPort, maildevInternalSmtpPort, mysqlDataVolume, mysqlInternalPort, rustfsInternalApiPort } from '../config/shared-service-config.js';
-import { buildSharedServiceProfile } from '../config/shared-service-profile.js';
+import { buildCaddyServiceProfile, buildSharedServiceProfile, caddyProtocols } from '../config/shared-service-profile.js';
 import { run, RunVerbosity } from '../runtime/command-runner.js';
 import { CaddyService } from './definitions/caddy-service.js';
 import { CorednsService } from './definitions/coredns-service.js';
@@ -180,5 +183,62 @@ describe('shared service Docker args', () => {
             'podman logs -f stamhoofd-coredns',
             'podman logs -f stamhoofd-caddy',
         ], { allowFailure: true, verbosity: RunVerbosity.Output });
+    });
+});
+
+describe('CoreDNS Corefile', () => {
+    async function corefileFor(publicIp?: string): Promise<string> {
+        const generatedDir = await fs.mkdtemp(path.join(os.tmpdir(), 'stam-cli-coredns-'));
+        if (publicIp === undefined) {
+            vi.stubEnv('PUBLIC_IP', '');
+        }
+        else {
+            vi.stubEnv('PUBLIC_IP', publicIp);
+        }
+        try {
+            const prepared = await new CorednsService().prepare({ generatedDir } as any);
+            return await fs.readFile(prepared.corefile, 'utf-8');
+        }
+        finally {
+            vi.unstubAllEnvs();
+        }
+    }
+
+    it('answers the zone with the loopback addresses by default', async () => {
+        const corefile = await corefileFor();
+
+        expect(corefile).toContain('IN A 127.0.0.1');
+        expect(corefile).toContain('IN AAAA ::1');
+        expect(corefile).toContain('template IN ANY');
+    });
+
+    it('answers the zone with the public IP and keeps other types out of SERVFAIL', async () => {
+        const corefile = await corefileFor('192.168.1.7');
+
+        expect(corefile).toContain('IN A 192.168.1.7');
+        // The zone has no IPv6 address to hand out, but AAAA and HTTPS must still come back as an
+        // empty NOERROR: falling through to no plugin SERVFAILs, and a resolver that asks for A and
+        // AAAA at once (Android) then fails the lookup instead of using the A record.
+        expect(corefile).toContain('template IN ANY');
+        expect(corefile).toContain('rcode NOERROR');
+    });
+
+    it('carries the zone SOA in a no-data answer', async () => {
+        // RFC 2308 wants the SOA in the authority section of a no-data answer. Without it a strict
+        // resolver cannot conclude the record is absent and retries the query instead, which is
+        // what Chrome on Android reports as ERR_TOO_MANY_RETRIES.
+        for (const corefile of [await corefileFor(), await corefileFor('192.168.1.7')]) {
+            expect(corefile).toMatch(/authority "\{\{ \.Zone \}\} \d+ IN SOA /);
+        }
+    });
+});
+
+describe('Caddy protocols', () => {
+    it('leaves HTTP/3 out when only TCP is published', () => {
+        expect(caddyProtocols(buildCaddyServiceProfile('darwin'))).toEqual(['h1', 'h2']);
+    });
+
+    it('keeps the Caddy default in host network mode', () => {
+        expect(caddyProtocols(buildCaddyServiceProfile('linux'))).toBeUndefined();
     });
 });

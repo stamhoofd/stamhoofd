@@ -3,7 +3,7 @@ import path from 'node:path';
 import { buildCaddyRouteOptions, writeCaddyConfig } from '../../config/caddy-config.js';
 import { caddyAdminPort, caddyBaseImage, caddyBuilderImage, caddyConfigPath, caddyContainer, caddyDataDir, caddyDataDirInContainer, caddyImage, caddyPlugins, localhostPort, localhostPortMapping } from '../../config/shared-service-config.js';
 import type { SharedServiceProfile } from '../../config/shared-service-profile.js';
-import { buildCaddyServiceProfile, buildSharedServiceProfile, SharedServiceCaddyRunMode } from '../../config/shared-service-profile.js';
+import { buildCaddyServiceProfile, buildSharedServiceProfile, caddyProtocols, SharedServiceCaddyRunMode } from '../../config/shared-service-profile.js';
 import type { CliContext } from '../../context/create-context.js';
 import { RunVerbosity } from '../../runtime/command-runner.js';
 import { withFileLock } from '../../runtime/file-lock.js';
@@ -141,6 +141,7 @@ export class CaddyService extends SharedDockerService<CaddyPrepared> {
     private static async writeRuntimeConfig(context: CliContext): Promise<string> {
         const profile = buildSharedServiceProfile(await docker.getContainerRuntime());
         return await writeCaddyConfig(context, {
+            protocols: caddyProtocols(profile),
             httpPort: profile.caddyHttpListenPort,
             httpsPort: profile.caddyHttpsListenPort,
             disableRedirects: profile.needsPrivilegedRedirects,
