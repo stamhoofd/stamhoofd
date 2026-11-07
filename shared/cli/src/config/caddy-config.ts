@@ -234,6 +234,7 @@ type CaddyConfig = {
             servers: {
                 stamhoofd: {
                     listen: string[];
+                    protocols?: string[];
                     routes: CaddyRoute[];
                     automatic_https?: { disable_redirects: boolean };
                 };
@@ -267,6 +268,7 @@ export async function writeCaddyConfig(
         listenHost?: string;
         adminListenHost?: string;
         adminOrigin?: string;
+        protocols?: string[];
     } = {},
 ): Promise<string> {
     const configPath = path.join(sharedDir(context), 'caddy.json');
@@ -449,6 +451,7 @@ export async function buildCaddyConfig(
         listenHost?: string;
         adminListenHost?: string;
         adminOrigin?: string;
+        protocols?: string[];
     } = {},
 ): Promise<CaddyConfig> {
     const domains = buildDomains(context);
@@ -501,6 +504,7 @@ export async function buildCaddyConfig(
                                   listenPort(options.httpsPort ?? caddyHttpsPort),
                                   listenPort(options.httpPort ?? caddyHttpPort),
                               ],
+                        protocols: options.protocols,
                         routes,
                         automatic_https:
                             options.setup || options.disableRedirects
