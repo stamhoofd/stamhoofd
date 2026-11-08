@@ -150,8 +150,6 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
             'another document type': 'https://just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-OTHER',
             'no document type': 'https://just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc',
             'a uuid that is not one': 'https://just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7d-CJCS',
-            'a trailing newline': `${EXPIRED_URL}\n`,
-            'a leading space': ` ${EXPIRED_URL}`,
             'a newline and a second url': `${EXPIRED_URL}\nhttps://evil.example/`,
             'nothing at all': '',
         };
@@ -168,6 +166,30 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
 
             // A url we do not accept is never called
             expect(fetchMock).not.toHaveBeenCalled();
+        });
+
+        /**
+         * Whitespace around the url is tolerated, since a QR reader appends a newline and a pasted
+         * link brings along whatever was on the clipboard. It cannot reach FOD Justitie either way:
+         * the url called is rebuilt from the uuid, so what is asserted here is that the request goes
+         * to the canonical url and not to whatever was sent.
+         */
+        test.each([
+            ['a trailing newline', `${EXPIRED_URL}\n`],
+            ['a leading space', ` ${EXPIRED_URL}`],
+            ['both', ` ${EXPIRED_URL}\n `],
+        ])('it trims %s and calls the canonical url', async (_name, url) => {
+            const { organization, token, member } = await setup();
+
+            await testServer.test(endpoint, buildRequest({
+                token: token.accessToken,
+                organizationHost: organization.getApiHost(),
+                memberId: member.id,
+                url,
+            }));
+
+            expect(fetchMock).toHaveBeenCalledTimes(1);
+            expect(fetchMock.mock.calls[0][0]).toBe(EXPIRED_URL);
         });
     });
 

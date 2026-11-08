@@ -3,6 +3,7 @@ import { AutoEncoder, StringDecoder, field } from '@common/encoding';
 import { SimpleError } from '@common/errors';
 import type { DecodedRequest, Request } from '@node/endpoints';
 import { Endpoint, Response } from '@node/endpoints';
+import { readJudicialRecordExtractUrl } from '@stamhoofd/judicial-record-check';
 import { Member, RateLimiter } from '@stamhoofd/models';
 import { Context } from '../../../helpers/Context.js';
 import { MAXIMUM_UPLOAD_SIZE } from './DeliverMemberJudicialRecordEndpoint.js';
@@ -15,16 +16,6 @@ class Body extends AutoEncoder {
     url: string;
 }
 type ResponseBody = Buffer;
-
-/** Where an extract of FOD Justitie is served, and the only origin we ever call. */
-const FOD_JUSTITIE_ORIGIN = 'https://just-crimeviewer-ctz.just.fgov.be';
-
-/**
- * The one url shape FOD Justitie prints on an extract. Fully anchored, and the uuid is the only
- * thing it captures: the url that is fetched is rebuilt from that capture, so no other part of what
- * the caller sent reaches the request.
- */
-export const FOD_JUSTITIE_RECORD_URL_PATTERN = /^https:\/\/just-crimeviewer-ctz\.just\.fgov\.be\/record\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})-CJCS$/;
 
 /** FOD Justitie answers in well under a second; a call that hangs is a call the member waits on. */
 export const FETCH_TIMEOUT_IN_MS = 10 * 1000;
@@ -116,15 +107,18 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
     }
 
     /**
-     * Rebuilds the url from the uuid of the one accepted shape, which rejects everything else: any
-     * other host, scheme, port, path, query or fragment.
+     * The one accepted shape, which rejects everything else: any other host, scheme, port, path,
+     * query or fragment. The url that is fetched is rebuilt from the uuid, so no other part of what
+     * the caller sent reaches the request.
+     *
+     * The same expression answers for the QR-code scanner and for the url an extract prints in
+     * words, so it lives in `@stamhoofd/judicial-record-check` where all three share it rather than
+     * being written once per caller and drifting apart.
      */
     private parseUrl(value: string): string {
-        const match = FOD_JUSTITIE_RECORD_URL_PATTERN.exec(value);
-        const url = match ? `${FOD_JUSTITIE_ORIGIN}/record/${match[1]}-CJCS` : null;
+        const url = readJudicialRecordExtractUrl(value);
 
-        // Compared whole, because `$` in JavaScript also matches before a trailing newline
-        if (url === null || url !== value) {
+        if (url === null) {
             throw new SimpleError({
                 code: 'invalid_field',
                 message: 'Not a url of FOD Justitie',
