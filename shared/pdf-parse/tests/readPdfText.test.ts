@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { extractPdfLines } from '../src/extractPdfLines.js';
-import { parsePrintedDate, readInlineLabelledValue, readLabelledValue, readMarkerDate, readValueOnNextLine } from '../src/readPdfText.js';
+import { parsePrintedDate, readDatedLabelledValue, readInlineLabelledValue, readLabelledValue, readMarkerDate, readValueOnNextLine } from '../src/readPdfText.js';
 import { createTestPdf } from './helpers/createTestPdf.js';
 
 describe('readLabelledValue', () => {
@@ -135,6 +135,59 @@ describe('readMarkerDate', () => {
 
     test('is null when no line carries the marker', () => {
         expect(readMarkerDate(['GERECHTELIJKE ANTECEDENTEN :'], ['BLANCO STRAFREGISTER'])).toBeNull();
+    });
+});
+
+describe('readDatedLabelledValue', () => {
+    // Verbatim from a real extract, which prints the url on the line below this sentence
+    const sentence = 'De authenticiteit van dit uittreksel kan tot 01/02/2027 gecontroleerd worden via :';
+    const label = 'De authenticiteit van dit uittreksel kan tot {date} gecontroleerd worden via';
+    const url = 'https://just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS';
+
+    test('reads the date out of the label and the value from the line below', () => {
+        expect(readDatedLabelledValue([sentence, url], [label])).toEqual({ date: new Date(Date.UTC(2027, 1, 1)), value: url });
+    });
+
+    test('reads a wording that prints the value behind the colon', () => {
+        expect(readDatedLabelledValue([`${sentence} ${url}`], [label])).toEqual({ date: new Date(Date.UTC(2027, 1, 1)), value: url });
+    });
+
+    test('does not cut the value off at the colon of the url', () => {
+        expect(readDatedLabelledValue([sentence, url], [label])?.value).toBe(url);
+    });
+
+    test('ignores case and how the words are spaced', () => {
+        expect(readDatedLabelledValue(['DE  AUTHENTICITEIT VAN DIT UITTREKSEL KAN TOT 01/02/2027  GECONTROLEERD WORDEN VIA :', url], [label])?.value).toBe(url);
+    });
+
+    test('tries every accepted spelling', () => {
+        const french = "L'authenticité de cet extrait peut être vérifiée jusqu'au {date} via";
+
+        expect(readDatedLabelledValue(["L'authenticité de cet extrait peut être vérifiée jusqu'au 01/02/2027 via :", url], [label, french])?.date).toEqual(new Date(Date.UTC(2027, 1, 1)));
+    });
+
+    test('is null when the same words sit inside a sentence about them', () => {
+        expect(readDatedLabelledValue([`Let op: ${sentence}`, url], [label])).toBeNull();
+    });
+
+    test('is null when the label is printed without its colon', () => {
+        expect(readDatedLabelledValue(['De authenticiteit van dit uittreksel kan tot 01/02/2027 gecontroleerd worden via', url], [label])).toBeNull();
+    });
+
+    test('is null when the date inside the label is not a date', () => {
+        expect(readDatedLabelledValue([sentence.replace('01/02/2027', '31/02/2027'), url], [label])).toBeNull();
+    });
+
+    test('is null when the label carries no date at all', () => {
+        expect(readDatedLabelledValue(['De authenticiteit van dit uittreksel kan gecontroleerd worden via :', url], [label])).toBeNull();
+    });
+
+    test('is null when the sentence is the last line and prints no value', () => {
+        expect(readDatedLabelledValue([sentence], [label])).toBeNull();
+    });
+
+    test('is null when no line carries the label', () => {
+        expect(readDatedLabelledValue(['BLANCO STRAFREGISTER (05/10/2026)'], [label])).toBeNull();
     });
 });
 

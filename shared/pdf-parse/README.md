@@ -6,7 +6,7 @@ is the whole setup - no worker file to copy, no bundler configuration, no asset 
 [pdf.js](#pdfjs) for which build that is and what it costs.
 
 ```ts
-import { extractPdfLines, parsePrintedDate, readInlineLabelledValue, readLabelledValue, readMarkerDate, readValueOnNextLine } from '@stamhoofd/pdf-parse';
+import { extractPdfLines, parsePrintedDate, readDatedLabelledValue, readInlineLabelledValue, readLabelledValue, readMarkerDate, readValueOnNextLine } from '@stamhoofd/pdf-parse';
 
 const lines = await extractPdfLines(bytes);
 
@@ -23,6 +23,11 @@ const purpose = readValueOnNextLine(lines, ['Finaliteit van het uittreksel']);
 
 // BLANCO STRAFREGISTER (02/11/2026)
 const blancoOn = readMarkerDate(lines, ['BLANCO STRAFREGISTER']);
+
+// De authenticiteit van dit uittreksel kan tot 01/02/2027 gecontroleerd worden via :
+// https://...
+// -> { date: 01/02/2027, value: 'https://...' }, or null: the pair, never half of it
+const verifiable = readDatedLabelledValue(lines, ['De authenticiteit van dit uittreksel kan tot {date} gecontroleerd worden via']);
 ```
 
 - pdf.js emits text items in generator order, not in reading order, so a label and its value can
@@ -40,9 +45,10 @@ const blancoOn = readMarkerDate(lines, ['BLANCO STRAFREGISTER']);
 Reading specific text back out of those lines is the other half: `readLabelledValue` for a field
 written as `Label: value` on its own line, `readInlineLabelledValue` for a label that sits inside a
 longer line next to other fields - ending where the next field of that line begins -
-`readValueOnNextLine` for one printed below its label, and `readMarkerDate` for a statement the
-document makes about itself. Each takes a list of accepted spellings, so another wording can be
-appended without touching the matching. Which labels a document prints its fields behind stays with
+`readValueOnNextLine` for one printed below its label, `readMarkerDate` for a statement the
+document makes about itself, and `readDatedLabelledValue` for such a statement that carries a date
+inside its own label. Each takes a list of accepted spellings, so another wording can be appended
+without touching the matching. Which labels a document prints its fields behind stays with
 the caller: this package extracts, it does not interpret.
 
 Every one of them wants the colon the document prints after its label, which is also what keeps a
@@ -53,6 +59,12 @@ All of them match the same way: ignoring case and how the words are spaced, but 
 document prints - these extracts are issued in French and German too. A spelling that differs in its
 accents is another spelling, so it goes in the list, which is what the list is for. A value comes
 back with its own accents untouched.
+
+`readDatedLabelledValue` exists because a fixed label cannot express a sentence whose date sits in
+the middle of it - `kan tot 01/02/2027 gecontroleerd worden` - so matching the sentence and reading
+its date are one operation. It answers with both or with nothing, deliberately: read by two separate
+calls they could resolve against different lines and disagree, and the caller would have no way to
+notice.
 
 `readMarkerDate` asks for more than the words being somewhere on the page. A document that states
 something about itself prints that statement as a heading of its own, with the date it was
