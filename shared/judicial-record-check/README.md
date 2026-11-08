@@ -7,7 +7,7 @@ file and nothing else.
 ```ts
 import { checkJudicialRecord } from '@stamhoofd/judicial-record-check';
 
-const { report, certificatePath } = await checkJudicialRecord({
+const { report, certificatePath, extract } = await checkJudicialRecord({
     data: pdfBytes,
     firstName: 'Jan',
     lastName: 'Janssens',
@@ -16,6 +16,10 @@ const { report, certificatePath } = await checkJudicialRecord({
 });
 
 report.isPassed; // every check has a result and that result passed
+
+// Where FOD Justitie serves this document and until when, both null when its text was never read
+extract?.url;
+extract?.urlExpiry;
 ```
 
 Nothing is stored and nothing is read from a database: the same document delivered twice gives the
@@ -75,6 +79,22 @@ step of the signature refused it, which limit a pdf did not fit. Reducing those 
 to a handful of codes to re-word them in the frontend would throw away the part that tells someone
 what to do about it. They are rendered in the language of the request, so they are written on the
 way out and not meant to be stored and shown again later.
+
+## The extract is answered as well as the checks
+
+`extract` holds the values read off the document, and null when the text was never read — the
+signature did not hold, or the pdf carries no text. Not everything a document says is something a
+check has an opinion about: it also prints where FOD Justitie serves it and until when, which is
+what lets a member whose viewer cannot draw the pdf be handed that link instead.
+
+That url is **validated, not trusted**. It comes out of a document we did not author and ends up in
+a link a member clicks, so `readJudicialRecordExtractUrl` holds it to the exact form FOD Justitie
+prints — the same form the QR-code encodes and the fetch endpoint accepts, which is why the check
+lives here rather than beside any one of its three callers. A url that does not match is dropped
+together with its date: half an answer would be a date beside a link we never meant to offer.
+
+`extract` also holds the name and birth date printed on the document, so it belongs in the process
+that already has the bytes. It is not something to answer over http.
 
 ## What is specific to FOD Justitie
 
