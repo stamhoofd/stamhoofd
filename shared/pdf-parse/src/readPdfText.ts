@@ -141,6 +141,57 @@ export function readMarkerDate(lines: string[], markers: readonly string[]): Dat
     return null;
 }
 
+/** Where a label template says the document prints a date inside the label itself. */
+const DATE_PLACEHOLDER = '{date}';
+
+/**
+ * A statement the document makes about itself that carries a date *inside* its label, with the
+ * value it introduces behind the colon or on the line below - `De authenticiteit van dit uittreksel
+ * kan tot 01/02/2027 gecontroleerd worden via :` and then a url.
+ *
+ * The label is given as a template with `{date}` where the document prints the date, once. A fixed
+ * label cannot express this: the words on either side are boilerplate but the date between them is
+ * not, so matching the sentence and reading its date are the same operation.
+ *
+ * Which is also why both come back together rather than from two calls. Read separately they could
+ * resolve against different lines and disagree - a document that prints the sentence twice, or a
+ * paragraph that mentions the same words - and a caller has no way to notice. Here they are either
+ * the pair the document printed on one line, or nothing.
+ *
+ * The label has to open its line, as a statement about the whole document does, and the colon it
+ * prints is required: the same words inside a sentence about them do not answer.
+ */
+export function readDatedLabelledValue(lines: string[], labels: readonly string[]): { date: Date; value: string } | null {
+    for (const label of labels) {
+        const [before, after] = collapseSpaces(label).split(DATE_PLACEHOLDER);
+
+        // Both sides are collapsed first, so every gap is one space or none. ` ?` rather than `\s*`
+        // is what keeps two quantifiers from trading the same whitespace between them
+        const pattern = new RegExp(`^${escapeRegExp(before ?? '')} ?(${PRINTED_DATE}) ?${escapeRegExp(after ?? '')} ?[:：](.*)$`, 'iu');
+
+        for (const [index, line] of lines.entries()) {
+            const match = pattern.exec(collapseSpaces(line));
+            if (!match) {
+                continue;
+            }
+
+            // A date the calendar does not have is not a date, so the sentence has not resolved
+            const date = parsePrintedDate(match[1]);
+            if (date === null) {
+                continue;
+            }
+
+            // A wording that prints the value behind the colon resolves as well as one below it
+            const value = match[2].trim() || lines[index + 1]?.trim();
+            if (value) {
+                return { date, value };
+            }
+        }
+    }
+
+    return null;
+}
+
 /**
  * A date as a document prints it, read day first: `05/10/2026` is the fifth of October. Midnight
  * UTC, since a printed date names a day and not a moment, so two of them compare as days.
