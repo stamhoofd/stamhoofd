@@ -36,6 +36,19 @@ export interface JudicialRecordCheckOutcome {
      * them. A caller that can do it adds its outcome to the Authentic check.
      */
     certificatePath: pkijs.Certificate[] | null;
+
+    /**
+     * The values read off the document, null when its text was never read - the signature did not
+     * hold, or the pdf carries no text to read.
+     *
+     * Answered because the checks are not everything the document says. It also prints where FOD
+     * Justitie serves it and until when, which no check has an opinion about but a caller does: a
+     * member whose viewer cannot draw the pdf can be handed that link instead.
+     *
+     * It holds the name and birth date printed on the extract, so it belongs where the document
+     * already is - the process that has the bytes. It is not something to answer over http.
+     */
+    extract: JudicialRecordExtract | null;
 }
 
 /**
@@ -57,6 +70,7 @@ export async function checkJudicialRecord(request: JudicialRecordCheckRequest): 
         return {
             report: report([authentic, ...pending(CONTENT_CHECKS, $t('We lazen dit document niet: eerst moet vaststaan dat het van {signerName} komt.', { signerName: SIGNER_NAME }))]),
             certificatePath,
+            extract: null,
         };
     }
 
@@ -74,12 +88,16 @@ export async function checkJudicialRecord(request: JudicialRecordCheckRequest): 
         return {
             report: report([authentic, ...pending(CONTENT_CHECKS, human(error))]),
             certificatePath,
+            extract: null,
         };
     }
 
+    const extract = readJudicialRecordExtract(lines);
+
     return {
-        report: report([authentic, ...checkJudicialRecordContent(readJudicialRecordExtract(lines), request, signedAt, new Date())]),
+        report: report([authentic, ...checkJudicialRecordContent(extract, request, signedAt, new Date())]),
         certificatePath,
+        extract,
     };
 }
 
