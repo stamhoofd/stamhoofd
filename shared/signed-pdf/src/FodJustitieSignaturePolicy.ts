@@ -41,9 +41,6 @@ export const GLOBALSIGN_DOCUMENT_SIGNING_ROOT_R45_PEM
         + '-----END CERTIFICATE-----\n';
 
 export const FOD_JUSTITIE_SIGNATURE_POLICY: PdfSignaturePolicy = {
-    /** Friendly name of the signer used in error messages. */
-    signerName: 'FOD Justitie',
-
     /** The VAT number of FOD Justitie. */
     signerOrganizationIdentifier: 'VATBE-0308357753',
 

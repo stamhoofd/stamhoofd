@@ -1,7 +1,4 @@
 export interface PdfSignaturePolicy {
-    /** Friendly name of the expected signer, NOT VERIFIED. */
-    signerName: string;
-
     /** Exact value required in the signer certificate's organizationIdentifier (OID 2.5.4.97). */
     signerOrganizationIdentifier: string;
 

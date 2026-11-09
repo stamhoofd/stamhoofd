@@ -3,7 +3,6 @@ import type { SimpleError } from '@common/errors';
 import { describe, expect, test } from 'vitest';
 
 import { locatePdfSignature } from '../src/PdfSignatureLocator.js';
-const SIGNER_NAME = 'Signing Authority';
 
 /**
  * These cases need no cryptography: they are about what the signature claims to cover. Building the
@@ -31,24 +30,24 @@ function expectFailure(bytes: Uint8Array, code: string) {
     let thrown: unknown;
 
     try {
-        locatePdfSignature(bytes, SIGNER_NAME);
+        locatePdfSignature(bytes);
     } catch (error) {
         thrown = error;
     }
 
     expect(isSimpleError(thrown)).toBe(true);
     expect((thrown as SimpleError).code).toBe(code);
-    // Every rejection has something to show the member.
+    // Every rejection has something to show the member, and names no signer: this package is not
+    // told who signed, so an explanation that reads as if it knows would be guessing.
     expect((thrown as SimpleError).human).toBeTruthy();
-    // The explanation names the caller's signer, not a placeholder and not FOD Justitie.
-    expect((thrown as SimpleError).human).toContain(SIGNER_NAME);
+    expect((thrown as SimpleError).human).not.toContain('FOD Justitie');
     expect((thrown as SimpleError).human).not.toContain('{');
 }
 
 describe('locatePdfSignature', () => {
     test('locates the signature and the bytes it covers', () => {
         const bytes = document();
-        const located = locatePdfSignature(bytes, SIGNER_NAME);
+        const located = locatePdfSignature(bytes);
 
         expect(located.subFilter).toBe('ETSI.CAdES.detached');
         expect([...located.container]).toEqual([0xab, 0xcd, 0xef]);
@@ -127,7 +126,7 @@ describe('locatePdfSignature', () => {
     });
 
     test('accepts the zero padding a signing library leaves in /Contents', () => {
-        const located = locatePdfSignature(document({ contents: `<abcdef${'0'.repeat(20)}>` }), SIGNER_NAME);
+        const located = locatePdfSignature(document({ contents: `<abcdef${'0'.repeat(20)}>` }));
 
         expect([...located.container.subarray(0, 3)]).toEqual([0xab, 0xcd, 0xef]);
     });
@@ -139,7 +138,7 @@ describe('locatePdfSignature', () => {
 
     test('accepts both detached CMS formats', () => {
         for (const subFilter of ['ETSI.CAdES.detached', 'adbe.pkcs7.detached']) {
-            expect(locatePdfSignature(document({ subFilter: `/SubFilter /${subFilter} ` }), SIGNER_NAME).subFilter).toBe(subFilter);
+            expect(locatePdfSignature(document({ subFilter: `/SubFilter /${subFilter} ` })).subFilter).toBe(subFilter);
         }
     });
 });

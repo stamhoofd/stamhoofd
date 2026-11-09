@@ -5,7 +5,7 @@ import { beforeAll, describe, expect, test } from 'vitest';
 import { getSpkiHash } from '../src/Certificates.js';
 import { verifyPdfSignature } from '../src/verifyPdfSignature.js';
 import type { TestChain } from '../src/testing/SignedPdfBuilder.js';
-import { TEST_SIGNER_COMMON_NAME, TEST_SIGNER_NAME, TEST_SIGNER_ORGANIZATION, TEST_SIGNER_ORGANIZATION_IDENTIFIER, createSignedPdf, createTestChain, issueCertificate, toPem } from '../src/testing/SignedPdfBuilder.js';
+import { TEST_SIGNER_COMMON_NAME, TEST_SIGNER_ORGANIZATION, TEST_SIGNER_ORGANIZATION_IDENTIFIER, createSignedPdf, createTestChain, issueCertificate, toPem } from '../src/testing/SignedPdfBuilder.js';
 
 const SIGNED_AT = new Date('2026-11-02T17:02:46Z');
 
@@ -22,9 +22,10 @@ describe('verifyPdfSignature', () => {
 
         expect(isSimpleError(thrown)).toBe(true);
         expect((thrown as SimpleError).code).toBe(code);
-        // Every rejection has something to show the member, naming the policy's signer.
+        // Every rejection has something to show the member, and names no signer: the policy does not
+        // carry one, so an explanation that reads as if it knows would be guessing.
         expect((thrown as SimpleError).human).toBeTruthy();
-        expect((thrown as SimpleError).human).toContain(TEST_SIGNER_NAME);
+        expect((thrown as SimpleError).human).not.toContain('FOD Justitie');
         expect((thrown as SimpleError).human).not.toContain('{');
     }
 

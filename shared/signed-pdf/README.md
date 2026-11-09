@@ -26,6 +26,9 @@ later review do not want the same number — so this package hands back `signedA
 weighs it. A signature dated in the future is still refused: that is the signature failing to be
 coherent rather than a limit being exceeded.
 
+Every rejection is a `SimpleError` whose `human` message names no signer: this package is never told
+who the signer is, only which certificate to demand. A caller that wants to name one says so itself.
+
 ## Limitations
 
 No revocation check (OCSP/CRL) and no reading of the document's content. Revocation is a network

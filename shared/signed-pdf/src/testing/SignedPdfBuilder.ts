@@ -122,7 +122,6 @@ export interface TestChain {
 export const TEST_SIGNER_ORGANIZATION = 'Signing Authority nv';
 export const TEST_SIGNER_ORGANIZATION_IDENTIFIER = 'VATBE-0123456789';
 export const TEST_SIGNER_COMMON_NAME = 'Signing Authority - Document Service';
-export const TEST_SIGNER_NAME = 'Signing Authority';
 
 export async function createTestChain(options: {
     signerNotBefore?: Date;
@@ -160,7 +159,6 @@ export async function createTestChain(options: {
         intermediate,
         signer,
         policy: {
-            signerName: TEST_SIGNER_NAME,
             signerOrganizationIdentifier: TEST_SIGNER_ORGANIZATION_IDENTIFIER,
             trustAnchorPem: toPem(anchor.certificate),
             trustAnchorSpkiHash: await getSpkiHash(anchor.certificate),

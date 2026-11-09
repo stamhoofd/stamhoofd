@@ -4,20 +4,16 @@ import { describe, expect, test } from 'vitest';
 
 import { verifyPdfFromFodJustitie } from '../src/FodJustitie.js';
 
-
 describe('verifyPdfFromFodJustitie', () => {
-    async function expectFailure(bytes: Uint8Array, code: string) {
-        const thrown = await verifyPdfFromFodJustitie(bytes).then(() => null, (error: unknown) => error);
+    test('rejects a file that is not a pdf', async () => {
+        const thrown = await verifyPdfFromFodJustitie(new Uint8Array([1, 2, 3])).then(() => null, (error: unknown) => error);
 
         expect(isSimpleError(thrown)).toBe(true);
-        expect((thrown as SimpleError).code).toBe(code);
+        expect((thrown as SimpleError).code).toBe('not_a_pdf');
 
-        return thrown as SimpleError;
-    }
-
-    test('rejects a file that is not a pdf, naming FOD Justitie', async () => {
-        const error = await expectFailure(new Uint8Array([1, 2, 3]), 'not_a_pdf');
-
-        expect(error.human).toContain('FOD Justitie');
+        // The shorthand pins a policy of its own, so it must not leak the name of the one caller it
+        // exists for into what the member reads.
+        expect((thrown as SimpleError).human).toBeTruthy();
+        expect((thrown as SimpleError).human).not.toContain('FOD Justitie');
     });
 });
