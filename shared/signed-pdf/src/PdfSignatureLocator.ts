@@ -18,12 +18,12 @@ export interface LocatedPdfSignature {
     subFilter: string;
 }
 
-export function unreadableSignature(signerName: string): string {
-    return $t('De digitale ondertekening van dit bestand is onleesbaar. Laad het originele pdf-bestand op dat je van {signerName} kreeg, zonder het opnieuw op te slaan of te bewerken.', { signerName });
+export function unreadableSignature(): string {
+    return $t('De digitale ondertekening van dit bestand is onleesbaar. Laad het originele pdf-bestand op, zonder het opnieuw op te slaan of te bewerken.');
 }
 
-function changedAfterSigning(signerName: string): string {
-    return $t('Dit bestand werd gewijzigd nadat {signerName} het ondertekende. Laad het originele pdf-bestand op dat je van {signerName} kreeg, zonder het opnieuw op te slaan of te bewerken.', { signerName });
+function changedAfterSigning(): string {
+    return $t('Dit bestand werd gewijzigd. Laad het originele pdf-bestand op, zonder het opnieuw op te slaan of te bewerken.');
 }
 
 /** Reads `[ a b c d ]` of non-negative integers, starting at the `[`. */
@@ -104,12 +104,12 @@ function readName(bytes: Uint8Array, from: number): string | null {
  *
  * Throws a `SimpleError` when the file carries no usable signature.
  */
-export function locatePdfSignature(bytes: Uint8Array, signerName: string): LocatedPdfSignature {
+export function locatePdfSignature(bytes: Uint8Array): LocatedPdfSignature {
     if (!startsWithAscii(bytes, '%PDF-', 0)) {
         throw new SimpleError({
             code: 'not_a_pdf',
             message: 'The file does not start with a PDF header.',
-            human: $t('Dit bestand is geen pdf. Laad het originele pdf-bestand op dat je van {signerName} kreeg.', { signerName }),
+            human: $t('Dit bestand is geen pdf. Laad het originele pdf-bestand op.'),
             statusCode: 400,
         });
     }
@@ -120,7 +120,7 @@ export function locatePdfSignature(bytes: Uint8Array, signerName: string): Locat
         throw new SimpleError({
             code: 'no_signature',
             message: 'The document holds no signature.',
-            human: $t('Dit bestand is niet digitaal ondertekend. Een afdruk, een scan of een foto kan niet gecontroleerd worden. Laad het originele pdf-bestand op dat je van {signerName} kreeg.', { signerName }),
+            human: $t('Dit bestand is niet digitaal ondertekend. Een afdruk, een scan of een foto kan niet gecontroleerd worden. Laad het originele pdf-bestand op.'),
             statusCode: 400,
         });
     }
@@ -129,7 +129,7 @@ export function locatePdfSignature(bytes: Uint8Array, signerName: string): Locat
         throw new SimpleError({
             code: 'multiple_signatures',
             message: `The document holds ${byteRangeKeys.length} signatures.`,
-            human: $t('Dit bestand bevat meer dan één digitale ondertekening. Laad het originele pdf-bestand op dat je van {signerName} kreeg, zonder het opnieuw op te slaan of te bewerken.', { signerName }),
+            human: $t('Dit bestand bevat meer dan één digitale ondertekening. Laad het originele pdf-bestand op, zonder het opnieuw op te slaan of te bewerken.'),
             statusCode: 400,
         });
     }
@@ -140,7 +140,7 @@ export function locatePdfSignature(bytes: Uint8Array, signerName: string): Locat
         throw new SimpleError({
             code: 'malformed_signature_dictionary',
             message: 'The byte range of the signature could not be read.',
-            human: unreadableSignature(signerName),
+            human: unreadableSignature(),
             statusCode: 400,
         });
     }
@@ -151,7 +151,7 @@ export function locatePdfSignature(bytes: Uint8Array, signerName: string): Locat
         throw new SimpleError({
             code: 'malformed_signature_dictionary',
             message: `The byte range of the signature is not usable: [${byteRange.join(' ')}].`,
-            human: unreadableSignature(signerName),
+            human: unreadableSignature(),
             statusCode: 400,
         });
     }
@@ -160,7 +160,7 @@ export function locatePdfSignature(bytes: Uint8Array, signerName: string): Locat
         throw new SimpleError({
             code: 'incomplete_coverage',
             message: `The signature covers ${secondOffset + secondLength} of ${bytes.length} bytes, so the document changed after signing.`,
-            human: changedAfterSigning(signerName),
+            human: changedAfterSigning(),
             statusCode: 400,
         });
     }
@@ -174,7 +174,7 @@ export function locatePdfSignature(bytes: Uint8Array, signerName: string): Locat
         throw new SimpleError({
             code: 'incomplete_coverage',
             message: 'The gap between the signed ranges is not the signature itself.',
-            human: changedAfterSigning(signerName),
+            human: changedAfterSigning(),
             statusCode: 400,
         });
     }
@@ -189,7 +189,7 @@ export function locatePdfSignature(bytes: Uint8Array, signerName: string): Locat
         throw new SimpleError({
             code: 'incomplete_coverage',
             message: 'The gap between the signed ranges is not a /Contents entry.',
-            human: changedAfterSigning(signerName),
+            human: changedAfterSigning(),
             statusCode: 400,
         });
     }
@@ -200,7 +200,7 @@ export function locatePdfSignature(bytes: Uint8Array, signerName: string): Locat
         throw new SimpleError({
             code: 'malformed_signature_dictionary',
             message: 'The /Contents entry of the signature is not a hexadecimal string.',
-            human: unreadableSignature(signerName),
+            human: unreadableSignature(),
             statusCode: 400,
         });
     }
@@ -212,7 +212,7 @@ export function locatePdfSignature(bytes: Uint8Array, signerName: string): Locat
         throw new SimpleError({
             code: 'multiple_signatures',
             message: `The document holds ${subFilterKeys.length} signature formats.`,
-            human: $t('Dit bestand bevat meer dan één digitale ondertekening. Laad het originele pdf-bestand op dat je van {signerName} kreeg, zonder het opnieuw op te slaan of te bewerken.', { signerName }),
+            human: $t('Dit bestand bevat meer dan één digitale ondertekening. Laad het originele pdf-bestand op, zonder het opnieuw op te slaan of te bewerken.'),
             statusCode: 400,
         });
     }
@@ -223,7 +223,7 @@ export function locatePdfSignature(bytes: Uint8Array, signerName: string): Locat
         throw new SimpleError({
             code: 'malformed_signature_dictionary',
             message: 'The signature has no readable /SubFilter.',
-            human: unreadableSignature(signerName),
+            human: unreadableSignature(),
             statusCode: 400,
         });
     }
@@ -232,7 +232,7 @@ export function locatePdfSignature(bytes: Uint8Array, signerName: string): Locat
         throw new SimpleError({
             code: 'unsupported_signature_format',
             message: `Unsupported signature format /${subFilter}.`,
-            human: $t('De digitale ondertekening van dit bestand heeft een vorm die we niet kunnen controleren. Laad het originele pdf-bestand op dat je van {signerName} kreeg.', { signerName }),
+            human: $t('De digitale ondertekening van dit bestand heeft een vorm die we niet kunnen controleren. Laad het originele pdf-bestand op.'),
             statusCode: 400,
         });
     }

@@ -22,12 +22,12 @@ const SHA256_WITH_RSA_OID = '1.2.840.113549.1.1.11'; // for the signature over t
  */
 const CLOCK_TOLERANCE_IN_MS = 5 * 60 * 1000;
 
-function notSignedBy(signerName: string): string {
-    return $t('Dit bestand werd niet ondertekend door {signerName}. Kijk na of je het juiste bestand koos.', { signerName });
+function notSignedBy(): string {
+    return $t('Dit bestand werd niet ondertekend door de organisatie die we verwachten. Kijk na of je het juiste bestand koos.');
 }
 
-function couldNotEstablishIssuer(signerName: string): string {
-    return $t('We konden niet controleren of dit bestand van {signerName} komt.', { signerName });
+function couldNotEstablishIssuer(): string {
+    return $t('We konden niet controleren van wie dit bestand komt.');
 }
 
 /**
@@ -124,12 +124,12 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'file_too_large',
             message: `The file is ${bytes.length} bytes, the maximum is ${policy.maximumFileSize}.`,
-            human: $t('Dit bestand is te groot om te controleren. Laad het originele pdf-bestand op dat je van {signerName} kreeg.', { signerName: policy.signerName }),
+            human: $t('Dit bestand is te groot om te controleren. Laad het originele pdf-bestand op.'),
             statusCode: 400,
         });
     }
 
-    const { container, signedBytes } = locatePdfSignature(bytes, policy.signerName);
+    const { container, signedBytes } = locatePdfSignature(bytes);
 
     let signedData: pkijs.SignedData | undefined;
     let containerProblem: string | undefined;
@@ -150,7 +150,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'malformed_signature_container',
             message: containerProblem ?? 'The /Contents entry does not parse as CMS SignedData.',
-            human: unreadableSignature(policy.signerName),
+            human: unreadableSignature(),
             statusCode: 400,
         });
     }
@@ -166,7 +166,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'signature_not_detached',
             message: 'The signature container carries attached content.',
-            human: unreadableSignature(policy.signerName),
+            human: unreadableSignature(),
             statusCode: 400,
         });
     }
@@ -175,7 +175,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'signature_not_detached',
             message: `The signature container covers ${signedData.encapContentInfo.eContentType}, not detached data.`,
-            human: unreadableSignature(policy.signerName),
+            human: unreadableSignature(),
             statusCode: 400,
         });
     }
@@ -184,7 +184,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'multiple_signers',
             message: `The signature holds ${signedData.signerInfos.length} signers.`,
-            human: $t('Dit bestand werd door meer dan één partij ondertekend. Laad het originele pdf-bestand op dat je van {signerName} kreeg.', { signerName: policy.signerName }),
+            human: $t('Dit bestand werd door meer dan één partij ondertekend. Laad het originele pdf-bestand op.'),
             statusCode: 400,
         });
     }
@@ -195,7 +195,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'unsupported_digest_algorithm',
             message: `The signature uses digest algorithm ${signerInfo.digestAlgorithm.algorithmId}, expected SHA-256.`,
-            human: $t('De digitale ondertekening van dit bestand gebruikt een beveiliging die we niet aanvaarden. Laad het originele pdf-bestand op dat je van {signerName} kreeg.', { signerName: policy.signerName }),
+            human: $t('De digitale ondertekening van dit bestand gebruikt een beveiliging die we niet aanvaarden. Laad het originele pdf-bestand op.'),
             statusCode: 400,
         });
     }
@@ -208,7 +208,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'unsupported_signature_algorithm',
             message: `The signature uses signature algorithm ${signerInfo.signatureAlgorithm.algorithmId}, expected sha256WithRSAEncryption.`,
-            human: $t('De digitale ondertekening van dit bestand gebruikt een beveiliging die we niet aanvaarden. Laad het originele pdf-bestand op dat je van {signerName} kreeg.', { signerName: policy.signerName }),
+            human: $t('De digitale ondertekening van dit bestand gebruikt een beveiliging die we niet aanvaarden. Laad het originele pdf-bestand op.'),
             statusCode: 400,
         });
     }
@@ -219,7 +219,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'missing_signing_time',
             message: 'The signature does not carry exactly one signing time.',
-            human: unreadableSignature(policy.signerName),
+            human: unreadableSignature(),
             statusCode: 400,
         });
     }
@@ -230,7 +230,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'malformed_signature_container',
             message: 'The signer certificate is not embedded in the signature.',
-            human: unreadableSignature(policy.signerName),
+            human: unreadableSignature(),
             statusCode: 400,
         });
     }
@@ -255,7 +255,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'invalid_signature',
             message: 'The signature does not match the signed bytes.',
-            human: $t('De digitale ondertekening van dit bestand klopt niet. Laad het originele pdf-bestand op dat je van {signerName} kreeg, zonder het opnieuw op te slaan of te bewerken.', { signerName: policy.signerName }),
+            human: $t('De digitale ondertekening van dit bestand klopt niet. Laad het originele pdf-bestand op, zonder het opnieuw op te slaan of te bewerken.'),
             statusCode: 400,
         });
     }
@@ -269,7 +269,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'unexpected_signed_content_type',
             message: `The signed content type attribute is ${signedContentType ?? 'missing'}, expected ${DATA_OID}.`,
-            human: unreadableSignature(policy.signerName),
+            human: unreadableSignature(),
             statusCode: 400,
         });
     }
@@ -280,7 +280,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'unexpected_signing_certificate',
             message: 'The signing-certificate attribute does not name the certificate the signature was verified with.',
-            human: unreadableSignature(policy.signerName),
+            human: unreadableSignature(),
             statusCode: 400,
         });
     }
@@ -294,7 +294,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'signed_in_the_future',
             message: `The signature claims to be made at ${signedAt.toISOString()}, which is after ${now.toISOString()}.`,
-            human: $t('Volgens de digitale ondertekening werd dit bestand in de toekomst ondertekend. Laad het originele pdf-bestand op dat je van {signerName} kreeg.', { signerName: policy.signerName }),
+            human: $t('Volgens de digitale ondertekening werd dit bestand in de toekomst ondertekend. Laad het originele pdf-bestand op.'),
             statusCode: 400,
         });
     }
@@ -306,7 +306,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'certificate_expired_at_signing_time',
             message: `The signer certificate was valid from ${signerCertificate.notBefore.value.toISOString()} until ${signerCertificate.notAfter.value.toISOString()}, but the signature claims ${signedAt.toISOString()}.`,
-            human: couldNotEstablishIssuer(policy.signerName),
+            human: couldNotEstablishIssuer(),
             statusCode: 400,
         });
     }
@@ -321,7 +321,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'untrusted_certificate_chain',
             message: `The bundled trust anchor hashes to ${anchorHash}, but ${policy.trustAnchorSpkiHash} is pinned.`,
-            human: couldNotEstablishIssuer(policy.signerName),
+            human: couldNotEstablishIssuer(),
             statusCode: 400,
         });
     }
@@ -346,7 +346,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'untrusted_certificate_chain',
             message: validationError ?? validated?.resultMessage ?? 'The certificate chain does not validate to the pinned trust anchor.',
-            human: couldNotEstablishIssuer(policy.signerName),
+            human: couldNotEstablishIssuer(),
             statusCode: 400,
         });
     }
@@ -357,7 +357,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'untrusted_certificate_chain',
             message: 'The validated certificate path does not start at the signer.',
-            human: couldNotEstablishIssuer(policy.signerName),
+            human: couldNotEstablishIssuer(),
             statusCode: 400,
         });
     }
@@ -368,7 +368,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'untrusted_certificate_chain',
             message: 'The validated certificate path does not end at the pinned trust anchor.',
-            human: couldNotEstablishIssuer(policy.signerName),
+            human: couldNotEstablishIssuer(),
             statusCode: 400,
         });
     }
@@ -382,7 +382,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'unexpected_certificate_chain',
             message: `The path runs through ${intermediates.length > 0 ? intermediates.join(', ') : 'no intermediates'}, which is not the pinned set. A certificate authority rotation looks like this.`,
-            human: couldNotEstablishIssuer(policy.signerName),
+            human: couldNotEstablishIssuer(),
             statusCode: 400,
         });
     }
@@ -392,7 +392,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'signer_is_certificate_authority',
             message: 'The signer certificate is a certificate authority, not an end entity.',
-            human: notSignedBy(policy.signerName),
+            human: notSignedBy(),
             statusCode: 400,
         });
     }
@@ -403,7 +403,7 @@ export async function verifyPdfSignature(bytes: Uint8Array, policy: PdfSignature
         throw new SimpleError({
             code: 'unexpected_signer',
             message: `The signer's organization identifier is ${organizationIdentifier ?? 'missing or not unique'}, expected ${policy.signerOrganizationIdentifier}.`,
-            human: notSignedBy(policy.signerName),
+            human: notSignedBy(),
             statusCode: 400,
         });
     }
