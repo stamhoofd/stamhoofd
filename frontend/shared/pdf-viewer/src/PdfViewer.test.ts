@@ -6,18 +6,41 @@ import { createTestPdf } from './tests/createTestPdf.ts';
 
 const viewerWidth = 400;
 
+const globalOptions = {
+    config: {
+        globalProperties: {
+            $t: (globalThis as any).$t ?? ((value: string) => value),
+        } as any,
+    },
+};
+
 function renderViewer(data: Uint8Array, onError?: (error: Error) => void) {
     return render(PdfViewer, {
         props: { data },
         attrs: { style: `width: ${viewerWidth}px;`, onError },
-        global: {
-            config: {
-                globalProperties: {
-                    $t: (globalThis as any).$t ?? ((value: string) => value),
-                } as any,
-            },
-        },
+        global: globalOptions,
     });
+}
+
+function textLayers() {
+    return [...document.querySelectorAll<HTMLElement>('.pdf-viewer-page .textLayer')];
+}
+
+function viewerElement() {
+    return document.querySelector<HTMLElement>('.pdf-viewer')!;
+}
+
+function wheel(options: WheelEventInit) {
+    const rect = viewerElement().getBoundingClientRect();
+    const event = new WheelEvent('wheel', {
+        bubbles: true,
+        cancelable: true,
+        clientX: rect.left + rect.width / 2,
+        clientY: rect.top + rect.height / 2,
+        ...options,
+    });
+    viewerElement().dispatchEvent(event);
+    return event;
 }
 
 function pageElements() {
@@ -71,8 +94,11 @@ test('It renders a one page document as a single page', async () => {
 
     expect(pageElements()).toHaveLength(1);
 
+    // The canvas gets its size before pdf.js has painted into it
     const canvas = paintedCanvases()[0];
-    expect(isBlank(canvas)).toBe(false);
+    await vi.waitFor(() => {
+        expect(isBlank(canvas)).toBe(false);
+    }, { timeout: 10_000 });
 
     // An extract leans on Helvetica without embedding it, so the text of a page only appears if
     // pdf.js substitutes the standard fonts. The fixture does the same.
@@ -151,8 +177,9 @@ test('It reports a document it cannot open', async () => {
 
 /**
  * pdf.js 6 calls `AbortSignal.any`, which iOS below 17.4 does not have, but only from its
- * annotation editor and its touch manager. The viewer paints pages onto a canvas and mounts
- * neither, so it needs no polyfill. This keeps that true.
+ * annotation editor, its touch manager and the `TextLayerBuilder` of its viewer app. The viewer
+ * mounts none of them - its text layer is the core `TextLayer` - so it needs no polyfill. This keeps
+ * that true, for the text on top of the page as well.
  */
 test('It renders without AbortSignal.any, which iOS below 17.4 lacks', async () => {
     const any = vi.spyOn(AbortSignal, 'any');
@@ -162,6 +189,7 @@ test('It renders without AbortSignal.any, which iOS below 17.4 lacks', async () 
 
         await vi.waitFor(() => {
             expect(countDarkPixels(paintedCanvases()[0])).toBeGreaterThan(500);
+            expect(textLayers()[0].textContent).toContain('Pagina 1 van 3');
         }, { timeout: 10_000 });
 
         expect(any).not.toHaveBeenCalled();
@@ -186,4 +214,80 @@ test('It renders on a real worker it brings itself', async () => {
 
     expect((globalThis as any).pdfjsWorker).toBeUndefined();
     expect(GlobalWorkerOptions.workerSrc).toBeFalsy();
+});
+
+test('It lays the text of a page on top of it, so it can be selected', async () => {
+    renderViewer(createTestPdf({ pageCount: 1 }));
+
+    await vi.waitFor(() => {
+        expect(textLayers()[0].textContent).toContain('Pagina 1 van 1');
+    }, { timeout: 10_000 });
+
+    const span = textLayers()[0].querySelector('span')!;
+    expect(getComputedStyle(span).color).toBe('rgba(0, 0, 0, 0)');
+    expect(getComputedStyle(span).userSelect).toBe('text');
+});
+
+test('It zooms with ctrl and the scroll wheel, and draws the page again at that size once it pauses', async () => {
+    renderViewer(createTestPdf({ pageCount: 1 }));
+
+    await vi.waitFor(() => {
+        expect(paintedCanvases()).toHaveLength(1);
+    }, { timeout: 10_000 });
+    const canvasWidth = paintedCanvases()[0].width;
+
+    const event = wheel({ ctrlKey: true, deltaY: -100 });
+
+    // The page zooms, not the whole document around it
+    expect(event.defaultPrevented).toBe(true);
+    await vi.waitFor(() => {
+        expect(viewerElement().classList.contains('zoomed')).toBe(true);
+    });
+    expect(pageElements()[0].getBoundingClientRect().width).toBeGreaterThan(viewerWidth);
+
+    await vi.waitFor(() => {
+        expect(paintedCanvases()[0].width).toBeGreaterThan(canvasWidth);
+    }, { timeout: 10_000 });
+});
+
+test('It leaves a plain scroll to the browser, and zooms out no further than a page that fits', async () => {
+    renderViewer(createTestPdf({ pageCount: 1 }));
+
+    await vi.waitFor(() => {
+        expect(paintedCanvases()).toHaveLength(1);
+    }, { timeout: 10_000 });
+
+    expect(wheel({ deltaY: -100 }).defaultPrevented).toBe(false);
+    wheel({ ctrlKey: true, deltaY: 100 });
+
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(viewerElement().classList.contains('zoomed')).toBe(false);
+    expect(pageElements()[0].getBoundingClientRect().width).toBeCloseTo(viewerWidth, 0);
+});
+
+test('It zooms with two fingers that move apart', async () => {
+    renderViewer(createTestPdf({ pageCount: 1 }));
+
+    await vi.waitFor(() => {
+        expect(paintedCanvases()).toHaveLength(1);
+    }, { timeout: 10_000 });
+
+    const element = viewerElement();
+    const rect = element.getBoundingClientRect();
+    const y = rect.top + 100;
+    const touches = (spread: number) => [
+        new Touch({ identifier: 1, target: element, clientX: rect.left + 200 - spread, clientY: y }),
+        new Touch({ identifier: 2, target: element, clientX: rect.left + 200 + spread, clientY: y }),
+    ];
+
+    element.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, cancelable: true, touches: touches(50) }));
+    const move = new TouchEvent('touchmove', { bubbles: true, cancelable: true, touches: touches(100) });
+    element.dispatchEvent(move);
+
+    // Otherwise the browser zooms the whole page along
+    expect(move.defaultPrevented).toBe(true);
+    await vi.waitFor(() => {
+        expect(element.classList.contains('zoomed')).toBe(true);
+    });
+    expect(pageElements()[0].getBoundingClientRect().width).toBeGreaterThan(viewerWidth * 1.5);
 });

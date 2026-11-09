@@ -1,7 +1,10 @@
 <template>
-    <div ref="el" class="pdf-viewer-page" :style="{ aspectRatio: `${aspectRatio}` }">
+    <div ref="el" class="pdf-viewer-page" :style="style">
         <!-- A canvas without an explicit size defaults to 300x150 and allocates it. -->
         <canvas ref="canvasElement" width="0" height="0" />
+
+        <!-- The text of the page, invisible on top of the canvas, so it can be selected and copied -->
+        <div ref="textLayerElement" class="textLayer" />
 
         <p v-if="failed" class="pdf-viewer-page-error">
             {{ $t('Deze pagina kon niet worden weergegeven.') }}
@@ -11,7 +14,7 @@
 
 <script lang="ts" setup>
 import type { PDFDocumentProxy, PDFPageProxy, RenderTask } from 'pdfjs-dist';
-import { RenderingCancelledException } from 'pdfjs-dist';
+import { RenderingCancelledException, TextLayer } from 'pdfjs-dist';
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue';
 import { getRenderScale } from './getRenderScale.ts';
 
@@ -23,6 +26,12 @@ const props = defineProps<{
      * Width of the viewer in css pixels, or null while it is still being measured.
      */
     width: number | null;
+
+    /**
+     * Width the page is shown at in css pixels. Differs from `width` while a zoom is going on, when
+     * the canvas is only stretched; the text on top has to follow what is shown.
+     */
+    displayWidth: number | null;
 
     /**
      * Width / height of the first page of the document. A page holds its place in the scroll height
@@ -41,15 +50,62 @@ const renderMargin = '150%';
 
 const el = useTemplateRef<HTMLElement>('el');
 const canvasElement = useTemplateRef<HTMLCanvasElement>('canvasElement');
+const textLayerElement = useTemplateRef<HTMLDivElement>('textLayerElement');
 
 const ownAspectRatio = ref<number | null>(null);
+
+/** Width of the page in pdf units, which the text layer is laid out in */
+const pageWidth = ref<number | null>(null);
 const near = ref(false);
 const failed = ref(false);
 
 const aspectRatio = computed(() => ownAspectRatio.value ?? props.defaultAspectRatio);
 
+const style = computed(() => ({
+    aspectRatio: `${aspectRatio.value}`,
+    // pdf.js sizes the text layer with these: css pixels per pdf unit, rounded to whole pixels
+    '--total-scale-factor': props.displayWidth !== null && pageWidth.value !== null ? `${props.displayWidth / pageWidth.value}` : undefined,
+    '--scale-round-x': '1px',
+    '--scale-round-y': '1px',
+}));
+
 let page: PDFPageProxy | null = null;
 let task: RenderTask | null = null;
+
+/**
+ * Laid out once per page and kept: it follows the zoom through `--total-scale-factor`, so unlike the
+ * canvas it never has to be drawn again.
+ */
+let textLayer: TextLayer | null = null;
+
+function clearTextLayer() {
+    textLayer?.cancel();
+    textLayer = null;
+    textLayerElement.value?.replaceChildren();
+}
+
+async function renderTextLayer(loadedPage: PDFPageProxy) {
+    const container = textLayerElement.value;
+    if (textLayer || !container) {
+        return;
+    }
+
+    textLayer = new TextLayer({
+        textContentSource: loadedPage.streamTextContent(),
+        container,
+        viewport: loadedPage.getViewport({ scale: 1 }),
+    });
+
+    try {
+        await textLayer.render();
+    }
+    catch (error) {
+        // Only the selection is missing then: the page itself is on the canvas
+        if (!(error instanceof Error && error.name === 'AbortException')) {
+            console.error('Failed to lay out the text of pdf page', props.pageNumber, error);
+        }
+    }
+}
 
 /**
  * Incremented on every render and discard, so an await that resolves after the next one started
@@ -98,6 +154,7 @@ async function render() {
 
         const unscaled = page.getViewport({ scale: 1 });
         ownAspectRatio.value = unscaled.width / unscaled.height;
+        pageWidth.value = unscaled.width;
 
         const scale = getRenderScale({
             cssWidth: width,
@@ -116,6 +173,7 @@ async function render() {
         if (current === generation) {
             task = null;
             failed.value = false;
+            void renderTextLayer(page);
         }
     }
     catch (error) {
@@ -129,8 +187,10 @@ async function render() {
 
 watch(() => [props.document, props.pageNumber], () => {
     discard();
+    clearTextLayer();
     page = null;
     ownAspectRatio.value = null;
+    pageWidth.value = null;
     failed.value = false;
     void render();
 });
@@ -166,6 +226,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
     discard();
+    clearTextLayer();
 });
 </script>
 
@@ -189,6 +250,81 @@ onBeforeUnmount(() => {
         inset: 0;
         width: 100%;
         height: 100%;
+    }
+
+    // What pdf.js's own viewer sets on its text layer (pdfjs-dist/web/pdf_viewer.css), without the
+    // highlighting and editing it does not use here: transparent text in the place of the drawn text.
+    > .textLayer {
+        position: absolute;
+        inset: 0;
+        overflow: clip;
+        color-scheme: only light;
+        text-align: initial;
+        line-height: 1;
+        letter-spacing: normal;
+        word-spacing: normal;
+        text-size-adjust: none;
+        forced-color-adjust: none;
+        transform-origin: 0 0;
+        caret-color: CanvasText;
+        z-index: 0;
+
+        --min-font-size: 1;
+        --text-scale-factor: calc(var(--total-scale-factor) * var(--min-font-size));
+        --min-font-size-inv: calc(1 / var(--min-font-size));
+
+        :is(span, br) {
+            color: transparent;
+            position: absolute;
+            white-space: pre;
+            cursor: text;
+            transform-origin: 0% 0%;
+            user-select: text;
+        }
+
+        > :not(.markedContent), .markedContent span:not(.markedContent) {
+            z-index: 1;
+
+            --font-height: 0;
+            font-size: calc(var(--text-scale-factor) * var(--font-height));
+
+            --scale-x: 1;
+            --rotate: 0deg;
+            transform: rotate(var(--rotate)) scaleX(var(--scale-x)) scale(var(--min-font-size-inv));
+        }
+
+        .markedContent {
+            display: contents;
+        }
+
+        span[role="img"] {
+            user-select: none;
+            cursor: default;
+        }
+
+        ::selection {
+            background: rgba(0 0 255 / 0.25);
+            background: color-mix(in srgb, AccentColor, transparent 50%);
+            color: transparent;
+        }
+
+        br::selection {
+            background: transparent;
+        }
+
+        // Keeps a selection that is dragged past the last line from jumping to the start of the page
+        .endOfContent {
+            display: block;
+            position: absolute;
+            inset: 100% 0 0;
+            z-index: 0;
+            cursor: default;
+            user-select: none;
+        }
+
+        &.selecting .endOfContent {
+            top: 0;
+        }
     }
 
     > .pdf-viewer-page-error {

@@ -24,7 +24,17 @@ import PdfViewer from '@stamhoofd/frontend-pdf-viewer/PdfViewer.vue';
   and does not fire this.
 
 The viewer fills the width it is given and lays its pages out as a column. The parent decides the
-width and does the scrolling; there is nothing else to configure.
+width and does the scrolling.
+
+## Zoom and text
+
+- Ctrl or cmd with the scroll wheel, a trackpad pinch or two fingers zoom the pages up to four times
+  the width of the viewer, around the pointer (`listenForZoom.ts`). The viewer then scrolls sideways
+  and leaves scrolling down to the parent. During a gesture the canvas is stretched and only drawn
+  again once it pauses.
+- The text of every page lies invisibly on top of its canvas, so it can be selected and copied. It
+  is pdf.js's `TextLayer`, laid out once per page and scaled with `--total-scale-factor`, so a zoom
+  does not lay it out again. Its css is the part of pdf.js's `pdf_viewer.css` it needs.
 
 ## How it holds up on a long document
 
@@ -45,11 +55,12 @@ Most documents we show are a single page, but nothing may assume that.
   hands pdf.js the port itself rather than going through `GlobalWorkerOptions`, so importing
   `@stamhoofd/pdf-parse` — whose worker module sets `globalThis.pdfjsWorker` at module scope —
   cannot drag rendering onto the main thread.
-- **No `AbortSignal.any` polyfill is needed here, until someone adds a text or annotation layer.**
-  pdf.js 6 calls it, but only from its annotation editor and its touch manager, neither of which
-  the viewer mounts. That matters because the app still supports Safari 15.4 and `AbortSignal.any`
-  arrived in 17.4. Mount any of those layers and this package needs the polyfill; a test fails the
-  moment a render reaches for it.
+- **No `AbortSignal.any` polyfill is needed here, as long as the viewer keeps to pdf.js's core.**
+  pdf.js 6 calls it from its annotation editor, its touch manager and the `TextLayerBuilder` of its
+  viewer app, none of which the viewer mounts: the text layer is the core `TextLayer`, and pinch to
+  zoom is our own (`listenForZoom.ts`). That matters because the app still supports Safari 15.4 and
+  `AbortSignal.any` arrived in 17.4. Mount any of those and this package needs the polyfill; a test
+  fails the moment a render reaches for it.
 
 ## Tests
 
