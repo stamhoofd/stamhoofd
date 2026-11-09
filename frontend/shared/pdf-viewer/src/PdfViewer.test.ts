@@ -1,10 +1,18 @@
 import { GlobalWorkerOptions } from 'pdfjs-dist';
 import { expect, test, vi } from 'vitest';
 import { render } from 'vitest-browser-vue';
+import { defineComponent, h, ref } from 'vue';
 import PdfViewer from './PdfViewer.vue';
 import { createTestPdf } from './tests/createTestPdf.ts';
 
 const viewerWidth = 400;
+
+type ViewerOptions = {
+    horizontal?: boolean;
+    fixedHeight?: boolean;
+    onLoaded?: (info: { pageCount: number }) => void;
+    onPage?: (pageNumber: number) => void;
+};
 
 const globalOptions = {
     config: {
@@ -14,10 +22,10 @@ const globalOptions = {
     },
 };
 
-function renderViewer(data: Uint8Array, onError?: (error: Error) => void) {
+function renderViewer(data: Uint8Array, onError?: (error: Error) => void, { horizontal, fixedHeight, onLoaded, onPage }: ViewerOptions = {}) {
     return render(PdfViewer, {
-        props: { data },
-        attrs: { style: `width: ${viewerWidth}px;`, onError },
+        props: { data, horizontal, fixedHeight },
+        attrs: { style: `width: ${viewerWidth}px;`, onError, onLoaded, onPage },
         global: globalOptions,
     });
 }
@@ -216,6 +224,19 @@ test('It renders on a real worker it brings itself', async () => {
     expect(GlobalWorkerOptions.workerSrc).toBeFalsy();
 });
 
+test('It reports the number of pages once the document is open, and starts on the first', async () => {
+    const onLoaded = vi.fn();
+    const onPage = vi.fn();
+    renderViewer(createTestPdf({ pageCount: 3 }), undefined, { onLoaded, onPage });
+
+    await vi.waitFor(() => {
+        expect(onLoaded).toHaveBeenCalledOnce();
+    }, { timeout: 10_000 });
+
+    expect(onLoaded).toHaveBeenCalledWith({ pageCount: 3 });
+    expect(onPage).toHaveBeenCalledWith(1);
+});
+
 test('It lays the text of a page on top of it, so it can be selected', async () => {
     renderViewer(createTestPdf({ pageCount: 1 }));
 
@@ -226,6 +247,47 @@ test('It lays the text of a page on top of it, so it can be selected', async () 
     const span = textLayers()[0].querySelector('span')!;
     expect(getComputedStyle(span).color).toBe('rgba(0, 0, 0, 0)');
     expect(getComputedStyle(span).userSelect).toBe('text');
+});
+
+test('It lays the pages of a horizontal viewer out next to each other, each as wide as the viewer', async () => {
+    renderViewer(createTestPdf({ pageCount: 3 }), undefined, { horizontal: true });
+
+    await vi.waitFor(() => {
+        expect(paintedCanvases().length).toBeGreaterThan(0);
+    }, { timeout: 10_000 });
+
+    const [first, second] = pageElements().map(page => page.getBoundingClientRect());
+    expect(second.top).toBe(first.top);
+    expect(second.left).toBeGreaterThanOrEqual(first.right);
+    expect(first.width).toBeCloseTo(viewerWidth, 0);
+
+    // The viewer scrolls through them itself, rather than growing as wide as all of them
+    expect(viewerElement().scrollWidth).toBeGreaterThan(viewerElement().clientWidth);
+});
+
+test('It goes to a page of a horizontal viewer, and reports the page it is on', async () => {
+    const onPage = vi.fn();
+    const viewer = ref<InstanceType<typeof PdfViewer> | null>(null);
+    const data = createTestPdf({ pageCount: 3 });
+
+    render(defineComponent({
+        setup: () => () => h(PdfViewer, { ref: viewer, data, horizontal: true, style: `width: ${viewerWidth}px;`, onPage }),
+    }), { global: globalOptions });
+
+    await vi.waitFor(() => {
+        expect(paintedCanvases().length).toBeGreaterThan(0);
+    }, { timeout: 10_000 });
+
+    viewer.value!.goToPage(3);
+
+    // It scrolls there smoothly, so the page is reported before it has arrived
+    await vi.waitFor(() => {
+        const page = pageElements()[2].getBoundingClientRect();
+        const root = viewerElement().getBoundingClientRect();
+        expect(page.left).toBeGreaterThanOrEqual(root.left);
+        expect(page.right).toBeLessThanOrEqual(root.right);
+    }, { timeout: 10_000 });
+    expect(onPage).toHaveBeenLastCalledWith(3);
 });
 
 test('It zooms with ctrl and the scroll wheel, and draws the page again at that size once it pauses', async () => {
@@ -290,4 +352,22 @@ test('It zooms with two fingers that move apart', async () => {
         expect(element.classList.contains('zoomed')).toBe(true);
     });
     expect(pageElements()[0].getBoundingClientRect().width).toBeGreaterThan(viewerWidth * 1.5);
+});
+
+test('It keeps the height of one page with fixedHeight, and scrolls up and down itself when zoomed', async () => {
+    renderViewer(createTestPdf({ pageCount: 1 }), undefined, { horizontal: true, fixedHeight: true });
+
+    await vi.waitFor(() => {
+        expect(paintedCanvases()).toHaveLength(1);
+    }, { timeout: 10_000 });
+
+    const height = viewerElement().getBoundingClientRect().height;
+    expect(viewerElement().scrollHeight).toBeLessThanOrEqual(viewerElement().clientHeight + 1);
+
+    wheel({ ctrlKey: true, deltaY: -100 });
+
+    await vi.waitFor(() => {
+        expect(viewerElement().scrollHeight).toBeGreaterThan(viewerElement().clientHeight + 1);
+    });
+    expect(viewerElement().getBoundingClientRect().height).toBe(height);
 });
