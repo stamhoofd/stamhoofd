@@ -18,7 +18,7 @@ import type { PropertyFilter } from '../filters/PropertyFilter.js';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { getActivePeriodIds } from '../getActivePeriods.js';
 import { MemberPlatformMembershipHelper } from '../helpers/MemberPlatformMembershipHelper.js';
-import type { JudicialRecordRequirement } from '../helpers/JudicialRecordHelper.js';
+import type { JudicialRecordStatusWithReason } from '../helpers/JudicialRecordHelper.js';
 import { JudicialRecordHelper } from '../helpers/JudicialRecordHelper.js';
 import type { MemberResponsibility } from '../MemberResponsibility.js';
 import type { MemberResponsibilityRecordBase } from './MemberResponsibilityRecord.js';
@@ -791,8 +791,8 @@ export class PlatformMember implements ObjectWithRecords {
         return null;
     }
 
-    get judicialRecord(): JudicialRecordRequirement {
-        return JudicialRecordHelper.getRequirement({
+    get judicialRecord(): JudicialRecordStatusWithReason {
+        return JudicialRecordHelper.getStatus({
             firstName: this.patchedMember.details.firstName,
             birthDay: this.patchedMember.details.birthDay,
             responsibilities: this.patchedMember.responsibilities.map(record => ({

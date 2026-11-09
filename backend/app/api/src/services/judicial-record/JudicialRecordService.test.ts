@@ -1,7 +1,7 @@
 import { SimpleError, isSimpleError } from '@common/errors';
 import type { Member, Organization } from '@stamhoofd/models';
 import { MemberFactory, MemberResponsibilityRecordFactory, OrganizationFactory, Platform, PlatformResponsibilityFactory } from '@stamhoofd/models';
-import { JudicialRecordCheck, JudicialRecordCheckReport, JudicialRecordCheckResult, JudicialRecordCheckStatus, JudicialRecordDeliveryStatus, judicialRecordChecksInOrder, MemberResponsibility } from '@stamhoofd/structures';
+import { JudicialRecordCheck, JudicialRecordCheckReport, JudicialRecordCheckResult, JudicialRecordCheckStatus, JudicialRecordStatus, judicialRecordChecksInOrder, MemberResponsibility } from '@stamhoofd/structures';
 import { JudicialRecordService } from './JudicialRecordService.js';
 
 const checkJudicialRecordMock = vi.hoisted(() => vi.fn());
@@ -15,12 +15,7 @@ vi.mock('@stamhoofd/certificate-revocation', () => ({
     assertChainNotRevoked: assertChainNotRevokedMock,
 }));
 
-/**
- * Only passed on to the mocked package, which decides nothing about it: a real signed extract holds
- * someone's name, birth date and address, so one is never committed. What the five checks make of a
- * document is `@stamhoofd/judicial-record-check`'s own test; this covers what the service does
- * around them.
- */
+/** A real signed extract holds someone's name, birth date and address, so one is never committed. */
 const PDF = new TextEncoder().encode('Dit is geen pdf.');
 
 /** Stands in for the chain the signature validated, which only reaches the revocation call. */
@@ -28,7 +23,6 @@ const CERTIFICATE_PATH = [{ signer: true }];
 
 const MAX_AGE_IN_DAYS = 31;
 
-/** Every check passed unless a test says otherwise, since that is the one outcome with two steps. */
 function report(statuses: Partial<Record<JudicialRecordCheck, JudicialRecordCheckStatus>> = {}): JudicialRecordCheckReport {
     return JudicialRecordCheckReport.create({
         checks: judicialRecordChecksInOrder.map(check => JudicialRecordCheckResult.create({
@@ -48,7 +42,6 @@ describe('JudicialRecordService.deliver', () => {
     /** Holds a responsibility that asks for an extract, and is old enough for it to apply. */
     let member: Member;
 
-    /** Holds nothing, so no responsibility of theirs asks for an extract. */
     let memberWithoutResponsibility: Member;
 
     /** Holds a responsibility the organization defined itself, not a platform one. */
@@ -121,10 +114,10 @@ describe('JudicialRecordService.deliver', () => {
         expect(checkJudicialRecordMock).not.toHaveBeenCalled();
     });
 
-    test('answers AUTO_OK when every check passed', async () => {
+    test('answers Ok when every check passed', async () => {
         checkJudicialRecordMock.mockResolvedValue({ report: report(), certificatePath: CERTIFICATE_PATH });
 
-        expect(await deliver()).toBe(JudicialRecordDeliveryStatus.AutoOk);
+        expect(await deliver()).toBe(JudicialRecordStatus.Ok);
 
         expect(checkJudicialRecordMock).toHaveBeenCalledWith({
             data: PDF,
@@ -150,46 +143,35 @@ describe('JudicialRecordService.deliver', () => {
         expect(isSimpleError(error) && error.code).toBe('certificate_revoked');
     });
 
-    /**
-     * The regression test for the organization in scope that used to be a parameter here. An extract
-     * is delivered from the member portal, which on a platform is in no organization at all, so a
-     * requirement an organization defined itself has to be found through the member's own records -
-     * otherwise this member is told they do not have to deliver, while they do.
-     */
+    /** Regression test for the organization in scope that used to be a parameter of `deliver`. */
     test('finds a requirement an organization defined itself, with no organization in scope', async () => {
         checkJudicialRecordMock.mockResolvedValue({ report: report(), certificatePath: CERTIFICATE_PATH });
 
-        expect(await deliver({ member: memberWithOrganizationResponsibility })).toBe(JudicialRecordDeliveryStatus.AutoOk);
+        expect(await deliver({ member: memberWithOrganizationResponsibility })).toBe(JudicialRecordStatus.Ok);
     });
 
-    test('answers MANUAL on a failed content check', async () => {
+    test('answers UnderReview on a failed content check', async () => {
         checkJudicialRecordMock.mockResolvedValue({
-            report: report({ [JudicialRecordCheck.Blank]: JudicialRecordCheckStatus.Failed }),
+            report: report({ [JudicialRecordCheck.EmptyRecord]: JudicialRecordCheckStatus.Failed }),
             certificatePath: CERTIFICATE_PATH,
         });
 
-        expect(await deliver()).toBe(JudicialRecordDeliveryStatus.Manual);
+        expect(await deliver()).toBe(JudicialRecordStatus.UnderReview);
     });
 
-    /**
-     * The rule most likely to be undone later. The member saw this failure in the step before
-     * delivering and chose to deliver anyway - an extract from another country our checks cannot
-     * read reaches this same case - so a reviewer opens the document rather than the backend
-     * refusing something the member was already told about.
-     */
-    test('answers MANUAL on a failed Authentic check, rather than refusing the delivery', async () => {
+    test('answers UnderReview on a failed Authentic check, rather than refusing the delivery', async () => {
         checkJudicialRecordMock.mockResolvedValue({
             report: report({
                 [JudicialRecordCheck.Authentic]: JudicialRecordCheckStatus.Failed,
                 [JudicialRecordCheck.Identity]: JudicialRecordCheckStatus.Pending,
                 [JudicialRecordCheck.Model]: JudicialRecordCheckStatus.Pending,
                 [JudicialRecordCheck.Age]: JudicialRecordCheckStatus.Pending,
-                [JudicialRecordCheck.Blank]: JudicialRecordCheckStatus.Pending,
+                [JudicialRecordCheck.EmptyRecord]: JudicialRecordCheckStatus.Pending,
             }),
             certificatePath: null,
         });
 
-        expect(await deliver()).toBe(JudicialRecordDeliveryStatus.Manual);
+        expect(await deliver()).toBe(JudicialRecordStatus.UnderReview);
 
         // There is no chain to ask about when the signature did not hold
         expect(assertChainNotRevokedMock).not.toHaveBeenCalled();

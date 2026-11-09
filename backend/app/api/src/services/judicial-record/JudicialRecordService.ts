@@ -3,7 +3,7 @@ import { assertChainNotRevoked } from '@stamhoofd/certificate-revocation';
 import { checkJudicialRecord } from '@stamhoofd/judicial-record-check';
 import type { Member } from '@stamhoofd/models';
 import { MemberResponsibilityRecord, Organization, Platform } from '@stamhoofd/models';
-import { JudicialRecordDeliveryStatus, JudicialRecordHelper, JudicialRecordStatus } from '@stamhoofd/structures';
+import { JudicialRecordHelper, JudicialRecordStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
 export interface JudicialRecordDeliveryRequest {
@@ -20,27 +20,16 @@ export interface JudicialRecordDeliveryRequest {
 /**
  * Accepting a delivered judicial record extract for a member.
  *
- * The five automatic checks are `@stamhoofd/judicial-record-check`, which runs them in the browser as
- * well. What is left here is what only the backend can do: establish that this member has to deliver
- * an extract at all, and ask the issuing authorities whether the certificates behind the signature
- * are still valid.
- *
  * Nothing is stored. Storing the document and the outcome arrives with the review flow.
  */
 export class JudicialRecordService {
     /**
-     * Only revocation refuses a delivery.
-     *
-     * Everything else the checks found was already shown to whoever delivered the extract, in the
-     * step before this one, and they chose to deliver it anyway - a failed signature check included,
-     * and an extract from another country that our checks cannot read as well. Refusing those here
-     * would refuse something the member was already told about and deliberately sent in, so they
-     * become `Manual` instead: a reviewer opens the document.
-     *
-     * A revoked certificate is different precisely because the frontend cannot see it. It never
-     * reaches a reviewer, since the only way out of it is a new document from FOD Justitie.
+     * Revocation is the only thing that refuses a delivery, because it is the only thing the
+     * frontend could not already have shown. Every other check ran there too, and whoever delivered
+     * the extract saw the result and chose to deliver anyway - so those become `UnderReview`, a
+     * failed signature and an unreadable foreign extract included.
      */
-    static async deliver(request: JudicialRecordDeliveryRequest): Promise<JudicialRecordDeliveryStatus> {
+    static async deliver(request: JudicialRecordDeliveryRequest): Promise<JudicialRecordStatus> {
         await this.assertExtractRequired(request.member);
 
         const { report, certificatePath } = await checkJudicialRecord({
@@ -56,20 +45,15 @@ export class JudicialRecordService {
         }
 
         return report.isPassed
-            ? JudicialRecordDeliveryStatus.AutoOk
-            : JudicialRecordDeliveryStatus.Manual;
+            ? JudicialRecordStatus.Ok
+            : JudicialRecordStatus.UnderReview;
     }
 
-    /**
-     * The same rule the member view shows: `JudicialRecordHelper.getRequirement`, over the
-     * responsibilities this member holds. Derived rather than read from a column, so it stays
-     * correct when a responsibility changes its minimum age.
-     */
     private static async assertExtractRequired(member: Member): Promise<void> {
         const records = await MemberResponsibilityRecord.where({ memberId: member.id });
         const minimumAges = await this.getMinimumAges(records);
 
-        const requirement = JudicialRecordHelper.getRequirement({
+        const { status, description } = JudicialRecordHelper.getStatus({
             firstName: member.details.firstName,
             birthDay: member.details.birthDay,
             responsibilities: records.map(record => ({
@@ -79,13 +63,13 @@ export class JudicialRecordService {
             })),
         });
 
-        if (requirement.status !== JudicialRecordStatus.Required) {
+        if (status !== JudicialRecordStatus.Required) {
             throw new SimpleError({
                 code: 'judicial_record_not_required',
                 message: 'No judicial record extract is required for this member',
                 human: $t('Er is geen uittreksel uit het strafregister nodig voor {name}. {reason}', {
                     name: member.details.firstName,
-                    reason: requirement.description,
+                    reason: description,
                 }),
                 statusCode: 400,
             });
@@ -93,18 +77,11 @@ export class JudicialRecordService {
     }
 
     /**
-     * The minimum age of every responsibility these records point to, by responsibility id. Null
-     * when the responsibility never asks for an extract, and absent when it no longer exists.
-     *
-     * Each record is resolved against its own organization rather than against one organization in
-     * scope. An extract is delivered from the member portal, which on a platform is not inside an
-     * organization at all, and organizations define responsibilities with a
-     * `judicialRecordMinimumAge` of their own next to the platform ones. Looking at only the
-     * platform ones there would read an organization-defined requirement as no requirement and
-     * refuse a member who genuinely has to deliver.
-     *
-     * This is why the request has no organization: there is no scope that would answer this
-     * correctly for every call path, and the records say which organizations to ask.
+     * Each record is resolved against its own organization instead of against one organization in
+     * scope, because an extract is delivered from the member portal, which on a platform is in no
+     * organization at all. Organizations define responsibilities with a `judicialRecordMinimumAge`
+     * of their own, so a null scope would read one of those as no requirement and refuse a member
+     * who does have to deliver.
      */
     private static async getMinimumAges(records: MemberResponsibilityRecord[]): Promise<Map<string, number | null>> {
         const platform = await Platform.getSharedStruct();
