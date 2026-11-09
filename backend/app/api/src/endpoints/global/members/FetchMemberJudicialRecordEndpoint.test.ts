@@ -26,10 +26,7 @@ function resetLimiter(limiter: RateLimiter) {
 }
 
 describe('Endpoint.FetchMemberJudicialRecord', () => {
-    /**
-     * Every test replaces fetch, so nothing here reaches FOD Justitie. The default answers the one
-     * thing a working link answers; a test that needs another response installs its own.
-     */
+    /** Nothing here reaches FOD Justitie: fetch is replaced for every test, answering a pdf unless one says otherwise. */
     let fetchMock: MockedFunction<typeof fetch>;
 
     function respondWith(body: Buffer | string, { status = 200, contentType = 'application/pdf' }: { status?: number; contentType?: string } = {}) {
@@ -58,7 +55,6 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
         vi.unstubAllGlobals();
     });
 
-    /** A member of 20 with an account of their own. */
     async function setup() {
         const organization = await new OrganizationFactory({}).create();
         const user = await new UserFactory({ organization }).create();
@@ -101,7 +97,7 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
 
         expect(Buffer.from(response.body!)).toEqual(PDF);
 
-        // Never rendered on our own origin: it is somebody else's document
+        // Bytes from outside are never rendered on the api origin
         expect(response.headers['content-type']).toBe('application/octet-stream');
         expect(response.headers['content-disposition']).toBe('attachment; filename="uittreksel.pdf"');
         expect(response.headers['x-content-type-options']).toBe('nosniff');
@@ -164,15 +160,13 @@ describe('Endpoint.FetchMemberJudicialRecord', () => {
                 url,
             }))).rejects.toThrow(STExpect.simpleError({ code: 'invalid_field', field: 'url' }));
 
-            // A url we do not accept is never called
             expect(fetchMock).not.toHaveBeenCalled();
         });
 
         /**
-         * Whitespace around the url is tolerated, since a QR reader appends a newline and a pasted
-         * link brings along whatever was on the clipboard. It cannot reach FOD Justitie either way:
-         * the url called is rebuilt from the uuid, so what is asserted here is that the request goes
-         * to the canonical url and not to whatever was sent.
+         * Whitespace is tolerated because a QR reader appends a newline and a pasted link brings
+         * along whatever was on the clipboard. What is asserted is the url that gets called, not
+         * that the request was accepted: it is rebuilt from the uuid, so nothing around it travels.
          */
         test.each([
             ['a trailing newline', `${EXPIRED_URL}\n`],

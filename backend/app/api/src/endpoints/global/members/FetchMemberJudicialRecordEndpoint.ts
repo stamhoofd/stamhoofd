@@ -11,7 +11,6 @@ import { MAXIMUM_UPLOAD_SIZE } from './DeliverMemberJudicialRecordEndpoint.js';
 type Params = { id: string };
 type Query = undefined;
 class Body extends AutoEncoder {
-    /** The url printed on the extract, as the scanner read it off the QR code. */
     @field({ decoder: StringDecoder })
     url: string;
 }
@@ -49,21 +48,15 @@ export const judicialRecordFetchUserLimiter = new RateLimiter({
 });
 
 /**
- * Fetching an extract from the judicial record for a member: the url off the QR code goes in, the
- * pdf comes out. Nothing is stored, neither the url nor the document.
+ * This exists because the browser cannot make the call itself: the viewer of FOD Justitie answers
+ * without any cross-origin header. So the member scans the QR code, we fetch what it points at, and
+ * the bytes go straight back for them to deliver with the endpoint next door - which is why the
+ * audience is the same as there, the member themselves and their parents.
  *
- * It exists because the browser cannot make this call itself - the viewer of FOD Justitie answers
- * without any cross-origin header - so the member scans the QR code and we fetch what it points at.
- * The bytes go straight back to them, and they deliver them with the endpoint next door.
+ * Nothing is stored or logged, neither the url nor the document: the url alone says which extract
+ * belongs to whom.
  *
- * Which is also why the audience is the same as there, the member themselves and their parents: an
- * extract is theirs, and this endpoint hands one out.
- *
- * Everything that comes back is untrusted input. FOD Justitie is who they say they are - the
- * certificate of the origin says so - but a document behind one of their urls is not something they
- * drew up themselves in every case, so the response is read under a cap, with no redirect followed,
- * and only handed on when it is a pdf. Whether it is a *valid* extract is not decided here: that is
- * what the five checks of the delivery are for.
+ * Whether the pdf is a *valid* extract is not decided here, but at the delivery.
  */
 export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     bodyDecoder = Body as Decoder<Body>;
@@ -87,7 +80,6 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
 
         const member = await Member.getByIdWithUsers(request.params.id);
 
-        // Only the member and their parents, as with delivering: see the note on the class
         if (!member || !Context.auth.isUserManager(member)) {
             throw Context.auth.memberNotFoundOrNoAccess();
         }
@@ -97,9 +89,9 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
         this.trackLimits(user.id, member.id);
 
         const response = new Response(await this.readPdf(url));
-        response.headers['content-type'] = 'application/octet-stream';
 
-        // The pdf is somebody else's document: it is never rendered on our own origin
+        // Bytes from outside are never rendered on the api origin, whatever they turn out to hold
+        response.headers['content-type'] = 'application/octet-stream';
         response.headers['content-disposition'] = 'attachment; filename="uittreksel.pdf"';
         response.headers['x-content-type-options'] = 'nosniff';
 
@@ -107,13 +99,12 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
     }
 
     /**
-     * The one accepted shape, which rejects everything else: any other host, scheme, port, path,
-     * query or fragment. The url that is fetched is rebuilt from the uuid, so no other part of what
-     * the caller sent reaches the request.
+     * The url that is fetched is rebuilt from the uuid the shape captures, so no other part of what
+     * the caller sent reaches the outbound request.
      *
-     * The same expression answers for the QR-code scanner and for the url an extract prints in
-     * words, so it lives in `@stamhoofd/judicial-record-check` where all three share it rather than
-     * being written once per caller and drifting apart.
+     * The shape is shared rather than written here because the QR-code scanner that produces a url
+     * and the reading of the one an extract prints in words have to agree with this endpoint: a url
+     * the scanner accepts and this refuses is a dead end a member cannot get out of.
      */
     private parseUrl(value: string): string {
         const url = readJudicialRecordExtractUrl(value);
@@ -132,9 +123,8 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
     }
 
     /**
-     * A call we make on behalf of whoever asked, so it is limited like the delivery it leads to.
-     * The two are counted apart: fetching is the cheaper of the two and failing at it - a link that
-     * was already used, a scan that went wrong - should not use up attempts at delivering.
+     * Counted apart from the delivery limits: fetching is the cheaper of the two, and failing at it
+     * - a scan that went wrong, a viewer that was down - should not use up attempts at delivering.
      */
     private trackLimits(userId: string, memberId: string) {
         try {
@@ -156,7 +146,7 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
         try {
             response = await fetch(url, {
                 method: 'GET',
-                // The url is one of ours by now, so it is never followed anywhere else
+                // The url is already the canonical one, so anywhere it points next is not FOD Justitie
                 redirect: 'error',
                 signal: AbortSignal.timeout(FETCH_TIMEOUT_IN_MS),
                 credentials: 'omit',
@@ -180,7 +170,7 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
 
         const bytes = await this.readCapped(response.body);
 
-        // An extract that is not a pdf at all is not worth parsing further up
+        // A content type is only what the other end claims, so the bytes have to say it too
         if (bytes.subarray(0, 5).toString('latin1') !== '%PDF-') {
             throw this.notAPdf();
         }
@@ -188,10 +178,7 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
         return bytes;
     }
 
-    /**
-     * Reads the response chunk by chunk and stops at the cap, rather than reading it whole and
-     * measuring afterwards: what is on the other end decides how much it sends.
-     */
+    /** Stops at the cap rather than reading whole and measuring after: the other end decides how much it sends. */
     private async readCapped(body: ReadableStream<Uint8Array>): Promise<Buffer> {
         const reader = body.getReader();
         const chunks: Uint8Array[] = [];
@@ -221,9 +208,9 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
     }
 
     /**
-     * The one answer for every way this can end without a pdf in hand: a link that was already
-     * used or has expired, a page instead of a document, a response too large, no answer at all.
-     * They are one thing to the member, and the thing to do about it is always the same.
+     * One answer for every way this ends without a pdf in hand - a page instead of a document, a
+     * response too large, no answer at all - because they are one thing to the member, and what to
+     * do about it is the same each time. It also keeps what went wrong from being worth probing for.
      */
     private notAPdf(): SimpleError {
         return new SimpleError({
