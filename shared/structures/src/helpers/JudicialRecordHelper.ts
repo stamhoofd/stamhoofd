@@ -2,18 +2,29 @@ import { Formatter } from '@stamhoofd/utility';
 import type { Organization } from '../Organization.js';
 import type { Platform } from '../Platform.js';
 
+/**
+ * `getStatus` only ever answers `NotRequired` or `Required` today, because the outcome of a delivered
+ * extract is not stored yet. The two delivered outcomes live here rather than in an enum of their own
+ * so that a member has one judicial record status, not two that have to be combined at every call site.
+ */
 export enum JudicialRecordStatus {
     /** The member doesn't have to have a judicial record extract checked. */
     NotRequired = 'NotRequired',
 
     /** The member has to have a judicial record extract checked. */
     Required = 'Required',
+
+    /** An extract was delivered and a reviewer has to look at it. */
+    UnderReview = 'UnderReview',
+
+    /** An extract was delivered and every automatic check passed, so nobody has to open it. */
+    Ok = 'Ok',
 }
 
 /**
  * A status with the reason behind it, so a member view can explain why an extract is (not) required.
  */
-export interface JudicialRecordRequirement {
+export interface JudicialRecordStatusWithReason {
     status: JudicialRecordStatus;
 
     /** Human readable reason, mentioning a date when that makes it clearer. */
@@ -51,6 +62,10 @@ export class JudicialRecordHelper {
                 return $t(`Vereist`);
             case JudicialRecordStatus.NotRequired:
                 return $t(`Niet vereist`);
+            case JudicialRecordStatus.UnderReview:
+                return $t(`Wordt beoordeeld`);
+            case JudicialRecordStatus.Ok:
+                return $t(`OK`);
         }
     }
 
@@ -92,15 +107,15 @@ export class JudicialRecordHelper {
     }
 
     /**
-     * Whether the member has to have their judicial record extract checked on `atDate`, with the reason behind it.
+     * The judicial record status of the member on `atDate`, with the reason behind it.
      */
-    static getRequirement({ firstName, birthDay, responsibilities, atDate = new Date() }: {
+    static getStatus({ firstName, birthDay, responsibilities, atDate = new Date() }: {
         /** Used in the description, so it talks about the member by name. */
         firstName: string;
         birthDay: Date | null;
         responsibilities: JudicialRecordResponsibility[];
         atDate?: Date;
-    }): JudicialRecordRequirement {
+    }): JudicialRecordStatusWithReason {
         const status = responsibilities.some(responsibility => this.requiresExtract({ responsibility, birthDay, atDate }))
             ? JudicialRecordStatus.Required
             : JudicialRecordStatus.NotRequired;

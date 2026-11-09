@@ -35,6 +35,9 @@ const fallbackStatus = JudicialRecordStatus.NotRequired;
 /** Marks the one status in the map that is the fallback, instead of a condition of its own. */
 const otherwise = 'otherwise';
 
+/** Marks a status no query can reach, because the outcome a member delivered is not stored yet. */
+const notStored = 'notStored';
+
 /**
  * At least one responsibility requires the member to have an extract checked today.
  *
@@ -85,7 +88,9 @@ export function judicialRecordStatusExpression(minimumAges: Map<string, number>)
 
     // One entry per status: a new JudicialRecordStatus does not compile until SQL decides it too. The first
     // matching condition wins; the status marked `otherwise` is the one left over.
-    const conditions: Record<JudicialRecordStatus, SQLWhere | typeof otherwise> = {
+    const conditions: Record<JudicialRecordStatus, SQLWhere | typeof otherwise | typeof notStored> = {
+        [JudicialRecordStatus.Ok]: notStored,
+        [JudicialRecordStatus.UnderReview]: notStored,
         [JudicialRecordStatus.Required]: requiresExtract(minimumAges),
         [JudicialRecordStatus.NotRequired]: otherwise,
     };
@@ -95,6 +100,10 @@ export function judicialRecordStatusExpression(minimumAges: Map<string, number>)
     // Reverse order: the last condition is the innermost else of the IF chain, so the first one wins
     for (const status of Object.keys(conditions).reverse() as JudicialRecordStatus[]) {
         const condition = conditions[status];
+
+        if (condition === notStored) {
+            continue;
+        }
 
         if (condition === otherwise) {
             if (expression !== null) {
