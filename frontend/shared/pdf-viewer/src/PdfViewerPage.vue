@@ -39,6 +39,9 @@ const props = defineProps<{
      * every page of an extract has the same size.
      */
     defaultAspectRatio: number;
+
+    /** The pages scroll sideways in the viewer, so it is the viewer they come near, not the screen. */
+    horizontal: boolean;
 }>();
 
 /**
@@ -212,7 +215,9 @@ onMounted(() => {
     try {
         const observer = new IntersectionObserver((entries) => {
             near.value = entries[entries.length - 1].isIntersecting;
-        }, { rootMargin: `${renderMargin} 0px` });
+        }, props.horizontal
+            ? { root: el.value.parentElement, rootMargin: `0px ${renderMargin}` }
+            : { rootMargin: `${renderMargin} 0px` });
         observer.observe(el.value);
 
         onBeforeUnmount(() => observer.disconnect());

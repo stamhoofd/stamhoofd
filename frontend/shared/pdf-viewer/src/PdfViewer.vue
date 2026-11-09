@@ -1,5 +1,5 @@
 <template>
-    <div ref="el" class="pdf-viewer" :class="{ zoomed: zoom > 1 }" :style="rootStyle">
+    <div ref="el" class="pdf-viewer" :class="{ horizontal, 'fixed-height': scrollsVertically, zoomed: zoom > 1 }" :style="rootStyle">
         <p v-if="failed" class="error-box">
             {{ $t('Deze pdf kon niet worden geopend.') }}
         </p>
@@ -10,6 +10,7 @@
                 :key="pageNumber"
                 :document="pdf.document"
                 :page-number="pageNumber"
+                :horizontal="horizontal"
                 :width="renderWidth"
                 :display-width="displayWidth"
                 :default-aspect-ratio="defaultAspectRatio"
@@ -27,12 +28,32 @@ import { listenForZoom } from './listenForZoom.ts';
 import type { LoadedPdf } from './loadPdfDocument.ts';
 import { loadPdfDocument } from './loadPdfDocument.ts';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     data: Uint8Array;
-}>();
+
+    /**
+     * Lays the pages out next to each other, one page wide, and scrolls through them sideways
+     * instead of making the parent scroll down.
+     */
+    horizontal?: boolean;
+
+    /**
+     * Only with `horizontal`: the viewer keeps the height of a page that fits its width, and a zoomed
+     * page scrolls up and down inside it. Without it the viewer grows with the zoom and the parent
+     * scrolls down, which is the one to pick inside something that scrolls already.
+     */
+    fixedHeight?: boolean;
+}>(), {
+    horizontal: false,
+    fixedHeight: false,
+});
 
 const emit = defineEmits<{
     (e: 'error', error: Error): void;
+    /** Once the document is open and its pages hold their place */
+    (e: 'loaded', info: { pageCount: number }): void;
+    /** The page in the middle of a horizontal viewer, from 1, whenever it changes */
+    (e: 'page', pageNumber: number): void;
 }>();
 
 /**
@@ -69,8 +90,11 @@ let renderZoomTimeout: ReturnType<typeof setTimeout> | null = null;
 const renderWidth = computed(() => width.value === null ? null : width.value * renderZoom.value);
 const displayWidth = computed(() => width.value === null ? null : width.value * zoom.value);
 
+const scrollsVertically = computed(() => props.horizontal && props.fixedHeight);
+
 const rootStyle = computed(() => ({
     '--pdf-viewer-zoom': `${zoom.value}`,
+    'height': scrollsVertically.value && width.value !== null ? `${width.value / defaultAspectRatio.value}px` : undefined,
 }));
 
 /**
@@ -114,6 +138,9 @@ async function load(data: Uint8Array) {
         zoom.value = 1;
         renderZoom.value = 1;
         pdf.value = loaded;
+        emit('loaded', { pageCount: loaded.document.numPages });
+        currentPage = 1;
+        emit('page', 1);
     }
     catch (error) {
         if (current !== generation) {
@@ -127,7 +154,7 @@ async function load(data: Uint8Array) {
 
 function updateWidth() {
     if (el.value) {
-        // Without the padding, which a zoomed viewer has to leave room for the page shadows
+        // Without the padding, which a horizontal viewer has to leave room for the page shadows
         const style = getComputedStyle(el.value);
         width.value = el.value.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
     }
@@ -165,8 +192,8 @@ async function zoomAt(scaleFactor: number, origin: [number, number]) {
     const rect = root.getBoundingClientRect();
     const style = getComputedStyle(root);
     const x = origin[0] - rect.left - parseFloat(style.paddingLeft) + root.scrollLeft;
-    const scroller = getVerticalScroller(root);
-    const y = origin[1] - rect.top;
+    const scroller = scrollsVertically.value ? root : getVerticalScroller(root);
+    const y = scrollsVertically.value ? origin[1] - rect.top - parseFloat(style.paddingTop) + root.scrollTop : origin[1] - rect.top;
 
     zoom.value = next;
     await nextTick();
@@ -192,11 +219,48 @@ function panBy(dx: number, dy: number) {
     }
 
     root.scrollLeft -= dx;
-    const scroller = getVerticalScroller(root);
+    const scroller = scrollsVertically.value ? root : getVerticalScroller(root);
     if (scroller) {
         scroller.scrollTop -= dy;
     }
 }
+
+function pageElements() {
+    return [...(el.value?.querySelectorAll<HTMLElement>(':scope > .pdf-viewer-page') ?? [])];
+}
+
+let currentPage = 1;
+
+/** The page under the middle of the viewer, which is the one a horizontal viewer snaps to */
+function updateCurrentPage() {
+    const root = el.value;
+    if (!root || !props.horizontal) {
+        return;
+    }
+
+    const rect = root.getBoundingClientRect();
+    const middle = rect.left + rect.width / 2;
+    const index = pageElements().findIndex(page => page.getBoundingClientRect().right >= middle);
+
+    if (index !== -1 && index + 1 !== currentPage) {
+        currentPage = index + 1;
+        emit('page', currentPage);
+    }
+}
+
+/** Scrolls a horizontal viewer to the start of a page, from 1 */
+function goToPage(pageNumber: number) {
+    const root = el.value;
+    const page = pageElements()[pageNumber - 1];
+    if (!root || !page || !props.horizontal) {
+        return;
+    }
+
+    const left = root.scrollLeft + page.getBoundingClientRect().left - root.getBoundingClientRect().left - parseFloat(getComputedStyle(root).paddingLeft);
+    root.scrollTo({ left, behavior: 'smooth' });
+}
+
+defineExpose({ goToPage });
 
 const zoomAbortController = new AbortController();
 
@@ -212,6 +276,8 @@ onMounted(() => {
         onZoom: (scaleFactor, origin) => void zoomAt(scaleFactor, origin),
         onPan: panBy,
     });
+
+    el.value.addEventListener('scroll', updateCurrentPage, { passive: true, signal: zoomAbortController.signal });
 
     try {
         const observer = new ResizeObserver(() => updateWidth());
@@ -250,7 +316,40 @@ onBeforeUnmount(() => {
         border-radius: $border-radius;
     }
 
-    &.zoomed {
+    &.horizontal {
+        flex-direction: row;
+        // Not stretched to the height of the viewer: a page keeps its own shape, and a zoomed one is taller
+        align-items: flex-start;
+        overflow: auto;
+        overscroll-behavior-x: contain;
+        scroll-snap-type: x mandatory;
+
+        // A scroll area clips what sticks out of it, so this leaves room for the shadow of the pages
+        padding: 10px;
+        margin: -10px;
+        scroll-padding: 10px;
+
+        > .pdf-viewer-page, > .pdf-viewer-loading {
+            flex: 0 0 100%;
+            scroll-snap-align: start;
+        }
+
+        // A zoomed page is scrolled through freely, not one page at a time
+        &.zoomed {
+            scroll-snap-type: none;
+
+            // And up and down inside the viewer, without scrolling on into the page around it at the end
+            &.fixed-height {
+                overscroll-behavior: contain;
+            }
+
+            > .pdf-viewer-page {
+                flex-basis: calc(100% * var(--pdf-viewer-zoom));
+            }
+        }
+    }
+
+    &.zoomed:not(.horizontal) {
         align-items: flex-start;
         overflow-x: auto;
         overscroll-behavior-x: contain;

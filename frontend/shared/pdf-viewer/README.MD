@@ -19,19 +19,27 @@ import PdfViewer from '@stamhoofd/frontend-pdf-viewer/PdfViewer.vue';
   and have no url of their own. The viewer copies the bytes before handing them to pdf.js, which
   would otherwise transfer the buffer to its worker and leave the caller with an empty array.
   Assigning a new array reloads the document.
+- `horizontal` lays the pages out next to each other, each as wide as the viewer, and scrolls
+  through them sideways inside the viewer. A zoomed page makes the viewer taller and the parent
+  scrolls down, unless `fixedHeight` is set: then the viewer keeps the height of a page that fits
+  its width and scrolls up and down itself. Pick that one only where nothing around it scrolls, or
+  there are two scroll areas on top of each other.
+- `loaded` fires with the number of pages once the document is open.
+- `page` fires with the page in the middle of a `horizontal` viewer whenever that changes, and
+  `goToPage(number)` (on a template ref) scrolls one there. Both count from 1.
 - `error` fires once when the document cannot be opened at all. The viewer shows its own error box
   in that case, so listening is optional. A single page that fails to paint reports inside that page
   and does not fire this.
 
 The viewer fills the width it is given and lays its pages out as a column. The parent decides the
-width and does the scrolling.
+width and does the scrolling, unless the viewer is `horizontal`.
 
 ## Zoom and text
 
 - Ctrl or cmd with the scroll wheel, a trackpad pinch or two fingers zoom the pages up to four times
-  the width of the viewer, around the pointer (`listenForZoom.ts`). The viewer then scrolls sideways
-  and leaves scrolling down to the parent. During a gesture the canvas is stretched and only drawn
-  again once it pauses.
+  the width of the viewer, around the pointer (`listenForZoom.ts`). The viewer then scrolls sideways;
+  with `fixedHeight` it scrolls up and down too, otherwise it leaves that to the parent. During a
+  gesture the canvas is stretched and only drawn again once it pauses.
 - The text of every page lies invisibly on top of its canvas, so it can be selected and copied. It
   is pdf.js's `TextLayer`, laid out once per page and scaled with `--total-scale-factor`, so a zoom
   does not lay it out again. Its css is the part of pdf.js's `pdf_viewer.css` it needs.
