@@ -15,23 +15,13 @@ type Query = undefined;
 type Body = undefined;
 type ResponseBody = JudicialRecordDeliveryResponse;
 
-/**
- * How old an extract may be when it is delivered. A month, as the member is told when they request
- * one, counted from the day it was drawn up. The member portal counts the same thirty days before
- * it offers to deliver, so an extract it accepted is never refused here for its age.
- */
+/** A month, as the member is told when they request one. The member portal counts the same thirty days before it offers to deliver. */
 export const JUDICIAL_RECORD_MAX_AGE_IN_DAYS = 30;
 
-/**
- * Only bounds what we are willing to read from the request: the verification has its own, smaller
- * cap on the document it accepts.
- */
+/** Only bounds what we are willing to read from the request: the verification has its own, smaller cap on the document it accepts. */
 export const MAXIMUM_UPLOAD_SIZE = 5 * 1024 * 1024;
 
-/**
- * Checking a document is expensive - it parses a pdf and asks an authority about certificates - and
- * a member needs only a handful of attempts to deliver one.
- */
+/** Checking a document parses a pdf and asks an authority about certificates, and a member needs only a handful of attempts. */
 export const judicialRecordMemberLimiter = new RateLimiter({
     limits: [
         {
@@ -60,21 +50,9 @@ export const judicialRecordUserLimiter = new RateLimiter({
 });
 
 /**
- * Delivering an extract from the judicial record for a member: the final submit of the member
- * portal flow. The pdf goes in and a `JudicialRecordDeliveryStatus` comes out - whether the
- * automatic checks settled it, or a reviewer has to open the document.
- *
- * It does not answer with the checklist. The member portal ran the same five checks on the same
- * document in the step before this one and showed the member what held and what did not, so there
- * is nothing left to tell them. The backend runs them again anyway, because the frontend having run
- * them is not something a request can prove.
- *
- * Nothing is stored. Not the document - it is read, checked and removed again, also when the
- * request fails - and not the outcome: keeping either of those for a reviewer arrives with the
- * review flow. So this endpoint decides nothing about the member, which is why delivering is
- * allowed to the member themselves and their parents and to nobody else for now. An administrator
- * reading someone else's extract needs a right of its own, and that right belongs with the review
- * flow that gives them something to read.
+ * The final submit of the member portal delivery flow. The portal ran the same checks on the same
+ * document a step earlier, but they run again here: that the frontend ran them is not something a
+ * request can prove.
  */
 export class DeliverMemberJudicialRecordEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -96,15 +74,16 @@ export class DeliverMemberJudicialRecordEndpoint extends Endpoint<Params, Query,
 
         const member = await Member.getByIdWithUsers(request.params.id);
 
-        // Only the member and their parents, never an administrator: see the note on the class.
+        // Not canAccessMember: an administrator reading someone else's extract needs a right of its
+        // own, which arrives with the review flow that gives them something to read.
         if (!member || !Context.auth.isUserManager(member)) {
             throw Context.auth.memberNotFoundOrNoAccess();
         }
 
         this.trackLimits(user.id, member.id);
 
-        // Allocate before parsing, so every temporary artifact of this request belongs to a
-        // directory we remove as a whole - also the ones a parser error leaves behind.
+        // Allocated before parsing, so the artifacts a parser error leaves behind are inside the
+        // directory the finally removes as a whole.
         const uploadDirectory = await fs.mkdtemp(join(tmpdir(), 'stamhoofd-judicial-record-'));
 
         try {
@@ -136,12 +115,16 @@ export class DeliverMemberJudicialRecordEndpoint extends Endpoint<Params, Query,
         }
     }
 
-    /** The body holds the pdf and nothing else: no field of it is read. */
     private async parseForm(request: DecodedRequest<Params, Query, Body>, uploadDirectory: string): Promise<formidable.File> {
         const incoming = request.request.request;
 
         if (!incoming) {
             throw new Error('Not supported without real request');
+        }
+
+        // Formidable has no parser for anything else and fails with an unhelpful stream error.
+        if (!incoming.headers['content-type']?.startsWith('multipart/form-data')) {
+            throw this.missingFile();
         }
 
         const form = formidable({ uploadDir: uploadDirectory, maxFileSize: MAXIMUM_UPLOAD_SIZE, maxFields: 0, maxFiles: 1, keepExtensions: true });
@@ -156,13 +139,7 @@ export class DeliverMemberJudicialRecordEndpoint extends Endpoint<Params, Query,
                 const file = files.file?.[0];
 
                 if (!file) {
-                    reject(new SimpleError({
-                        code: 'missing_field',
-                        message: 'Missing file',
-                        human: $t('Kies het pdf-bestand van je uittreksel.'),
-                        field: 'file',
-                        statusCode: 400,
-                    }));
+                    reject(this.missingFile());
                     return;
                 }
 
@@ -171,10 +148,17 @@ export class DeliverMemberJudicialRecordEndpoint extends Endpoint<Params, Query,
         });
     }
 
-    /**
-     * A file too large is the one parser error worth its own message: it is the member's to fix, and
-     * the fix is to upload the original pdf rather than a scan or a photo of it.
-     */
+    private missingFile(): SimpleError {
+        return new SimpleError({
+            code: 'missing_field',
+            message: 'Missing file',
+            human: $t('Kies het pdf-bestand van je uittreksel.'),
+            field: 'file',
+            statusCode: 400,
+        });
+    }
+
+    /** Every way the body can fail to hold a document is the client's mistake, so none of them is a 500 - a full disk is ours and keeps its status. */
     private formError(error: unknown): unknown {
         const code = typeof error === 'object' && error !== null && 'code' in error ? error.code : null;
 
@@ -186,6 +170,10 @@ export class DeliverMemberJudicialRecordEndpoint extends Endpoint<Params, Query,
                 field: 'file',
                 statusCode: 400,
             });
+        }
+
+        if (code === formidableErrors.missingMultipartBoundary || code === formidableErrors.malformedMultipart || code === formidableErrors.noEmptyFiles) {
+            return this.missingFile();
         }
 
         return error;
