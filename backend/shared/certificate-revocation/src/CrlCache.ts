@@ -6,10 +6,7 @@ const MAXIMUM_BYTES = 10 * 1024 * 1024;
 
 export interface FetchedCrl {
     bytes: Uint8Array;
-    /**
-     * When these bytes came off the network, which is what their lifetime is counted from. Handing it
-     * back means re-reading a cached list cannot keep pushing its own expiry forward.
-     */
+    /** Handed back so that re-reading a cached list cannot keep pushing its own expiry forward. */
     fetchedAt: Date;
 }
 
@@ -44,8 +41,7 @@ export class CrlCache {
 
     /**
      * `nextUpdate` sits inside the signed list, so only a caller that checked that signature may say
-     * how long we keep it. A list that names none is kept a day from the moment it was fetched, which
-     * is as long as anything else here is believed without being told so.
+     * how long we keep it. One that names none is kept a day, as long as anything else here.
      */
     store(url: string, { bytes, fetchedAt }: FetchedCrl, nextUpdate: Date | null): void {
         const ceiling = new Date(fetchedAt.getTime() + MAXIMUM_FRESHNESS_IN_MS);

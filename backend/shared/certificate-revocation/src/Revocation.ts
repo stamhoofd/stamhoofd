@@ -11,7 +11,7 @@ import { FetchRevocationHttpClient } from './RevocationHttpClient.js';
 
 export type RevocationStatus = 'good' | 'revoked' | 'unknown';
 
-/** Replaces the network and the list cache, so the checks can be tested without either. */
+/** Test seam: replaces the network and the list cache. */
 export interface RevocationOptions {
     client?: RevocationHttpClient;
     cache?: CrlCache;
@@ -20,11 +20,9 @@ export interface RevocationOptions {
 export interface CertificateAndIssuer {
     certificate: pkijs.Certificate;
     issuer: pkijs.Certificate;
-    /** For the message that says which certificate is the problem. */
     name: string;
 }
 
-/** OCSP first, the revocation list after. */
 export async function checkCertificateRevocation(certificate: pkijs.Certificate, issuer: pkijs.Certificate, options: RevocationOptions = {}): Promise<RevocationStatus> {
     const client = options.client ?? new FetchRevocationHttpClient();
     const cache = options.cache ?? sharedCrlCache;
@@ -49,20 +47,16 @@ export async function checkCertificateRevocation(certificate: pkijs.Certificate,
 }
 
 /**
- * Checks every certificate of a validated path, the trust anchor aside: that one is pinned by the
- * hash of its public key rather than looked up.
+ * `certificatePath` is the path a signature check answered with, signer first and anchor last.
  *
- * `certificatePath` is the path a signature check answered with, signer first and anchor last. Every
- * certificate is checked against the next one as its issuer.
- *
- * Resolves when nothing in the path is revoked. Throws a `SimpleError` when one is, and when a status
- * could not be established: accepting a signature we did not finish checking is not an option.
+ * Throws when a certificate is revoked, and when a status could not be established: accepting a
+ * signature we did not finish checking is not an option.
  */
 export async function assertChainNotRevoked(certificatePath: pkijs.Certificate[]): Promise<void> {
     await assertLinksNotRevoked(toCertificateChain(certificatePath));
 }
 
-/** Takes the seam the tests replace the network with, which the public entry point does not. */
+/** Separate from the public entry point because it takes the seam the tests stub. */
 export async function assertLinksNotRevoked(chain: CertificateAndIssuer[], options: RevocationOptions = {}): Promise<void> {
     let unknown: string | null = null;
 

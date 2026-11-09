@@ -61,11 +61,10 @@ export function getCrlUrls(certificate: pkijs.Certificate): string[] {
 }
 
 /**
- * These urls come out of a certificate, so they are treated as input even though the chain they
- * belong to is already pinned. Plain http is normal here: the responses are signed, so the transport
- * is not what we trust. An address of our own network is not.
+ * These urls come out of a certificate, so they are untrusted input even though the chain is pinned.
+ * Plain http is fine: the responses are signed, so the transport is not what we trust.
  *
- * A name that resolves to such an address still gets through, which no check here can see; this
+ * A name that resolves to a local address still gets through, which no check here can see; this only
  * turns away the shapes that say so in the url itself.
  */
 function acceptableUrls(urls: string[]): string[] {

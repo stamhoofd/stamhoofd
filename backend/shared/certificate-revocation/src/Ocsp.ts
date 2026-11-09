@@ -22,9 +22,8 @@ export async function checkOcsp(certificate: pkijs.Certificate, issuer: pkijs.Ce
         return 'unknown';
     }
 
-    // A responder that answers live can prove the answer is this one rather than one it gave before a
-    // revocation. Many answer from pre-produced files instead and leave the nonce out, which the
-    // freshness checks below have to carry on their own.
+    // Proves the answer is this one rather than one given before a revocation. Responders answering
+    // from pre-produced files leave it out, so the freshness checks below have to carry that case.
     const nonce = crypto.getRandomValues(new Uint8Array(NONCE_SIZE_IN_BYTES));
     const sentNonce = new Uint8Array(new asn1js.OctetString({ valueHex: nonce.slice().buffer as ArrayBuffer }).toBER(false));
 
@@ -62,10 +61,9 @@ export async function checkOcsp(certificate: pkijs.Certificate, issuer: pkijs.Ce
             basic.certs = [issuer];
         }
 
-        // The issuer may be the anchor here: the chain it belongs to was pinned before we got here.
-        // `trustedResponders` is what makes pkijs accept a response the issuer signed itself, since
-        // without it the responder's own chain is validated - and a self-signed root cannot be
-        // validated as the end entity of its own. Its signature still has to hold.
+        // Trusting the issuer is safe: its chain was pinned before we got here. `trustedResponders`
+        // is what makes pkijs accept a response the issuer signed itself - without it the responder's
+        // own chain is validated, and a self-signed root cannot be the end entity of its own.
         if (!await basic.verify({ trustedCerts: [issuer], issuerCerts: [issuer], trustedResponders: [issuer] })) {
             return 'unknown';
         }
@@ -84,9 +82,8 @@ export async function checkOcsp(certificate: pkijs.Certificate, issuer: pkijs.Ce
             return 'unknown';
         }
 
-        // Found again rather than returned by the call above, which answers with a status and not
-        // with the response that carried it. Nothing is believed on a response that has run out, so
-        // the window it names has to be read off the same entry.
+        // Looked up again because the call above answers with a status, not with the entry that
+        // carried it - and the freshness window has to be read off that same entry.
         const single = await findSingleResponse(basic, certificate, issuer);
 
         if (single === null || !isCurrent(single.thisUpdate, single.nextUpdate ?? null)) {
@@ -103,10 +100,7 @@ export async function checkOcsp(certificate: pkijs.Certificate, issuer: pkijs.Ce
     }
 }
 
-/**
- * A responder that echoes a nonce has to echo ours. One that sends none at all is answering from a
- * file it prepared earlier, which is allowed.
- */
+/** Sending none at all is allowed: the responder is answering from a file it prepared earlier. */
 function echoesNonce(basic: pkijs.BasicOCSPResponse, sent: Uint8Array): boolean {
     const extension = (basic.tbsResponseData.responseExtensions ?? []).find(candidate => candidate.extnID === NONCE_OID);
 
@@ -119,7 +113,6 @@ function echoesNonce(basic: pkijs.BasicOCSPResponse, sent: Uint8Array): boolean 
     return received.length === sent.length && received.every((byte, index) => byte === sent[index]);
 }
 
-/** The entry of the response that answers about this certificate, or null when none does. */
 async function findSingleResponse(basic: pkijs.BasicOCSPResponse, certificate: pkijs.Certificate, issuer: pkijs.Certificate): Promise<pkijs.SingleResponse | null> {
     const crypto = pkijs.getCrypto(true);
 
