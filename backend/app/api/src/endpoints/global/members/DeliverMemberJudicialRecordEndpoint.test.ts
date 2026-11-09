@@ -2,7 +2,7 @@ import { SimpleError } from '@common/errors';
 import { Request } from '@node/endpoints';
 import type { RateLimiter } from '@stamhoofd/models';
 import { MemberFactory, OrganizationFactory, UserFactory } from '@stamhoofd/models';
-import { JudicialRecordDeliveryStatus, MemberDetails, Permissions } from '@stamhoofd/structures';
+import { JudicialRecordStatus, MemberDetails, Permissions } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { defaultOptions } from 'formidable';
@@ -20,11 +20,9 @@ import { DeliverMemberJudicialRecordEndpoint, judicialRecordMemberLimiter, judic
 const endpoint = new DeliverMemberJudicialRecordEndpoint();
 
 /**
- * Stands in for the delivered document. Not a real extract: a valid one has to be signed by FOD
- * Justitie with their private key, and it holds someone's name, birth date and address - so none is
- * committed. What the checks make of a document is the check package's own test, and what the
- * service does around them is the service's; this endpoint only has to hand the bytes over
- * unchanged.
+ * Not a real extract: a valid one is signed by FOD Justitie with their private key and holds
+ * someone's name, birth date and address, so none is committed. This endpoint only has to hand the
+ * bytes over unchanged.
  */
 const PDF = new TextEncoder().encode('Dit is geen pdf.');
 
@@ -36,18 +34,10 @@ function resetLimiter(limiter: RateLimiter) {
 }
 
 describe('Endpoint.DeliverMemberJudicialRecord', () => {
-    /**
-     * Every multipart write of a test lands here, both the directory the endpoint allocates and
-     * formidable's own default, so what is left behind after a test is visible.
-     */
+    /** Both the directory the endpoint allocates and formidable's own default, so what is left behind after a test is visible. */
     let uploadDirectory: string;
     const originalUploadDirectory = defaultOptions.uploadDir;
 
-    /**
-     * The service is the layer under this one and has its own tests, including which outcome becomes
-     * which status and which of them throws. What is left to cover here is that the endpoint asks it
-     * for this member with these bytes, and answers and fails with whatever it says.
-     */
     let deliver: MockInstance<typeof JudicialRecordService.deliver>;
 
     beforeEach(async () => {
@@ -61,7 +51,7 @@ describe('Endpoint.DeliverMemberJudicialRecord', () => {
         vi.stubEnv('TMPDIR', uploadDirectory);
         defaultOptions.uploadDir = uploadDirectory;
 
-        deliver = vi.spyOn(JudicialRecordService, 'deliver').mockResolvedValue(JudicialRecordDeliveryStatus.AutoOk);
+        deliver = vi.spyOn(JudicialRecordService, 'deliver').mockResolvedValue(JudicialRecordStatus.Ok);
     });
 
     afterEach(async () => {
@@ -90,33 +80,21 @@ describe('Endpoint.DeliverMemberJudicialRecord', () => {
         return { organization, user, token, member };
     }
 
-    /** The multipart request a browser sends: the pdf and nothing else. */
-    function buildRequest({ token, organizationHost, memberId, content, includeFile = true }: {
+    function buildUpload({ token, organizationHost, memberId, contentType, body }: {
         token: string;
         organizationHost: string;
         memberId: string;
-        content?: Uint8Array;
-        includeFile?: boolean;
+        contentType?: string;
+        body: Buffer;
     }) {
-        const boundary = '--------------------------StamhoofdTest';
-        const parts: Buffer[] = [];
-
-        if (includeFile) {
-            parts.push(
-                Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="uittreksel.pdf"\r\nContent-Type: application/pdf\r\n\r\n`),
-                Buffer.from(content ?? PDF),
-                Buffer.from('\r\n'),
-            );
-        }
-
-        parts.push(Buffer.from(`--${boundary}--\r\n`));
-        const body = Buffer.concat(parts);
-
         const stream = Readable.from([body]) as unknown as IncomingMessage;
         stream.headers = {
-            'content-type': `multipart/form-data; boundary=${boundary}`,
             'content-length': body.length.toString(),
         };
+
+        if (contentType !== undefined) {
+            stream.headers['content-type'] = contentType;
+        }
 
         const request = Request.buildJson('POST', `/v1/members/${memberId}/judicial-record`, organizationHost);
         request.headers.authorization = 'Bearer ' + token;
@@ -125,7 +103,25 @@ describe('Endpoint.DeliverMemberJudicialRecord', () => {
         return request;
     }
 
-    test('It answers AUTO_OK when the automatic checks settled the delivery', async () => {
+    /** The multipart request a browser sends: the pdf and nothing else. */
+    function buildRequest({ token, organizationHost, memberId, content, fieldName = 'file' }: {
+        token: string;
+        organizationHost: string;
+        memberId: string;
+        content?: Uint8Array;
+        fieldName?: string;
+    }) {
+        const boundary = '--------------------------StamhoofdTest';
+        const body = Buffer.concat([
+            Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="${fieldName}"; filename="uittreksel.pdf"\r\nContent-Type: application/pdf\r\n\r\n`),
+            Buffer.from(content ?? PDF),
+            Buffer.from(`\r\n--${boundary}--\r\n`),
+        ]);
+
+        return buildUpload({ token, organizationHost, memberId, contentType: `multipart/form-data; boundary=${boundary}`, body });
+    }
+
+    test('It answers Ok when the automatic checks settled the delivery', async () => {
         const { organization, token, member } = await setup();
 
         const response = await testServer.test(endpoint, buildRequest({
@@ -134,7 +130,7 @@ describe('Endpoint.DeliverMemberJudicialRecord', () => {
             memberId: member.id,
         }));
 
-        expect(response.body.status).toBe(JudicialRecordDeliveryStatus.AutoOk);
+        expect(response.body.status).toBe(JudicialRecordStatus.Ok);
 
         // The document goes over as received, and a month old at most - the same thirty days the member portal counts before it offers to deliver
         expect(deliver).toHaveBeenCalledWith({
@@ -144,9 +140,9 @@ describe('Endpoint.DeliverMemberJudicialRecord', () => {
         });
     });
 
-    test('It answers MANUAL when a reviewer has to open the document', async () => {
+    test('It answers UnderReview when a reviewer has to open the document', async () => {
         const { organization, token, member } = await setup();
-        deliver.mockResolvedValue(JudicialRecordDeliveryStatus.Manual);
+        deliver.mockResolvedValue(JudicialRecordStatus.UnderReview);
 
         const response = await testServer.test(endpoint, buildRequest({
             token: token.accessToken,
@@ -154,7 +150,7 @@ describe('Endpoint.DeliverMemberJudicialRecord', () => {
             memberId: member.id,
         }));
 
-        expect(response.body.status).toBe(JudicialRecordDeliveryStatus.Manual);
+        expect(response.body.status).toBe(JudicialRecordStatus.UnderReview);
     });
 
     test('It passes on that this member has no extract to deliver', async () => {
@@ -210,23 +206,110 @@ describe('Endpoint.DeliverMemberJudicialRecord', () => {
             organizationHost: organization.getApiHost(),
             memberId: member.id,
             content: new Uint8Array(MAXIMUM_UPLOAD_SIZE + 1),
-        }))).rejects.toThrow(STExpect.simpleError({ code: 'file_too_large' }));
+        }))).rejects.toThrow(STExpect.simpleError({ code: 'file_too_large', field: 'file', statusCode: 400 }));
 
         expect(deliver).not.toHaveBeenCalled();
         expect(await fs.readdir(uploadDirectory)).toEqual([]);
     });
 
-    test('It requires a file', async () => {
-        const { organization, token, member } = await setup();
+    describe('A body that holds no document is the client\'s mistake, never a 500', () => {
+        const missingFile = STExpect.simpleError({ code: 'missing_field', field: 'file', statusCode: 400 });
 
-        await expect(testServer.test(endpoint, buildRequest({
-            token: token.accessToken,
-            organizationHost: organization.getApiHost(),
-            memberId: member.id,
-            includeFile: false,
-        }))).rejects.toThrow(STExpect.simpleError({ code: 'missing_field' }));
+        test('It requires a file part', async () => {
+            const { organization, token, member } = await setup();
+            const boundary = 'StamhoofdTest';
 
-        expect(deliver).not.toHaveBeenCalled();
+            await expect(testServer.test(endpoint, buildUpload({
+                token: token.accessToken,
+                organizationHost: organization.getApiHost(),
+                memberId: member.id,
+                contentType: `multipart/form-data; boundary=${boundary}`,
+                body: Buffer.from(`--${boundary}--\r\n`),
+            }))).rejects.toThrow(missingFile);
+
+            expect(deliver).not.toHaveBeenCalled();
+        });
+
+        test('It requires that part to be the one it asked for', async () => {
+            const { organization, token, member } = await setup();
+
+            await expect(testServer.test(endpoint, buildRequest({
+                token: token.accessToken,
+                organizationHost: organization.getApiHost(),
+                memberId: member.id,
+                fieldName: 'document',
+            }))).rejects.toThrow(missingFile);
+
+            expect(deliver).not.toHaveBeenCalled();
+        });
+
+        test('It refuses an empty file', async () => {
+            const { organization, token, member } = await setup();
+
+            await expect(testServer.test(endpoint, buildRequest({
+                token: token.accessToken,
+                organizationHost: organization.getApiHost(),
+                memberId: member.id,
+                content: new Uint8Array(0),
+            }))).rejects.toThrow(missingFile);
+
+            expect(deliver).not.toHaveBeenCalled();
+        });
+
+        test('It refuses a body that is not multipart', async () => {
+            const { organization, token, member } = await setup();
+
+            await expect(testServer.test(endpoint, buildUpload({
+                token: token.accessToken,
+                organizationHost: organization.getApiHost(),
+                memberId: member.id,
+                contentType: 'application/json',
+                body: Buffer.from('{}'),
+            }))).rejects.toThrow(missingFile);
+
+            expect(deliver).not.toHaveBeenCalled();
+        });
+
+        test('It refuses a request without a content type', async () => {
+            const { organization, token, member } = await setup();
+
+            await expect(testServer.test(endpoint, buildUpload({
+                token: token.accessToken,
+                organizationHost: organization.getApiHost(),
+                memberId: member.id,
+                body: Buffer.from(''),
+            }))).rejects.toThrow(missingFile);
+
+            expect(deliver).not.toHaveBeenCalled();
+        });
+
+        test('It refuses a multipart content type without a boundary', async () => {
+            const { organization, token, member } = await setup();
+
+            await expect(testServer.test(endpoint, buildUpload({
+                token: token.accessToken,
+                organizationHost: organization.getApiHost(),
+                memberId: member.id,
+                contentType: 'multipart/form-data',
+                body: Buffer.from('anything'),
+            }))).rejects.toThrow(missingFile);
+
+            expect(deliver).not.toHaveBeenCalled();
+        });
+
+        test('It refuses a multipart body that ends mid-parse', async () => {
+            const { organization, token, member } = await setup();
+
+            await expect(testServer.test(endpoint, buildUpload({
+                token: token.accessToken,
+                organizationHost: organization.getApiHost(),
+                memberId: member.id,
+                contentType: 'multipart/form-data; boundary=StamhoofdTest',
+                body: Buffer.from('not multipart at all'),
+            }))).rejects.toThrow(missingFile);
+
+            expect(deliver).not.toHaveBeenCalled();
+        });
     });
 
     test('It does not accept a delivery from an account the member is not linked to', async () => {
@@ -251,8 +334,7 @@ describe('Endpoint.DeliverMemberJudicialRecord', () => {
         }).create();
         const adminToken = await SessionService.createSession(admin);
 
-        // Full access to the member is not enough: an administrator reading an extract of someone
-        // else needs a right of its own, which arrives with the review flow
+        // Full access to the member is not enough: that right arrives with the review flow
         await expect(testServer.test(endpoint, buildRequest({
             token: adminToken.accessToken,
             organizationHost: organization.getApiHost(),
