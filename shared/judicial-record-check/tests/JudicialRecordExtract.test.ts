@@ -2,8 +2,8 @@ import { readJudicialRecordExtract } from '../src/JudicialRecordExtract.js';
 
 /**
  * The layout of a real extract: the date sits in the header next to the reference and the subject
- * rather than on a line of its own, the purpose is printed below its label, and the blank marker
- * carries its own date.
+ * rather than on a line of its own, the purpose is printed below its label, and the empty record
+ * marker carries its own date.
  */
 const EXTRACT_URL = 'https://just-crimeviewer-ctz.just.fgov.be/record/2331f637-9f30-46bd-9a3f-be62ff76d7dc-CJCS';
 
@@ -28,14 +28,14 @@ describe('readJudicialRecordExtract', () => {
             birthDay: new Date('2006-04-05T00:00:00.000Z'),
             documentDate: new Date('2026-11-02T00:00:00.000Z'),
             purpose: '596.2 - model bestemd voor de contacten met minderjarigen',
-            blankSince: new Date('2026-11-02T00:00:00.000Z'),
+            emptyRecordSince: new Date('2026-11-02T00:00:00.000Z'),
             url: EXTRACT_URL,
             urlExpiry: new Date('2027-02-01T00:00:00.000Z'),
         });
     });
 
     test('reads the date of the document rather than the other dates around it', () => {
-        // The header holds a birth date too, and the blank marker a third date
+        // The header holds a birth date too, and the empty record marker a third date
         expect(readJudicialRecordExtract(EXTRACT_LINES).documentDate).toEqual(new Date('2026-11-02T00:00:00.000Z'));
     });
 
@@ -48,7 +48,7 @@ describe('readJudicialRecordExtract', () => {
     test('leaves out a marker that is only mentioned', () => {
         const lines = EXTRACT_LINES.map(line => line.startsWith('BLANCO') ? 'Dit is geen BLANCO STRAFREGISTER (02/11/2026)' : line);
 
-        expect(readJudicialRecordExtract(lines).blankSince).toBeNull();
+        expect(readJudicialRecordExtract(lines).emptyRecordSince).toBeNull();
     });
 
     test('leaves a field that does not resolve null', () => {
@@ -60,7 +60,7 @@ describe('readJudicialRecordExtract', () => {
             birthDay: null,
             documentDate: null,
             purpose: null,
-            blankSince: null,
+            emptyRecordSince: null,
             url: null,
             urlExpiry: null,
         });

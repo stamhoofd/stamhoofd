@@ -17,7 +17,7 @@ const MEMBER: Omit<JudicialRecordCheckRequest, 'data'> = {
     maxAgeInDays: 31,
 };
 
-function lines(overrides: { date?: string; lastName?: string; firstName?: string; birthDay?: string; purpose?: string; blank?: string | null } = {}): string[] {
+function lines(overrides: { date?: string; lastName?: string; firstName?: string; birthDay?: string; purpose?: string; emptyRecord?: string | null } = {}): string[] {
     const all = [
         `Ref. doc : 20261102-5351 - Datum : ${overrides.date ?? '02/11/2026'} Betreft : JANSSENS JAN - 05/04/2006 1 / 1`,
         'UITTREKSEL UIT HET STRAFREGISTER',
@@ -28,10 +28,10 @@ function lines(overrides: { date?: string; lastName?: string; firstName?: string
         overrides.purpose ?? '596.2 - model bestemd voor de contacten met minderjarigen',
     ];
 
-    const blank = overrides.blank === undefined ? '02/11/2026' : overrides.blank;
+    const emptyRecordSince = overrides.emptyRecord === undefined ? '02/11/2026' : overrides.emptyRecord;
 
-    if (blank !== null) {
-        all.push(`BLANCO STRAFREGISTER (${blank})`);
+    if (emptyRecordSince !== null) {
+        all.push(`BLANCO STRAFREGISTER (${emptyRecordSince})`);
     }
 
     return all;
@@ -44,13 +44,23 @@ function check(overrides: Parameters<typeof lines>[0] = {}, member: Partial<Omit
 }
 
 describe('checkJudicialRecordContent', () => {
-    test('passes every content check on a blank extract of the member', () => {
+    test('passes every content check on an empty record extract of the member', () => {
         const results = check();
 
         for (const [name, result] of results) {
             expect(result.status, name).toBe(JudicialRecordCheckStatus.Passed);
             expect(result.reason, name).not.toBe('');
         }
+    });
+
+    describe('model', () => {
+        test('refuses another model', () => {
+            expect(check({ purpose: '596.1 - model bestemd voor gereglementeerde activiteiten' }).get(JudicialRecordCheck.Model)!.isFailed).toBe(true);
+        });
+
+        test('refuses a model that only mentions 596.2', () => {
+            expect(check({ purpose: '596.1 - niet te verwarren met model 596.2' }).get(JudicialRecordCheck.Model)!.isFailed).toBe(true);
+        });
     });
 
     describe('identity', () => {
@@ -90,16 +100,6 @@ describe('checkJudicialRecordContent', () => {
         });
     });
 
-    describe('model', () => {
-        test('refuses another model', () => {
-            expect(check({ purpose: '596.1 - model bestemd voor gereglementeerde activiteiten' }).get(JudicialRecordCheck.Model)!.isFailed).toBe(true);
-        });
-
-        test('refuses a model that only mentions 596.2', () => {
-            expect(check({ purpose: '596.1 - niet te verwarren met model 596.2' }).get(JudicialRecordCheck.Model)!.isFailed).toBe(true);
-        });
-    });
-
     describe('age', () => {
         test('refuses a document older than the maximum age', () => {
             const result = check({}, { maxAgeInDays: 7 }).get(JudicialRecordCheck.Age)!;
@@ -123,16 +123,16 @@ describe('checkJudicialRecordContent', () => {
         });
     });
 
-    describe('blank', () => {
-        test('refuses an extract without the blank marker', () => {
-            expect(check({ blank: null }).get(JudicialRecordCheck.Blank)!.isFailed).toBe(true);
+    describe('empty record', () => {
+        test('refuses an extract without the marker', () => {
+            expect(check({ emptyRecord: null }).get(JudicialRecordCheck.EmptyRecord)!.isFailed).toBe(true);
         });
 
         test('refuses a marker dated before the day the extract was drawn up', () => {
-            const result = check({ blank: '02/10/2026' }).get(JudicialRecordCheck.Blank)!;
+            const result = check({ emptyRecord: '02/10/2026' }).get(JudicialRecordCheck.EmptyRecord)!;
 
             expect(result.isFailed).toBe(true);
-            // Names the day the register was established to be blank, not the day of the document
+            // Names the day the register was established to be empty, not the day of the document
             expect(result.reason).toContain(Formatter.date(new Date('2026-10-02T00:00:00.000Z'), true));
         });
     });
@@ -151,7 +151,7 @@ describe('checkJudicialRecord', () => {
         });
 
         expect(report.isPassed).toBe(false);
-        expect(report.getChecks(true).map(result => result.check)).toEqual([...judicialRecordChecksInOrder]);
+        expect(report.getChecks().map(result => result.check)).toEqual([...judicialRecordChecksInOrder]);
 
         // Nothing was established about a chain, so there is none to look certificates up in
         expect(certificatePath).toBeNull();

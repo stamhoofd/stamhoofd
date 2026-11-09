@@ -29,35 +29,35 @@ the service on top of this.
 
 ## The five checks
 
-Each answers passed, failed or pending, with a sentence saying why. Three states, not two: a check
-without a verdict is not a check that failed, and reporting the four content checks as failures
-because a signature did not hold would say four things are wrong with a document when only one is.
-Nothing is approved on a pending check, so the distinction costs no safety.
+Each answers passed, failed or pending, with a sentence saying why. Pending is separate from failed
+because reporting the four content checks as failures over one signature would say four things are
+wrong with a document when only one is. Nothing is approved on a pending check, so the distinction
+costs no safety.
 
 1. **Authentic** — [`@stamhoofd/signed-pdf`](../signed-pdf/README.md): which bytes the signature
    covers, the signature itself, the pinned signer and the certificate chain. It answers with the
    moment the signature says it was made, which the dates below are judged against. A refusal
    because an authority did not answer us is pending rather than failed: nothing is wrong with the
    document, and trying again later can still give it a verdict.
-2. **Identity** — the name and birth date printed on the extract are the member's. An extract prints
+2. **Model** — the purpose has to *start* with `596.2`, the model for activities with minors. Not
+   merely mention it: the number turns up in the boilerplate of other models, so a 596.1 extract can
+   name it while being another document.
+3. **Identity** — the name and birth date printed on the extract are the member's. An extract prints
    every given name its holder has, where a member record usually holds the one they go by, so the
    names we have must all be on the document and the document may hold more. Accents, capitals and
    punctuation are how a name is written, not which name it is. The reason names the member we
    expected, never the name we found: an extract that is not theirs is someone else's.
-3. **Model** — the purpose has to *start* with `596.2`, the model for activities with minors. Not
-   merely mention it: the number turns up in the boilerplate of other models, so a 596.1 extract can
-   name it while being another document.
 4. **Age** — no older than `maxAgeInDays`, **and** drawn up the day it was signed. Those belong
    together. The date in the header is printed text and says nothing by itself; the signing time
    comes out of the signature. Requiring them to be the same day is what lets the printed date be
    read as the day the extract was drawn up. **This is the only place the limit is applied.**
    `@stamhoofd/signed-pdf` hands back the signing time and judges no age of its own, deliberately:
    the limit differs per caller, and one rule in two places is one rule too many.
-5. **Blank** — the extract states its own blankness as a heading with a date beside it, and that
-   date is when the register was established to be blank. An extract drawn up today that was blank a
-   month ago says nothing about today, so that date has to be the day of the document. It is
-   compared against the signing time, which check 4 already ties the header date to: with both
-   passed, all three dates are one day.
+5. **Empty record** — the extract states as a heading that the record holds nothing, with a date
+   beside it, and that date is when the register was established to be empty. An extract drawn up
+   today that was empty a month ago says nothing about today, so that date has to be the day of the
+   document. It is compared against the signing time, which the age check already ties the header
+   date to: with both passed, all three dates are one day.
 
 The signature comes first because it is what makes the text worth reading — a file we cannot place
 could say anything — so the content is only parsed once it holds. A document whose text we cannot
@@ -98,8 +98,8 @@ that already has the bytes. It is not something to answer over http.
 
 ## What is specific to FOD Justitie
 
-`JudicialRecordExtract.ts`: the labels its fields are printed behind, the blank marker, and the
-model we accept. How a line has to be taken apart to find a value is `@stamhoofd/pdf-parse`'s; the
+`JudicialRecordExtract.ts`: the labels its fields are printed behind, the empty record marker, and
+the model we accept. How a line has to be taken apart to find a value is `@stamhoofd/pdf-parse`'s; the
 signature goes through `@stamhoofd/signed-pdf`. Neither package knows what a judicial record is.
 
 Every field takes a list of accepted spellings, so another wording — a second Dutch variant, or the

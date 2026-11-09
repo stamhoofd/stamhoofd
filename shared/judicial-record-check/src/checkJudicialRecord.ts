@@ -9,8 +9,8 @@ import { JUDICIAL_RECORD_MODEL, readJudicialRecordExtract } from './JudicialReco
 
 const SIGNER_NAME = 'FOD Justitie';
 
-/** The checks that are run on the text of the document, so only once the signature holds. */
-const CONTENT_CHECKS = [JudicialRecordCheck.Identity, JudicialRecordCheck.Model, JudicialRecordCheck.Age, JudicialRecordCheck.Blank];
+/** Run on the text of the document, so only once the signature holds. */
+const CONTENT_CHECKS = [JudicialRecordCheck.Model, JudicialRecordCheck.Identity, JudicialRecordCheck.Age, JudicialRecordCheck.EmptyRecord];
 
 export interface JudicialRecordCheckRequest {
     /** The original pdf, exactly as it was received: untrusted input. */
@@ -28,40 +28,28 @@ export interface JudicialRecordCheckOutcome {
     report: JudicialRecordCheckReport;
 
     /**
-     * The path the signature validated, from the signer up to the pinned trust anchor. Null when the
-     * Authentic check did not pass, since there is then no path we established anything about.
-     *
-     * Answered rather than kept inside, because revocation is looked up on these certificates and
-     * that lookup cannot run everywhere this package runs: it talks to the authorities that issued
-     * them. A caller that can do it adds its outcome to the Authentic check.
+     * The validated path, from the signer up to the pinned trust anchor, null when the Authentic
+     * check did not pass. Answered rather than kept inside because revocation is looked up on these
+     * certificates, and that lookup talks to the authorities that issued them - which cannot happen
+     * everywhere this package runs.
      */
     certificatePath: pkijs.Certificate[] | null;
 
     /**
-     * The values read off the document, null when its text was never read - the signature did not
-     * hold, or the pdf carries no text to read.
-     *
-     * Answered because the checks are not everything the document says. It also prints where FOD
-     * Justitie serves it and until when, which no check has an opinion about but a caller does: a
-     * member whose viewer cannot draw the pdf can be handed that link instead.
-     *
-     * It holds the name and birth date printed on the extract, so it belongs where the document
-     * already is - the process that has the bytes. It is not something to answer over http.
+     * The values read off the document, null when its text was never read. Answered because a caller
+     * needs more than the checks: where FOD Justitie serves the document, for a member whose viewer
+     * cannot draw the pdf. It holds a name and birth date, so it stays in the process that already
+     * has the bytes rather than being answered over http.
      */
     extract: JudicialRecordExtract | null;
 }
 
 /**
- * Everything we can establish about a delivered judicial record extract on our own, without a human
- * looking at it.
+ * Everything we can establish about a delivered judicial record extract without a human looking
+ * at it.
  *
- * The five checks of the automatic control, in display order. The signature first, because it is
- * what makes the text worth reading: a file we cannot place could say anything. Its content is only
- * parsed once the signature holds.
- *
- * Nothing is stored and nothing is read from a database: the same document delivered twice gives the
- * same answer, and a reviewer opening one later has it checked again rather than shown a stored
- * verdict.
+ * The signature goes first because it is what makes the text worth reading: a file we cannot place
+ * could say anything, so the content is only parsed once the signature holds.
  */
 export async function checkJudicialRecord(request: JudicialRecordCheckRequest): Promise<JudicialRecordCheckOutcome> {
     const { authentic, signedAt, certificatePath } = await checkSignature(request.data);
@@ -79,12 +67,12 @@ export async function checkJudicialRecord(request: JudicialRecordCheckRequest): 
     try {
         lines = await extractPdfLines(request.data);
     } catch (error) {
-        // A pdf we cannot read the text of: no text layer, or beyond the limits the package
-        // accepts. Its own message says what to do about it, which is the same for all four.
         if (!isSimpleError(error)) {
             throw error;
         }
 
+        // Its own message says what to do about a pdf we cannot read the text of, and that is the
+        // same answer for all four content checks
         return {
             report: report([authentic, ...pending(CONTENT_CHECKS, human(error))]),
             certificatePath,
@@ -101,10 +89,7 @@ export async function checkJudicialRecord(request: JudicialRecordCheckRequest): 
     };
 }
 
-/**
- * Check 1. Answers with the signing time and the validated path as well, since that time is the one
- * date here that is covered by the signature. Both are null when the signature did not hold.
- */
+/** Answers with the signing time too, because that is the one date here covered by the signature. */
 async function checkSignature(data: Uint8Array): Promise<{ authentic: JudicialRecordCheckResult; signedAt: Date | null; certificatePath: pkijs.Certificate[] | null }> {
     try {
         const { signedAt, certificatePath } = await verifyPdfFromFodJustitie(data);
@@ -119,9 +104,8 @@ async function checkSignature(data: Uint8Array): Promise<{ authentic: JudicialRe
             throw error;
         }
 
-        // Nothing is wrong with the document when an authority did not answer us about its
-        // certificates, so that is not a verdict on the document: it is a check without one,
-        // and trying again later can still give it one.
+        // An authority not answering us about the certificates is not a verdict on the document:
+        // nothing is wrong with it, and trying again later can still give it one
         const status = (error.statusCode ?? 400) >= 500
             ? JudicialRecordCheckStatus.Pending
             : JudicialRecordCheckStatus.Failed;
@@ -134,19 +118,35 @@ async function checkSignature(data: Uint8Array): Promise<{ authentic: JudicialRe
     }
 }
 
-/** Checks 2 to 5, on the text of a document whose signature already held. */
+/** The checks on the text of a document whose signature already held. */
 export function checkJudicialRecordContent(extract: JudicialRecordExtract, request: Omit<JudicialRecordCheckRequest, 'data'>, signedAt: Date, atDate: Date): JudicialRecordCheckResult[] {
     return [
-        checkIdentity(extract, request),
         checkModel(extract),
+        checkIdentity(extract, request),
         checkAge(extract, signedAt, request.maxAgeInDays, atDate),
-        checkBlank(extract, signedAt),
+        checkEmptyRecord(extract, signedAt),
     ];
 }
 
 /**
- * Check 2. The name we expected is in the reason, never the name we found: an extract that is not
- * this member's is someone else's, and that someone did not agree to us repeating their name here.
+ * The purpose has to start with the model number rather than merely mention it: 596.2 also turns up
+ * in the boilerplate of other models, so a 596.1 extract can name it while being another document.
+ */
+function checkModel(extract: JudicialRecordExtract): JudicialRecordCheckResult {
+    if (extract.purpose === null) {
+        return result(JudicialRecordCheck.Model, JudicialRecordCheckStatus.Failed, $t('We vonden niet terug waarvoor dit uittreksel werd opgemaakt.'));
+    }
+
+    if (!extract.purpose.startsWith(JUDICIAL_RECORD_MODEL)) {
+        return result(JudicialRecordCheck.Model, JudicialRecordCheckStatus.Failed, $t('Dit is geen uittreksel model {model}, het soort dat nodig is voor activiteiten met minderjarigen.', { model: JUDICIAL_RECORD_MODEL }));
+    }
+
+    return result(JudicialRecordCheck.Model, JudicialRecordCheckStatus.Passed, $t('Uittreksel model {model}, het soort dat nodig is voor activiteiten met minderjarigen.', { model: JUDICIAL_RECORD_MODEL }));
+}
+
+/**
+ * The reason names the member we expected, never the name we found: an extract that is not this
+ * member's is someone else's, and that someone did not agree to us repeating their name here.
  */
 function checkIdentity(extract: JudicialRecordExtract, member: Pick<JudicialRecordCheckRequest, 'firstName' | 'lastName' | 'birthDay'>): JudicialRecordCheckResult {
     if (extract.firstName === null || extract.lastName === null || extract.birthDay === null) {
@@ -168,29 +168,9 @@ function checkIdentity(extract: JudicialRecordExtract, member: Pick<JudicialReco
 }
 
 /**
- * Check 3. The purpose has to start with the model number, not merely mention it somewhere: 596.2
- * also turns up in the boilerplate of other models, so a 596.1 extract can name it while being
- * another document.
- */
-function checkModel(extract: JudicialRecordExtract): JudicialRecordCheckResult {
-    if (extract.purpose === null) {
-        return result(JudicialRecordCheck.Model, JudicialRecordCheckStatus.Failed, $t('We vonden niet terug waarvoor dit uittreksel werd opgemaakt.'));
-    }
-
-    if (!extract.purpose.startsWith(JUDICIAL_RECORD_MODEL)) {
-        return result(JudicialRecordCheck.Model, JudicialRecordCheckStatus.Failed, $t('Dit is geen uittreksel model {model}, het soort dat nodig is voor activiteiten met minderjarigen.', { model: JUDICIAL_RECORD_MODEL }));
-    }
-
-    return result(JudicialRecordCheck.Model, JudicialRecordCheckStatus.Passed, $t('Uittreksel model {model}, het soort dat nodig is voor activiteiten met minderjarigen.', { model: JUDICIAL_RECORD_MODEL }));
-}
-
-/**
- * Check 4. Recent enough, and drawn up the day it was signed.
- *
- * Those two belong together. The date in the header is printed text and says nothing by itself; the
- * signing time comes out of the signature. Requiring them to be the same day is what lets the
- * printed date be read as the day the extract was drawn up, and what catches an older extract whose
- * header was edited - the signature covers the bytes, but a header is also just bytes to it.
+ * The header date is printed text and says nothing by itself; the signing time comes out of the
+ * signature. Requiring them to be the same day is what lets the printed date be read as the day the
+ * extract was drawn up, and what catches an older extract whose header was edited.
  */
 function checkAge(extract: JudicialRecordExtract, signedAt: Date, maxAgeInDays: number, atDate: Date): JudicialRecordCheckResult {
     if (extract.documentDate === null) {
@@ -214,28 +194,24 @@ function checkAge(extract: JudicialRecordExtract, signedAt: Date, maxAgeInDays: 
 }
 
 /**
- * Check 5. Blank, and blank as of the day the extract was drawn up.
- *
- * The marker is a heading the document prints about itself, with a date beside it - that date is
- * when the register was established to be blank. An extract drawn up today that states it was blank
- * a month ago says nothing about today, so the date has to be the day of the document.
- *
- * It is compared against the signing time rather than against the printed header date, because that
- * is the date check 4 already ties the header to: with both checks passed, all three are one day.
+ * The marker carries the date the register was established to hold nothing, and an extract drawn up
+ * today that was empty a month ago says nothing about today - so that date has to be the day of the
+ * document. Compared against the signing time rather than the printed header date, because that is
+ * the date the age check already ties the header to.
  */
-function checkBlank(extract: JudicialRecordExtract, signedAt: Date): JudicialRecordCheckResult {
-    if (extract.blankSince === null) {
-        return result(JudicialRecordCheck.Blank, JudicialRecordCheckStatus.Failed, $t('Dit is geen blanco uittreksel uit het strafregister.'));
+function checkEmptyRecord(extract: JudicialRecordExtract, signedAt: Date): JudicialRecordCheckResult {
+    if (extract.emptyRecordSince === null) {
+        return result(JudicialRecordCheck.EmptyRecord, JudicialRecordCheckStatus.Failed, $t('Dit is geen blanco uittreksel uit het strafregister.'));
     }
 
-    if (!isSameDay(extract.blankSince, signedAt)) {
-        return result(JudicialRecordCheck.Blank, JudicialRecordCheckStatus.Failed, $t('Dit uittreksel is blanco sinds {blank}, niet sinds de dag waarop het werd opgemaakt ({document}).', {
-            blank: Formatter.date(extract.blankSince, true),
+    if (!isSameDay(extract.emptyRecordSince, signedAt)) {
+        return result(JudicialRecordCheck.EmptyRecord, JudicialRecordCheckStatus.Failed, $t('Dit uittreksel is blanco sinds {since}, niet sinds de dag waarop het werd opgemaakt ({document}).', {
+            since: Formatter.date(extract.emptyRecordSince, true),
             document: Formatter.date(signedAt, true),
         }));
     }
 
-    return result(JudicialRecordCheck.Blank, JudicialRecordCheckStatus.Passed, $t('Blanco uittreksel uit het strafregister op {date}.', { date: Formatter.date(extract.blankSince, true) }));
+    return result(JudicialRecordCheck.EmptyRecord, JudicialRecordCheckStatus.Passed, $t('Blanco uittreksel uit het strafregister op {date}.', { date: Formatter.date(extract.emptyRecordSince, true) }));
 }
 
 function report(checks: JudicialRecordCheckResult[]): JudicialRecordCheckReport {
@@ -255,10 +231,7 @@ function human(error: { human?: string; code: string }): string {
     return error.human ?? $t('We konden dit document niet controleren. Laad het originele pdf-bestand op dat je van {signerName} kreeg.', { signerName: SIGNER_NAME });
 }
 
-/**
- * Names and dates printed on a document are compared the way a person would read them: accents,
- * capitals and punctuation are how a name is written, not which name it is.
- */
+/** Accents, capitals and punctuation are how a name is written, not which name it is. */
 function normalizeName(value: string): string {
     return Formatter.removeAccents(value).toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim();
 }
