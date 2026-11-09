@@ -15,25 +15,23 @@ const allPassed = Object.fromEntries(judicialRecordChecksInOrder.map(check => [c
 describe('JudicialRecordCheckReport', () => {
     test('shows the checks in display order, whichever order they came in', () => {
         const unordered = report({
-            [JudicialRecordCheck.Blank]: JudicialRecordCheckStatus.Passed,
+            [JudicialRecordCheck.EmptyRecord]: JudicialRecordCheckStatus.Passed,
             [JudicialRecordCheck.Identity]: JudicialRecordCheckStatus.Passed,
+            [JudicialRecordCheck.Model]: JudicialRecordCheckStatus.Passed,
             [JudicialRecordCheck.Authentic]: JudicialRecordCheckStatus.Passed,
         });
 
-        expect(unordered.getChecks(true).map(result => result.check)).toEqual([
+        expect(unordered.getChecks().map(result => result.check)).toEqual([
             JudicialRecordCheck.Authentic,
+            JudicialRecordCheck.Model,
             JudicialRecordCheck.Identity,
-            JudicialRecordCheck.Blank,
+            JudicialRecordCheck.EmptyRecord,
         ]);
-    });
-
-    test('keeps the blank check from the member', () => {
-        expect(report(allPassed).getChecks(false).map(result => result.check)).not.toContain(JudicialRecordCheck.Blank);
     });
 
     test('passes only when every check has a result that passed', () => {
         expect(report(allPassed).isPassed).toBe(true);
-        expect(report({ ...allPassed, [JudicialRecordCheck.Blank]: JudicialRecordCheckStatus.Failed }).isPassed).toBe(false);
+        expect(report({ ...allPassed, [JudicialRecordCheck.EmptyRecord]: JudicialRecordCheckStatus.Failed }).isPassed).toBe(false);
 
         // A check without a verdict is not a check that passed
         expect(report({ ...allPassed, [JudicialRecordCheck.Age]: JudicialRecordCheckStatus.Pending }).isPassed).toBe(false);
@@ -49,6 +47,6 @@ describe('JudicialRecordCheckReport', () => {
             [JudicialRecordCheck.Identity]: JudicialRecordCheckStatus.Failed,
         });
 
-        expect(failed.failedChecks.map(result => result.check)).toEqual([JudicialRecordCheck.Identity, JudicialRecordCheck.Model]);
+        expect(failed.failedChecks.map(result => result.check)).toEqual([JudicialRecordCheck.Model, JudicialRecordCheck.Identity]);
     });
 });
