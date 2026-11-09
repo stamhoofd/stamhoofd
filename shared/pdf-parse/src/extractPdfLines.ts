@@ -8,32 +8,26 @@ const MAX_PAGES = 10;
 /** Items closer together than this on the y axis belong to the same line. */
 const LINE_TOLERANCE = 2;
 
-/**
- * A malformed upload is answered with a SimpleError the member reads, so pdf.js writing its own
- * account of the same file to the console adds noise and no reader.
- */
+// A malformed upload already answers with a SimpleError the member reads; pdf.js narrating the same
+// file to the console adds noise and no reader.
 const VERBOSITY = VerbosityLevel.ERRORS;
 
-/** A text item of a page, reduced to what placing it on a line needs. */
 interface TextItem {
     str: string;
-    /** From the left of the page, in pdf units. */
+    /** In pdf units, from the left of the page. */
     x: number;
-    /** From the bottom of the page, in pdf units. */
+    /** In pdf units, from the bottom of the page. */
     y: number;
     width: number;
     fontSize: number;
 }
 
 /**
- * The text of a pdf in reading order, one string per line.
+ * The text of a pdf in reading order, one string per line: pdf.js itself emits items in the order
+ * the file happens to draw them, so a label and its value can arrive in either sequence.
  *
- * pdf.js emits text items in the order the file happens to draw them, so a label and its value can
- * arrive in either sequence.
- *
- * Throws a `SimpleError` when there is no text to return. Every one of them carries a `human`
- * message that says what to do about it, so a caller can pass it on to whoever uploaded the file
- * without having to map the code first.
+ * Throws a `SimpleError` whose `human` message says what to do about it, so a caller can pass it
+ * straight on to whoever uploaded the file.
  */
 export async function extractPdfLines(data: Uint8Array): Promise<string[]> {
     if (data.byteLength === 0) {
@@ -95,8 +89,8 @@ async function readPages(data: Uint8Array): Promise<TextItem[][]> {
             await pdf.loadingTask.destroy();
         }
     } finally {
-        // pdf.js only tears down a worker it created itself, and this one was created here. The
-        // channel has to be closed as well, or Node keeps the event loop alive on the open port
+        // pdf.js only tears down workers it created itself, and Node keeps the event loop alive on
+        // an open port
         worker.destroy();
         close();
     }
@@ -108,8 +102,7 @@ async function loadDocument(data: Uint8Array, worker: ReturnType<typeof createMa
             data,
             worker,
             verbosity: VERBOSITY,
-            // This package reads text and never renders, so an untrusted document has no business
-            // installing font faces into the page it is read on
+            // Nothing here renders, so an untrusted document has no business installing font faces
             disableFontFace: true,
         }).promise;
     } catch (error) {
@@ -142,7 +135,7 @@ async function readPageItems(pdf: Awaited<ReturnType<typeof loadDocument>>, page
     const { items } = await page.getTextContent();
 
     return items
-        // A page also yields marked-content boundaries, which carry no text and no position
+        // Pages also yield marked-content boundaries, which carry no text and no position
         .filter((item): item is Extract<typeof item, { str: string }> => 'str' in item)
         .map((item) => {
             // The text matrix: scale and skew first, then the position the item is drawn at
@@ -153,7 +146,6 @@ async function readPageItems(pdf: Awaited<ReturnType<typeof loadDocument>>, page
                 x,
                 y,
                 width: item.width,
-                // The drawn size of the glyphs, which the matrix may have scaled and skewed
                 fontSize: Math.hypot(skewX, scaleY),
             };
         });
