@@ -229,7 +229,7 @@ export class FetchMemberJudicialRecordEndpoint extends Endpoint<Params, Query, B
         return new SimpleError({
             code: 'judicial_record_not_available',
             message: 'FOD Justitie did not return a pdf',
-            human: $t('We konden je uittreksel niet ophalen bij FOD Justitie. Een link werkt maar één keer: vraag een nieuw uittreksel aan en scan de QR-code opnieuw.'),
+            human: $t('We konden je uittreksel niet ophalen bij FOD Justitie. Probeer het over 20 minuten nog eens of upload het originele document.'),
             statusCode: 400,
         });
     }
