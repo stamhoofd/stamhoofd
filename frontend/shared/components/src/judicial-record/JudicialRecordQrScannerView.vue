@@ -50,21 +50,18 @@ import { isSimpleError, isSimpleErrors } from '@common/errors';
 import { Request } from '@common/networking';
 import { useDismiss } from '@browser/navigation';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
+import { readJudicialRecordExtractUrl } from '@stamhoofd/judicial-record-check';
 import type { PlatformMember } from '@stamhoofd/structures';
 import { onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue';
 import Spinner from '../Spinner.vue';
 import { useQrScanner } from '../hooks/useQrScanner';
 import STNavigationBar from '../navigation/STNavigationBar.vue';
-import { readJudicialRecordExtractUrl } from './judicialRecordExtractUrl';
 import { useFetchJudicialRecordPdf } from './useFetchJudicialRecordPdf';
 
 const props = defineProps<{
     member: PlatformMember;
 
-    /**
-     * Hands the extract that was behind the code to the delivery step, which continues the flow with
-     * it, together with the link it came from.
-     */
+    /** Takes the extract and the link it came from, and continues the flow with both. */
     selectHandler: (file: File, url: string) => Promise<void>;
 }>();
 
@@ -80,9 +77,9 @@ const errorMessage = ref<string | null>(null);
 let lastRefusedCode: string | null = null;
 
 /**
- * The link that could not be fetched. The camera keeps reading it while the member still holds the
- * extract in front of it, and every read would be another request, another error and another buzz.
- * It is tried again once the scanner is opened again; another code is read as usual.
+ * The camera keeps reading the same code while the member holds the extract in front of it, and
+ * every read would be another request, another error and another buzz. Reopening the scanner tries
+ * it again; another code is read as usual.
  */
 let failedUrl: string | null = null;
 
@@ -130,8 +127,8 @@ async function readCode(value: string) {
 }
 
 /**
- * The pdf arrives at the delivery step the way an uploaded one does, so the control step cannot tell
- * the two apart. The scanner closes first: the next step is pushed by the step underneath it.
+ * The pdf reaches the delivery step the way an uploaded one does, so the control step cannot tell the
+ * two apart. The scanner closes first: the next step is pushed by the step underneath it.
  */
 async function deliver(url: string) {
     fetching.value = true;

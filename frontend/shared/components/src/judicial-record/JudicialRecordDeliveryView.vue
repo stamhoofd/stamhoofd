@@ -145,8 +145,8 @@ const AMBRASSADE_URL = 'https://www.ambrassade.be/themas/uittreksel-strafregiste
 const navigate = useNavigationActions();
 
 /**
- * Both methods end here, and both move on right away with whatever file was picked: the control step
- * judges it, next to the file itself, and sends it in when nothing needs fixing.
+ * Both ways of answering end here, and every file moves on: what is wrong with one is said by the
+ * control step, next to the file itself, rather than here where the file is no longer in view.
  */
 async function continueWith(file: File, url: string | null = null) {
     props.delivery.file = file;
@@ -162,8 +162,8 @@ const { dragging, dropHandlers } = useJudicialRecordPdfSelection((file) => {
 });
 
 /**
- * Coming back here means delivering another extract, so the step starts over: the previous choice
- * is gone and the control step only ever runs on a file that was picked after the member returned.
+ * Coming back here means delivering another extract, so the control step only ever runs on a file
+ * that was picked after the member returned.
  */
 onActivated(() => {
     props.delivery.file = null;
@@ -186,9 +186,9 @@ function onChangeFile(event: Event) {
 }
 
 /**
- * The scanner is presented on top of this step rather than being a step of its own: it is one of two
- * ways to answer the same question, and it closes itself once it has the document. It covers the
- * screen like the ticket scanner, which the native camera of the app needs to draw underneath it.
+ * Presented on top of this step rather than being a step of its own: it is one of two ways to answer
+ * the same question, and it closes itself once it has the document. It covers the screen like the
+ * ticket scanner, which the native camera of the app needs to draw underneath it.
  */
 async function scanQrCode() {
     await navigate.present({

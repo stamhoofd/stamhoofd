@@ -38,12 +38,12 @@
                     <STErrorsDefault :error-box="errorBox" />
                 </div>
 
-                <p v-if="deliveryStatus === JudicialRecordDeliveryStatus.AutoOk" class="success-box icon success" data-testid="judicial-record-summary">
+                <p v-if="deliveryStatus === JudicialRecordStatus.Ok" class="success-box icon success" data-testid="judicial-record-summary">
                     {{ $t('Opgeslagen & goedgekeurd') }}
                 </p>
 
-                <p v-else-if="deliveryStatus === JudicialRecordDeliveryStatus.Manual" class="warning-box icon clock" data-testid="judicial-record-summary">
-                    {{ $t('Je attest wordt beoordeeld') }}
+                <p v-else-if="deliveryStatus === JudicialRecordStatus.UnderReview" class="warning-box icon clock" data-testid="judicial-record-summary">
+                    {{ $t('Je uittreksel wordt beoordeeld') }}
                 </p>
 
                 <!-- Next to the view there is a column for the extract. Without that room it stays here. -->
@@ -88,7 +88,7 @@ import { Request } from '@common/networking';
 import { AppManager } from '@stamhoofd/frontend-platform/AppManager';
 import { checkJudicialRecord } from '@stamhoofd/judicial-record-check';
 import type { JudicialRecordCheckReport } from '@stamhoofd/structures';
-import { JudicialRecordCheck, JudicialRecordCheckStatus, JudicialRecordDeliveryStatus } from '@stamhoofd/structures';
+import { JudicialRecordCheck, JudicialRecordCheckStatus, JudicialRecordStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import Spinner from '../Spinner.vue';
@@ -115,7 +115,7 @@ const props = defineProps<JudicialRecordStepProps>();
 const navigate = useNavigationActions();
 const deliverJudicialRecord = useDeliverJudicialRecord();
 
-/** The file picked on the step before. That step moves on with every file, so this step is where it is judged. */
+/** The step before moves on with every file it is given, so this is where a file is judged. */
 const file = props.delivery.file;
 
 const isPdf = file?.type === 'application/pdf';
@@ -123,13 +123,11 @@ const isPdf = file?.type === 'application/pdf';
 const fileIcon = isPdf ? 'file-pdf color-pdf' : (file?.type.startsWith('image/') ? 'file-image' : 'file');
 
 /**
- * Where the file stopped. It is judged in three layers, each only once the one before holds:
+ * Where the file stopped. Which buttons the member gets follows from the layer, not from the error:
  *
- * 1. `basic`: whether it is a pdf of a size an extract can have, and whether its bytes can be read.
- *    Nothing can be done with a file that fails here, other than picking another.
- * 2. `checks`: the checks of judicial-record-check, in the browser. A verdict the member disagrees
- *    with can still be sent in, for a reviewer to look at - not when the checks themselves broke,
- *    since then there is no verdict to disagree with.
+ * 1. `basic`: not a pdf, too large, or unreadable bytes. Nothing to do but pick another file.
+ * 2. `checks`: a verdict the member disagrees with can still be sent in for a reviewer to look at -
+ *    not when the checks themselves broke, since then there is no verdict to disagree with.
  * 3. `backend`: it has the last word, and is the only one that can look up a revocation.
  */
 type Failure =
@@ -139,19 +137,18 @@ type Failure =
 
 const failure = ref<Failure | null>(null);
 
-/** What the checks in the browser found, null while they run or when they could not run */
+/** Null while the checks run, and when they could not run */
 const report = ref<JudicialRecordCheckReport | null>(props.delivery.report);
 
-/** What happens to the file right now: it is checked first and, when nothing needs fixing, sent in */
 const processing = ref<'checking' | 'sending' | null>(null);
 
 /**
- * The member asked for the running upload with a button. That button shows it is busy, and the
- * reason it was pressed for stays in view until the backend answers.
+ * The running upload was asked for with a button, so that button shows it is busy and the reason it
+ * was pressed for stays in view until the backend answers.
  */
 const sendingOnRequest = ref(false);
 
-/** Shown on the file row, together with a spinner, for what runs without the member asking for it */
+/** Only for what runs without the member asking for it: the rest is said by the button they pressed */
 const processingDescription = computed(() => {
     if (sendingOnRequest.value) {
         return null;
@@ -165,10 +162,9 @@ const processingDescription = computed(() => {
 
 const errorBox = ref<ErrorBox | null>(null);
 
-/** The pdf the member is looking at, read from the file once it passed the basic checks */
 const pdfData = ref<Uint8Array | null>(null);
 
-const deliveryStatus = ref<JudicialRecordDeliveryStatus | null>(props.delivery.status);
+const deliveryStatus = ref<JudicialRecordStatus | null>(props.delivery.status);
 
 /** Where FOD Justitie serves the document and until when, as the document itself prints it */
 const extractUrl = ref<{ url: string; expiry: Date | null } | null>(null);
@@ -176,8 +172,8 @@ const extractUrl = ref<{ url: string; expiry: Date | null } | null>(null);
 const previewWide = ref(false);
 
 /**
- * The viewer could not draw this document. It says nothing about the checks - those ran on the same
- * bytes and have their own verdict - so the member is offered another way to look at it.
+ * It says nothing about the checks - those ran on the same bytes and have their own verdict - so the
+ * member is offered another way to look at the document instead of being stopped.
  */
 const viewerFailed = ref(false);
 
@@ -278,11 +274,11 @@ async function check(data: Uint8Array) {
 
 /**
  * Whether the report lets the document through to the backend right away: nothing to fix, or only
- * that it is not blank, which a reviewer decides about either way. Otherwise the member decides.
+ * that the record is not empty, which a reviewer decides about either way. Otherwise the member does.
  */
 function judge(result: JudicialRecordCheckReport): boolean {
     const outcome = getJudicialRecordCheckOutcome(result);
-    if (outcome === JudicialRecordCheckOutcome.Passed || outcome === JudicialRecordCheckOutcome.NotBlank) {
+    if (outcome === JudicialRecordCheckOutcome.Passed || outcome === JudicialRecordCheckOutcome.NotEmptyRecord) {
         return true;
     }
 
@@ -296,10 +292,10 @@ function judge(result: JudicialRecordCheckReport): boolean {
 
 /**
  * Only the first thing that needs fixing is said. The checks are in the order in which they depend
- * on each other, so it is also the one to fix first. Not being blank is nothing to fix.
+ * on each other, so it is also the one to fix first. A record that is not empty is nothing to fix.
  */
 function firstProblem(result: JudicialRecordCheckReport): string | null {
-    const problem = result.getChecks().find(r => r.status !== JudicialRecordCheckStatus.Passed && !(r.check === JudicialRecordCheck.Blank && r.status === JudicialRecordCheckStatus.Failed));
+    const problem = result.getChecks().find(r => r.status !== JudicialRecordCheckStatus.Passed && !(r.check === JudicialRecordCheck.EmptyRecord && r.status === JudicialRecordCheckStatus.Failed));
     return problem?.reason || null;
 }
 
@@ -309,8 +305,7 @@ function isTooManyRequests(error: unknown) {
 
 /**
  * Layer 3: right away when nothing needs fixing, otherwise because the member asks for it. The
- * backend accepts every document and runs the same checks again, so it has the last word on whether
- * a person still has to look at it. The one thing it refuses is a revoked certificate.
+ * backend accepts every document, so the only thing that fails here is a revoked certificate.
  */
 async function deliver({ onRequest = false } = {}) {
     if (file === null || processing.value !== null) {
@@ -346,7 +341,7 @@ async function deliver({ onRequest = false } = {}) {
     }
 }
 
-/** Back to the delivery step, which is the step right below this one, with nothing selected. */
+/** The delivery step is the one right below this, and clears its selection when it is activated. */
 async function deliverAgain() {
     await navigate.pop({ force: true });
 }
@@ -372,10 +367,7 @@ const externalUrl = computed(() => {
     return known.url;
 });
 
-/**
- * Another way to look at a document the viewer cannot draw. FOD Justitie's own page shows the
- * original; without it the browser shows the file itself. The app has no tabs, so there it is saved.
- */
+/** FOD Justitie's own page shows the original; without it, the file itself. The app has no tabs. */
 const openAction = computed(() => {
     if (externalUrl.value !== null) {
         return { icon: 'external', label: $t('Openen bij FOD Justitie') };
@@ -524,9 +516,8 @@ const actions = computed((): Action[] => {
 });
 
 /**
- * Until the backend has the document, leaving loses it: the member would have to find and pick it
- * again. Not for a document that cannot be sent from here. The buttons of this step leave on
- * purpose and skip the question.
+ * Until the backend has the document, leaving loses it and the member has to find and pick it again.
+ * Not worth asking about a document that cannot be sent from here anyway.
  */
 const isUnsent = computed(() => {
     if (file === null || deliveryStatus.value !== null) {

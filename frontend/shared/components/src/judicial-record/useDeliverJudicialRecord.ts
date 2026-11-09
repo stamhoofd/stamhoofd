@@ -1,26 +1,22 @@
 import type { Decoder } from '@common/encoding';
-import type { JudicialRecordDeliveryStatus } from '@stamhoofd/structures';
+import type { JudicialRecordStatus } from '@stamhoofd/structures';
 import { JudicialRecordDeliveryResponse } from '@stamhoofd/structures';
 import { useContext } from '../hooks/useContext';
 import { useRequestOwner } from '../hooks/networking/useRequestOwner';
 
 /**
- * Hands the chosen pdf to the backend, which answers whether the extract is approved or whether a
- * person will look at it.
+ * Hands the chosen pdf to the backend, which runs the same five checks again on what it actually
+ * received and looks up whether the certificate was revoked - a network call that has no business in
+ * code the browser runs. That makes it, not the browser, the one that decides.
  *
- * The browser already ran the same five checks before this is called, so this is not where the
- * member finds out what is wrong with their document. It is the backend that decides, though: it
- * runs them again on what it actually received, and looks up whether a certificate was revoked -
- * a network call that has no business in code the browser runs.
- *
- * Parsing a pdf and asking an authority about certificates is not instant, hence the generous
- * timeout, and a retry runs the whole thing again, which is why the member asks for it.
+ * Parsing a pdf and asking an authority about certificates is not instant, hence the timeout, and a
+ * retry runs the whole thing again, which is why the member asks for it instead of the client.
  */
 export function useDeliverJudicialRecord() {
     const context = useContext();
     const owner = useRequestOwner();
 
-    return async function deliverJudicialRecord(memberId: string, file: File): Promise<JudicialRecordDeliveryStatus> {
+    return async function deliverJudicialRecord(memberId: string, file: File): Promise<JudicialRecordStatus> {
         const formData = new FormData();
         formData.append('file', file);
 

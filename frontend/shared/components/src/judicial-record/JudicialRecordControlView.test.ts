@@ -1,5 +1,5 @@
 import { SimpleError } from '@common/errors';
-import { JudicialRecordCheck, JudicialRecordCheckReport, JudicialRecordCheckResult, JudicialRecordCheckStatus, JudicialRecordDeliveryResponse, JudicialRecordDeliveryStatus, MemberDetails, MemberWithRegistrationsBlob, Organization, Platform, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
+import { JudicialRecordCheck, JudicialRecordCheckReport, JudicialRecordCheckResult, JudicialRecordCheckStatus, JudicialRecordDeliveryResponse, JudicialRecordStatus, MemberDetails, MemberWithRegistrationsBlob, Organization, Platform, PlatformFamily, PlatformMember } from '@stamhoofd/structures';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { render } from 'vitest-browser-vue';
 import { reactive } from 'vue';
@@ -97,28 +97,28 @@ function createReport(statuses: Partial<Record<JudicialRecordCheck, JudicialReco
 
 const passedReport = () => createReport({
     [JudicialRecordCheck.Authentic]: JudicialRecordCheckStatus.Passed,
-    [JudicialRecordCheck.Identity]: JudicialRecordCheckStatus.Passed,
     [JudicialRecordCheck.Model]: JudicialRecordCheckStatus.Passed,
+    [JudicialRecordCheck.Identity]: JudicialRecordCheckStatus.Passed,
     [JudicialRecordCheck.Age]: JudicialRecordCheckStatus.Passed,
-    [JudicialRecordCheck.Blank]: JudicialRecordCheckStatus.Passed,
+    [JudicialRecordCheck.EmptyRecord]: JudicialRecordCheckStatus.Passed,
 });
 
 /** Everything about the document is in order, there is simply something on the record. */
-const notBlankReport = () => createReport({
+const notEmptyReport = () => createReport({
     [JudicialRecordCheck.Authentic]: JudicialRecordCheckStatus.Passed,
-    [JudicialRecordCheck.Identity]: JudicialRecordCheckStatus.Passed,
     [JudicialRecordCheck.Model]: JudicialRecordCheckStatus.Passed,
+    [JudicialRecordCheck.Identity]: JudicialRecordCheckStatus.Passed,
     [JudicialRecordCheck.Age]: JudicialRecordCheckStatus.Passed,
-    [JudicialRecordCheck.Blank]: JudicialRecordCheckStatus.Failed,
+    [JudicialRecordCheck.EmptyRecord]: JudicialRecordCheckStatus.Failed,
 });
 
 /** A scan or a photo: the signature does not hold, so the content checks have no verdict. */
 const notSignedReport = () => createReport({
     [JudicialRecordCheck.Authentic]: JudicialRecordCheckStatus.Failed,
-    [JudicialRecordCheck.Identity]: JudicialRecordCheckStatus.Pending,
     [JudicialRecordCheck.Model]: JudicialRecordCheckStatus.Pending,
+    [JudicialRecordCheck.Identity]: JudicialRecordCheckStatus.Pending,
     [JudicialRecordCheck.Age]: JudicialRecordCheckStatus.Pending,
-    [JudicialRecordCheck.Blank]: JudicialRecordCheckStatus.Pending,
+    [JudicialRecordCheck.EmptyRecord]: JudicialRecordCheckStatus.Pending,
 }, {
     [JudicialRecordCheck.Authentic]: 'Dit bestand werd niet ondertekend door FOD Justitie.',
 });
@@ -137,10 +137,10 @@ function createPdf(name = 'uittreksel.pdf', size = 1024) {
  * The delivery step hands over the file it was given. When the member comes back to this step, the
  * delivery also holds what the checks found (`report`) and what the backend answered (`status`).
  */
-function renderView({ file = createPdf(), report = null, status = null, request = vi.fn().mockResolvedValue(deliveryResponse(JudicialRecordDeliveryStatus.AutoOk)), width = narrowWidth, url = null }: {
+function renderView({ file = createPdf(), report = null, status = null, request = vi.fn().mockResolvedValue(deliveryResponse(JudicialRecordStatus.Ok)), width = narrowWidth, url = null }: {
     file?: File;
     report?: JudicialRecordCheckReport | null;
-    status?: JudicialRecordDeliveryStatus | null;
+    status?: JudicialRecordStatus | null;
     request?: ReturnType<typeof vi.fn>;
     width?: number;
     url?: string | null;
@@ -192,7 +192,7 @@ function renderView({ file = createPdf(), report = null, status = null, request 
 }
 
 /** What the upload endpoint answers with: the status, and nothing about the checks. */
-function deliveryResponse(status: JudicialRecordDeliveryStatus) {
+function deliveryResponse(status: JudicialRecordStatus) {
     return { data: JudicialRecordDeliveryResponse.create({ status }) };
 }
 
@@ -284,7 +284,7 @@ test('Shows the file, and what happens to it while it is checked and sent in', a
         expect(selectedFile().textContent).toContain('Bezig met inzenden');
     });
 
-    sending.resolve(deliveryResponse(JudicialRecordDeliveryStatus.AutoOk));
+    sending.resolve(deliveryResponse(JudicialRecordStatus.Ok));
 
     await vi.waitFor(() => {
         expect(summary().textContent).toContain('goedgekeurd');
@@ -307,7 +307,7 @@ test('Sends in an extract that passed every check right away, and only offers to
     expect(options.method).toBe('POST');
     expect(options.path).toMatch(/^\/members\/.+\/judicial-record$/);
     expect((options.body as FormData).get('file')).toBe(delivery.file);
-    expect(delivery.status).toBe(JudicialRecordDeliveryStatus.AutoOk);
+    expect(delivery.status).toBe(JudicialRecordStatus.Ok);
 
     expect(byTestId('judicial-record-send-anyway')).toBeNull();
     expect(byTestId('judicial-record-retry-upload')).toBeNull();
@@ -320,10 +320,10 @@ test('Sends in an extract that passed every check right away, and only offers to
     });
 });
 
-test('Sends in an extract that is real but not blank as well, and says a reviewer looks at it', async () => {
-    check.mockResolvedValue(checkOutcome(notBlankReport()));
+test('Sends in an extract that is real but not empty as well, and says a reviewer looks at it', async () => {
+    check.mockResolvedValue(checkOutcome(notEmptyReport()));
     const { request, delivery } = renderView({
-        request: vi.fn().mockResolvedValue(deliveryResponse(JudicialRecordDeliveryStatus.Manual)),
+        request: vi.fn().mockResolvedValue(deliveryResponse(JudicialRecordStatus.UnderReview)),
     });
 
     await vi.waitFor(() => {
@@ -331,7 +331,7 @@ test('Sends in an extract that is real but not blank as well, and says a reviewe
     });
     expect(summary().textContent).toContain('beoordeeld');
     expect(request).toHaveBeenCalledTimes(1);
-    expect(delivery.status).toBe(JudicialRecordDeliveryStatus.Manual);
+    expect(delivery.status).toBe(JudicialRecordStatus.UnderReview);
     expect(fileError()).toBeNull();
     expect(byTestId('judicial-record-close')).not.toBeNull();
 });
@@ -355,7 +355,7 @@ test('Says below the file what needs fixing, without sending it in', async () =>
 });
 
 test('Opens on what the backend answered when it has the extract already, without checking or sending it again', async () => {
-    const { request } = renderView({ report: notBlankReport(), status: JudicialRecordDeliveryStatus.Manual });
+    const { request } = renderView({ report: notEmptyReport(), status: JudicialRecordStatus.UnderReview });
 
     await vi.waitFor(() => {
         expect(summary().textContent).toContain('beoordeeld');
@@ -437,7 +437,7 @@ test('Sends in a refused extract anyway when the member asks for it', async () =
     expect(selectedFile().textContent).not.toContain('Bezig met inzenden');
     expect(fileError()!.textContent).toContain('niet ondertekend door FOD Justitie');
 
-    sending.resolve(deliveryResponse(JudicialRecordDeliveryStatus.Manual));
+    sending.resolve(deliveryResponse(JudicialRecordStatus.UnderReview));
 
     await vi.waitFor(() => {
         expect(summary().textContent).toContain('beoordeeld');
@@ -447,7 +447,7 @@ test('Sends in a refused extract anyway when the member asks for it', async () =
     expect(options.method).toBe('POST');
     expect(options.body).toBeInstanceOf(FormData);
     expect((options.body as FormData).get('file')).toBeInstanceOf(File);
-    expect(delivery.status).toBe(JudicialRecordDeliveryStatus.Manual);
+    expect(delivery.status).toBe(JudicialRecordStatus.UnderReview);
     expect(fileError()).toBeNull();
 
     // In is in: there is nothing left to try
@@ -498,7 +498,7 @@ test('Offers another attempt, not insistence, when the delivery never landed', a
                 message: 'Unknown',
                 human: 'We konden de digitale ondertekening van dit bestand niet volledig controleren. Probeer het later opnieuw.',
             }))
-            .mockResolvedValueOnce(deliveryResponse(JudicialRecordDeliveryStatus.AutoOk)),
+            .mockResolvedValueOnce(deliveryResponse(JudicialRecordStatus.Ok)),
     });
 
     const submit = () => document.querySelector<HTMLButtonElement>('[data-testid="judicial-record-send-anyway"]')!;
@@ -594,7 +594,7 @@ test('Offers to open a document it cannot draw from its row, without touching th
     vi.spyOn(console, 'error').mockImplementation(() => {});
     viewerFails = true;
     const open = vi.spyOn(window, 'open').mockReturnValue(null);
-    renderView({ report: passedReport(), status: JudicialRecordDeliveryStatus.AutoOk });
+    renderView({ report: passedReport(), status: JudicialRecordStatus.Ok });
 
     await vi.waitFor(() => {
         expect(byTestId('judicial-record-open-file')).not.toBeNull();
@@ -615,7 +615,7 @@ test('Opens a document it cannot draw at FOD Justitie, when they serve it', asyn
     vi.spyOn(console, 'error').mockImplementation(() => {});
     viewerFails = true;
     const open = vi.spyOn(window, 'open').mockReturnValue(null);
-    renderView({ report: passedReport(), status: JudicialRecordDeliveryStatus.AutoOk, url: extractUrl });
+    renderView({ report: passedReport(), status: JudicialRecordStatus.Ok, url: extractUrl });
 
     await vi.waitFor(() => {
         expect(byTestId('judicial-record-open-file')).not.toBeNull();
@@ -643,7 +643,7 @@ test('Puts nothing in a column of its own for a document it cannot draw', async 
 
 test('Asks before leaving with an extract that was not sent in', async () => {
     renderView({
-        request: vi.fn().mockResolvedValue(deliveryResponse(JudicialRecordDeliveryStatus.Manual)),
+        request: vi.fn().mockResolvedValue(deliveryResponse(JudicialRecordStatus.UnderReview)),
     });
 
     await vi.waitFor(() => {
@@ -674,7 +674,7 @@ function names(items: ContextMenu['items']) {
 }
 
 test('Offers to open and download the file from the menu of its row, and the original while FOD Justitie serves it', async () => {
-    renderView({ report: passedReport(), status: JudicialRecordDeliveryStatus.AutoOk, url: extractUrl });
+    renderView({ report: passedReport(), status: JudicialRecordStatus.Ok, url: extractUrl });
 
     await vi.waitFor(() => {
         expect(byTestId('judicial-record-selected-file')).not.toBeNull();
@@ -685,7 +685,7 @@ test('Offers to open and download the file from the menu of its row, and the ori
 });
 
 test('Leaves the original out of the menu when FOD Justitie does not serve it', async () => {
-    renderView({ report: passedReport(), status: JudicialRecordDeliveryStatus.AutoOk });
+    renderView({ report: passedReport(), status: JudicialRecordStatus.Ok });
 
     await vi.waitFor(() => {
         expect(byTestId('judicial-record-selected-file')).not.toBeNull();
@@ -722,7 +722,7 @@ test('Leaves the original out once the day the document prints has passed', asyn
 });
 
 test('Offers the same in the menu of the document', async () => {
-    renderView({ report: passedReport(), status: JudicialRecordDeliveryStatus.AutoOk, url: extractUrl });
+    renderView({ report: passedReport(), status: JudicialRecordStatus.Ok, url: extractUrl });
 
     await vi.waitFor(() => {
         expect(byTestId('pdf-viewer')).not.toBeNull();
@@ -733,7 +733,7 @@ test('Offers the same in the menu of the document', async () => {
 
 test('Turns the pages of the document with the arrow keys, as far as there are pages', async () => {
     viewerPageCount = 3;
-    renderView({ report: passedReport(), status: JudicialRecordDeliveryStatus.AutoOk });
+    renderView({ report: passedReport(), status: JudicialRecordStatus.Ok });
 
     await vi.waitFor(() => {
         expect(byTestId('pdf-viewer')).not.toBeNull();

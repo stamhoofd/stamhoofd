@@ -1,5 +1,5 @@
 import { ComponentWithProperties } from '@browser/navigation';
-import { Group, GroupPrice, GroupSettings, JudicialRecordCheckReport, JudicialRecordDeliveryStatus, MemberDetails, MemberWithRegistrationsBlob, Organization, Platform, PlatformFamily, PlatformMember, Registration } from '@stamhoofd/structures';
+import { Group, GroupPrice, GroupSettings, JudicialRecordCheckReport, JudicialRecordStatus, MemberDetails, MemberWithRegistrationsBlob, Organization, Platform, PlatformFamily, PlatformMember, Registration } from '@stamhoofd/structures';
 import { expect, test, vi } from 'vitest';
 import { render } from 'vitest-browser-vue';
 import { userEvent } from 'vitest/browser';
@@ -208,7 +208,7 @@ test('Forgets what the step after it found about an earlier file', async () => {
     renderView();
     delivery.url = 'https://just-crimeviewer-ctz.just.fgov.be/record/earlier';
     delivery.report = JudicialRecordCheckReport.create({});
-    delivery.status = JudicialRecordDeliveryStatus.Manual;
+    delivery.status = JudicialRecordStatus.UnderReview;
 
     const pdf = createPdf();
     dispatchDrag('drop', [pdf]);
@@ -297,7 +297,7 @@ test('Starts over when the member comes back to this step', async () => {
     });
     delivery.url = 'https://just-crimeviewer-ctz.just.fgov.be/record/earlier';
     delivery.report = JudicialRecordCheckReport.create({});
-    delivery.status = JudicialRecordDeliveryStatus.AutoOk;
+    delivery.status = JudicialRecordStatus.Ok;
 
     // The member goes back
     shown.value = true;
