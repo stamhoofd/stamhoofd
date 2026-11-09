@@ -9,7 +9,6 @@ export interface CrlOptions {
     cache: CrlCache;
 }
 
-/** The fallback for OCSP: one signed file per authority, so it can be cached. */
 export async function checkCrl(certificate: pkijs.Certificate, issuer: pkijs.Certificate, url: string, options: CrlOptions): Promise<RevocationStatus> {
     const list = await readCrl(url, issuer, options);
 
@@ -36,7 +35,6 @@ async function readCrl(url: string, issuer: pkijs.Certificate, { client, cache }
     }
 
     if (!isCurrent(list.thisUpdate.value, list.nextUpdate?.value ?? null)) {
-        // Either dated after us, or the authority has published a newer list since
         return null;
     }
 

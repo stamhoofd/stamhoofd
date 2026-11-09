@@ -6,12 +6,11 @@ export interface RevocationHttpClient {
 /** An OCSP response for one certificate is a few kilobytes. */
 const MAXIMUM_OCSP_RESPONSE_BYTES = 64 * 1024;
 
-/** A responder that does not answer within this is treated as unavailable. */
 const TIMEOUT_IN_MS = 5 * 1000;
 
 /**
- * Fetches revocation data with the limits such a call needs in a request a member is waiting for.
- * No redirects: the url came out of a certificate, so it is never followed anywhere else.
+ * The limits are those a call needs inside a request a member is waiting for. No redirects: the url
+ * came out of a certificate, so it is never followed anywhere else.
  */
 export class FetchRevocationHttpClient implements RevocationHttpClient {
     async post(url: string, body: Uint8Array, contentType: string): Promise<Uint8Array> {
