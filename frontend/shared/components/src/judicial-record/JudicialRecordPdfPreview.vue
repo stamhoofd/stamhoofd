@@ -30,7 +30,7 @@ const props = defineProps<{
     fileMenuItems: ContextMenuItem[];
 }>();
 
-/** A document the viewer cannot draw. The parent offers it another way, so nothing is drawn here instead. */
+/** The parent offers another way to look at a document the viewer cannot draw. */
 const emit = defineEmits<{
     (e: 'error', error: Error): void;
 }>();

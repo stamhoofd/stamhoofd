@@ -5,9 +5,9 @@ import type { NavigationActions } from '../types/NavigationActions';
 import type { JudicialRecordDelivery, JudicialRecordStepProps } from './JudicialRecordStepProps';
 
 /**
- * The order of the steps, and the only place that knows it. Following the pattern of
- * useMemberAdministrationOnboarding: each step gets its number and a handler to reach the next one,
- * so a step can be inserted or reordered here without touching the views.
+ * The only place that knows the order, following useMemberAdministrationOnboarding: each step gets
+ * its number and a handler to reach the next one, so a step can be reordered here without touching
+ * the views.
  */
 const STEPS = [
     () => import('./JudicialRecordConsentView.vue'),
@@ -47,21 +47,15 @@ function buildStep(index: number, options: FlowOptions): ComponentWithProperties
 }
 
 /**
- * The first step of the flow, for a route that opens it from a url. A route needs a component and
- * the properties to mount it with, which is exactly what this hands over: which view comes first,
- * what number it carries and how it reaches the next step all stay in this file.
- *
- * The flow is a page the member navigates to and can leave with the back button, not a dialog on
- * top of the portal, so every step is pushed onto the stack the route was shown on. A screen that
- * needs it as a popup instead - the member detail in the dashboard - takes its steps off this same
- * module in whatever shape that screen turns out to need.
+ * The first step of the flow, for a route that opens it from a url. The flow is a page the member
+ * navigates to and can leave with the back button, not a dialog on top of the portal, so every step
+ * is pushed onto the stack the route was shown on.
  */
 export const judicialRecordDeliveryFlowFirstStep = {
     component: () => STEPS[0](),
 
     props: (options: {
         member: PlatformMember;
-        /** An administrator delivering for the member confirms the member gave consent, instead of giving it. */
         onBehalfOfMember?: boolean;
         dismissHandler: (navigate: NavigationActions) => Promise<void>;
     }): JudicialRecordStepProps => buildStepProps(0, {

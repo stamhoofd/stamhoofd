@@ -139,8 +139,8 @@ const privacy = computed(() => {
 
 /**
  * The privacy policy is part of the sentence the member agrees to, not a footnote under it, so the
- * link is rendered inside the checkbox label. Clicking a link inside a label does not toggle the
- * checkbox: a label does nothing for clicks on interactive descendants.
+ * link goes inside the checkbox label. A label does nothing for clicks on interactive descendants,
+ * so the link does not toggle the checkbox.
  */
 const consentText = computed(() => {
     const sentence = props.onBehalfOfMember
