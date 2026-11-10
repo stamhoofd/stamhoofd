@@ -1,8 +1,8 @@
 import { SimpleError } from '@common/errors';
 import type { AuditLog, Document, EventNotification, MemberWithUsersRegistrationsAndGroups, Order, Ticket } from '@stamhoofd/models';
-import { BalanceItem, CachedBalance, EmailRecipient, Event, Group, Invoice, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Platform as PlatformModel, Registration, RegistrationInvitation, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
+import { BalanceItem, CachedBalance, EmailRecipient, Event, Group, Invoice, JudicialRecord, Member, MemberPlatformMembership, MemberResponsibilityRecord, Organization, OrganizationRegistrationPeriod, Payment, Platform as PlatformModel, Registration, RegistrationInvitation, RegistrationPeriod, User, Webshop } from '@stamhoofd/models';
 import type { EmailRecipient as EmailRecipientStruct, PaymentGeneral } from '@stamhoofd/structures';
-import { BaseOrganization, getAppHost, ImpersonatedBy, OrganizationPrivateMetaData } from '@stamhoofd/structures';
+import { BaseOrganization, getAppHost, ImpersonatedBy, MemberJudicialRecord, OrganizationPrivateMetaData } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { Payment as PaymentStruct, AuditLogReplacement, AuditLogReplacementType, AuditLog as AuditLogStruct, BalanceItem as BalanceItemStruct, DetailedReceivableBalance, Document as DocumentStruct, EventNotification as EventNotificationStruct, Event as EventStruct, GenericBalance, Group as GroupStruct, GroupType, InvitationGroupData, InvitationMemberData, InvoicedBalanceItem, InvoiceStruct, MemberPlatformMembership as MemberPlatformMembershipStruct, MemberRegistrationInvitation, MembersBlob, MemberWithRegistrationsBlob, NamedObject, OrganizationRegistrationPeriod as OrganizationRegistrationPeriodStruct, Organization as OrganizationStruct, PaymentCustomer, PrivateOrder, PrivateWebshop, ReceivableBalanceObject, ReceivableBalanceObjectContact, ReceivableBalance as ReceivableBalanceStruct, ReceivableBalanceType, RegistrationInvitation as RegistrationInvitationStruct, RegistrationsBlob, RegistrationWithMemberBlob, TicketPrivate, UserWithMembers, WebshopPreview, WebshopPrivateMetaData, Webshop as WebshopStruct } from '@stamhoofd/structures';
 import { Sorter } from '@stamhoofd/utility';
@@ -529,6 +529,15 @@ export class AuthenticatedStructures {
                     .where('periodId', relevantPeriodIds)
                     .fetch()
             : [];
+
+        // The current judicial record of each member: one row per member at most, since currentMemberId is
+        // null on superseded rows. Without it the member list and the member view would disagree, the list
+        // reading the status from SQL and the view falling back to Required for an approved member.
+        const judicialRecords = members.length > 0
+            ? await JudicialRecord.select()
+                    .where('currentMemberId', members.map(m => m.id))
+                    .fetch()
+            : [];
         const registrationInvitations = members.length > 0
             ? await RegistrationInvitation.select()
                     .where('memberId', members.map(m => m.id))
@@ -745,6 +754,19 @@ export class AuthenticatedStructures {
                 return r.getStructure(group);
             });
             blob.registrationInvitations = memberRegistrationInvitations.get(blob.id) ?? [];
+
+            const record = judicialRecords.find(r => r.memberId === blob.id);
+            const member = members.find(m => m.id === blob.id);
+
+            // identityMatches is answered here rather than in the struct: the hash is a backend concern and
+            // the frontend has no business being able to recompute one.
+            blob.judicialRecord = record
+                ? MemberJudicialRecord.create({
+                        reviewStatus: record.reviewStatus,
+                        identityMatches: record.identityHash === member?.judicialIdentityHash,
+                        reviewedAt: record.reviewedAt,
+                    })
+                : null;
         }
 
         return MembersBlob.create({
