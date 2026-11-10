@@ -3,6 +3,7 @@ import { assertChainNotRevoked } from '@stamhoofd/certificate-revocation';
 import { checkJudicialRecord } from '@stamhoofd/judicial-record-check';
 import type { Member } from '@stamhoofd/models';
 import { MemberResponsibilityRecord, Organization, Platform } from '@stamhoofd/models';
+import type { JudicialRecordStatusWithReason } from '@stamhoofd/structures';
 import { JudicialRecordHelper, JudicialRecordStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 
@@ -49,11 +50,17 @@ export class JudicialRecordService {
             : JudicialRecordStatus.UnderReview;
     }
 
-    private static async assertExtractRequired(member: Member): Promise<void> {
+    /**
+     * Whether the member's responsibilities ask them for an extract, ignoring whatever they delivered before.
+     *
+     * Answers `Required` or `NotRequired` only, because no record is passed: the question is the requirement,
+     * not the standing of a delivery.
+     */
+    static async getRequirement(member: Member): Promise<JudicialRecordStatusWithReason> {
         const records = await MemberResponsibilityRecord.where({ memberId: member.id });
         const minimumAges = await this.getMinimumAges(records);
 
-        const { status, description } = JudicialRecordHelper.getStatus({
+        return JudicialRecordHelper.getStatus({
             firstName: member.details.firstName,
             birthDay: member.details.birthDay,
             responsibilities: records.map(record => ({
@@ -62,6 +69,10 @@ export class JudicialRecordService {
                 minimumAge: minimumAges.get(record.responsibilityId) ?? null,
             })),
         });
+    }
+
+    private static async assertExtractRequired(member: Member): Promise<void> {
+        const { status, description } = await this.getRequirement(member);
 
         if (status !== JudicialRecordStatus.Required) {
             throw new SimpleError({

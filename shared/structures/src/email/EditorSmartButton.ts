@@ -45,6 +45,13 @@ export class EditorSmartButton extends AutoEncoder {
         }));
 
         buttons.push(EditorSmartButton.create({
+            id: 'judicialRecordUrl',
+            name: $t(`Uittreksel afleveren`),
+            text: $t(`Uittreksel afleveren`),
+            hint: $t(`Een knop waarmee het lid het uittreksel uit het strafregister meteen kan afleveren.`),
+        }));
+
+        buttons.push(EditorSmartButton.create({
             id: 'downloadUrl',
             name: $t(`%oJ`),
             text: $t(`%2E`),

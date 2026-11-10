@@ -136,6 +136,19 @@ export enum EmailTemplateType {
     EventNotificationPartiallyAccepted = 'EventNotificationPartiallyAccepted',
 
     /**
+     * Judicial records
+     *
+     * One type per review outcome, because what the member has to do next differs for each of them and
+     * that cannot be a replacement an administrator writes conditional prose around.
+     */
+    JudicialRecordAwaitingReview = 'JudicialRecordAwaitingReview',
+    JudicialRecordApproved = 'JudicialRecordApproved',
+    JudicialRecordConditionallyAccepted = 'JudicialRecordConditionallyAccepted',
+    JudicialRecordTemporarilyRejected = 'JudicialRecordTemporarilyRejected',
+    JudicialRecordPermanentlyRejected = 'JudicialRecordPermanentlyRejected',
+    JudicialRecordExpiringSoon = 'JudicialRecordExpiringSoon',
+
+    /**
      * Invoices
      */
     InvoiceGenerationErrors = 'InvoiceGenerationErrors',
@@ -354,6 +367,13 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationRejected: return $t('%Al');
             case EmailTemplateType.EventNotificationPartiallyAccepted: return $t('%Cl');
 
+            case EmailTemplateType.JudicialRecordAwaitingReview: return $t(`Uittreksel wacht op beoordeling`);
+            case EmailTemplateType.JudicialRecordApproved: return $t(`Uittreksel goedgekeurd`);
+            case EmailTemplateType.JudicialRecordConditionallyAccepted: return $t(`Uittreksel goedgekeurd onder voorwaarden`);
+            case EmailTemplateType.JudicialRecordTemporarilyRejected: return $t(`Uittreksel afgekeurd, nieuw uittreksel nodig`);
+            case EmailTemplateType.JudicialRecordPermanentlyRejected: return $t(`Uittreksel definitief afgekeurd`);
+            case EmailTemplateType.JudicialRecordExpiringSoon: return $t(`Goedkeuring verloopt binnenkort`);
+
             case EmailTemplateType.InvoiceGenerationErrors: return $t('%1Sm');
             case EmailTemplateType.InvoicePaid: return $t('%1Z7');
             case EmailTemplateType.CreditNotePaid: return $t('%1bz');
@@ -455,6 +475,14 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationRejected:
             case EmailTemplateType.EventNotificationPartiallyAccepted:
                 return $t('%CV');
+
+            case EmailTemplateType.JudicialRecordAwaitingReview:
+            case EmailTemplateType.JudicialRecordApproved:
+            case EmailTemplateType.JudicialRecordConditionallyAccepted:
+            case EmailTemplateType.JudicialRecordTemporarilyRejected:
+            case EmailTemplateType.JudicialRecordPermanentlyRejected:
+            case EmailTemplateType.JudicialRecordExpiringSoon:
+                return $t(`Uittreksel uit het strafregister`);
 
             case EmailTemplateType.InvoiceGenerationErrors:
             case EmailTemplateType.InvoicePaid:
@@ -569,6 +597,13 @@ export class EmailTemplate extends AutoEncoder {
             case EmailTemplateType.EventNotificationAccepted: return $t('%Ao');
             case EmailTemplateType.EventNotificationRejected: return $t('%Ap');
             case EmailTemplateType.EventNotificationPartiallyAccepted: return $t('%Cm');
+
+            case EmailTemplateType.JudicialRecordAwaitingReview: return $t(`Naar wie een afgeleverd uittreksel mag beoordelen, zodra een lid er een aflevert dat niet automatisch goedgekeurd is.`);
+            case EmailTemplateType.JudicialRecordApproved: return $t(`Naar het lid nadat iemand hun uittreksel heeft goedgekeurd.`);
+            case EmailTemplateType.JudicialRecordConditionallyAccepted: return $t(`Naar het lid nadat iemand hun uittreksel heeft goedgekeurd onder voorwaarden. Vermeld de voorwaarden met de variabele.`);
+            case EmailTemplateType.JudicialRecordTemporarilyRejected: return $t(`Naar het lid nadat iemand hun uittreksel heeft afgekeurd. Zij moeten een nieuw uittreksel afleveren.`);
+            case EmailTemplateType.JudicialRecordPermanentlyRejected: return $t(`Naar het lid nadat iemand hun uittreksel definitief heeft afgekeurd. Een nieuw uittreksel afleveren heeft geen zin.`);
+            case EmailTemplateType.JudicialRecordExpiringSoon: return $t(`Naar het lid een maand voordat de goedkeuring van hun uittreksel verloopt, zodat ze tijd hebben om een nieuw uittreksel aan te vragen.`);
         }
 
         return null;
@@ -650,6 +685,37 @@ export class EmailTemplate extends AutoEncoder {
                 ExampleReplacements.all.eventName,
                 ExampleReplacements.all.dateRange,
                 ...(type === EmailTemplateType.EventNotificationRejected || type === EmailTemplateType.EventNotificationPartiallyAccepted ? [ExampleReplacements.all.feedbackText] : []),
+            ];
+        }
+
+        if ([
+            EmailTemplateType.JudicialRecordAwaitingReview,
+            EmailTemplateType.JudicialRecordApproved,
+            EmailTemplateType.JudicialRecordConditionallyAccepted,
+            EmailTemplateType.JudicialRecordTemporarilyRejected,
+            EmailTemplateType.JudicialRecordPermanentlyRejected,
+            EmailTemplateType.JudicialRecordExpiringSoon,
+        ].includes(type)) {
+            return [
+                ...ExampleReplacements.default,
+                ExampleReplacements.all.firstNameMember,
+                ExampleReplacements.all.lastNameMember,
+                ExampleReplacements.all.platformOrOrganizationName,
+
+                // A reviewer opens the member, a member opens the delivery flow: never both in one template.
+                ...(type === EmailTemplateType.JudicialRecordAwaitingReview
+                    ? [ExampleReplacements.all.reviewUrl]
+                    : [ExampleReplacements.all.judicialRecordUrl]),
+
+                ...(type === EmailTemplateType.JudicialRecordConditionallyAccepted
+                    || type === EmailTemplateType.JudicialRecordTemporarilyRejected
+                    || type === EmailTemplateType.JudicialRecordPermanentlyRejected
+                    ? [ExampleReplacements.all.feedbackText]
+                    : []),
+
+                ...(type === EmailTemplateType.JudicialRecordExpiringSoon
+                    ? [ExampleReplacements.all.validUntilDate]
+                    : []),
             ];
         }
 

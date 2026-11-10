@@ -49,6 +49,10 @@ export class JudicialRecord extends QueryableModel {
     @column({ type: 'datetime', nullable: true })
     supersededAt: Date | null = null;
 
+    /** Set once the member has been warned that this decision is about to expire, so it is sent once. */
+    @column({ type: 'datetime', nullable: true })
+    expiryNotifiedAt: Date | null = null;
+
     @column({
         type: 'datetime', beforeSave(old?: any) {
             if (old !== undefined) {

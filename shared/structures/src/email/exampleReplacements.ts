@@ -151,6 +151,10 @@ function getReplacements() {
             token: 'reviewUrl',
             value: 'https://www.example.com/review',
         }),
+        judicialRecordUrl: Replacement.create({
+            token: 'judicialRecordUrl',
+            value: 'https://www.example.com/strafregister',
+        }),
         submitterName: Replacement.create({
             token: 'submitterName',
             value: $t(`%13f`),
