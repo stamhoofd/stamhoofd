@@ -765,6 +765,7 @@ export class AuthenticatedStructures {
                         reviewStatus: record.reviewStatus,
                         identityMatches: record.identityHash === member?.judicialIdentityHash,
                         reviewedAt: record.reviewedAt,
+                        hasDocument: (record.file?.reference ?? null) !== null,
                     })
                 : null;
         }

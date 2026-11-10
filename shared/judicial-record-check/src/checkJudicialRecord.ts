@@ -22,6 +22,15 @@ export interface JudicialRecordCheckRequest {
 
     /** How many days old the document may be, counted from the day it was drawn up. */
     maxAgeInDays: number;
+
+    /**
+     * The day to judge the document on. Defaults to today, which is what a delivery wants.
+     *
+     * A reviewer looking at a stored extract has to pass the day it was delivered: the age check asks whether
+     * the document was recent enough when it was handed in, and judging it against today would turn every
+     * extract that waited longer than `maxAgeInDays` for a reviewer into a failure nobody can fix.
+     */
+    atDate?: Date;
 }
 
 export interface JudicialRecordCheckOutcome {
@@ -83,7 +92,7 @@ export async function checkJudicialRecord(request: JudicialRecordCheckRequest): 
     const extract = readJudicialRecordExtract(lines);
 
     return {
-        report: report([authentic, ...checkJudicialRecordContent(extract, request, signedAt, new Date())]),
+        report: report([authentic, ...checkJudicialRecordContent(extract, request, signedAt, request.atDate ?? new Date())]),
         certificatePath,
         extract,
     };

@@ -24,6 +24,26 @@ export enum JudicialRecordReviewStatus {
     PermanentlyRejected = 'PermanentlyRejected',
 }
 
+/**
+ * The outcomes a reviewer can pick, in the order they are offered.
+ *
+ * `UnderReview` is not among them: it is the absence of a decision, so a reviewer cannot choose it.
+ */
+export const judicialRecordReviewOutcomes: readonly JudicialRecordReviewStatus[] = [
+    JudicialRecordReviewStatus.Ok,
+    JudicialRecordReviewStatus.ConditionallyAccepted,
+    JudicialRecordReviewStatus.TemporarilyRejected,
+    JudicialRecordReviewStatus.PermanentlyRejected,
+];
+
+/**
+ * How much a reviewer may write down.
+ *
+ * Enforced on the backend as well as on the textarea: the comment is the condition a conditional acceptance
+ * rests on, so it has to be long enough to state one, and a request is not what decides that.
+ */
+export const JUDICIAL_RECORD_MAX_COMMENT_LENGTH = 1000;
+
 /** Why a stored extract is no longer there. */
 export enum JudicialRecordFileRemovedReason {
     /** A reviewer decided, so the document is not needed any more. */
@@ -71,8 +91,12 @@ export class JudicialRecordReviewDetails extends AutoEncoder {
 /**
  * A member's current judicial record, as much of it as deciding their status needs.
  *
- * `identityMatches` is answered by the database, which compares the record's identity hash against the member's.
- * The hash is never derived outside SQL, so this carries the answer rather than the inputs.
+ * This is on the member blob, which a member reads about themselves as well as an administrator, so it carries
+ * nothing a member may not see: the reviewer's name and their comment are served by the review endpoint, to
+ * someone who is allowed to review.
+ *
+ * `identityMatches` carries the comparison rather than the hashes, so that nothing outside the backend can
+ * derive one.
  */
 export class MemberJudicialRecord extends AutoEncoder {
     @field({ decoder: new EnumDecoder(JudicialRecordReviewStatus) })
@@ -84,6 +108,15 @@ export class MemberJudicialRecord extends AutoEncoder {
     /** When a reviewer decided, null while nobody has looked. */
     @field({ decoder: DateDecoder, nullable: true })
     reviewedAt: Date | null = null;
+
+    /**
+     * Whether the document is still there to be looked at.
+     *
+     * Not the same question as `reviewStatus === UnderReview`: the retention window removes the document from a
+     * record nobody got to, which leaves a review that can no longer be carried out.
+     */
+    @field({ decoder: BooleanDecoder })
+    hasDocument = false;
 }
 
 /** The stored extract, and why it is gone once it is. */
