@@ -68,7 +68,7 @@ describe('OrganizationRegistrationPeriod.duplicate', () => {
             name: bundleDiscount.name,
         }));
 
-        const duplicate = organizationPeriod.duplicate(newPeriod);
+        const { newOrganizationPeriod: duplicate } = organizationPeriod.duplicate(newPeriod);
         const duplicatedGroup = duplicate.groups[0];
         const duplicatedBundleDiscount = duplicate.settings.bundleDiscounts[0];
 
