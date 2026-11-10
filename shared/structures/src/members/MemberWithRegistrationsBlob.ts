@@ -11,6 +11,7 @@ import { compileToInMemoryFilter } from '../filters/InMemoryFilter.js';
 import type { StamhoofdFilter } from '@stamhoofd/filters/StamhoofdFilter';
 import { memberWithRegistrationsBlobInMemoryFilterCompilers } from '../filters/inMemoryFilterDefinitions.js';
 import { Member } from './Member.js';
+import { MemberJudicialRecord } from './JudicialRecordReview.js';
 import { MemberPlatformMembership } from './MemberPlatformMembership.js';
 import { MemberResponsibilityRecord } from './MemberResponsibilityRecord.js';
 import { Registration } from './Registration.js';
@@ -40,6 +41,15 @@ export class MemberWithRegistrationsBlob extends Member implements Filterable {
 
     @field({ decoder: new ArrayDecoder(MemberPlatformMembership), version: 270 })
     platformMemberships: MemberPlatformMembership[] = [];
+
+    /**
+     * The member's current judicial record, null when they never delivered one.
+     *
+     * Needed because the status stopped being derivable from the responsibilities alone the moment an outcome
+     * became storable: a client cannot work out `Ok` or `Rejected` without being told.
+     */
+    @field({ decoder: MemberJudicialRecord, nullable: true, ...NextVersion })
+    judicialRecord: MemberJudicialRecord | null = null;
 
     @field({ decoder: new ArrayDecoder(GenericBalance), version: 375 })
     balances: GenericBalance[] = [];

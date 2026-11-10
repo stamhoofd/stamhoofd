@@ -2,8 +2,9 @@ import { MemberResponsibility } from '../MemberResponsibility.js';
 import { Organization } from '../Organization.js';
 import { OrganizationPrivateMetaData } from '../OrganizationPrivateMetaData.js';
 import { Platform, PlatformConfig } from '../Platform.js';
-import type { JudicialRecordResponsibility } from './JudicialRecordHelper.js';
-import { JudicialRecordHelper, JudicialRecordStatus } from './JudicialRecordHelper.js';
+import { JudicialRecordReviewStatus } from '../members/JudicialRecordReview.js';
+import type { JudicialRecordCurrentRecord, JudicialRecordResponsibility } from './JudicialRecordHelper.js';
+import { JUDICIAL_RECORD_VALIDITY_YEARS, JudicialRecordHelper, JudicialRecordStatus } from './JudicialRecordHelper.js';
 
 describe('JudicialRecordHelper.getStatus', () => {
     const atDate = new Date(2026, 5, 15);
@@ -226,5 +227,69 @@ describe('JudicialRecordHelper.asksForExtract', () => {
             platform: createPlatform([]),
             organization: Organization.create({}),
         })).toBe(false);
+    });
+});
+
+describe('JudicialRecordHelper.getStoredStatus', () => {
+    const atDate = new Date(2026, 5, 15);
+
+    function record(reviewStatus: JudicialRecordReviewStatus, options: { reviewedAt?: Date | null; identityMatches?: boolean } = {}): JudicialRecordCurrentRecord {
+        return {
+            reviewStatus,
+            identityMatches: options.identityMatches ?? true,
+            reviewedAt: options.reviewedAt === undefined ? new Date(2026, 0, 1) : options.reviewedAt,
+        };
+    }
+
+    /** Every review outcome, and the status it gives the member. */
+    const mapping: [JudicialRecordReviewStatus, JudicialRecordStatus][] = [
+        [JudicialRecordReviewStatus.UnderReview, JudicialRecordStatus.UnderReview],
+        [JudicialRecordReviewStatus.Ok, JudicialRecordStatus.Ok],
+        [JudicialRecordReviewStatus.ConditionallyAccepted, JudicialRecordStatus.Ok],
+        [JudicialRecordReviewStatus.TemporarilyRejected, JudicialRecordStatus.Rejected],
+        [JudicialRecordReviewStatus.PermanentlyRejected, JudicialRecordStatus.Rejected],
+    ];
+
+    test.each(mapping)('%s gives the member %s', (reviewStatus, expected) => {
+        expect(JudicialRecordHelper.getStoredStatus(record(reviewStatus), atDate)).toBe(expected);
+    });
+
+    test('a conditional acceptance permits, so it is not a rejection', () => {
+        const status = JudicialRecordHelper.getStoredStatus(record(JudicialRecordReviewStatus.ConditionallyAccepted), atDate);
+
+        expect(status).toBe(JudicialRecordStatus.Ok);
+        expect(status).not.toBe(JudicialRecordStatus.Rejected);
+    });
+
+    test('a record for a different name or birth date decides nothing', () => {
+        expect(JudicialRecordHelper.getStoredStatus(record(JudicialRecordReviewStatus.Ok, { identityMatches: false }), atDate)).toBeNull();
+    });
+
+    test('an approval older than the validity window decides nothing', () => {
+        const expired = new Date(atDate);
+        expired.setFullYear(expired.getFullYear() - JUDICIAL_RECORD_VALIDITY_YEARS);
+        expired.setDate(expired.getDate() - 1);
+
+        expect(JudicialRecordHelper.getStoredStatus(record(JudicialRecordReviewStatus.Ok, { reviewedAt: expired }), atDate)).toBeNull();
+    });
+
+    test('a temporary rejection does not expire, because it already asks for a new extract', () => {
+        const longAgo = new Date(2000, 0, 1);
+
+        expect(JudicialRecordHelper.getStoredStatus(record(JudicialRecordReviewStatus.TemporarilyRejected, { reviewedAt: longAgo }), atDate))
+            .toBe(JudicialRecordStatus.Rejected);
+    });
+
+    test('an unreviewed record cannot expire', () => {
+        expect(JudicialRecordHelper.hasExpired(null, atDate)).toBe(false);
+    });
+
+    test('only NotRequired and Ok let a member act', () => {
+        const permitted = Object.values(JudicialRecordStatus).filter(status =>
+            status === JudicialRecordStatus.NotRequired || status === JudicialRecordStatus.Ok,
+        );
+
+        expect(permitted).toHaveLength(2);
+        expect(Object.values(JudicialRecordStatus)).toHaveLength(5);
     });
 });
