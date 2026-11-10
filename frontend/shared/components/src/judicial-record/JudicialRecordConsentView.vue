@@ -40,7 +40,9 @@
                         {{ $t('Waarvoor?') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Enkel om na te gaan of je mag werken met minderjarigen.') }}
+                        {{ onBehalfOfMember
+                            ? $t('Enkel om na te gaan of {member} mag werken met minderjarigen.', { member: member.patchedMember.firstName })
+                            : $t('Enkel om na te gaan of je mag werken met minderjarigen.') }}
                     </p>
                 </STListItem>
 

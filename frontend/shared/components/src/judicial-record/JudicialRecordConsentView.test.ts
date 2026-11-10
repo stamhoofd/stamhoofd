@@ -103,6 +103,9 @@ test('An administrator confirms the consent of the member instead of giving it',
 
     expect(consentCheckbox().textContent).toContain('Simon');
     expect(consentCheckbox().textContent).not.toContain('Ik geef toestemming');
+
+    // What the extract is for is about the member as well, not about the administrator uploading it
+    expect(document.body.textContent).toContain('of Simon mag werken met minderjarigen');
 });
 
 test('Links the privacy policy of the reviewer', () => {
