@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { SimpleError } from '@common/errors';
 import { BundleDiscountGroupPriceSettings } from './BundleDiscountGroupPriceSettings.js';
-import { Group } from './Group.js';
+import type { Group } from './Group.js';
 import { GroupGenderType } from './GroupGenderType.js';
 import { OldGroupPrices } from './OldGroupPrices.js';
 import { ReduceablePrice } from './ReduceablePrice.js';
@@ -83,7 +83,7 @@ export class GroupPrice extends AutoEncoder {
         if (this.stock === null) {
             return false;
         }
-        if (item instanceof Group) {
+        if (!('group' in item)) {
             return this.getUsedStock(item) >= this.stock;
         }
         return this.getUsedStock(item.group) + this.getPendingStock(item) >= this.stock;
@@ -93,7 +93,7 @@ export class GroupPrice extends AutoEncoder {
         if (this.stock === null) {
             return null;
         }
-        if (item instanceof Group) {
+        if (!('group' in item)) {
             return Math.max(0, this.stock - this.getUsedStock(item));
         }
         return Math.max(0, this.stock - this.getPendingStock(item) - this.getUsedStock(item.group));
@@ -190,7 +190,7 @@ export class GroupOption extends AutoEncoder {
         if (this.stock === null) {
             return false;
         }
-        if (item instanceof Group) {
+        if (!('group' in item)) {
             return this.getUsedStock(item) >= this.stock;
         }
         return this.getUsedStock(item.group) + this.getPendingStock(item) >= this.stock;
@@ -200,7 +200,7 @@ export class GroupOption extends AutoEncoder {
         if (this.stock === null) {
             return null;
         }
-        if (item instanceof Group) {
+        if (!('group' in item)) {
             return Math.max(0, this.stock - this.getUsedStock(item));
         }
         return Math.max(0, this.stock - this.getPendingStock(item) - this.getUsedStock(item.group));
@@ -550,7 +550,7 @@ export class GroupSettings extends AutoEncoder {
         if (this.maxMembers === null) {
             return false;
         }
-        if (item instanceof Group) {
+        if (!('group' in item)) {
             return this.getUsedStock(item) >= this.maxMembers;
         }
         return this.getUsedStock(item.group) + this.getPendingStock(item) >= this.maxMembers;
@@ -560,7 +560,7 @@ export class GroupSettings extends AutoEncoder {
         if (this.maxMembers === null) {
             return null;
         }
-        if (item instanceof Group) {
+        if (!('group' in item)) {
             return Math.max(0, this.maxMembers - this.getUsedStock(item));
         }
         return Math.max(0, this.maxMembers - this.getPendingStock(item) - this.getUsedStock(item.group));
