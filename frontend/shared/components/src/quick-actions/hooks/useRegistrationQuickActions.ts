@@ -5,7 +5,7 @@ import type { MemberManager } from '@stamhoofd/frontend-application/MemberManage
 import { useMemberManager } from '@stamhoofd/frontend-application/MemberManager';
 import type { SessionContext } from '@stamhoofd/frontend-session/SessionContext';
 import type { Group, MemberRegistrationInvitation, Organization, PlatformFamily, PlatformMember, StamhoofdFilter } from '@stamhoofd/structures';
-import { Event, getActivePeriodIds, GroupStatus, GroupType, JudicialRecordStatus, LimitedFilteredRequest, PaginatedResponseDecoder, PayableBalanceCollection, SortItemDirection, WebshopStatus } from '@stamhoofd/structures';
+import { Event, getActivePeriodIds, GroupStatus, GroupType, JudicialRecordHelper, JudicialRecordStatus, LimitedFilteredRequest, PaginatedResponseDecoder, PayableBalanceCollection, SortItemDirection, WebshopStatus } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import type { Ref } from 'vue';
 import { computed, onActivated, onMounted, ref } from 'vue';
@@ -86,9 +86,6 @@ export function useRegistrationQuickActions(): QuickActions {
      * The members of this family that have to have an extract from the judicial record checked. The
      * same question the dashboard answers in their member detail, asked here for the family: a
      * responsibility they hold asks for an extract, and they are old enough for it to be required.
-     *
-     * Nothing is stored about a delivery yet, so the action stays on the portal after a member
-     * delivered one. It disappears once the status of the extract itself lands.
      */
     const membersNeedingJudicialRecord = computed(() => activeMembers.value.filter((member) => {
         return member.judicialRecord.status === JudicialRecordStatus.Required;
@@ -185,7 +182,10 @@ export function useRegistrationQuickActions(): QuickActions {
                     illustration: privacyPolicySvg,
                     prefix: $t('Verplicht voor jouw functie'),
                     title: $t('Upload het uittreksel uit het strafregister van {member}', { member: member.patchedMember.firstName }),
-                    description: $t('Wie met minderjarigen werkt, moet om de 3 jaar een uittreksel (model 596.2) laten controleren'),
+                    // A member who is renewing is told why, because the general rule reads as a first request
+                    // and leaves them wondering what happened to the extract they already delivered.
+                    description: JudicialRecordHelper.getRenewalReason(member.patchedMember.judicialRecord, member.patchedMember.firstName)
+                        ?? $t('Wie met minderjarigen werkt, moet om de 3 jaar een uittreksel (model 596.2) laten controleren'),
                     // Through the route, like the payments action above, so the flow has the same
                     // url here as it does when a member arrives on it from an e-mail
                     action: () => $navigate('judicialRecord', { params: { id: member.id } }),
