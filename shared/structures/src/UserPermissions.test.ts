@@ -465,5 +465,36 @@ describe('Unit.UserPermissions', () => {
             // The original role is not altered
             expect(role.accessRights).toEqual([AccessRight.OrganizationEventNotificationReviewer, AccessRight.MemberManageNRN]);
         });
+
+        test('an organization cannot grant the right to review judicial record extracts', () => {
+            // A review holds for every organization the member is registered in, so only the platform hands it out
+            const role = PermissionRoleDetailed.create({
+                id: 'role-1',
+                name: 'Hoofdbeheerder',
+                level: PermissionLevel.Full,
+                accessRights: [AccessRight.MemberReviewJudicialRecord],
+            });
+
+            const userPermissions = UserPermissions.create({
+                organizationPermissions: new Map([
+                    ['organization-1', Permissions.create({
+                        level: PermissionLevel.Full,
+                        roles: [PermissionRole.create({ id: role.id, name: role.name })],
+                    })],
+                ]),
+            });
+
+            const result = userPermissions.forWithoutInherit(
+                createOrganization({ id: 'organization-1', roles: [role] }),
+                createPlatform(),
+            );
+
+            expect(result).not.toBeNull();
+
+            // Neither by naming it in a role, nor through the full access that grants every other right
+            expect(result!.hasFullAccess()).toBe(true);
+            expect(result!.hasAccessRight(AccessRight.MemberManageNRN)).toBe(true);
+            expect(result!.hasAccessRight(AccessRight.MemberReviewJudicialRecord)).toBe(false);
+        });
     });
 });

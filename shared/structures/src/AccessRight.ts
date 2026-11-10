@@ -19,6 +19,7 @@ export class AccessRightHelper {
             case AccessRight.MemberWriteFinancialData: return $t(`%lC`);
 
             case AccessRight.MemberManageNRN: return $t(`%lD`);
+            case AccessRight.MemberReviewJudicialRecord: return $t(`Uittreksels uit het strafregister beoordelen`);
             case AccessRight.SendMessages: return $t(`%1DA`);
             case AccessRight.ManageEmailTemplates: return $t(`%1DB`);
         }
@@ -44,6 +45,7 @@ export class AccessRightHelper {
             case AccessRight.MemberReadFinancialData: return $t(`%lG`);
             case AccessRight.MemberWriteFinancialData: return $t(`%lH`);
             case AccessRight.MemberManageNRN: return $t(`%lD`);
+            case AccessRight.MemberReviewJudicialRecord: return $t(`Uittreksels beoordelen`);
             case AccessRight.SendMessages: return $t(`%1DC`);
             case AccessRight.ManageEmailTemplates: return $t(`%1DD`);
         }
@@ -65,6 +67,7 @@ export class AccessRightHelper {
             case AccessRight.MemberReadFinancialData: return $t(`%lQ`);
             case AccessRight.MemberWriteFinancialData: return $t(`%lR`);
             case AccessRight.MemberManageNRN: return $t(`%lS`);
+            case AccessRight.MemberReviewJudicialRecord: return $t(`Uittreksels uit het strafregister beoordelen voor alle groepen`);
             case AccessRight.SendMessages: return $t(`%1DE`);
             case AccessRight.ManageEmailTemplates: return $t(`%1DB`);
         }
@@ -80,6 +83,7 @@ export class AccessRightHelper {
             case AccessRight.MemberWriteFinancialData: return $t(`%lW`);
             case AccessRight.EventWrite: return $t(`%lX`);
             case AccessRight.MemberManageNRN: return $t(`%lY`);
+            case AccessRight.MemberReviewJudicialRecord: return $t(`Wie dit recht heeft, kan het uittreksel van een lid bekijken en goedkeuren of afkeuren. Een beoordeling geldt voor alle groepen waar het lid is ingeschreven, niet enkel voor deze groep.`);
             case AccessRight.ManageEmailTemplates: return $t(`%1DF`);
         }
         return null;
@@ -95,6 +99,7 @@ export class AccessRightHelper {
             case AccessRight.WebshopScanTickets: return PermissionLevel.Write;
             case AccessRight.SendMessages: return PermissionLevel.Write;
             case AccessRight.OrganizationEventNotificationReviewer: return null; // Never granted to full-admins, unless given by the platform
+            case AccessRight.MemberReviewJudicialRecord: return null; // A review binds every other organization, so only the platform hands it out
             case AccessRight.PlatformCreateOrganizations: return null;
         }
         return PermissionLevel.Full;

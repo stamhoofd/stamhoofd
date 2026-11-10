@@ -7,7 +7,7 @@ import { AccessRight } from '@stamhoofd/types/AccessRight';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
 import { PermissionsResourceType } from '@stamhoofd/types/PermissionsResourceType';
 import type { MemberResponsibility } from '@stamhoofd/structures';
-import { CountFilteredRequest, EventMeta, GroupStatus, GroupType, JudicialRecordReviewStatus, JudicialRecordStatus, LimitedFilteredRequest, MemberDetails, NamedObject, OrganizationTag, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ReceivableBalanceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection, STPackageBundle, STPackageType } from '@stamhoofd/structures';
+import { CountFilteredRequest, EventMeta, GroupStatus, GroupType, JudicialRecordReviewDetails, JudicialRecordReviewStatus, JudicialRecordStatus, LimitedFilteredRequest, MemberDetails, NamedObject, OrganizationTag, PermissionRoleDetailed, Permissions, PermissionsResourceKey, ReceivableBalanceType, RecordAnswer, RecordDateAnswer, RecordTextAnswer, RecordType, ResourcePermissions, SortItemDirection, STPackageBundle, STPackageType } from '@stamhoofd/structures';
 import { STExpect, TestUtils } from '@stamhoofd/test-utils';
 import { Language } from '@stamhoofd/types/Language';
 import { v4 as uuidv4 } from 'uuid';
@@ -3807,6 +3807,92 @@ describe('Endpoint.GetMembersEndpoint', () => {
             });
 
             expect(descending).toEqual([...ascending].reverse());
+        });
+    });
+
+    describe('Who may see who reviewed a judicial record extract', () => {
+        const platformHost = 'platform.stamhoofd.app';
+
+        /** A reviewed record, with the audit trail a decision leaves behind. */
+        async function setup() {
+            const tag = await new OrganizationTagFactory({}).create();
+            const organization = await new OrganizationFactory({ period, tags: [tag.id] }).create();
+            const member = await new MemberFactory({}).create();
+            await new RegistrationFactory({ member, organization }).create();
+
+            const record = new JudicialRecord();
+            record.memberId = member.id;
+            record.reviewStatus = JudicialRecordReviewStatus.Ok;
+            record.reviewedAt = new Date();
+            record.identityHash = member.judicialIdentityHash!;
+            record.reviewDetails = JudicialRecordReviewDetails.create({
+                userId: uuidv4(),
+                name: 'Wies Beoordelaar',
+                email: 'wies@example.com',
+                organizationId: organization.id,
+            });
+            await record.save();
+
+            return { tag, organization, member };
+        }
+
+        async function fetchMember(user: User, host: string, memberId: string) {
+            const token = await SessionService.createSession(user);
+            const response = await testServer.test(endpoint, Request.get({
+                path: baseUrl,
+                host,
+                query: new LimitedFilteredRequest({ filter: { id: memberId }, limit: 10 }),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+            }));
+
+            return response.body.results.members.find(m => m.id === memberId) ?? null;
+        }
+
+        /** Granted for the tag of the member's organization, which is how the platform hands this right out. */
+        function reviewerForTag(tagId: string) {
+            return Permissions.create({
+                level: PermissionLevel.None,
+                resources: new Map([[
+                    PermissionsResourceType.OrganizationTags,
+                    new Map([[tagId, ResourcePermissions.create({
+                        level: PermissionLevel.Full,
+                        accessRights: [AccessRight.MemberReviewJudicialRecord],
+                    })]]),
+                ]]),
+            });
+        }
+
+        test('A reviewer sees who decided', async () => {
+            const { tag, member } = await setup();
+            const reviewer = await new UserFactory({ globalPermissions: reviewerForTag(tag.id) }).create();
+
+            const record = (await fetchMember(reviewer, platformHost, member.id))?.judicialRecord;
+
+            expect(record?.reviewDetails?.name).toBe('Wies Beoordelaar');
+            expect(record?.reviewDetails?.email).toBe('wies@example.com');
+        });
+
+        test('A full admin of the organization does not, because full access does not carry this right', async () => {
+            const { organization, member } = await setup();
+            const organizationAdmin = await new UserFactory({
+                organization,
+                permissions: Permissions.create({ level: PermissionLevel.Full }),
+            }).create();
+
+            const record = (await fetchMember(organizationAdmin, organization.getApiHost(), member.id))?.judicialRecord;
+
+            // The record itself stays: without it the member view falls back to Required for an approved member
+            expect(record?.reviewStatus).toBe(JudicialRecordReviewStatus.Ok);
+            expect(record?.identityMatches).toBe(true);
+            expect(record?.reviewDetails).toBeNull();
+        });
+
+        test('A reviewer for another tag reaches neither the record nor the member', async () => {
+            const { member } = await setup();
+            const otherTag = await new OrganizationTagFactory({}).create();
+            const reviewer = await new UserFactory({ globalPermissions: reviewerForTag(otherTag.id) }).create();
+
+            expect(await fetchMember(reviewer, platformHost, member.id)).toBeNull();
         });
     });
 });

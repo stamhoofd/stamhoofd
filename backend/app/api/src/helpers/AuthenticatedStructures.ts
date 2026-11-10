@@ -760,11 +760,12 @@ export class AuthenticatedStructures {
 
             // identityMatches is answered here rather than in the struct: the hash is a backend concern and
             // the frontend has no business being able to recompute one.
-            blob.judicialRecord = record
+            blob.judicialRecord = record && member
                 ? MemberJudicialRecord.create({
                         reviewStatus: record.reviewStatus,
-                        identityMatches: record.identityHash === member?.judicialIdentityHash,
+                        identityMatches: record.identityHash === member.judicialIdentityHash,
                         reviewedAt: record.reviewedAt,
+                        reviewDetails: await Context.auth.canReviewJudicialRecord(member) ? record.reviewDetails : null,
                     })
                 : null;
         }

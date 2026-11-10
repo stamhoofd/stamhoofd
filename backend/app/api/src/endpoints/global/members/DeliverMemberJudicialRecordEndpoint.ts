@@ -50,9 +50,9 @@ export const judicialRecordUserLimiter = new RateLimiter({
 });
 
 /**
- * The final submit of the member portal delivery flow. The portal ran the same checks on the same
- * document a step earlier, but they run again here: that the frontend ran them is not something a
- * request can prove.
+ * The final submit of the delivery flow, for the member themselves and for an administrator holding the
+ * paper document. The portal ran the same checks on the same document a step earlier, but they run again
+ * here: that the frontend ran them is not something a request can prove.
  */
 export class DeliverMemberJudicialRecordEndpoint extends Endpoint<Params, Query, Body, ResponseBody> {
     protected doesMatch(request: Request): [true, Params] | [false] {
@@ -72,11 +72,11 @@ export class DeliverMemberJudicialRecordEndpoint extends Endpoint<Params, Query,
         await Context.setOptionalOrganizationScope();
         const { user } = await Context.authenticate();
 
-        const member = await Member.getByIdWithUsers(request.params.id);
+        // With registrations, because an administrator's access to this member can come from a group they
+        // are registered in rather than from the organization they belong to.
+        const member = await Member.getByIdWithUsersAndRegistrations(request.params.id);
 
-        // Not canAccessMember: an administrator reading someone else's extract needs a right of its
-        // own, which arrives with the review flow that gives them something to read.
-        if (!member || !Context.auth.isUserManager(member)) {
+        if (!member || !await Context.auth.canDeliverJudicialRecordFor(member)) {
             throw Context.auth.memberNotFoundOrNoAccess();
         }
 
