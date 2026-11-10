@@ -58,8 +58,8 @@ export interface JudicialRecordResponsibility {
 /**
  * The member's current judicial record, reduced to what decides their status.
  *
- * `identityMatches` is the comparison of the record's identity hash against the member's, done in the database:
- * the hash is never derived in TypeScript, so this helper is told the answer rather than working it out.
+ * `identityMatches` is the comparison of the record's identity hash against the member's, already made by the
+ * backend: this helper is told the answer rather than the hashes, so nothing here can derive one.
  */
 export interface JudicialRecordCurrentRecord {
     reviewStatus: JudicialRecordReviewStatus;

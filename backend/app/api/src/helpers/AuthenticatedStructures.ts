@@ -14,6 +14,7 @@ import {
     Event,
     Group,
     Invoice,
+    JudicialRecord,
     Member,
     MemberPlatformMembership,
     MemberResponsibilityRecord,
@@ -27,11 +28,15 @@ import {
     User,
     Webshop,
 } from '@stamhoofd/models';
-import type { EmailRecipient as EmailRecipientStruct, PaymentGeneral } from '@stamhoofd/structures';
+import type {
+    EmailRecipient as EmailRecipientStruct,
+    PaymentGeneral,
+} from '@stamhoofd/structures';
 import {
     BaseOrganization,
     getAppHost,
     ImpersonatedBy,
+    MemberJudicialRecord,
     OrganizationPrivateMetaData,
 } from '@stamhoofd/structures';
 import { PermissionLevel } from '@stamhoofd/types/PermissionLevel';
@@ -716,6 +721,19 @@ export class AuthenticatedStructures {
                       .where('periodId', relevantPeriodIds)
                       .fetch()
                 : [];
+
+        // The current judicial record of each member: one row per member at most, since currentMemberId is
+        // null on superseded rows. Without it the member list and the member view would disagree, the list
+        // reading the status from SQL and the view falling back to Required for an approved member.
+        const judicialRecords =
+            members.length > 0
+                ? await JudicialRecord.select()
+                      .where(
+                          'currentMemberId',
+                          members.map(m => m.id),
+                      )
+                      .fetch()
+                : [];
         const registrationInvitations =
             members.length > 0
                 ? await RegistrationInvitation.select()
@@ -986,6 +1004,19 @@ export class AuthenticatedStructures {
                     return r.getStructure(group);
                 });
             blob.registrationInvitations = memberRegistrationInvitations.get(blob.id) ?? [];
+
+            const record = judicialRecords.find(r => r.memberId === blob.id);
+            const member = members.find(m => m.id === blob.id);
+
+            // identityMatches is answered here rather than in the struct: the hash is a backend concern and
+            // the frontend has no business being able to recompute one.
+            blob.judicialRecord = record
+                ? MemberJudicialRecord.create({
+                        reviewStatus: record.reviewStatus,
+                        identityMatches: record.identityHash === member?.judicialIdentityHash,
+                        reviewedAt: record.reviewedAt,
+                    })
+                : null;
         }
 
         return MembersBlob.create({

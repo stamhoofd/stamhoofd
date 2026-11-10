@@ -13,6 +13,7 @@ import {
     CachedBalance,
     EventFactory,
     GroupFactory,
+    JudicialRecord,
     MemberFactory,
     MemberPlatformMembership,
     MemberResponsibilityRecordFactory,
@@ -34,6 +35,7 @@ import {
     EventMeta,
     GroupStatus,
     GroupType,
+    JudicialRecordReviewStatus,
     JudicialRecordStatus,
     LimitedFilteredRequest,
     MemberDetails,
@@ -4228,6 +4230,68 @@ describe('Endpoint.GetMembersEndpoint', () => {
             expect(response.status).toBe(200);
             return response.body.results.members.map(m => m.id);
         }
+
+        /** Approves the extract of a member, the way a reviewer would. */
+        async function approve(member: Member, reviewStatus = JudicialRecordReviewStatus.Ok) {
+            const record = new JudicialRecord();
+            record.memberId = member.id;
+            record.reviewStatus = reviewStatus;
+            record.reviewedAt = new Date();
+            // Copied from the member rather than recomputed, which is what the delivery flow does.
+            record.identityHash = member.judicialIdentityHash!;
+            await record.save();
+            return record;
+        }
+
+        test('Returns the stored record alongside the member, so the list and the member view agree', async () => {
+            const { token, members, memberIds } = await setupMembers();
+            await approve(members.adult);
+
+            const response = await testServer.test(endpoint, Request.get({
+                path: baseUrl,
+                host: platformHost,
+                query: new LimitedFilteredRequest({ filter: { id: { $in: memberIds } }, sort: [{ key: 'id', order: SortItemDirection.ASC }], limit: 100 }),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+            }));
+            expect(response.status).toBe(200);
+
+            const approved = response.body.results.members.find(m => m.id === members.adult.id);
+            expect(approved?.judicialRecord?.reviewStatus).toBe(JudicialRecordReviewStatus.Ok);
+            expect(approved?.judicialRecord?.identityMatches).toBe(true);
+
+            // A member who delivered nothing carries no record, rather than an empty one
+            const other = response.body.results.members.find(m => m.id === members.turnsTwentyToday.id);
+            expect(other?.judicialRecord).toBeNull();
+
+            // And the filter, which reads the database instead of the blob, puts them in the same status
+            expect(await fetchMemberIds({ token, filter: { id: { $in: memberIds }, judicialRecordStatus: { $in: [JudicialRecordStatus.Ok] } } }))
+                .toIncludeSameMembers([members.adult.id]);
+        });
+
+        test('A renamed member stops matching the approval that was granted to them', async () => {
+            const { token, members, memberIds } = await setupMembers();
+            await approve(members.adult);
+
+            members.adult.details.lastName = members.adult.details.lastName + '-Janssens';
+            await members.adult.save();
+
+            const response = await testServer.test(endpoint, Request.get({
+                path: baseUrl,
+                host: platformHost,
+                query: new LimitedFilteredRequest({ filter: { id: { $in: memberIds } }, sort: [{ key: 'id', order: SortItemDirection.ASC }], limit: 100 }),
+                headers: { authorization: 'Bearer ' + token.accessToken },
+            }));
+            expect(response.status).toBe(200);
+
+            const renamed = response.body.results.members.find(m => m.id === members.adult.id);
+            expect(renamed?.judicialRecord?.identityMatches).toBe(false);
+
+            // So they are asked for a new extract, in the list as well as in the member view
+            expect(await fetchMemberIds({ token, filter: { id: { $in: memberIds }, judicialRecordStatus: { $in: [JudicialRecordStatus.Ok] } } }))
+                .toHaveLength(0);
+            expect(await fetchMemberIds({ token, filter: { id: { $in: memberIds }, judicialRecordStatus: { $in: [JudicialRecordStatus.Required] } } }))
+                .toContain(members.adult.id);
+        });
 
         test('Lists the members that need an extract', async () => {
             const { token, members, memberIds } = await setupMembers();
