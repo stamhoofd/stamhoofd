@@ -46,14 +46,14 @@ let delivery: JudicialRecordDelivery;
  * With `shown`, the step is rendered in a KeepAlive the way a navigation controller keeps it: hidden
  * while a later step is on top, and activated again when the member comes back to it.
  */
-function renderView(member = createMember(), { isMobile = false, shown }: { isMobile?: boolean; shown?: ReturnType<typeof ref<boolean>> } = {}) {
+function renderView(member = createMember(), { isMobile = false, shown, onBehalfOfMember = false }: { isMobile?: boolean; shown?: ReturnType<typeof ref<boolean>>; onBehalfOfMember?: boolean } = {}) {
     saveHandler = vi.fn<(navigate: NavigationActions) => Promise<void>>().mockResolvedValue(undefined);
     present = vi.fn().mockResolvedValue(undefined);
     delivery = { file: null, url: null, report: null, status: null };
 
     const props = {
         member,
-        onBehalfOfMember: false,
+        onBehalfOfMember,
         stepNumber: 2,
         stepCount: 3,
         delivery,
@@ -309,4 +309,20 @@ test('Starts over when the member comes back to this step', async () => {
     expect(delivery.report).toBeNull();
     expect(delivery.status).toBeNull();
     expect(dropArea()).not.toBeNull();
+});
+
+test('speaks to the member about their own extract', () => {
+    renderView();
+
+    expect(view().textContent).toContain('Laat je uittreksel uit het strafregister hieronder controleren');
+    expect(view().textContent).toContain('Ontving je het document digitaal?');
+});
+
+test('speaks to an administrator about the extract of the member', () => {
+    renderView(createMember(), { onBehalfOfMember: true });
+
+    expect(view().textContent).toContain('Laat het uittreksel uit het strafregister van Simon hieronder controleren');
+    expect(view().textContent).toContain('Ontving Simon het document digitaal?');
+    expect(view().textContent).toContain('het loket van de gemeente van Simon');
+    expect(view().textContent).not.toContain('Ontving je het document digitaal?');
 });

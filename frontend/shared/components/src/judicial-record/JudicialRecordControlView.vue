@@ -43,7 +43,10 @@
                 </p>
 
                 <p v-else-if="deliveryStatus === JudicialRecordStatus.UnderReview" class="warning-box icon clock" data-testid="judicial-record-summary">
-                    {{ $t('Je uittreksel wordt beoordeeld') }}
+                    {{ voice(
+                        $t('Je uittreksel wordt beoordeeld'),
+                        $t('Het uittreksel van {member} wordt beoordeeld', { member: memberName }),
+                    ) }}
                 </p>
 
                 <!-- Next to the view there is a column for the extract. Without that room it stays here. -->
@@ -114,6 +117,13 @@ const props = defineProps<JudicialRecordStepProps>();
 
 const navigate = useNavigationActions();
 const deliverJudicialRecord = useDeliverJudicialRecord();
+
+const memberName = props.member.patchedMember.firstName;
+
+/** Picks between the member's own voice and that of an administrator delivering for them. */
+function voice(own: string, administrator: string) {
+    return props.onBehalfOfMember ? administrator : own;
+}
 
 /** The step before moves on with every file it is given, so this is where a file is judged. */
 const file = props.delivery.file;
@@ -199,7 +209,10 @@ async function readFile() {
 
     // A scan or a photo of an extract can never be checked, the QR-code on it can
     if (!isPdf) {
-        failBasic($t('Dit is geen pdf. Kies de pdf die je van FOD Justitie kreeg, of scan de QR-code op je uittreksel.'));
+        failBasic(voice(
+            $t('Dit is geen pdf. Kies de pdf die je van FOD Justitie kreeg, of scan de QR-code op je uittreksel.'),
+            $t('Dit is geen pdf. Kies de pdf die {member} van FOD Justitie kreeg, of scan de QR-code op het uittreksel.', { member: memberName }),
+        ));
         return;
     }
 
@@ -214,7 +227,10 @@ async function readFile() {
     } catch (error) {
         // The file was moved or deleted since it was picked, or the browser lost access to it
         console.error(error);
-        failBasic($t('We konden dit bestand niet lezen. Kies het opnieuw, of scan de QR-code op je uittreksel.'));
+        failBasic(voice(
+            $t('We konden dit bestand niet lezen. Kies het opnieuw, of scan de QR-code op je uittreksel.'),
+            $t('We konden dit bestand niet lezen. Kies het opnieuw, of scan de QR-code op het uittreksel.'),
+        ));
         return;
     }
 
@@ -256,7 +272,10 @@ async function check(data: Uint8Array) {
         console.error(error);
         errorBox.value = new ErrorBox(new SimpleError({
             code: 'judicial_record_check_crashed',
-            message: $t('We konden dit document niet controleren. Probeer een ander document, of scan de QR-code op je uittreksel.'),
+            message: voice(
+                $t('We konden dit document niet controleren. Probeer een ander document, of scan de QR-code op je uittreksel.'),
+                $t('We konden dit document niet controleren. Probeer een ander document, of scan de QR-code op het uittreksel.'),
+            ),
         }));
         failure.value = { layer: 'checks', crashed: true };
         return;
@@ -285,7 +304,10 @@ function judge(result: JudicialRecordCheckReport): boolean {
     failure.value = { layer: 'checks', crashed: false };
     errorBox.value = new ErrorBox(new SimpleError({
         code: 'judicial_record_check_failed',
-        message: firstProblem(result) ?? $t('We konden je uittreksel niet automatisch goedkeuren.'),
+        message: firstProblem(result) ?? voice(
+            $t('We konden je uittreksel niet automatisch goedkeuren.'),
+            $t('We konden het uittreksel van {member} niet automatisch goedkeuren.', { member: memberName }),
+        ),
     }));
     return false;
 }
@@ -533,14 +555,22 @@ const isUnsent = computed(() => {
     }
 });
 
-usePreventLeave(() => isUnsent.value ? $t('Je uittreksel is nog niet ingezonden.') : null);
+usePreventLeave(() => isUnsent.value
+    ? voice(
+        $t('Je uittreksel is nog niet ingezonden.'),
+        $t('Het uittreksel van {member} is nog niet ingezonden.', { member: memberName }),
+    )
+    : null);
 
 async function shouldNavigateAway() {
     if (!isUnsent.value) {
         return true;
     }
     return await CenteredMessage.confirm({
-        title: $t('Je uittreksel is nog niet ingezonden. Wil je toch stoppen?'),
+        title: voice(
+            $t('Je uittreksel is nog niet ingezonden. Wil je toch stoppen?'),
+            $t('Het uittreksel van {member} is nog niet ingezonden. Wil je toch stoppen?', { member: memberName }),
+        ),
         confirmText: $t('Stoppen'),
     });
 }

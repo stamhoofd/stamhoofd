@@ -137,13 +137,14 @@ function createPdf(name = 'uittreksel.pdf', size = 1024) {
  * The delivery step hands over the file it was given. When the member comes back to this step, the
  * delivery also holds what the checks found (`report`) and what the backend answered (`status`).
  */
-function renderView({ file = createPdf(), report = null, status = null, request = vi.fn().mockResolvedValue(deliveryResponse(JudicialRecordStatus.Ok)), width = narrowWidth, url = null }: {
+function renderView({ file = createPdf(), report = null, status = null, request = vi.fn().mockResolvedValue(deliveryResponse(JudicialRecordStatus.Ok)), width = narrowWidth, url = null, onBehalfOfMember = false }: {
     file?: File;
     report?: JudicialRecordCheckReport | null;
     status?: JudicialRecordStatus | null;
     request?: ReturnType<typeof vi.fn>;
     width?: number;
     url?: string | null;
+    onBehalfOfMember?: boolean;
 } = {}) {
     const dismissHandler = vi.fn().mockResolvedValue(undefined);
     const pop = vi.fn().mockResolvedValue(undefined);
@@ -157,7 +158,7 @@ function renderView({ file = createPdf(), report = null, status = null, request 
     const view = render(JudicialRecordControlView, {
         props: {
             member: createMember(),
-            onBehalfOfMember: false,
+            onBehalfOfMember,
             stepNumber: 3,
             stepCount: 3,
             delivery,
@@ -746,4 +747,25 @@ test('Turns the pages of the document with the arrow keys, as far as there are p
 
     press('ArrowRight');
     expect(goToPage).toHaveBeenCalledExactlyOnceWith(2);
+});
+
+test('Tells an administrator whose extract is being reviewed', async () => {
+    check.mockResolvedValue(checkOutcome(notEmptyReport()));
+    renderView({
+        onBehalfOfMember: true,
+        request: vi.fn().mockResolvedValue(deliveryResponse(JudicialRecordStatus.UnderReview)),
+    });
+
+    await vi.waitFor(() => {
+        expect(summary().textContent).toContain('Het uittreksel van Simon wordt beoordeeld');
+    });
+});
+
+test('Advises an administrator about the extract of the member, not their own', async () => {
+    renderView({ onBehalfOfMember: true, file: new File([new Uint8Array(10)], 'scan.png', { type: 'image/png' }) });
+
+    await vi.waitFor(() => {
+        expect(fileError()!.textContent).toContain('de pdf die Simon van FOD Justitie kreeg');
+    });
+    expect(fileError()!.textContent).toContain('de QR-code op het uittreksel');
 });

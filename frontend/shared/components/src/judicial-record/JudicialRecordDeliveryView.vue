@@ -12,7 +12,10 @@
             </h1>
 
             <p>
-                {{ $t('Laat je uittreksel uit het strafregister hieronder controleren, het moet voldoen aan deze voorwaarden:') }}
+                {{ voice(
+                    $t('Laat je uittreksel uit het strafregister hieronder controleren, het moet voldoen aan deze voorwaarden:'),
+                    $t('Laat het uittreksel uit het strafregister van {member} hieronder controleren, het moet voldoen aan deze voorwaarden:', { member: memberName }),
+                ) }}
             </p>
 
             <STList>
@@ -51,7 +54,10 @@
                         {{ $t('Gratis aan te vragen') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Via Mijn Burgerprofiel, de website of het loket van je gemeente. Zonder eID of vaste woonplaats via de Dienst Centraal Strafregister.') }}
+                        {{ voice(
+                            $t('Via Mijn Burgerprofiel, de website of het loket van je gemeente. Zonder eID of vaste woonplaats via de Dienst Centraal Strafregister.'),
+                            $t('Via Mijn Burgerprofiel, de website of het loket van de gemeente van {member}. Zonder eID of vaste woonplaats via de Dienst Centraal Strafregister.', { member: memberName }),
+                        ) }}
                     </p>
                 </STListItem>
 
@@ -64,10 +70,16 @@
                         {{ $t('Het originele document') }}
                     </h3>
                     <p class="style-description-small">
-                        {{ $t('Ontving je het document digitaal? Upload het hieronder.') }}
+                        {{ voice(
+                            $t('Ontving je het document digitaal? Upload het hieronder.'),
+                            $t('Ontving {member} het document digitaal? Upload het hieronder.', { member: memberName }),
+                        ) }}
                     </p>
                     <p class="style-description-small">
-                        {{ $t('Heb je een papieren versie? Gebruik onze scanner om de QR-code te scannen op het uittreksel.') }}
+                        {{ voice(
+                            $t('Heb je een papieren versie? Gebruik onze scanner om de QR-code te scannen op het uittreksel.'),
+                            $t('Is er een papieren versie? Gebruik onze scanner om de QR-code te scannen op het uittreksel.'),
+                        ) }}
                     </p>
                 </STListItem>
             </STList>
@@ -77,7 +89,10 @@
             <p>
                 <a class="button text selected" :href="AMBRASSADE_URL" target="_blank" rel="noopener">
                     <span class="icon external" />
-                    <span>{{ $t('Hoe vraag ik een uittreksel aan?') }}</span>
+                    <span>{{ voice(
+                        $t('Hoe vraag ik een uittreksel aan?'),
+                        $t('Hoe vraagt een lid een uittreksel aan?'),
+                    ) }}</span>
                 </a>
             </p>
 
@@ -127,7 +142,7 @@
 
 <script setup lang="ts">
 import { ComponentWithProperties, NavigationController } from '@browser/navigation';
-import { onActivated } from 'vue';
+import { computed, onActivated } from 'vue';
 import { AsyncComponent } from '../containers/AsyncComponent';
 import FileDropZone from '../inputs/FileDropZone.vue';
 import STList from '../layout/STList.vue';
@@ -143,6 +158,13 @@ const props = defineProps<JudicialRecordStepProps>();
 const AMBRASSADE_URL = 'https://www.ambrassade.be/themas/uittreksel-strafregister/usr-info-voor-vrijwilligers';
 
 const navigate = useNavigationActions();
+
+const memberName = computed(() => props.member.patchedMember.firstName);
+
+/** Picks between the member's own voice and that of an administrator delivering for them. */
+function voice(own: string, administrator: string) {
+    return props.onBehalfOfMember ? administrator : own;
+}
 
 /**
  * Both ways of answering end here, and every file moves on: what is wrong with one is said by the
