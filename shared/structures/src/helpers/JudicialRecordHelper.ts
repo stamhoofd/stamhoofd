@@ -1,11 +1,18 @@
 import { Formatter } from '@stamhoofd/utility';
+import { JudicialRecordReviewStatus } from '../members/JudicialRecordReview.js';
 import type { Organization } from '../Organization.js';
 import type { Platform } from '../Platform.js';
 
 /**
- * `getStatus` only ever answers `NotRequired` or `Required` today, because the outcome of a delivered
- * extract is not stored yet. The two delivered outcomes live here rather than in an enum of their own
- * so that a member has one judicial record status, not two that have to be combined at every call site.
+ * The judicial record status of a member: what the rest of the system acts on.
+ *
+ * The delivered outcomes live here rather than in an enum of their own so that a member has one judicial
+ * record status, not two that have to be combined at every call site. Several `JudicialRecordReviewStatus`
+ * outcomes collapse into one value here; which outcome it was stays on the record.
+ *
+ * A member may act when the status is `NotRequired` or `Ok`. `Required`, `UnderReview` and `Rejected` all
+ * block. Ask it that way round: "is it `Ok` or `NotRequired`", never "is it `Required`", or a fourth blocking
+ * value would silently start permitting the thing it was added to prevent.
  */
 export enum JudicialRecordStatus {
     /** The member doesn't have to have a judicial record extract checked. */
@@ -17,9 +24,15 @@ export enum JudicialRecordStatus {
     /** An extract was delivered and a reviewer has to look at it. */
     UnderReview = 'UnderReview',
 
-    /** An extract was delivered and every automatic check passed, so nobody has to open it. */
+    /** A reviewer refused the extract, for now or for good. */
+    Rejected = 'Rejected',
+
+    /** An extract was accepted, with or without conditions. */
     Ok = 'Ok',
 }
+
+/** How long a reviewer's decision stands before the member has to deliver again. */
+export const JUDICIAL_RECORD_VALIDITY_YEARS = 3;
 
 /**
  * A status with the reason behind it, so a member view can explain why an extract is (not) required.
@@ -40,6 +53,20 @@ export interface JudicialRecordResponsibility {
 
     /** `judicialRecordMinimumAge` of the responsibility this record points to, null when it never asks for an extract. */
     minimumAge: number | null;
+}
+
+/**
+ * The member's current judicial record, reduced to what decides their status.
+ *
+ * `identityMatches` is the comparison of the record's identity hash against the member's, done in the database:
+ * the hash is never derived in TypeScript, so this helper is told the answer rather than working it out.
+ */
+export interface JudicialRecordCurrentRecord {
+    reviewStatus: JudicialRecordReviewStatus;
+    identityMatches: boolean;
+
+    /** When a reviewer decided, null while nobody has looked. */
+    reviewedAt: Date | null;
 }
 
 export class JudicialRecordHelper {
@@ -64,9 +91,55 @@ export class JudicialRecordHelper {
                 return $t(`Niet vereist`);
             case JudicialRecordStatus.UnderReview:
                 return $t(`Wordt beoordeeld`);
+            case JudicialRecordStatus.Rejected:
+                return $t(`Afgekeurd`);
             case JudicialRecordStatus.Ok:
                 return $t(`OK`);
         }
+    }
+
+    /**
+     * The status a member's current record gives them, or null when the record does not decide it.
+     *
+     * Null means fall back to the responsibilities: there is no usable record, so the member is in the same
+     * position as one who never delivered.
+     */
+    static getStoredStatus(record: JudicialRecordCurrentRecord | null, atDate: Date = new Date()): JudicialRecordStatus | null {
+        if (record === null) {
+            return null;
+        }
+
+        // The approval was granted to a different name or birth date, so it says nothing about this member.
+        if (!record.identityMatches) {
+            return null;
+        }
+
+        switch (record.reviewStatus) {
+            case JudicialRecordReviewStatus.UnderReview:
+                // Nobody has looked yet, so there is no decision to expire.
+                return JudicialRecordStatus.UnderReview;
+
+            case JudicialRecordReviewStatus.TemporarilyRejected:
+                // The member has to deliver another extract, which is what Rejected already asks of them, so
+                // there is nothing for an expiry to change.
+                return JudicialRecordStatus.Rejected;
+
+            case JudicialRecordReviewStatus.Ok:
+            case JudicialRecordReviewStatus.ConditionallyAccepted:
+                return this.hasExpired(record.reviewedAt, atDate) ? null : JudicialRecordStatus.Ok;
+
+            case JudicialRecordReviewStatus.PermanentlyRejected:
+                return this.hasExpired(record.reviewedAt, atDate) ? null : JudicialRecordStatus.Rejected;
+        }
+    }
+
+    /** Whether a decision taken on `reviewedAt` no longer stands. A record nobody decided cannot expire. */
+    static hasExpired(reviewedAt: Date | null, atDate: Date = new Date()): boolean {
+        if (reviewedAt === null) {
+            return false;
+        }
+
+        return Formatter.luxon(reviewedAt).startOf('day').plus({ years: JUDICIAL_RECORD_VALIDITY_YEARS }).toJSDate() <= atDate;
     }
 
     /**
@@ -109,16 +182,24 @@ export class JudicialRecordHelper {
     /**
      * The judicial record status of the member on `atDate`, with the reason behind it.
      */
-    static getStatus({ firstName, birthDay, responsibilities, atDate = new Date() }: {
+    static getStatus({ firstName, birthDay, responsibilities, record = null, atDate = new Date() }: {
         /** Used in the description, so it talks about the member by name. */
         firstName: string;
         birthDay: Date | null;
         responsibilities: JudicialRecordResponsibility[];
+
+        /** The member's current record, when they have one. */
+        record?: JudicialRecordCurrentRecord | null;
         atDate?: Date;
     }): JudicialRecordStatusWithReason {
-        const status = responsibilities.some(responsibility => this.requiresExtract({ responsibility, birthDay, atDate }))
-            ? JudicialRecordStatus.Required
-            : JudicialRecordStatus.NotRequired;
+        const requiresExtract = responsibilities.some(responsibility => this.requiresExtract({ responsibility, birthDay, atDate }));
+
+        // A delivered outcome only says anything while an extract is actually required: a member who no longer
+        // holds a responsibility that asks for one is NotRequired, whatever they delivered before.
+        const stored = requiresExtract ? this.getStoredStatus(record, atDate) : null;
+
+        const status = stored
+            ?? (requiresExtract ? JudicialRecordStatus.Required : JudicialRecordStatus.NotRequired);
 
         /** The earliest date an extract is required from, over the responsibilities the member holds on `atDate`. */
         let requiredFrom: Date | null = null;
@@ -162,7 +243,7 @@ export class JudicialRecordHelper {
 
             return {
                 status,
-                description: status === JudicialRecordStatus.Required
+                description: requiresExtract
                     ? $t(`Sinds {date}, de {ordinal} verjaardag van {name}.`, { date, ordinal, name: firstName })
                     : $t(`Vanaf {date}, de {ordinal} verjaardag van {name}.`, { date, ordinal, name: firstName }),
             };
@@ -170,7 +251,7 @@ export class JudicialRecordHelper {
 
         return {
             status,
-            description: status === JudicialRecordStatus.Required
+            description: requiresExtract
                 ? $t(`Sinds {date}, de startdatum van de functie.`, { date })
                 : $t(`Vanaf {date}, de startdatum van de functie.`, { date }),
         };
