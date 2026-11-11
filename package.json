@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "type": "module",
-    "packageManager": "pnpm@12.13.0+sha512.1e55719bf26e809dce5c5084fdebaa64efb3da9038ae5d68a9f8a68311f1a45841c8c3b76a37298c3b66f6bcc80409a9b7f33c78a7168a3e90fb65a5d8235ae4",
+    "packageManager": "pnpm@12.19.0+sha512.87327b6619853205834e4be59ba3a231e303d9f5e435912ede3312b7539b79af890942f6513b05a4690745666888045c09b33fc420c2cd2d3bd95c01ba21dbeb",
     "scripts": {
         "build:backend:apps": "pnpm exec turbo run build --filter=@stamhoofd/backend --filter=@stamhoofd/backend-renderer --filter=@stamhoofd/backend-backup --filter=@stamhoofd/redirecter --filter=@stamhoofd/backend-statistics-syncer",
         "build:backend:shared": "pnpm exec turbo run build --filter='./backend/shared/*' --filter='./packages/node/*'",
