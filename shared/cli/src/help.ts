@@ -37,8 +37,10 @@ export default class StamhoofdHelp extends Help {
     }
 
     protected async showRootHelp(): Promise<void> {
-        let rootTopics = this.sortedTopics;
-        let rootCommands = this.sortedCommands;
+        // Shortcut setup owns completion installation; hide its helpers from root help, but keep direct invocation and help available.
+        const completionTopics = new Set(['autocomplete', 'completion']);
+        let rootTopics = this.sortedTopics.filter(topic => !completionTopics.has(topic.name.split(':')[0]));
+        let rootCommands = this.sortedCommands.filter(command => !completionTopics.has(command.id.split(':')[0]));
 
         this.log(this.formatRoot());
         this.log('');
