@@ -21,6 +21,15 @@ async function main() {
 
     const config = await loadConfig();
 
+    // Shortcut setup owns completion installation. Hide helpers in metadata so help and completion agree, while direct invocation remains available.
+    const isCompletionHelper = id => ['autocomplete', 'completion'].includes(id.split(':')[0]);
+    for (const command of [...config.commands, ...config.getPluginsList().flatMap(plugin => plugin.commands)]) {
+        if (isCompletionHelper(command.id)) command.hidden = true;
+    }
+    for (const topic of config.topics) {
+        if (isCompletionHelper(topic.name)) topic.hidden = true;
+    }
+
     if (args.length === 0) {
         await run(['--help'], config);
         return;

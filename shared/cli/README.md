@@ -110,6 +110,9 @@ For manual installation, export `stam completion bash --standalone` or
 `stam completion zsh --standalone` into the shell's completion search directory.
 Fish is not supported.
 
+The `completion` wrapper and upstream `autocomplete` helpers are hidden from help
+listings and generated suggestions; direct invocation and their `--help` remain available.
+
 Alternatively, keep completion in your own shell configuration:
 
 Install the `stam` shortcut first (`pnpm stam setup shortcut`). Generate an activation

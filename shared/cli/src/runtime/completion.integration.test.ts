@@ -134,6 +134,41 @@ describe('generated oclif completion with live local environments', () => {
         expect((await execute('stam', ['completion', 'environments'], { env })).stdout.trim().split('\n')).toEqual(['example-blue', 'example-green']);
     });
 
+    it.each(['bash', 'zsh'])('omits completion helpers from generated %s root suggestions', async (shell, context) => {
+        await requireShell(shell, context);
+        const { stdout } = await execute('stam', ['completion', shell, '--standalone'], { env });
+        const completion = path.join(root, shell === 'bash' ? 'stam' : '_stam');
+        await fs.writeFile(completion, stdout);
+        const requestPath = path.join(root, 'root-suggestions');
+        const script = shell === 'bash' ? `
+            source '${completion}'
+            COMP_WORDS=(stam "")
+            COMP_CWORD=1
+            _stam_local_completion
+            printf '%s\\n' "\${COMPREPLY[@]}"
+        ` : `
+            fpath=('${root}' $fpath)
+            autoload -Uz _stam
+            _arguments() { state=cmds; }
+            _values() { shift; print -l -- "$@"; }
+            words=(stam "")
+            CURRENT=2
+            _stam
+        `;
+        await fs.writeFile(requestPath, script);
+        const suggestions = (await execute(shell, [requestPath], { env })).stdout;
+        expect(suggestions).toMatch(/^setup(?:\[|$)/m);
+        expect(suggestions).not.toMatch(/^(?:autocomplete|completion)(?:\[|$)/m);
+    });
+
+    it('keeps direct helper help available while omitting helpers from root help', async () => {
+        const { stdout } = await execute('stam', ['--help'], { env });
+        expect(stdout).not.toMatch(/^\s+(?:autocomplete|completion)\s/m);
+        for (const command of ['autocomplete', 'completion']) {
+            expect((await execute('stam', [command, '--help'], { env })).stdout).toContain(`stam ${command}`);
+        }
+    });
+
     it.each(['bash', 'zsh'])('exports standalone %s completion usable after deleting the generation cache', async (shell, context) => {
         await requireShell(shell, context);
         const { stdout } = await execute('stam', ['completion', shell, '--standalone'], { env });

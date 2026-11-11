@@ -4,6 +4,7 @@ import path from 'node:path';
 import { docsEnvironmentCompletionScript, standaloneCompletionScript } from '../../runtime/completion.js';
 
 export default class Completion extends Command {
+    static hidden = true;
     static summary = 'Print Bash or Zsh activation for command, flag and docs environment completion';
     static args = { shell: Args.string({ required: true, options: ['bash', 'zsh'] }) };
     static flags = { standalone: Flags.boolean({ description: 'Export a standalone file for the shell completion search path' }) };
