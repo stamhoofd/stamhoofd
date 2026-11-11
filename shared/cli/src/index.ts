@@ -1,4 +1,5 @@
 export { run } from '@oclif/core';
+export type { DocsPublishingConfig, DocsPublishingProvider } from './runtime/docs-publishing.js';
 export { BaseCommand } from './base-command.js';
 export { withCliTelemetry, withCliPrompt, getCliTelemetry } from './runtime/telemetry.js';
 export { exec, execResult, execSudo } from './runtime/process.js';

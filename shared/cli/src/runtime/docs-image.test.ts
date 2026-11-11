@@ -33,14 +33,32 @@ describe('documentation images', () => {
     });
 
     it('pushes only the explicit version and does not build or deploy', async () => {
-        await publishDocsImage('/repo', 'v1.2.3', 'registry.example.com/team');
+        await publishDocsImage('/repo', 'v1.2.3', { registry: 'registry.example.com/team' }, RunVerbosity.Output, false);
         expect(run).toHaveBeenNthCalledWith(1, ['tag', 'docs:v1.2.3', 'registry.example.com/team/docs:v1.2.3'], { cwd: '/repo', verbosity: RunVerbosity.Output });
         expect(run).toHaveBeenNthCalledWith(2, ['push', 'registry.example.com/team/docs:v1.2.3'], { cwd: '/repo', verbosity: RunVerbosity.Output });
         expect(run).toHaveBeenCalledTimes(2);
     });
 
+    it('pushes the requested version before latest, both from the same local image', async () => {
+        await publishDocsImage('/repo', 'v1.2.3', { registry: 'host/team' }, RunVerbosity.Output, true);
+        expect(vi.mocked(run).mock.calls.map(([args]) => args)).toEqual([
+            ['tag', 'docs:v1.2.3', 'host/team/docs:v1.2.3'],
+            ['push', 'host/team/docs:v1.2.3'],
+            ['tag', 'docs:v1.2.3', 'host/team/docs:latest'],
+            ['push', 'host/team/docs:latest'],
+        ]);
+    });
+
+    it.each([true, false])('pushes a requested latest tag only once (latest=%s)', async (latest) => {
+        await publishDocsImage('/repo', 'latest', { registry: 'host/team' }, RunVerbosity.Output, latest);
+        expect(vi.mocked(run).mock.calls.map(([args]) => args)).toEqual([
+            ['tag', 'docs:latest', 'host/team/docs:latest'],
+            ['push', 'host/team/docs:latest'],
+        ]);
+    });
+
     it('fails before tagging if no destination is configured', async () => {
-        await expect(publishDocsImage('/repo', 'v1.2.3', undefined)).rejects.toThrow('STAM_DOCS_REGISTRY');
+        await expect(publishDocsImage('/repo', 'v1.2.3', { registry: '' })).rejects.toThrow('STAM_DOCS_REGISTRY');
         expect(run).not.toHaveBeenCalled();
     });
 
@@ -54,6 +72,7 @@ describe('documentation images', () => {
 
     it('stops on push failure', async () => {
         vi.mocked(run).mockResolvedValueOnce().mockRejectedValueOnce(new Error('denied'));
-        await expect(publishDocsImage('/repo', 'v1.2.3', 'host/private')).rejects.toThrow('denied');
+        await expect(publishDocsImage('/repo', 'v1.2.3', { registry: 'host/private' }, RunVerbosity.Output, true)).rejects.toThrow('denied');
+        expect(run).toHaveBeenCalledTimes(2);
     });
 });

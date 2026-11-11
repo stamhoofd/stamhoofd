@@ -2,7 +2,7 @@ import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { getOptionalDevopsPlugin, getOptionalDevopsSetupChecks } from './devops-plugin.js';
+import { getOptionalDevopsPlugin, getOptionalDevopsSetupChecks, getOptionalDocsPublishingProvider } from './devops-plugin.js';
 
 const roots: string[] = [];
 
@@ -13,6 +13,27 @@ afterEach(async () => {
 });
 
 describe('optional devops plugin', () => {
+    it('loads a publishing provider only when compiled, and does not hide installed module errors', async () => {
+        const root = await mkdtemp(join(tmpdir(), 'stam-devops-publishing-'));
+        roots.push(root);
+        expect(await getOptionalDocsPublishingProvider(root)).toBeUndefined();
+        await writeFile(join(root, 'package.json'), JSON.stringify({ name: 'devops', type: 'module' }));
+        expect(await getOptionalDocsPublishingProvider(root)).toBeUndefined();
+        await mkdir(join(root, 'dist-cli'));
+        await writeFile(join(root, 'dist-cli/docs-publishing.js'), 'throw new Error("installed module failed");');
+        await expect(getOptionalDocsPublishingProvider(root)).rejects.toThrow('installed module failed');
+    });
+
+    it('returns the installed publishing provider', async () => {
+        const root = await mkdtemp(join(tmpdir(), 'stam-devops-publishing-'));
+        roots.push(root);
+        await writeFile(join(root, 'package.json'), JSON.stringify({ name: 'devops', type: 'module' }));
+        await mkdir(join(root, 'dist-cli'));
+        await writeFile(join(root, 'dist-cli/docs-publishing.js'), 'export const docsPublishingProvider = { listEnvironments: async () => [], resolve: async () => ({ registry: "registry.example.com/team" }) };');
+        const provider = await getOptionalDocsPublishingProvider(root);
+        expect(await provider?.listEnvironments()).toEqual([]);
+        expect(await provider?.resolve()).toEqual({ registry: 'registry.example.com/team' });
+    });
     it('loads setup definitions only from an available compiled DevOps checkout', async () => {
         const root = await mkdtemp(join(tmpdir(), 'stam-devops-setup-'));
         roots.push(root);

@@ -55,11 +55,36 @@ The CLI build clears its own compiled output before compiling so commands remove
 
 `pnpm stam docs image build <tag>` builds the docs Node server image locally for
 `linux/amd64`. `pnpm stam docs image publish <tag>` pushes that existing image to
-`STAM_DOCS_REGISTRY` after a separate login with the selected container runtime.
+`STAM_DOCS_REGISTRY`, using supplied credentials or an existing runtime login.
 Both commands prefer Podman and fall back to Docker when Podman is not installed;
 set `STAMHOOFD_CONTAINER_RUNTIME=podman` or `docker` to select one explicitly.
-Use the same runtime for building, logging in, and publishing. Neither needs the private DevOps
+Use the same runtime for building and publishing (and any external login). Neither needs the private DevOps
 checkout. See [the docs image guide](../../docs/README.md). Publication does not deploy.
+Use `--latest` to push the requested tag first and then point `latest` to the same
+local image, or `--no-latest` to publish only the requested tag. If omitted, the CLI
+asks "Point the 'latest' tag to this image as well?" with a default of No, before
+reading credentials. Noninteractive publication requires one of these flags.
+Both pushes share the same authentication scope; a failed version push leaves
+`latest` untouched. An explicitly requested `latest` tag is pushed only once.
+`--environment <name>` resolves publishing configuration through the optional
+DevOps provider when `STAM_DOCS_REGISTRY` is unset. Explicit registry configuration
+bypasses that provider entirely. The provider prompts for an environment in a
+terminal; noninteractive use requires the flag. Custom environment names are accepted.
+`STAM_DOCS_REGISTRY_USERNAME` and `STAM_DOCS_REGISTRY_PASSWORD` must be supplied
+together as nonempty values. When the registry is unset, this pair overrides the
+provider's credentials while retaining its selected destination; provider lookup
+still requires its infrastructure access. Without the provider, set the registry too.
+Supplied credentials use password stdin and invocation-owned authentication files
+(directory mode `0700`, initial file mode `0600`), removed after success, failure or
+handled cancellation. Podman uses an explicit authfile without persistent Docker
+auth fallback; Docker uses an isolated config without credential helpers. Existing
+runtime auth is not modified, and there is no logout. With an explicit registry and
+no credential variables, the existing external-login path remains available.
+The isolated Docker config preserves the selected daemon context and its TLS
+connection material, plus Docker connection environment overrides; only registry
+auth is replaced. Connection files are removed with the temporary config.
+The installed Docker CLI resolves the effective connection, including
+`DOCKER_CONTEXT` and `DOCKER_HOST` precedence; the publisher does not impose its own.
 When the optional DevOps checkout is present, `pnpm stam test devops` runs its tests
 through the standard test command; it is also included in `stam test unit`.
 

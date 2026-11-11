@@ -10,8 +10,23 @@ docker run --rm -p 8080:8080 docs:v1.2.3
 Image build and publish commands prefer Podman and fall back to Docker when Podman
 is not installed. Set `STAMHOOFD_CONTAINER_RUNTIME=podman` or `docker` to select one
 explicitly. Use the same runtime to build, run, and publish the image; for Podman,
-replace `docker run` above with `podman run`. Before publishing, authenticate with
-`podman login` or `docker login` for the selected runtime.
+replace `docker run` above with `podman run`.
+
+To publish without the private checkout, set `STAM_DOCS_REGISTRY` to the destination
+host/namespace and run `pnpm stam docs image publish v1.2.3 --no-latest`. Supply both
+`STAM_DOCS_REGISTRY_USERNAME` and `STAM_DOCS_REGISTRY_PASSWORD` for invocation-scoped
+login: credentials are passed through stdin, authentication files are private and
+temporary, and existing Docker/Podman logins are left untouched. Temporary files
+are removed on success, failure and handled cancellation (not an uncatchable kill).
+Without those variables, authenticate externally with `podman login` or `docker login`
+for the selected runtime first. Publication never builds or deploys the image.
+Choose `--latest` instead to also point `latest` to this image after the version
+push succeeds. Omit both flags to be asked interactively (default No);
+noninteractive use requires `--latest` or `--no-latest`. Both pushes share the
+same authentication scope. Requesting the `latest` tag itself never pushes it twice.
+
+The optional private provider supports `--environment <name>` when no explicit
+registry is set. See the [CLI configuration and credential precedence](../shared/cli/README.md#documentation-images).
 
 The image runs Nuxt's Node server, including Nuxt Content search, as an unprivileged
 user on port 8080. SQLite content is built into the image; local runtime storage is
