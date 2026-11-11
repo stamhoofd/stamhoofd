@@ -414,6 +414,11 @@ The CLI uses an always-on local sampler; remote export remains opt-in.
 The `setup privileged-ports` and `setup caddy` actions accept `--dry-run` to preview
 commands and `--yes` to skip confirmation, matching the interactive setup repairs.
 
+Structures releases require a clean Git/JJ checkout on `main`, synchronized with
+`origin/main` after fetching. In JJ, use an empty working commit directly above
+`main`. The shared `inspectCheckout` and `assertReleaseTag` exports also support
+DevOps release-tag validation; tag validation does not require a particular branch.
+
 ### Translations
 
 During development, write Dutch `$t('Opslaan')` strings and commit them unchanged. Do not manually edit `shared/locales/src/nl.json`. Before releasing, a maintainer runs `pnpm stam translate auto`, reviews the generated changes, and commits them separately.

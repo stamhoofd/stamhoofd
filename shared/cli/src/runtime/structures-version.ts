@@ -5,6 +5,7 @@ import { run, RunVerbosity } from './command-runner.js';
 import { readReleasedVersion, replaceNextVersion, writeReleasedVersion } from './next-version-scanner.js';
 import { info, success, warning } from './ux.js';
 import { detectVcs, Vcs } from './vcs.js';
+import { assertMainCheckout } from './checkout.js';
 
 const excludedFolders = ['node_modules', 'dist', 'dist-types', '.development'];
 const versionFile = 'shared/structures/src/Version.ts';
@@ -12,7 +13,7 @@ const versionFile = 'shared/structures/src/Version.ts';
 export type IncreaseStructuresVersionOptions = {
     /** Repository root */
     cwd: string;
-    /** Skip the git checks (clean working tree, on main, up to date with origin/main) */
+    /** Skip the Git/JJ checks (clean working tree, on main, up to date with origin/main) */
     force?: boolean;
     /** Report what would change without writing or committing */
     dryRun?: boolean;
@@ -36,7 +37,7 @@ export async function increaseStructuresVersion(options: IncreaseStructuresVersi
     info(chalk.bold(chalk.blueBright('Increasing structures version to ' + nextVersion + '... (if changed)\n')));
 
     if (!dryRun && !force) {
-        await assertReleasableCheckout(cwd, verbosity);
+        await assertMainCheckout(cwd, verbosity);
     }
 
     const changedFiles: string[] = [];
@@ -58,8 +59,7 @@ export async function increaseStructuresVersion(options: IncreaseStructuresVersi
         changedFiles.push(filePath);
         if (!dryRun) {
             await fs.writeFile(filePath, newContent);
-        }
-        else {
+        } else {
             warning(chalk.yellow('Dry run: ' + filePath + ' not updated.'));
         }
     });
@@ -73,15 +73,13 @@ export async function increaseStructuresVersion(options: IncreaseStructuresVersi
     let newContent: string;
     try {
         newContent = writeReleasedVersion(currentContent, currentVersion, nextVersion);
-    }
-    catch {
+    } catch {
         throw new Error('Failed to update version in Version.ts. Please revert changes using Git.');
     }
 
     if (!dryRun) {
         await fs.writeFile(versionPath, newContent);
-    }
-    else {
+    } else {
         warning(chalk.yellow('Dry run: Version.ts not updated.'));
     }
 
@@ -90,8 +88,7 @@ export async function increaseStructuresVersion(options: IncreaseStructuresVersi
 
     if (!dryRun) {
         await commitVersionBump(cwd, nextVersion, verbosity);
-    }
-    else {
+    } else {
         warning(chalk.yellow('Dry run: Changes not commited.'));
     }
 
@@ -116,25 +113,6 @@ async function commitVersionBump(cwd: string, nextVersion: number, verbosity: Ru
     await run('git', ['commit', '-m', message], { cwd, verbosity });
 }
 
-async function assertReleasableCheckout(cwd: string, verbosity: RunVerbosity): Promise<void> {
-    await run('git', ['remote', 'update'], { cwd, verbosity });
-
-    const { stdout: status } = await run('git', ['status', '--porcelain'], { cwd, capture: true, verbosity });
-    if (status.trim()) {
-        throw new Error('You have pending changes in Git. Please commit to main before releasing a new version.');
-    }
-
-    const { stdout: branch } = await run('git', ['branch', '--show-current'], { cwd, capture: true, verbosity });
-    if (branch.trim() !== 'main') {
-        throw new Error('You are not on the main branch. Please checkout main before releasing a new version.');
-    }
-
-    const { stdout: tracking } = await run('git', ['status', '-uno'], { cwd, capture: true, verbosity });
-    if (!tracking.includes("Your branch is up to date with 'origin/main'")) {
-        throw new Error('Your branch is not up to date with origin/main. Please pull before releasing a new version.');
-    }
-}
-
 async function loopFolder(folderPath: string, processFile: (filePath: string) => Promise<void>): Promise<void> {
     const files = await fs.readdir(folderPath);
 
@@ -146,8 +124,7 @@ async function loopFolder(folderPath: string, processFile: (filePath: string) =>
                 continue;
             }
             await loopFolder(filePath, processFile);
-        }
-        else {
+        } else {
             await processFile(filePath);
         }
     }
@@ -160,8 +137,7 @@ async function isNestedCheckout(folderPath: string): Promise<boolean> {
     try {
         await fs.access(path.join(folderPath, '.git'));
         return true;
-    }
-    catch {
+    } catch {
         return false;
     }
 }

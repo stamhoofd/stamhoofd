@@ -1,4 +1,5 @@
 export { run } from '@oclif/core';
+export { inspectCheckout, assertReleaseTag, type Checkout } from './runtime/checkout.js';
 export type { DocsPublishingConfig, DocsPublishingProvider } from './runtime/docs-publishing.js';
 export { BaseCommand } from './base-command.js';
 export { withCliTelemetry, withCliPrompt, getCliTelemetry } from './runtime/telemetry.js';

@@ -56,6 +56,23 @@ describe('increaseStructuresVersion', () => {
         expect(run).toHaveBeenCalledExactlyOnceWith('jj', ['commit', '-m', 'Increased structures to version 13'], { cwd, verbosity: RunVerbosity.Output });
     });
 
+    it('accepts an empty JJ working copy directly above synchronized main', async () => {
+        vi.mocked(detectVcs).mockResolvedValue(Vcs.Jj);
+        vi.mocked(run).mockImplementation(async (command, args) => {
+            let stdout = '';
+            if (command === 'jj' && args.includes('log')) {
+                stdout = args.includes('@') ? 'working\ntrue\nmain-commit\n' : 'main-commit';
+            }
+            return { stdout, stderr: '', status: 0 };
+        });
+        const filePath = await writePendingField();
+
+        await increaseStructuresVersion({ cwd });
+
+        expect(await fs.readFile(filePath, 'utf8')).toContain('version: 13');
+        expect(run).toHaveBeenCalledWith('jj', ['commit', '-m', 'Increased structures to version 13'], expect.anything());
+    });
+
     it('does nothing when no pending fields are used', async () => {
         await increaseStructuresVersion({ cwd, force: true });
 
