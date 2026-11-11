@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { run, RunVerbosity } from '../runtime/command-runner.js';
 import { execSudo } from '../runtime/process.js';
 import { checkShellShortcut, removeLegacyShellFunction, setupShellShortcut } from './setup-shell.js';
+import { shellCompletionFiles, shellCompletionPaths } from './shell-completions.js';
 
 vi.mock(import('../runtime/command-runner.js'), async importOriginal => ({
     ...await importOriginal(),
@@ -15,6 +16,11 @@ vi.mock(import('../runtime/command-runner.js'), async importOriginal => ({
 }));
 vi.mock('../runtime/ux.js', () => ({ command: (text: string) => text, info: vi.fn(), success: vi.fn() }));
 vi.mock('../runtime/process.js', () => ({ execSudo: vi.fn(async () => ({ code: 0, stdout: '', stderr: '', signal: null })) }));
+vi.mock('./shell-completions.js', () => ({
+    shellCompletionFiles: vi.fn(async () => []),
+    shellCompletionPaths: vi.fn(async () => ({ bash: '/usr/share/bash-completion/completions/stam', zsh: '/usr/share/zsh/site-functions/_stam' })),
+    homebrewCompletionGuidance: 'Homebrew completion guidance',
+}));
 
 const execFileAsync = promisify(execFile);
 const script = fileURLToPath(new URL('../../bin/stam', import.meta.url));
@@ -30,7 +36,7 @@ describe('shortcut freshness', () => {
             .mockResolvedValueOnce(Buffer.from('current launcher'));
         expect(await checkShellShortcut()).toEqual({
             ok: current,
-            details: current ? 'stam installed in /usr/local/bin' : '/usr/local/bin/stam is out of date',
+            details: current ? 'stam and Bash/Zsh completion installed' : '/usr/local/bin/stam is out of date',
         });
         expect(read).toHaveBeenNthCalledWith(1, '/usr/local/bin/stam');
         expect(read).toHaveBeenNthCalledWith(2, script);
@@ -76,6 +82,58 @@ describe('shortcut installation directory', () => {
         await setupShellShortcut();
         expect(execSudo).toHaveBeenNthCalledWith(1, ['mkdir', '-p', '/usr/local/bin']);
         expect(execSudo).toHaveBeenNthCalledWith(2, ['install', '-m', '755', script, '/usr/local/bin/stam']);
+    });
+});
+
+describe('shortcut completion installation', () => {
+    beforeEach(() => vi.clearAllMocks());
+    afterEach(() => vi.restoreAllMocks());
+
+    it('installs standalone files with readable permissions and removes temporary sources', async () => {
+        const destination = '/usr/share/zsh/site-functions/_stam';
+        vi.mocked(shellCompletionFiles).mockResolvedValueOnce([{ destination, contents: '#compdef stam\n' }]);
+        vi.spyOn(fs, 'stat').mockResolvedValue({ isDirectory: () => true } as never);
+        vi.spyOn(fs, 'readFile').mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
+        await setupShellShortcut();
+        expect(execSudo).toHaveBeenCalledWith(['mkdir', '-p', path.dirname(destination)]);
+        const install = vi.mocked(execSudo).mock.calls.find(([args]) => args[0] === 'install' && args[2] === '644')![0];
+        expect(install[4]).toBe(destination);
+        await expect(fs.access(install[3])).rejects.toMatchObject({ code: 'ENOENT' });
+    });
+
+    it('reports stale completion even when the launcher is current', async () => {
+        vi.mocked(shellCompletionFiles).mockResolvedValueOnce([{ destination: '/completion', contents: 'current' }]);
+        vi.spyOn(fs, 'access').mockResolvedValue(undefined);
+        vi.spyOn(fs, 'readFile').mockResolvedValueOnce(Buffer.from('launcher')).mockResolvedValueOnce(Buffer.from('launcher')).mockResolvedValueOnce('old');
+        expect(await checkShellShortcut()).toEqual({ ok: false, details: '/completion is missing, unreadable or out of date' });
+    });
+
+    it('removes temporary completion files when privileged installation fails', async () => {
+        vi.mocked(shellCompletionFiles).mockResolvedValueOnce([{ destination: '/completion/_stam', contents: '#compdef stam\n' }]);
+        vi.spyOn(fs, 'stat').mockResolvedValue({ isDirectory: () => true } as never);
+        let temporarySource = '';
+        vi.mocked(execSudo).mockImplementation(async (args) => {
+            if (args[0] === 'install' && args[2] === '644') {
+                temporarySource = args[3];
+                expect(await fs.readFile(temporarySource, 'utf8')).toBe('#compdef stam\n');
+                throw new Error('installation denied');
+            }
+            return { code: 0, stdout: '', stderr: '', signal: null } as never;
+        });
+        try {
+            await expect(setupShellShortcut()).rejects.toThrow('installation denied');
+            await expect(fs.access(temporarySource)).rejects.toMatchObject({ code: 'ENOENT' });
+        } finally {
+            vi.mocked(execSudo).mockResolvedValue({ code: 0, stdout: '', stderr: '', signal: null } as never);
+        }
+    });
+
+    it('previews platform destinations without generating or installing files', async () => {
+        vi.spyOn(fs, 'stat').mockResolvedValue({ isDirectory: () => true } as never);
+        await setupShellShortcut({ dryRun: true });
+        expect(shellCompletionPaths).toHaveBeenCalled();
+        expect(shellCompletionFiles).not.toHaveBeenCalled();
+        expect(execSudo).not.toHaveBeenCalled();
     });
 });
 

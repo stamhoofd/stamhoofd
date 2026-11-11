@@ -47,3 +47,15 @@ _stam_local_completion() {
 }
 compdef _stam_local_completion stam`;
 }
+
+/** Embed the maintained generator's output so installed files do not depend on a user's cache. */
+export function standaloneCompletionScript(shell: string, generated: string): string {
+    const bridge = docsEnvironmentCompletionScript(shell, '').replace(/^source .*\n/, '');
+    if (shell === 'bash') return `${generated}\n${bridge}\n`;
+    const definitions = generated.replace(/\b_stam\b/g, '_stam_generated').replace(/\n_stam_generated\s*$/, '\n');
+    return `${definitions}\n${bridge
+        .replaceAll('_stam_local_completion', '_stam')
+        .replace('        autoload -Uz _stam\n', '')
+        .replace('        _stam "$@"', '        _stam_generated "$@"')
+        .replace('compdef _stam stam', '_stam "$@"')}\n`;
+}

@@ -19,13 +19,14 @@ the launcher runs the CLI in the same process, so Ctrl+C waits for command clean
 before returning to the shell. Reinstall older copied shortcuts with
 `pnpm stam setup shortcut` to use this launcher behavior.
 
-Run `pnpm stam setup shortcut` to install `shared/cli/bin/stam` as `/usr/local/bin/stam` using sudo. This removes the need to type `pnpm` or run commands in the project root. Setup also removes the legacy `stam` function blocks from `.zshrc` and `.bashrc`; restart your terminal or run `unset -f stam` if the old function is still loaded. Afterwards, `stam setup` performs the normal setup checks.
+Run `pnpm stam setup shortcut` to install `shared/cli/bin/stam` as `/usr/local/bin/stam` and standalone Bash/Zsh completion files using sudo. This removes the need to type `pnpm` or run commands in the project root. Setup also removes the legacy `stam` function blocks from `.zshrc` and `.bashrc`; restart your terminal or run `unset -f stam` if the old function is still loaded. Afterwards, `stam setup` performs the normal setup checks.
 
 Setup lists the binary shortcut under **Optional**, with its installation command
-when missing, non-executable, or different from this checkout's current shortcut.
+when missing, non-executable, or different from this checkout's current shortcut or completions.
 Run `stam setup shortcut` to replace an outdated copy. Optional checks do not block
 development readiness or appear in recommended fixes.
-Shortcut installation only runs `sudo mkdir` when `/usr/local/bin` is missing.
+Shortcut installation creates `/usr/local/bin` only when missing and ensures the
+platform completion directories exist before installing files.
 
 When the private DevOps checkout is present, a **DevOps** section follows Optional.
 It checks OpenTofu, Scaleway CLI, 1Password CLI and TFLint and shows installation
@@ -89,6 +90,27 @@ When the optional DevOps checkout is present, `pnpm stam test devops` runs its t
 through the standard test command; it is also included in `stam test unit`.
 
 ### Shell completion
+
+`stam setup shortcut` installs standalone completions alongside the launcher:
+
+| Platform | Bash | Zsh |
+| --- | --- | --- |
+| Linux | `/usr/share/bash-completion/completions/stam` | `/usr/share/zsh/site-functions/_stam` |
+| macOS | `$(brew --prefix)/etc/bash_completion.d/stam` | `$(brew --prefix)/share/zsh/site-functions/_stam` |
+
+The installed files do not depend on a user's cache or checkout path. Re-run setup
+after command/flag changes; `stam setup` detects missing or outdated files.
+`--dry-run` previews the destinations. Bash needs bash-completion enabled, and Zsh
+needs its usual `compinit` initialization. On macOS, setup displays
+[Homebrew shell-completion guidance](https://docs.brew.sh/Shell-Completion): load
+Homebrew's Bash completion integration, or run `brew shellenv` before Zsh's
+`compinit`. Setup does not edit these shell preferences.
+
+For manual installation, export `stam completion bash --standalone` or
+`stam completion zsh --standalone` into the shell's completion search directory.
+Fish is not supported.
+
+Alternatively, keep completion in your own shell configuration:
 
 Install the `stam` shortcut first (`pnpm stam setup shortcut`). Generate an activation
 file once, from inside the checkout, for your shell:

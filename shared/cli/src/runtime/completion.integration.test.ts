@@ -134,6 +134,33 @@ describe('generated oclif completion with live local environments', () => {
         expect((await execute('stam', ['completion', 'environments'], { env })).stdout.trim().split('\n')).toEqual(['example-blue', 'example-green']);
     });
 
+    it.each(['bash', 'zsh'])('exports standalone %s completion usable after deleting the generation cache', async (shell, context) => {
+        await requireShell(shell, context);
+        const { stdout } = await execute('stam', ['completion', shell, '--standalone'], { env });
+        expect(stdout).not.toContain(root);
+        expect(stdout).not.toContain('example-blue');
+        await fs.rm(path.join(root, 'cache'), { recursive: true, force: true });
+        const completion = path.join(root, shell === 'bash' ? 'stam' : '_stam');
+        await fs.writeFile(completion, stdout);
+        const script = shell === 'bash' ? `
+            source '${completion}'
+            COMP_WORDS=(stam docs image publish v1 --environment example-b)
+            COMP_CWORD=6
+            _stam_local_completion
+            printf '%s\\n' "\${COMPREPLY[@]}"
+        ` : `
+            fpath=('${root}' $fpath)
+            autoload -Uz _stam
+            compadd() { shift; print -l -- "$@"; }
+            words=(stam docs image publish v1 --environment example-b)
+            CURRENT=7
+            _stam
+        `;
+        const requestPath = path.join(root, 'standalone-request');
+        await fs.writeFile(requestPath, script);
+        expect((await execute(shell, [requestPath], { env })).stdout.trim()).toBe('example-blue');
+    });
+
     it('accepts explicit custom names rather than restricting parsing to suggestions', async () => {
         await fs.writeFile(modulePath, `export const docsPublishingProvider = {
             listEnvironments: async () => [],
