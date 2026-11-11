@@ -30,68 +30,6 @@ optimisticRepeatInstall: false
 disallowWorkspaceCycles: true
 linkWorkspacePackages: true
 minimumReleaseAge: 10080
-minimumReleaseAgeExclude:
-  - node-forge@1.4.1
-  - nodemailer@10.1.4
-  - body-parser@1.20.9 || 2.4.0
-  - fast-uri@3.1.9
-  - serialize-javascript@7.1.3
-  - '@simonbackx/*'
-  - '@aws-sdk/checksums@3.1001.0 || 3.1001.1'
-  - '@aws-sdk/client-s3@3.1130.0 || 3.1135.0 || 3.1140.0'
-  - '@aws-sdk/client-ses@3.1130.0 || 3.1135.0 || 3.1140.0'
-  - '@aws-sdk/client-sesv2@3.1130.0 || 3.1135.0 || 3.1140.0'
-  - '@aws-sdk/client-sqs@3.1130.0 || 3.1135.0 || 3.1140.0'
-  - '@aws-sdk/core@3.978.0 || 3.978.1'
-  - '@aws-sdk/credential-provider-env@3.972.71 || 3.972.72'
-  - '@aws-sdk/credential-provider-http@3.972.73 || 3.972.74'
-  - '@aws-sdk/credential-provider-ini@3.973.16 || 3.973.17'
-  - '@aws-sdk/credential-provider-login@3.972.78 || 3.972.79'
-  - '@aws-sdk/credential-provider-node@3.972.83 || 3.972.84'
-  - '@aws-sdk/credential-provider-process@3.972.71 || 3.972.72'
-  - '@aws-sdk/credential-provider-sso@3.973.15 || 3.973.16'
-  - '@aws-sdk/credential-provider-web-identity@3.972.77 || 3.972.78'
-  - '@aws-sdk/lib-storage@3.1130.0 || 3.1135.0 || 3.1140.0'
-  - '@aws-sdk/middleware-sdk-s3@3.972.76 || 3.972.77'
-  - '@aws-sdk/nested-clients@3.997.45 || 3.997.46'
-  - '@aws-sdk/s3-request-presigner@3.1130.0 || 3.1135.0 || 3.1140.0'
-  - '@aws-sdk/token-providers@3.1129.0 || 3.1138.0'
-  - '@atlowchemi/webfont-generator-darwin-arm64@0.7.0'
-  - '@atlowchemi/webfont-generator-darwin-x64@0.7.0'
-  - '@atlowchemi/webfont-generator-linux-arm-gnueabihf@0.7.0'
-  - '@atlowchemi/webfont-generator-linux-arm64-gnu@0.7.0'
-  - '@atlowchemi/webfont-generator-linux-arm64-musl@0.7.0'
-  - '@atlowchemi/webfont-generator-linux-x64-gnu@0.7.0'
-  - '@atlowchemi/webfont-generator-linux-x64-musl@0.7.0'
-  - '@atlowchemi/webfont-generator-win32-arm64-msvc@0.7.0'
-  - '@atlowchemi/webfont-generator-win32-x64-msvc@0.7.0'
-  - '@atlowchemi/webfont-generator@0.7.0'
-  - vite-svg-2-webfont@8.3.0
-  - '@aws-sdk/middleware-sdk-sqs@3.972.43'
-  - '@aws-sdk/signature-v4-multi-region@3.996.47'
-  - '@aws-sdk/types@3.974.6'
-  - '@aws-sdk/xml-builder@3.972.41'
-  - '@capgo/capacitor-updater@8.51.25'
-  - '@puppeteer/browsers@3.2.3'
-  - '@smithy/core@3.35.0'
-  - '@smithy/types@4.19.0'
-  - '@typescript-eslint/eslint-plugin@8.70.1'
-  - '@typescript-eslint/parser@8.70.1'
-  - '@typescript-eslint/project-service@8.70.1'
-  - '@typescript-eslint/scope-manager@8.70.1'
-  - '@typescript-eslint/tsconfig-utils@8.70.1'
-  - '@typescript-eslint/type-utils@8.70.1'
-  - '@typescript-eslint/types@8.70.1'
-  - '@typescript-eslint/typescript-estree@8.70.1'
-  - '@typescript-eslint/utils@8.70.1'
-  - '@typescript-eslint/visitor-keys@8.70.1'
-  - eslint-plugin-vue@10.11.1
-  - libphonenumber-js@1.13.14
-  - puppeteer-core@25.12.0
-  - puppeteer@25.12.0
-  - sass@1.105.0
-  - typescript-eslint@8.70.1
-  - joi@18.3.1
 strictDepBuilds: true
 allowBuilds:
   protobufjs@7.6.6: false
@@ -102,7 +40,6 @@ allowBuilds:
   esbuild@0.25.12 || 0.28.2: true
   nx@22.7.12: false
   puppeteer: true
-  puppeteer@25.10.0: true
   unrs-resolver@1.12.2: true
   vue-demi@0.14.10: true
 
@@ -110,40 +47,25 @@ overrides:
   '@types/node': '22.20.4'
   axios: '1.21.0'
   cookie: '2.0.1'
-  fast-xml-parser: '5.11.2'
-  node-forge: '1.4.1'
+  node-forge: '1.4.3'
   nodemailer: '10.3.1'
   pacote: '21.5.1'
-  postcss: '8.5.28'
   semver: '7.8.5'
   sharp: '0.35.5'
-  sortablejs: '1.15.7'
   tar: '7.5.22'
   vue: '3.5.44'
-  ws: '8.21.3'
-  yargs: '17.7.3'
-  js-yaml: '4.3.2'
+  # Keep older consumers patched without downgrading consumers of newer majors.
+  'yargs@<18': '17.7.3'
+  'js-yaml@<5': '4.3.2'
   '@colors/colors': '1.6.1'
-  '@trapezedev/project': '7.1.11'
   'nx>brace-expansion': '5.0.12'
   'nx>follow-redirects': '1.16.2'
-  'axios>follow-redirects': '1.16.2'
   'nx>smol-toml': '1.9.0'
   'xcode>uuid': '11.1.1'
   'fontless>esbuild': '0.28.2'
   '@nuxt/content>zod': '4.6.7'
   'openai>zod': '4.6.7'
   '@anthropic-ai/sdk>zod': '4.6.7'
-  'express>qs': '6.16.1'
-  'body-parser>qs': '6.16.1'
-  '@intlify/core': '11.4.14'
-  '@intlify/core-base': '11.4.14'
-  '@intlify/devtools-types': '11.4.14'
-  '@intlify/message-compiler': '11.4.14'
-  '@intlify/shared': '11.4.14'
-  vue-i18n: '11.4.14'
-  '@modelcontextprotocol/sdk>@hono/node-server': '2.1.3'
-  joi: '18.3.1'
   '@eslint/config-array>minimatch': '11.0.1'
   '@npmcli/arborist>minimatch': '11.0.1'
   '@npmcli/map-workspaces>minimatch': '11.0.1'
