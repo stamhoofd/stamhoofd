@@ -103,7 +103,7 @@ export class StartOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         if (request.body.fromOrganizationRegistrationPeriodId) {
             const currentOrganizationRegistrationPeriod = await OrganizationRegistrationPeriod.getByID(request.body.fromOrganizationRegistrationPeriodId);
 
-            if (!currentOrganizationRegistrationPeriod) {
+            if (!currentOrganizationRegistrationPeriod || currentOrganizationRegistrationPeriod.organizationId !== organization.id) {
                 throw new SimpleError({
                     code: 'not_found',
                     message: 'Organization Period not found',
@@ -111,12 +111,23 @@ export class StartOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                     statusCode: 404 });
             }
 
-            const groups = await Group.getAll(organization.id, currentOrganizationRegistrationPeriod.periodId);
+            const existingOrganizationRegistrationPeriod = await OrganizationRegistrationPeriod.select()
+                .where('organizationId', organization.id)
+                .andWhere('periodId', period.id)
+                .first(false);
+
+            if (existingOrganizationRegistrationPeriod) {
+                return new Response(
+                    await AuthenticatedStructures.organizationRegistrationPeriod(existingOrganizationRegistrationPeriod),
+                );
+            }
+
+            const currentOrganizationRegistrationPeriodStruct = await AuthenticatedStructures.organizationRegistrationPeriod(currentOrganizationRegistrationPeriod);
 
             const {
                 newOrganizationPeriod,
                 groupMap: newGroupMap,
-            } = currentOrganizationRegistrationPeriod.getStructure(period, groups).duplicate(
+            } = currentOrganizationRegistrationPeriodStruct.duplicate(
                 periodStruct,
             );
 
@@ -137,7 +148,6 @@ export class StartOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
         organizationPeriod.organizationId = organization.id;
         organizationPeriod.periodId = struct.period.id;
         organizationPeriod.settings = struct.settings;
-        await organizationPeriod.save();
 
         // Create waiting list groups first: a regular group referencing a waiting list requires
         // that waiting list group to already exist in the same period (see createGroup), otherwise
@@ -165,6 +175,9 @@ export class StartOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
                 console.error('Error creating group', s.id, e);
             }
         }
+
+        await organizationPeriod.save();
+
         const groups = await Group.getAll(organization.id, organizationPeriod.periodId);
         await StartOrganizationRegistrationPeriodsEndpoint.duplicateEmailTemplates(organization, groupMap);
 
@@ -357,13 +370,19 @@ export class StartOrganizationRegistrationPeriodsEndpoint extends Endpoint<Param
     }
 
     static async duplicateEmailTemplates(organization: Organization, groupMap: Map<string, string>) {
-        for (const [originalGroupId, newGroupId] of groupMap.entries()) {
-            const originalTemplates = await EmailTemplate.select()
-                .where('organizationId', organization.id)
-                .andWhere('groupId', originalGroupId)
-                .fetch();
+        const originalTemplates = await EmailTemplate.select()
+            .where('organizationId', organization.id)
+            .andWhere('groupId', [...groupMap.keys()])
+            .fetch();
 
-            for (const template of originalTemplates) {
+        for (const [originalGroupId, newGroupId] of groupMap.entries()) {
+            if (!newGroupId) continue;
+
+            const originalGroupTemplates = originalTemplates.filter(
+                t => t.groupId === originalGroupId,
+            );
+
+            for (const template of originalGroupTemplates) {
                 const newTemplate = new EmailTemplate();
                 newTemplate.subject = template.subject;
                 newTemplate.organizationId = template.organizationId;
