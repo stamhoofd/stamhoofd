@@ -1,0 +1,71 @@
+{
+    "dependencies": {
+        "@capacitor-community/in-app-review": {
+            "version": "8.0.0",
+            "path": "node_modules/.pnpm/@capacitor-community+in-app-review@8.0.0_@capacitor+core@8.6.0/node_modules/@capacitor-community/in-app-review"
+        },
+        "@capacitor/android": {
+            "version": "8.6.0",
+            "path": "node_modules/.pnpm/@capacitor+android@8.6.0_@capacitor+core@8.6.0/node_modules/@capacitor/android"
+        },
+        "@capacitor/app": {
+            "version": "8.1.2",
+            "path": "node_modules/.pnpm/@capacitor+app@8.1.2_@capacitor+core@8.6.0/node_modules/@capacitor/app"
+        },
+        "@capacitor/app-launcher": {
+            "version": "8.0.1",
+            "path": "node_modules/.pnpm/@capacitor+app-launcher@8.0.1_@capacitor+core@8.6.0/node_modules/@capacitor/app-launcher"
+        },
+        "@capacitor/cli": {
+            "version": "8.6.0",
+            "path": "node_modules/.pnpm/@capacitor+cli@8.6.0_supports-color@10.2.2/node_modules/@capacitor/cli"
+        },
+        "@capacitor/core": {
+            "version": "8.6.0",
+            "path": "node_modules/.pnpm/@capacitor+core@8.6.0/node_modules/@capacitor/core"
+        },
+        "@capacitor/device": {
+            "version": "8.0.3",
+            "path": "node_modules/.pnpm/@capacitor+device@8.0.3_@capacitor+core@8.6.0/node_modules/@capacitor/device"
+        },
+        "@capacitor/filesystem": {
+            "version": "8.1.5",
+            "path": "node_modules/.pnpm/@capacitor+filesystem@8.1.5_@capacitor+core@8.6.0/node_modules/@capacitor/filesystem"
+        },
+        "@capacitor/haptics": {
+            "version": "8.0.2",
+            "path": "node_modules/.pnpm/@capacitor+haptics@8.0.2_@capacitor+core@8.6.0/node_modules/@capacitor/haptics"
+        },
+        "@capacitor/ios": {
+            "version": "8.6.0",
+            "path": "node_modules/.pnpm/@capacitor+ios@8.6.0_@capacitor+core@8.6.0/node_modules/@capacitor/ios"
+        },
+        "@capacitor/keyboard": {
+            "version": "8.0.6",
+            "path": "node_modules/.pnpm/@capacitor+keyboard@8.0.6_@capacitor+core@8.6.0/node_modules/@capacitor/keyboard"
+        },
+        "@capacitor/preferences": {
+            "version": "8.0.1",
+            "path": "node_modules/.pnpm/@capacitor+preferences@8.0.1_@capacitor+core@8.6.0/node_modules/@capacitor/preferences"
+        },
+        "@capacitor/share": {
+            "version": "8.0.3",
+            "path": "node_modules/.pnpm/@capacitor+share@8.0.3_@capacitor+core@8.6.0/node_modules/@capacitor/share"
+        },
+        "@capacitor/status-bar": {
+            "version": "8.0.4",
+            "path": "node_modules/.pnpm/@capacitor+status-bar@8.0.4_@capacitor+core@8.6.0/node_modules/@capacitor/status-bar"
+        },
+        "@capgo/capacitor-updater": {
+            "version": "8.54.0",
+            "path": "node_modules/.pnpm/@capgo+capacitor-updater@8.54.0_@capacitor+core@8.6.0/node_modules/@capgo/capacitor-updater"
+        }
+    },
+    "config": "08c58cb2e8659a73f7eb58b816dc876af9b71d16ab2e127f1bad3e2254ea7983",
+    "generated": {
+        "ios/App/CapApp-SPM/Package.swift": "e1b70c14c0adbf919ba873a69892e70278d0e3644ff2dcb107d476e95ea42cd5",
+        "ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved": "c83eb4d450f48bd1e3645f89ff64e2012dca4e3942728f1cb858322f587cc9b8",
+        "android/capacitor.settings.gradle": "acb54c71c6d83647143e3257c23be88d2fdf84550b2b1c2ae91109634af4a79d",
+        "android/app/capacitor.build.gradle": "6349b53e5c7fbca23001c15d396f841416662c4bd26330eb6096079ceefeacba"
+    }
+}
