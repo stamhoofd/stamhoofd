@@ -2,11 +2,12 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { run, RunVerbosity } from './command-runner.js';
+import { run } from '../services/docker.js';
+import { RunVerbosity } from './command-runner.js';
 import { buildDocsImage, docsImageReference, publishDocsImage } from './docs-image.js';
 
-vi.mock('./command-runner.js', async importOriginal => ({
-    ...await importOriginal<typeof import('./command-runner.js')>(),
+vi.mock('../services/docker.js', async importOriginal => ({
+    ...await importOriginal<typeof import('../services/docker.js')>(),
     run: vi.fn(),
 }));
 
@@ -27,14 +28,14 @@ describe('documentation images', () => {
         for (const version of ['22.1.0', '24.2.0', 'v24.2.0']) {
             await fs.writeFile(path.join(rootDir, '.nvmrc'), `${version}\n`);
             await buildDocsImage(rootDir, 'v1.2.3');
-            expect(run).toHaveBeenLastCalledWith('docker', ['build', '--platform', 'linux/amd64', '--file', 'docs/Dockerfile', '--build-arg', `NODE_VERSION=${version.replace(/^v/, '')}`, '--tag', 'docs:v1.2.3', '.'], { cwd: rootDir, verbosity: RunVerbosity.Output });
+            expect(run).toHaveBeenLastCalledWith(['build', '--platform', 'linux/amd64', '--file', 'docs/Dockerfile', '--build-arg', `NODE_VERSION=${version.replace(/^v/, '')}`, '--tag', 'docs:v1.2.3', '.'], { cwd: rootDir, verbosity: RunVerbosity.Output });
         }
     });
 
     it('pushes only the explicit version and does not build or deploy', async () => {
         await publishDocsImage('/repo', 'v1.2.3', 'registry.example.com/team');
-        expect(run).toHaveBeenNthCalledWith(1, 'docker', ['tag', 'docs:v1.2.3', 'registry.example.com/team/docs:v1.2.3'], { cwd: '/repo', verbosity: RunVerbosity.Output });
-        expect(run).toHaveBeenNthCalledWith(2, 'docker', ['push', 'registry.example.com/team/docs:v1.2.3'], { cwd: '/repo', verbosity: RunVerbosity.Output });
+        expect(run).toHaveBeenNthCalledWith(1, ['tag', 'docs:v1.2.3', 'registry.example.com/team/docs:v1.2.3'], { cwd: '/repo', verbosity: RunVerbosity.Output });
+        expect(run).toHaveBeenNthCalledWith(2, ['push', 'registry.example.com/team/docs:v1.2.3'], { cwd: '/repo', verbosity: RunVerbosity.Output });
         expect(run).toHaveBeenCalledTimes(2);
     });
 

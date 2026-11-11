@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { run, RunVerbosity } from './command-runner.js';
+import { run } from '../services/docker.js';
+import { RunVerbosity } from './command-runner.js';
 
 /** A single image reference is used for both local builds and registry publication. */
 export function docsImageReference(tag: string, registry?: string): string {
@@ -15,14 +16,14 @@ export function docsImageReference(tag: string, registry?: string): string {
 
 export async function buildDocsImage(rootDir: string, tag: string, verbosity = RunVerbosity.Output): Promise<void> {
     const nodeVersion = (await fs.readFile(path.join(rootDir, '.nvmrc'), 'utf8')).trim().replace(/^v/, '');
-    await run('docker', ['build', '--platform', 'linux/amd64', '--file', 'docs/Dockerfile', '--build-arg', `NODE_VERSION=${nodeVersion}`, '--tag', docsImageReference(tag), '.'], { cwd: rootDir, verbosity });
+    await run(['build', '--platform', 'linux/amd64', '--file', 'docs/Dockerfile', '--build-arg', `NODE_VERSION=${nodeVersion}`, '--tag', docsImageReference(tag), '.'], { cwd: rootDir, verbosity });
 }
 
-/** Docker authentication is external: credentials never enter build arguments or image layers. */
+/** Container registry authentication is external: credentials never enter build arguments or image layers. */
 export async function publishDocsImage(rootDir: string, tag: string, registry: string | undefined, verbosity = RunVerbosity.Output): Promise<void> {
     if (!registry) throw new Error('Set STAM_DOCS_REGISTRY to the destination registry host/namespace.');
     const local = docsImageReference(tag);
     const remote = docsImageReference(tag, registry);
-    await run('docker', ['tag', local, remote], { cwd: rootDir, verbosity });
-    await run('docker', ['push', remote], { cwd: rootDir, verbosity });
+    await run(['tag', local, remote], { cwd: rootDir, verbosity });
+    await run(['push', remote], { cwd: rootDir, verbosity });
 }

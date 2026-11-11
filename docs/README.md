@@ -7,6 +7,12 @@ pnpm stam docs image build v1.2.3
 docker run --rm -p 8080:8080 docs:v1.2.3
 ```
 
+Image build and publish commands prefer Podman and fall back to Docker when Podman
+is not installed. Set `STAMHOOFD_CONTAINER_RUNTIME=podman` or `docker` to select one
+explicitly. Use the same runtime to build, run, and publish the image; for Podman,
+replace `docker run` above with `podman run`. Before publishing, authenticate with
+`podman login` or `docker login` for the selected runtime.
+
 The image runs Nuxt's Node server, including Nuxt Content search, as an unprivileged
 user on port 8080. SQLite content is built into the image; local runtime storage is
 ephemeral and contains no authoritative data. The build context excludes DevOps,

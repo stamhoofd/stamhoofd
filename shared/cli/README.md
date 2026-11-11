@@ -55,7 +55,10 @@ The CLI build clears its own compiled output before compiling so commands remove
 
 `pnpm stam docs image build <tag>` builds the docs Node server image locally for
 `linux/amd64`. `pnpm stam docs image publish <tag>` pushes that existing image to
-`STAM_DOCS_REGISTRY` after a separate Docker login. Neither needs the private DevOps
+`STAM_DOCS_REGISTRY` after a separate login with the selected container runtime.
+Both commands prefer Podman and fall back to Docker when Podman is not installed;
+set `STAMHOOFD_CONTAINER_RUNTIME=podman` or `docker` to select one explicitly.
+Use the same runtime for building, logging in, and publishing. Neither needs the private DevOps
 checkout. See [the docs image guide](../../docs/README.md). Publication does not deploy.
 When the optional DevOps checkout is present, `pnpm stam test devops` runs its tests
 through the standard test command; it is also included in `stam test unit`.
