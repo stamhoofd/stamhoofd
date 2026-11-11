@@ -48,6 +48,7 @@
         "@aws-sdk/client-s3": "3.1160.0",
         "@inquirer/prompts": "7.10.1",
         "@oclif/core": "4.14.0",
+        "@oclif/plugin-autocomplete": "3.3.0",
         "@stamhoofd/metabase": "workspace:*",
         "@stamhoofd/stdsync": "workspace:*",
         "@stamhoofd/types": "workspace:*",
@@ -67,6 +68,7 @@
         "commands": "./dist/commands",
         "helpClass": "./dist/help.js",
         "topicSeparator": " ",
+        "plugins": ["@oclif/plugin-autocomplete"],
         "theme": {
             "sectionHeader": "cyan",
             "command": "cyan",

@@ -27,6 +27,9 @@ same authentication scope. Requesting the `latest` tag itself never pushes it tw
 
 The optional private provider supports `--environment <name>` when no explicit
 registry is set. See the [CLI configuration and credential precedence](../shared/cli/README.md#documentation-images).
+For live local environment suggestions, activate
+[Bash or Zsh completion](../shared/cli/README.md#shell-completion), then use
+`stam docs image publish v1.2.3 --environment <TAB>`.
 
 The image runs Nuxt's Node server, including Nuxt Content search, as an unprivileged
 user on port 8080. SQLite content is built into the image; local runtime storage is

@@ -1,5 +1,5 @@
 #!/usr/bin/env -S node --use-system-ca
-import { Config, Errors, Plugin, run } from '@oclif/core';
+import { Config, Errors, run } from '@oclif/core';
 import { fileURLToPath } from 'node:url';
 import { getOptionalDevopsPlugin } from '../dist/runtime/devops-plugin.js';
 
@@ -7,14 +7,13 @@ const cliRoot = fileURLToPath(new URL('../', import.meta.url));
 const devopsRoot = fileURLToPath(new URL('../../../devops/', import.meta.url));
 
 async function loadConfig() {
+    const config = await Config.load({ root: cliRoot });
     const devops = await getOptionalDevopsPlugin(devopsRoot);
     if (!devops) {
-        return import.meta.url;
+        return config;
     }
 
-    const root = new Plugin({ root: cliRoot, isRoot: true });
-    await root.load();
-    return Config.load({ root: cliRoot, plugins: new Map([[root.name, root], [devops.name, devops]]) });
+    return Config.load({ root: cliRoot, plugins: new Map([...config.plugins, [devops.name, devops]]) });
 }
 
 async function main() {

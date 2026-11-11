@@ -88,6 +88,49 @@ The installed Docker CLI resolves the effective connection, including
 When the optional DevOps checkout is present, `pnpm stam test devops` runs its tests
 through the standard test command; it is also included in `stam test unit`.
 
+### Shell completion
+
+Install the `stam` shortcut first (`pnpm stam setup shortcut`). Generate an activation
+file once, from inside the checkout, for your shell:
+
+```bash
+mkdir -p ~/.config/stam
+stam completion bash > ~/.config/stam/completion.bash
+
+# Add this line to ~/.bashrc (or the startup file used by your login shell)
+source ~/.config/stam/completion.bash
+```
+
+```zsh
+mkdir -p ~/.config/stam
+stam completion zsh > ~/.config/stam/completion.zsh
+
+# Add this line to ~/.zshrc
+source ~/.config/stam/completion.zsh
+```
+
+Command and flag suggestions use `@oclif/plugin-autocomplete` with space-separated
+topics. A small shell bridge adds live values for
+`stam docs image publish <tag> --environment <TAB>` (Bash may need two Tabs).
+The equals form, `--environment=<TAB>`, is supported too.
+Suggestions come only from the active checkout's local operator configuration;
+completion does not prompt, read credentials or query infrastructure. An absent
+optional provider gives no environment suggestions. Explicit custom names remain
+valid and do not have to appear in the list. The launcher prepares the CLI and
+optional compiled provider before each request, including from nested directories.
+
+Generated command/flag scripts live in oclif's user-private cache directory
+(`$XDG_CACHE_HOME/@stamhoofd/cli/autocomplete` on Linux, defaulting to
+`~/.cache/@stamhoofd/cli/autocomplete`). Environment names are requested at Tab time,
+not embedded in generated scripts or persisted in a value cache. Regenerate the
+activation file from the checkout after changing commands or flags, then source it
+again; live environment values need no regeneration. Sourcing the saved file works
+from any directory and does not run generation at shell startup. Dynamic
+environment completion supports Bash and Zsh, not Fish or PowerShell. Use
+`stam completion`, rather than the plugin's plain `stam autocomplete` setup, to
+include the live environment bridge. Live environment requests require `stam` on
+PATH and a working directory inside the checkout so its wrapper can locate the repository.
+
 ### Commands
 
 #### Command telemetry
