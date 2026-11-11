@@ -39,3 +39,22 @@ Change this in `.development/.env` and restart `yarn dev:server`
 ### Testing
 
 You might need to restart Safari on iOS.
+
+### Native scene lifecycle regression checks
+
+The mobile iOS app uses `SceneDelegate` and the `Main` storyboard configured in
+`UIApplicationSceneManifest`. Capacitor's `SceneDelegateProxy` receives scene
+connection and link events, including links that launch the app.
+
+After changes to the native lifecycle, run the `App` scheme in Xcode on an iPhone
+and an iPad simulator/device:
+
+1. Terminate the app and launch it. The web view should appear without the
+   `UIScene life cycle is required` launch assertion.
+2. Background and reopen the app. The existing screen should resume normally.
+3. Open a supported universal link with the app terminated, then with it already
+   running. Both should navigate to the linked screen.
+4. Open any configured custom URL scheme in both states and verify its handler.
+
+These checks require the native app; browser tests do not exercise UIKit's scene
+lifecycle.

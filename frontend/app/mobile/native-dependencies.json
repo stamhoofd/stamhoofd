@@ -61,7 +61,7 @@
             "path": "node_modules/.pnpm/@capgo+capacitor-updater@8.54.0_@capacitor+core@8.6.0/node_modules/@capgo/capacitor-updater"
         }
     },
-    "config": "08c58cb2e8659a73f7eb58b816dc876af9b71d16ab2e127f1bad3e2254ea7983",
+    "config": "a7c75ded53c8d643add5c88238bacb01b008fdaa74c9e7073be5d548e9985603",
     "generated": {
         "ios/App/CapApp-SPM/Package.swift": "e1b70c14c0adbf919ba873a69892e70278d0e3644ff2dcb107d476e95ea42cd5",
         "ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved": "c83eb4d450f48bd1e3645f89ff64e2012dca4e3942728f1cb858322f587cc9b8",

@@ -2,7 +2,7 @@
 	"appId": "com.stamhoofd.stamhoofd",
 	"appName": "Stamhoofd",
 	"webDir": "dist",
-	"loggingBehavior": "none",
+	"loggingBehavior": "debug",
 	"plugins": {
 		"Keyboard": {
 			"resize": "none",
