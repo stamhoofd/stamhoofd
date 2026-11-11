@@ -33,6 +33,33 @@ afterEach(() => {
 });
 
 describe('native dependency install hook', () => {
+    it('skips production-only installs without reading missing devDependencies or writing native state', () => {
+        const directory = fixture();
+        write(directory, 'package.json', { devDependencies: { '@capacitor/cli': '8.6.0' } });
+        write(resolve(directory, '../../..'), 'node_modules/.modules.yaml', { included: { devDependencies: false } });
+        const run = vi.fn();
+
+        expect(() => updateNativeDependencies({ directory, platform: 'darwin', run })).not.toThrow();
+        expect(run).not.toHaveBeenCalled();
+        expect(() => readFileSync(join(directory, 'native-dependencies.json'))).toThrow();
+    });
+
+    it.each([false, true])('rejects missing devDependencies in explicit checks (devDependencies installed: %s)', (devDependencies) => {
+        const directory = fixture();
+        write(directory, 'package.json', { devDependencies: { '@capacitor/cli': '8.6.0' } });
+        write(resolve(directory, '../../..'), 'node_modules/.modules.yaml', { included: { devDependencies } });
+
+        expect(() => updateNativeDependencies({ directory, check: true })).toThrow('ENOENT');
+    });
+
+    it('rejects missing devDependencies during full installs', () => {
+        const directory = fixture();
+        write(directory, 'package.json', { devDependencies: { '@capacitor/cli': '8.6.0' } });
+        write(resolve(directory, '../../..'), 'node_modules/.modules.yaml', { included: { devDependencies: true } });
+
+        expect(() => updateNativeDependencies({ directory })).toThrow('ENOENT');
+    });
+
     it('records resolved dependency paths relative to the repository root', () => {
         const directory = fixture();
         const packagePath = 'node_modules/.pnpm/native-plugin@1.0.0/node_modules/native-plugin';

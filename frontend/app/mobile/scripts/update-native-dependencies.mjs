@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
  * Root postinstall hook for native mobile dependency upgrades. The committed
  * native-dependencies.json records a successful refresh so unchanged installs
  * can run without Xcode. CI uses --check to reject stale state without modifying it.
+ * Production-only installs skip the hook; explicit checks still require all dependencies.
  *
  * @typedef {object} NativeDependencyState
  * @property {Record<string, {version: string, path: string}>} dependencies Installed native packages and repository-root-relative real paths.
@@ -97,6 +98,10 @@ function runCommand(command, args, cwd) {
  * @throws {Error} When state is stale in check mode or outside macOS, or refreshing fails.
  */
 export function updateNativeDependencies({ directory = mobileDir, platform = process.platform, check = false, run = runCommand } = {}) {
+    // The pinned pnpm writes JSON here but exposes no production-install environment flag.
+    const modulesPath = resolve(directory, '../../../node_modules/.modules.yaml');
+    if (!check && existsSync(modulesPath) && readJSON(modulesPath).included?.devDependencies === false) return;
+
     const statePath = join(directory, 'native-dependencies.json');
     const current = dependencyState(directory);
     if (existsSync(statePath) && JSON.stringify(readJSON(statePath)) === JSON.stringify(current)) return;
