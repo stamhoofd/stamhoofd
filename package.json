@@ -5,6 +5,7 @@
     "type": "module",
     "packageManager": "pnpm@12.19.0+sha512.87327b6619853205834e4be59ba3a231e303d9f5e435912ede3312b7539b79af890942f6513b05a4690745666888045c09b33fc420c2cd2d3bd95c01ba21dbeb",
     "scripts": {
+        "postinstall": "node frontend/app/mobile/scripts/update-native-dependencies.mjs",
         "build:backend:apps": "pnpm exec turbo run build --filter=@stamhoofd/backend --filter=@stamhoofd/backend-renderer --filter=@stamhoofd/backend-backup --filter=@stamhoofd/redirecter --filter=@stamhoofd/backend-statistics-syncer",
         "build:backend:shared": "pnpm exec turbo run build --filter='./backend/shared/*' --filter='./packages/node/*'",
         "build:global:shared": "pnpm exec turbo run build --filter='./shared/*' --filter='./packages/common/*' --filter='./packages/browser/*'",

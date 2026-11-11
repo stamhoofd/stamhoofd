@@ -32,3 +32,6 @@ runs:
     - name: Install dependencies
       shell: bash
       run: pnpm install --frozen-lockfile ${{ inputs.production == 'true' && '--prod' || '' }}
+    - name: Check native mobile dependencies
+      shell: bash
+      run: node frontend/app/mobile/scripts/update-native-dependencies.mjs --check

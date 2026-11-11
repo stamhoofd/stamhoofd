@@ -1,0 +1,109 @@
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+const { updateNativeDependencies } = await import(new URL('../../../../frontend/app/mobile/scripts/update-native-dependencies.mjs', import.meta.url).href);
+const directories: string[] = [];
+const swiftLock = 'ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved';
+
+function write(directory: string, path: string, value: unknown) {
+    mkdirSync(dirname(join(directory, path)), { recursive: true });
+    writeFileSync(join(directory, path), typeof value === 'string' ? value : JSON.stringify(value));
+}
+
+function fixture() {
+    const rootDirectory = mkdtempSync(join(tmpdir(), 'native-dependencies-'));
+    directories.push(rootDirectory);
+    const directory = join(rootDirectory, 'frontend/app/mobile');
+    write(directory, 'package.json', { dependencies: { '@capacitor/ios': '8.6.0', 'native-plugin': '1.0.0', 'vue': '3.0.0' } });
+    write(directory, 'node_modules/@capacitor/ios/package.json', { version: '8.6.0' });
+    write(directory, 'node_modules/native-plugin/package.json', { version: '1.0.0', capacitor: { ios: { src: 'ios' } } });
+    write(directory, 'node_modules/vue/package.json', { version: '3.0.0' });
+    write(directory, 'capacitor.config.json', {});
+    write(directory, 'ios/App/CapApp-SPM/Package.swift', 'exact: "8.6.0"');
+    write(directory, swiftLock, { pins: [{ identity: 'capacitor-swift-pm', state: { version: '8.6.0' } }] });
+    write(directory, 'android/capacitor.settings.gradle', '// generated');
+    write(directory, 'android/app/capacitor.build.gradle', '// generated');
+    return directory;
+}
+
+afterEach(() => {
+    for (const directory of directories.splice(0)) rmSync(directory, { recursive: true, force: true });
+});
+
+describe('native dependency install hook', () => {
+    it('records resolved dependency paths relative to the repository root', () => {
+        const directory = fixture();
+        const packagePath = 'node_modules/.pnpm/native-plugin@1.0.0/node_modules/native-plugin';
+        const installedPath = resolve(directory, '../../..', packagePath);
+        write(installedPath, 'package.json', { version: '1.0.0', capacitor: {} });
+        rmSync(join(directory, 'node_modules/native-plugin'), { recursive: true });
+        symlinkSync(installedPath, join(directory, 'node_modules/native-plugin'), 'dir');
+
+        updateNativeDependencies({ directory, platform: 'darwin', run: vi.fn() });
+
+        const state = JSON.parse(readFileSync(join(directory, 'native-dependencies.json'), 'utf8'));
+        expect(state.dependencies['native-plugin'].path).toBe(packagePath);
+    });
+
+    it('rejects a pending refresh on Linux before running commands or writing a receipt', () => {
+        const directory = fixture();
+        const run = vi.fn();
+        expect(() => updateNativeDependencies({ directory, platform: 'linux', run })).toThrow('macOS with Xcode');
+        expect(run).not.toHaveBeenCalled();
+        expect(() => readFileSync(join(directory, 'native-dependencies.json'))).toThrow();
+    });
+
+    it('preflights Xcode, updates native dependencies, and resolves Swift before recording success', () => {
+        const directory = fixture();
+        const run = vi.fn();
+        updateNativeDependencies({ directory, platform: 'darwin', run });
+        expect(run.mock.calls).toEqual([
+            ['xcodebuild', ['-version'], directory],
+            ['pnpm', ['exec', 'cap', 'update'], directory],
+            ['xcodebuild', ['-resolvePackageDependencies', '-project', 'ios/App/App.xcodeproj', '-scheme', 'App'], directory],
+        ]);
+        run.mockClear();
+        updateNativeDependencies({ directory, platform: 'linux', run });
+        updateNativeDependencies({ directory, check: true, run });
+        expect(run).not.toHaveBeenCalled();
+    });
+
+    it.each(['plugin', 'removed-plugin', 'swift-lock', 'config'])('detects a changed %s even with a previous successful receipt', (change) => {
+        const directory = fixture();
+        updateNativeDependencies({ directory, platform: 'darwin', run: vi.fn() });
+        if (change === 'plugin') write(directory, 'node_modules/native-plugin/package.json', { version: '1.1.0', capacitor: {} });
+        if (change === 'removed-plugin') write(directory, 'package.json', { dependencies: { '@capacitor/ios': '8.6.0' } });
+        if (change === 'swift-lock') write(directory, swiftLock, { pins: [] });
+        if (change === 'config') write(directory, 'capacitor.config.json', { includePlugins: [] });
+        const run = vi.fn();
+        expect(() => updateNativeDependencies({ directory, platform: 'darwin', check: true, run })).toThrow('out of sync');
+        expect(run).not.toHaveBeenCalled();
+    });
+
+    it('does not require macOS for an unrelated web dependency upgrade', () => {
+        const directory = fixture();
+        updateNativeDependencies({ directory, platform: 'darwin', run: vi.fn() });
+        write(directory, 'node_modules/vue/package.json', { version: '3.1.0' });
+        expect(() => updateNativeDependencies({ directory, platform: 'linux', run: vi.fn() })).not.toThrow();
+    });
+
+    it.each([1, 2, 3])('does not record success when command %s fails', (failure) => {
+        const directory = fixture();
+        let calls = 0;
+        const run = vi.fn(() => {
+            if (++calls === failure) throw new Error('command failed');
+        });
+        expect(() => updateNativeDependencies({ directory, platform: 'darwin', run })).toThrow('command failed');
+        expect(run).toHaveBeenCalledTimes(failure);
+        expect(() => readFileSync(join(directory, 'native-dependencies.json'))).toThrow();
+    });
+
+    it('rejects a successful resolver that leaves a stale Capacitor pin', () => {
+        const directory = fixture();
+        write(directory, swiftLock, { pins: [{ identity: 'capacitor-swift-pm', state: { version: '8.4.2' } }] });
+        expect(() => updateNativeDependencies({ directory, platform: 'darwin', run: vi.fn() })).toThrow('matching Capacitor manifests');
+        expect(() => readFileSync(join(directory, 'native-dependencies.json'))).toThrow();
+    });
+});

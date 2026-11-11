@@ -25,6 +25,8 @@ packages:
   - 'docs'
 
 verifyDepsBeforeRun: false
+# Run the native dependency postinstall check even when npm dependencies are unchanged.
+optimisticRepeatInstall: false
 disallowWorkspaceCycles: true
 linkWorkspacePackages: true
 minimumReleaseAge: 10080
