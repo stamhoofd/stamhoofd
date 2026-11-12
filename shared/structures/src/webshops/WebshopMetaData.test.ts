@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { CustomerFieldRequirement } from './CustomerFieldRequirement.js';
 import { CustomerSettings } from './CustomerSettings.js';
 import { Version } from '../Version.js';
-import { WebshopMetaData, WebshopOrderMode } from './WebshopMetaData.js';
+import { CheckoutMethodPrice, WebshopMetaData, WebshopOrderMode } from './WebshopMetaData.js';
 
 const { Required, Optional, Disabled } = CustomerFieldRequirement;
 
@@ -315,5 +315,41 @@ describe('WebshopMetaData.orderMode <-> cartEnabled', () => {
         expect(
             encodePatch(WebshopMetaData.patch({ name: 'Nieuwe naam' }), oldVersion).cartEnabled,
         ).toBeUndefined();
+    });
+});
+
+describe('CheckoutMethodPrice.hasReducedPrice', () => {
+    it('is true when the price drops from the minimum order amount', () => {
+        expect(
+            CheckoutMethodPrice.create({ price: 5_0000, minimumPrice: 50_0000, discountPrice: 0 })
+                .hasReducedPrice,
+        ).toBe(true);
+    });
+
+    it('is false when the price rises from the minimum order amount', () => {
+        expect(
+            CheckoutMethodPrice.create({
+                price: 5_0000,
+                minimumPrice: 50_0000,
+                discountPrice: 10_0000,
+            }).hasReducedPrice,
+        ).toBe(false);
+    });
+
+    it('is false when the price stays the same', () => {
+        expect(
+            CheckoutMethodPrice.create({
+                price: 5_0000,
+                minimumPrice: 50_0000,
+                discountPrice: 5_0000,
+            }).hasReducedPrice,
+        ).toBe(false);
+    });
+
+    it('is false without a minimum order amount', () => {
+        expect(
+            CheckoutMethodPrice.create({ price: 5_0000, minimumPrice: null, discountPrice: 0 })
+                .hasReducedPrice,
+        ).toBe(false);
     });
 });
