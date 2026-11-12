@@ -115,7 +115,7 @@
             <template v-if="selectedMethod && selectedMethod.type === 'Delivery'">
                 <hr>
                 <h2>{{ $t('%Us') }}</h2>
-                <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.discountPrice !== patchedOrder.data.deliveryPrice" class="info-box">
+                <div v-if="deliveryMethod && deliveryMethod.price.minimumPrice !== null && deliveryMethod.price.hasReducedPrice && deliveryMethod.price.discountPrice !== patchedOrder.data.deliveryPrice" class="info-box">
                     {{ $t('%Ut', {min: formatPrice(deliveryMethod.price.minimumPrice), price: formatPrice(deliveryMethod.price.discountPrice)}) }}
                 </div>
 

@@ -311,6 +311,14 @@ export class CheckoutMethodPrice extends AutoEncoder {
     @field({ decoder: IntegerDecoder })
     @field({ ...upgradePriceFrom2To4DecimalPlaces })
     discountPrice = 0;
+
+    /**
+     * Whether the price drops once the cart reaches the minimum price.
+     * Organizations can also use the minimum price to raise the price instead.
+     */
+    get hasReducedPrice() {
+        return this.minimumPrice !== null && this.discountPrice < this.price;
+    }
 }
 
 export class WebshopDeliveryMethod extends CheckoutMethod {
