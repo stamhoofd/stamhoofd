@@ -13,6 +13,7 @@ import { DataValidator } from '@stamhoofd/utility';
 import parsePhoneNumber from 'libphonenumber-js/max';
 import { AuthenticatedStructures } from '../../../helpers/AuthenticatedStructures.js';
 import { Context } from '../../../helpers/Context.js';
+import { getJudicialRecordMinimumAges } from '../../../helpers/judicialRecordStatus.js';
 import { memberFilterCompilers } from '../../../sql-filters/members.js';
 import { memberSorters } from '../../../sql-sorters/members.js';
 import { getMemberScopeFilter } from './helpers/getMemberScopeFilter.js';
@@ -44,7 +45,8 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     static async buildQuery(q: CountFilteredRequest | LimitedFilteredRequest, permissionLevel: PermissionLevel = PermissionLevel.Read) {
         const organization = Context.organization;
-        const scopedFilterCompilers = filterCompilers(organization?.id ?? null);
+        const judicialRecordMinimumAges = await getJudicialRecordMinimumAges(organization ?? null);
+        const scopedFilterCompilers = filterCompilers(organization?.id ?? null, { judicialRecordMinimumAges });
         let scopeFilter: StamhoofdFilter | undefined = undefined;
 
         if (organization && STAMHOOFD.userMode === 'organization' && await Context.auth.hasFullAccess(organization.id)) {
@@ -84,7 +86,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
             }
 
             q.sort = assertSort(q.sort, [{ key: 'id' }]);
-            await applySQLSorter(query, q.sort, sorters(organization?.id ?? null));
+            await applySQLSorter(query, q.sort, sorters(organization?.id ?? null, { judicialRecordMinimumAges }));
             query.limit(q.limit);
         }
 
@@ -183,6 +185,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
     static async buildData(requestQuery: LimitedFilteredRequest, permissionLevel = PermissionLevel.Read) {
         const organization = Context.organization;
+        const judicialRecordMinimumAges = await getJudicialRecordMinimumAges(organization ?? null);
         const query = await GetMembersEndpoint.buildQuery(requestQuery, permissionLevel);
         let data: Member[];
 
@@ -212,7 +215,7 @@ export class GetMembersEndpoint extends Endpoint<Params, Query, Body, ResponseBo
 
         if (members.length >= requestQuery.limit) {
             const lastObject = members[members.length - 1];
-            const nextFilter = getSortFilter(lastObject, sorters(organization?.id ?? null), requestQuery.sort);
+            const nextFilter = getSortFilter(lastObject, sorters(organization?.id ?? null, { judicialRecordMinimumAges }), requestQuery.sort);
 
             next = new LimitedFilteredRequest({
                 filter: requestQuery.filter,
