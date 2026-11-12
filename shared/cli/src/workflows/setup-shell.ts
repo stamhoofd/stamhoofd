@@ -12,6 +12,7 @@ export async function checkShellShortcut(): Promise<{ ok: boolean; details: stri
         await fs.access('/usr/local/bin/stam', constants.X_OK);
         const source = fileURLToPath(new URL('../../bin/stam', import.meta.url));
         const [installed, current] = await Promise.all([
+            // eslint-disable-next-line node-security/no-toctou-vulnerability -- Read-only diagnostic of a root-owned install path; the check result is never used for access decisions, and ENOENT/EACCES are handled below.
             fs.readFile('/usr/local/bin/stam'),
             fs.readFile(source),
         ]);
