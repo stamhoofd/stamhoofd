@@ -2,8 +2,9 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSyn
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+// eslint-disable-next-line import/no-relative-packages -- Exercise the install hook without adding a reverse workspace dependency.
+import { updateNativeDependencies } from '../../../../frontend/app/mobile/scripts/update-native-dependencies.mjs';
 
-const { updateNativeDependencies } = await import(new URL('../../../../frontend/app/mobile/scripts/update-native-dependencies.mjs', import.meta.url).href);
 const directories: string[] = [];
 const swiftLock = 'ios/App/App.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved';
 

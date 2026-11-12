@@ -11,6 +11,7 @@ const execute = promisify(execFile);
 const realCli = path.join(getProjectPath(), 'shared/cli');
 
 async function requireShell(shell: string, context: TestContext): Promise<void> {
+    // Zsh coverage is best-effort on developer machines and CI; Bash coverage always runs.
     if (shell !== 'zsh') return;
     try { await execute(shell, ['--version']); }
     catch (error) {
@@ -46,7 +47,7 @@ describe('generated oclif completion with live local environments', () => {
         await fs.rm(root, { recursive: true, force: true });
     });
 
-    it.each(['bash', 'zsh'])('generates and requests %s completion from a nested working directory', async (shell, context) => {
+    it.for(['bash', 'zsh'])('generates and requests %s completion from a nested working directory', async (shell, context) => {
         await requireShell(shell, context);
         const { stdout: activation } = await execute('stam', ['completion', shell], { cwd: path.join(root, 'shared/cli'), env });
         const activationPath = path.join(root, 'activation');
@@ -82,7 +83,7 @@ describe('generated oclif completion with live local environments', () => {
         expect((await complete()).stdout.trim()).toBe('');
     }, 30_000);
 
-    it.each(['bash', 'zsh'])('completes equals-form environment values in %s', async (shell, context) => {
+    it.for(['bash', 'zsh'])('completes equals-form environment values in %s', async (shell, context) => {
         await requireShell(shell, context);
         const { stdout: activation } = await execute('stam', ['completion', shell], { env });
         const requests = shell === 'bash' ? [
@@ -134,7 +135,7 @@ describe('generated oclif completion with live local environments', () => {
         expect((await execute('stam', ['completion', 'environments'], { env })).stdout.trim().split('\n')).toEqual(['example-blue', 'example-green']);
     });
 
-    it.each(['bash', 'zsh'])('omits completion helpers from generated %s root suggestions', async (shell, context) => {
+    it.for(['bash', 'zsh'])('omits completion helpers from generated %s root suggestions', async (shell, context) => {
         await requireShell(shell, context);
         const { stdout } = await execute('stam', ['completion', shell, '--standalone'], { env });
         const completion = path.join(root, shell === 'bash' ? 'stam' : '_stam');
@@ -169,7 +170,7 @@ describe('generated oclif completion with live local environments', () => {
         }
     });
 
-    it.each(['bash', 'zsh'])('exports standalone %s completion usable after deleting the generation cache', async (shell, context) => {
+    it.for(['bash', 'zsh'])('exports standalone %s completion usable after deleting the generation cache', async (shell, context) => {
         await requireShell(shell, context);
         const { stdout } = await execute('stam', ['completion', shell, '--standalone'], { env });
         expect(stdout).not.toContain(root);
