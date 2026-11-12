@@ -3,6 +3,7 @@ import { QueryableModel, SQL } from '@stamhoofd/sql';
 import { MemberDetails, PlatformMembershipMemberDetails, RegistrationWithTinyMember, TinyMember } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import basex from 'base-x';
+import { getJudicialIdentityHash } from '../helpers/judicialIdentityHash.js';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { Group } from './Group.js';
@@ -85,6 +86,30 @@ export class Member extends QueryableModel {
         },
     })
     memberNumber: string | null;
+
+    /**
+     * The identity an approval of a judicial record extract was granted to.
+     *
+     * Derived here rather than written by a caller, for the same reason firstName and birthDay are: every save
+     * goes through this hook, so no write path can leave it disagreeing with the name it is a hash of. A
+     * judicial record copies this value instead of recomputing it.
+     */
+    @column({
+        type: 'string',
+        nullable: true,
+        beforeSave: function (this: Member) {
+            if (!this.details) {
+                return null;
+            }
+
+            return getJudicialIdentityHash({
+                firstName: this.details.firstName,
+                lastName: this.details.lastName,
+                birthDay: this.details.birthDay,
+            });
+        },
+    })
+    judicialIdentityHash: string | null;
 
     @column({ type: 'json', decoder: MemberDetails })
     details: MemberDetails;

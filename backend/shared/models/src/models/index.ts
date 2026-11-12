@@ -1,3 +1,4 @@
+export * from './JudicialRecord.js';
 export * from './Member.js';
 export { MergedMember } from './MergedMember.js';
 export { Organization } from './Organization.js';
