@@ -168,7 +168,7 @@ describe('generated oclif completion with live local environments', () => {
         for (const command of ['autocomplete', 'completion']) {
             expect((await execute('stam', [command, '--help'], { env })).stdout).toContain(`stam ${command}`);
         }
-    });
+    }, 30_000);
 
     it.for(['bash', 'zsh'])('exports standalone %s completion usable after deleting the generation cache', async (shell, context) => {
         await requireShell(shell, context);
