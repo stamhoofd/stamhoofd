@@ -17,6 +17,12 @@
 **/.jj
 **/.env*
 **/.npmrc
+**/.aws
+**/.docker
+**/.ssh
+**/*.pem
+**/*.key
+**/*.local.json
 **/.nuxt
 **/.output
 **/.data

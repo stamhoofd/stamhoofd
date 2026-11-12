@@ -1,9 +1,21 @@
 import {
+    checkbox as checkboxPrompt,
     confirm as confirmPrompt,
     input as inputPrompt,
     select as selectPrompt,
 } from '@inquirer/prompts';
 import { getCliTelemetry, withCliPrompt } from './telemetry.js';
+
+export function checkbox<Value>(
+    ...args: Parameters<typeof checkboxPrompt<Value>>
+): Promise<Value[]> {
+    return withCliPrompt(() =>
+        checkboxPrompt(args[0], {
+            ...args[1],
+            signal: args[1]?.signal ?? getCliTelemetry()?.signal,
+        }),
+    );
+}
 
 export function confirm(...args: Parameters<typeof confirmPrompt>): Promise<boolean> {
     return withCliPrompt(() =>
