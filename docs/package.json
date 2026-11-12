@@ -7,7 +7,9 @@
         "prepare:observability": "pnpm --filter @node/nuxt-observability... run build:types && pnpm --filter @node/nuxt-observability... run build",
         "build": "pnpm run prepare:observability && nuxt build",
         "generate": "pnpm run prepare:observability && nuxt generate",
-        "preview": "nuxt preview"
+        "preview": "nuxt preview",
+        "lint": "pnpm run prepare:observability && nuxt prepare && eslint . --quiet",
+        "typecheck": "pnpm run prepare:observability && nuxt typecheck --checker vue-tsc"
     },
     "dependencies": {
         "@node/nuxt-observability": "workspace:*",

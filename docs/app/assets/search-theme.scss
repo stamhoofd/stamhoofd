@@ -1,0 +1,121 @@
+@use '@stamhoofd/scss/base/variables' as *;
+@use '@stamhoofd/scss/base/text-styles' as *;
+
+// The maintained ContentSearch owns the dialog, filtering and keyboard behavior.
+.site-search-popup {
+    --ui-primary: #{$color-primary};
+    --ui-text: #{$color-dark};
+    --ui-text-highlighted: #{$color-dark};
+    --ui-text-muted: #{$color-gray-4};
+    --ui-text-dimmed: #{$color-gray-4};
+    --ui-bg: #{$color-background};
+    --ui-bg-muted: #{$color-background-shade};
+    --ui-bg-elevated: #{$color-background-shade};
+    --ui-bg-accented: #{$color-background-shade-darker};
+    --ui-border: #{$color-border};
+
+    background: $color-background;
+    color: $color-dark;
+    border-radius: $border-radius-modals;
+    @extend %style-overlay-shadow;
+
+    [data-slot='root'] { border: 0; }
+
+    [data-slot='input'] {
+        @extend %style-input-box;
+        flex: none;
+        margin: 20px;
+        width: calc(100% - 40px);
+
+        input {
+            height: 48px;
+            padding-left: 44px;
+            padding-right: 48px;
+            color: $color-dark;
+            outline: none;
+            font-size: 16px;
+        }
+
+        [data-slot='leading'] { padding-left: 14px; }
+        [data-slot='trailing'] { padding-right: 2px; }
+        .iconify { width: 20px; height: 20px; margin: 0; }
+    }
+
+    [data-slot='close'] {
+        width: 44px;
+        height: 44px;
+        justify-content: center;
+        border-radius: $border-radius;
+        color: $color-gray-4;
+
+        &:hover { background: $color-background-shade; }
+        &:active { background: $color-background-shade-darker; }
+        &:focus-visible {
+            outline: 2px solid $color-primary-dark;
+            outline-offset: -2px;
+        }
+    }
+
+    [data-slot='content'] { border: 0; }
+    [data-slot='viewport'] { padding: 0 10px 10px; }
+    [data-slot='group'] { padding: 0; border-color: $color-border; }
+
+    [data-slot='label'] {
+        padding: 15px 10px 5px;
+        font-size: 13px;
+        line-height: 20px;
+        color: $color-gray-4;
+    }
+
+    [data-slot='item'] {
+        min-height: 50px;
+        padding: 15px 10px;
+        gap: 15px;
+        font-size: 14px;
+        line-height: 20px;
+
+        &::before { border-radius: $border-radius; }
+        &[data-highlighted]::before { background: $color-background-shade; }
+        &:active::before { background: $color-background-shade-darker; }
+    }
+
+    [data-slot='itemLeadingIcon'] {
+        width: 20px;
+        height: 20px;
+        margin: 0;
+        color: $color-gray-4;
+    }
+
+    [data-slot='itemLabelPrefix'],
+    [data-slot='itemLabelSuffix'],
+    [data-slot='itemDescription'] { color: $color-gray-4; }
+
+    mark {
+        color: $color-primary-dark;
+        background: $color-primary-background;
+    }
+
+    [data-slot='empty'] {
+        padding: 35px 20px;
+        font-size: 14px;
+        line-height: 1.6;
+        overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 500px) {
+        [data-slot='input'] { margin: 15px; width: calc(100% - 30px); }
+        [data-slot='viewport'] { padding: 0 5px 5px; }
+    }
+}
+
+// The saturated primary fallback lacks 3:1 contrast against the dark input.
+html.dark .site-search-popup [data-slot='input']:focus-within {
+    border-color: $color-primary-dark;
+    outline-color: $color-primary-dark;
+}
+
+[data-slot='overlay']:has(~ .site-search-popup) {
+    background: rgb(0 0 0 / 70%);
+
+    @media (prefers-reduced-motion: reduce) { animation: none; }
+}

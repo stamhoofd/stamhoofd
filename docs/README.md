@@ -1,4 +1,63 @@
-# Documentation image
+# Documentation site
+
+## Theme ownership
+
+The Nuxt theme selectively ports the simple documentation design from
+[`stamhoofd-documentation-theme`](https://github.com/stamhoofd/stamhoofd-documentation-theme),
+revision `7ecd981845f3119691a6353de2da771b249f0857`, compared with
+<https://www.stamhoofd.be/docs/> in November 2026. Production uses the small
+documentation header and footer, not the marketing navigation variants.
+
+- `app/assets/site-theme.scss` owns reusable typography, `--site-*` color/layout
+  tokens, `.site-action`/`.site-button`, header, footer and support styling.
+  Nuxt UI's text/background/primary tokens map to these colors; `html.dark`
+  follows Nuxt color mode rather than a separate media-query theme.
+- `app/components/app/AppHeader.vue` and `AppFooter.vue` override the Docus shell.
+  Header search opens the existing `useContentSearch()` dialog, retaining its
+  keyboard shortcuts, focus management, Escape and navigation dismissal.
+  Mobile uses the live site's two icon actions, without a separate menu.
+  App artwork from the existing `st-icons` font retains website-sized 24px boxes;
+  text actions use 34px visual rows with expanded 44px hit areas.
+- `app/components/site/SiteSupport.vue` exposes `<SiteSupport />` for the support
+  CTA on the homepage and articles. Place it outside narrow article containers.
+- `app/assets/docs-theme.scss` and documentation page/layout components own
+  documentation-specific layout and prose. Keep website-wide styling out of
+  that stylesheet so a later website migration can reuse the shell.
+- `app/assets/stamhoofd.scss` remains the existing shared callout stylesheet.
+  Docus continues to own content search. `app/assets/search-theme.scss` styles
+  its popup with shared app surfaces, input styles, modal corners and list spacing
+  through Nuxt UI's modal class and data slots. Search icons use the existing app
+  SVG artwork through a local Nuxt Icon collection; filtering, section links,
+  keyboard navigation and focus management remain owned by Nuxt UI.
+- `app/components/global/ProseImg.vue` owns screenshot zoom, composing Nuxt Image
+  with Nuxt UI's modal for keyboard access, focus management and dismissal.
+
+The shell retains the current app logo artwork, Clarity City fonts and normal
+letter spacing, but uses the website's large support CTA and layout scale.
+Color mode defaults to the system, with an explicit System/Light/Dark preference
+selector. `app/plugins/stamhoofd-color-mode.ts` applies body classes only for forced
+modes, matching the app's Auto behavior without merging conflicting SSR classes.
+The footer retains Nuxt's custom color-mode selector and preference handling,
+styled with shared app inputs and context-menu typography, colors and corners.
+The website's dark palette and blue/purple heading gradient remain website-specific;
+dark mode uses lighter gradient colors to preserve contrast against the decoration.
+Shared app callouts and input surfaces keep their app tokens.
+
+Only the decorative header SVG was ported from the Ghost template. Logo assets
+already existed here. The three Clarity City WOFF2 weights (Medium, SemiBold and
+Bold) in `public/fonts/clarity-city` are copied from the equivalent repository
+assets in `frontend/shared/assets/fonts/clarity-city/WOFF2`; production also uses
+Clarity City, despite naming its font family “Metropolis”. No Ghost JavaScript,
+full legacy reset, marketing pages or generated theme build files are included.
+
+UI labels remain plain Dutch for this migration. The standalone Nuxt site does
+not integrate the application's `$t` translation helper yet.
+
+Production must set `NUXT_SITE_URL` to the public documentation base URL so
+canonical and Open Graph URLs use the deployment address. Local development
+does not set a production URL.
+
+## Documentation image
 
 Build from the repository root without a DevOps checkout or cloud credentials:
 

@@ -7,6 +7,33 @@ const iconsDir = resolve(dirname(fileURLToPath(import.meta.url)), '../frontend/s
 
 export default defineNuxtConfig({
     extends: ['docus'],
+    site: {
+        name: 'Stamhoofd Documentatie',
+    },
+    icon: {
+        customCollections: [{
+            prefix: 'stamhoofd',
+            dir: iconsDir,
+        }],
+    },
+    content: {
+        build: {
+            markdown: {
+                toc: {
+                    depth: 4,
+                    searchDepth: 4,
+                },
+                highlight: {
+                    theme: {
+                        default: 'github-light',
+                        // Override the inherited light theme, which takes precedence over default.
+                        light: 'github-light',
+                        dark: 'github-dark',
+                    },
+                },
+            },
+        },
+    },
     modules: [
         '@node/nuxt-observability',
         (_, nuxt) => {
@@ -23,6 +50,9 @@ export default defineNuxtConfig({
         // .info-box, .warning-box and .success-box (see iconCss.hbs).
         'virtual:vite-svg-2-webfont.css',
         '~/assets/stamhoofd.scss',
+        '~/assets/site-theme.scss',
+        '~/assets/search-theme.scss',
+        '~/assets/docs-theme.scss',
     ],
     routeRules: {
         '/favicon.ico': {
