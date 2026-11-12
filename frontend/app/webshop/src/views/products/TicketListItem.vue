@@ -6,6 +6,9 @@
         </h3>
         <p v-if="isSingle && order" class="description" v-text="$t('%x3')+order.number" />
         <p v-if="isSingle && order" class="description" v-text="order.data.customer.name" />
+        <p v-if="cartItem.customer" class="description">
+            {{ cartItem.customer.firstName }} {{ cartItem.customer.lastName }}
+        </p>
         <p v-if="description" class="description" v-text="description" />
 
         <p v-if="cartItem.product.location" class="description" v-text="cartItem.product.location.name" />
@@ -24,7 +27,7 @@ import { ComponentWithProperties, NavigationController, usePresent } from '@brow
 import { AsyncComponent } from '@stamhoofd/components/containers/AsyncComponent.ts';
 
 import STListItem from '@stamhoofd/components/layout/STListItem.vue';
-import type { Order, Organization, TicketPublic, Webshop} from '@stamhoofd/structures';
+import type { Order, Organization, TicketPublic, Webshop } from '@stamhoofd/structures';
 import { WebshopTicketType } from '@stamhoofd/structures';
 import { Formatter } from '@stamhoofd/utility';
 import { computed } from 'vue';
